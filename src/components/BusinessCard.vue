@@ -32,19 +32,35 @@
 
       <!-- Contact Info -->
       <div class="space-y-2 mt-6">
-        <div v-if="card.data.email" class="flex items-center space-x-2" :style="{ color: textColor }">
+        <div
+          v-if="card.data.email"
+          class="flex items-center space-x-2"
+          :style="{ color: textColor }"
+        >
           <Mail class="w-4 h-4 opacity-70" />
           <span class="text-sm">{{ card.data.email }}</span>
         </div>
-        <div v-if="card.data.phone" class="flex items-center space-x-2" :style="{ color: textColor }">
+        <div
+          v-if="card.data.phone"
+          class="flex items-center space-x-2"
+          :style="{ color: textColor }"
+        >
           <Phone class="w-4 h-4 opacity-70" />
           <span class="text-sm">{{ card.data.phone }}</span>
         </div>
-        <div v-if="card.data.website" class="flex items-center space-x-2" :style="{ color: textColor }">
+        <div
+          v-if="card.data.website"
+          class="flex items-center space-x-2"
+          :style="{ color: textColor }"
+        >
           <Globe class="w-4 h-4 opacity-70" />
           <span class="text-sm">{{ card.data.website }}</span>
         </div>
-        <div v-if="card.data.address" class="flex items-center space-x-2" :style="{ color: textColor }">
+        <div
+          v-if="card.data.address"
+          class="flex items-center space-x-2"
+          :style="{ color: textColor }"
+        >
           <MapPin class="w-4 h-4 opacity-70" />
           <span class="text-sm">{{ card.data.address }}</span>
         </div>
@@ -52,9 +68,13 @@
 
       <!-- QR Code Badge (optional) -->
       <div v-if="showQR" class="absolute bottom-4 right-4 bg-white p-2 rounded-lg shadow-lg">
-        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center text-xs text-gray-400">
-          QR
-        </div>
+        <QrcodeVue
+          :value="qrCodeValue"
+          size="64"
+          level="H"
+          foreground="#000000"
+          background="#ffffff"
+        />
       </div>
     </div>
   </div>
@@ -63,17 +83,18 @@
 <script setup>
 import { computed } from 'vue'
 import { Mail, Phone, Globe, MapPin } from 'lucide-vue-next'
+import QrcodeVue from 'qrcode-vue3'
 import { useCardsStore } from '@/stores/cards'
 
 const props = defineProps({
   card: {
     type: Object,
-    required: true
+    required: true,
   },
   showQR: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const store = useCardsStore()
@@ -85,12 +106,27 @@ const template = computed(() => {
 const cardStyle = computed(() => {
   return {
     background: `linear-gradient(135deg, ${template.value.colors.primary} 0%, ${template.value.colors.secondary} 100%)`,
-    minHeight: '280px'
+    minHeight: '280px',
   }
 })
 
 const textColor = computed(() => {
   return template.value.colors.text
+})
+
+const qrCodeValue = computed(() => {
+  // Génère un vCard format pour le QR code
+  const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${props.card.data.fullName || 'Contact'}
+TITLE:${props.card.data.title || ''}
+ORG:${props.card.data.company || ''}
+TEL:${props.card.data.phone || ''}
+EMAIL:${props.card.data.email || ''}
+URL:${props.card.data.website || ''}
+ADR:;;${props.card.data.address || ''};;;;
+END:VCARD`
+  return vcard
 })
 </script>
 

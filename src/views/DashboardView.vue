@@ -112,25 +112,29 @@
 
               <!-- Actions -->
               <div class="flex flex-wrap gap-3">
-                <button
+                <router-link
+                  :to="`/editor/${card.id}`"
                   class="px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium flex items-center space-x-2"
                 >
                   <Edit class="w-4 h-4" />
                   <span>Modifier</span>
-                </button>
+                </router-link>
                 <button
+                  @click="shareCard(card.id)"
                   class="px-4 py-2 bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-200 dark:hover:bg-secondary-800 transition-colors font-medium flex items-center space-x-2"
                 >
                   <Share2 class="w-4 h-4" />
-                  <span>Partager</span>
+                  <span>{{ copiedCardId === card.id ? 'Copié !' : 'Partager' }}</span>
                 </button>
                 <button
+                  @click="downloadVCard(card)"
                   class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors font-medium flex items-center space-x-2"
                 >
                   <Download class="w-4 h-4" />
                   <span>Télécharger vCard</span>
                 </button>
                 <button
+                  @click="deleteCard(card.id)"
                   class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium flex items-center space-x-2"
                 >
                   <Trash2 class="w-4 h-4" />
@@ -163,14 +167,60 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useCardsStore } from '@/stores/cards'
 import BusinessCard from '@/components/BusinessCard.vue'
 import { CreditCard, Eye, Download, Plus, Edit, Share2, Trash2 } from 'lucide-vue-next'
 
 const store = useCardsStore()
+const copiedCardId = ref(null)
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
   return new Date(dateString).toLocaleDateString('fr-FR', options)
+}
+
+const shareCard = (cardId) => {
+  const card = store.getCardById(cardId)
+  if (card) {
+    const shareLink = store.generateShareLink(cardId)
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink).then(() => {
+        copiedCardId.value = cardId
+        setTimeout(() => {
+          copiedCardId.value = null
+        }, 2000)
+      })
+    }
+  }
+}
+
+const downloadVCard = (card) => {
+  const vCardContent = `BEGIN:VCARD
+VERSION:3.0
+FN:${card.data.fullName}
+TITLE:${card.data.title}
+ORG:${card.data.company}
+EMAIL:${card.data.email}
+TEL:${card.data.phone}
+URL:${card.data.website}
+ADR:;;${card.data.address};;;;
+PHOTO;VALUE=URI:${card.data.photo}
+END:VCARD`
+
+  const blob = new Blob([vCardContent], { type: 'text/vcard' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${card.data.fullName || 'carte'}.vcf`
+  link.click()
+  window.URL.revokeObjectURL(url)
+}
+
+const deleteCard = (cardId) => {
+  if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.')) {
+    store.deleteCard(cardId)
+    alert('✅ Carte supprimée !')
+  }
 }
 </script>

@@ -251,9 +251,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
+import { useAuthStore } from '@/stores/authStore'
 import BusinessCard from '@/components/BusinessCard.vue'
 import {
   User,
@@ -266,12 +267,18 @@ import {
   FileText,
   QrCode,
   Info,
+  Copy,
+  Check,
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const route = useRoute()
 const store = useCardsStore()
+const authStore = useAuthStore()
 
 const showQRCode = ref(false)
+const isEditing = ref(false)
+const shareLinkCopied = ref(false)
 
 const cardData = ref({
   name: 'Ma nouvelle carte',
@@ -288,20 +295,44 @@ const cardData = ref({
   },
 })
 
+onMounted(() => {
+  // Si on a une ID dans l'URL, on charge la carte
+  if (route.params.id) {
+    const cardId = Number(route.params.id)
+    const existingCard = store.getCardById(cardId)
+    if (existingCard) {
+      cardData.value = JSON.parse(JSON.stringify(existingCard))
+      isEditing.value = true
+    }
+  }
+
+  // Si on a un template sélectionné depuis la galerie
+  if (store.currentTemplate) {
+    cardData.value.template = store.currentTemplate
+    store.currentTemplate = null
+  }
+})
+
 const isFormValid = computed(() => {
   return cardData.value.data.fullName && cardData.value.data.title && cardData.value.data.email
 })
 
 const saveCard = () => {
   if (isFormValid.value) {
-    store.addCard(cardData.value)
-    alert('✅ Carte enregistrée avec succès !')
+    if (isEditing.value) {
+      // Mise à jour d'une carte existante
+      store.updateCard(cardData.value.id, cardData.value)
+      alert('✅ Carte mise à jour avec succès !')
+    } else {
+      // Création d'une nouvelle carte
+      store.addCard(cardData.value)
+      alert('✅ Carte enregistrée avec succès !')
+    }
     router.push('/dashboard')
   }
 }
 
 const downloadVCard = () => {
-  // Simulation du téléchargement vCard
   const vCardContent = `BEGIN:VCARD
 VERSION:3.0
 FN:${cardData.value.data.fullName}
@@ -311,6 +342,7 @@ EMAIL:${cardData.value.data.email}
 TEL:${cardData.value.data.phone}
 URL:${cardData.value.data.website}
 ADR:;;${cardData.value.data.address};;;;
+PHOTO;VALUE=URI:${cardData.value.data.photo}
 END:VCARD`
 
   const blob = new Blob([vCardContent], { type: 'text/vcard' })
@@ -320,9 +352,23 @@ END:VCARD`
   link.download = `${cardData.value.data.fullName || 'carte'}.vcf`
   link.click()
   window.URL.revokeObjectURL(url)
+  alert('📥 Fichier vCard téléchargé !')
 }
 
 const shareCard = () => {
-  alert('🔗 Fonctionnalité de partage - À implémenter dans la version finale !')
+  if (isEditing.value) {
+    const shareLink = store.generateShareLink(cardData.value.id)
+    if (shareLink) {
+      // Copier dans le presse-papiers
+      navigator.clipboard.writeText(shareLink).then(() => {
+        shareLinkCopied.value = true
+        setTimeout(() => {
+          shareLinkCopied.value = false
+        }, 2000)
+      })
+    }
+  } else {
+    alert('💾 Enregistrez d\'abord la carte pour la partager !')
+  }
 }
 </script>
