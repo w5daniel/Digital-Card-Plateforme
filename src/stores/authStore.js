@@ -18,28 +18,33 @@ export const useAuthStore = defineStore('auth', () => {
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Simulation d'une vérification
-        if (email && password && password.length >= 6) {
-          const mockUser = {
-            id: 1,
-            email: email,
-            name: email.split('@')[0],
-            createdAt: new Date().toISOString(),
-          }
-          const mockToken = `token_${Date.now()}`
-
-          user.value = mockUser
-          token.value = mockToken
-          localStorage.setItem('authToken', mockToken)
-          localStorage.setItem('user', JSON.stringify(mockUser))
-
-          isLoading.value = false
-          resolve(mockUser)
-        } else {
+        // Validation
+        if (!email || !password || password.length < 6) {
           error.value = 'Email ou mot de passe invalide'
           isLoading.value = false
           reject(new Error(error.value))
+          return
         }
+
+        // Simulation d'appel API: POST /api/auth/login
+        // En production: fetch('https://api.example.com/auth/login', {...})
+
+        const mockUser = {
+          id: 1,
+          email: email,
+          name: email.split('@')[0],
+          createdAt: new Date().toISOString(),
+          isPremium: false, // Backend détermine le statut premium
+        }
+        const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+        user.value = mockUser
+        token.value = mockToken
+        localStorage.setItem('authToken', mockToken)
+        localStorage.setItem('user', JSON.stringify(mockUser))
+
+        isLoading.value = false
+        resolve(mockUser)
       }, 500)
     })
   }
@@ -75,14 +80,18 @@ export const useAuthStore = defineStore('auth', () => {
           return
         }
 
-        // Simulated registration success
+        // Vérification email unique (en production, côté backend)
+        // if (email existe déjà) { error.value = 'Email déjà utilisé' }
+
+        // Simulation d'appel API: POST /api/auth/register
         const mockUser = {
           id: Date.now(),
           email: email,
           name: fullName,
           createdAt: new Date().toISOString(),
+          isPremium: false,
         }
-        const mockToken = `token_${Date.now()}`
+        const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
         user.value = mockUser
         token.value = mockToken
@@ -118,6 +127,47 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Upgrader au plan premium
+   */
+  function upgradeToPremium() {
+    isLoading.value = true
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!user.value) {
+          error.value = 'Vous devez être connecté'
+          isLoading.value = false
+          reject(new Error(error.value))
+          return
+        }
+
+        // Simulation d'appel API: POST /api/premium/upgrade avec paiement Stripe
+        if (user.value) {
+          user.value.isPremium = true
+          user.value.premiumUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+          localStorage.setItem('user', JSON.stringify(user.value))
+        }
+
+        isLoading.value = false
+        resolve(user.value)
+      }, 1000)
+    })
+  }
+
+  /**
+   * Vérifier si l'utilisateur a un plan actif
+   */
+  function hasPremium() {
+    if (!user.value?.isPremium) return false
+
+    if (user.value.premiumUntil) {
+      return new Date() < new Date(user.value.premiumUntil)
+    }
+
+    return true
+  }
+
   return {
     // State
     user,
@@ -133,5 +183,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     restoreSession,
+    upgradeToPremium,
+    hasPremium,
   }
 })

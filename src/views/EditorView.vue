@@ -70,15 +70,47 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2"
-                  >URL Photo (optionnel)</label
-                >
-                <input
-                  v-model="cardData.data.photo"
-                  type="url"
-                  placeholder="https://example.com/photo.jpg"
-                  class="input-field"
-                />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo de profil</label>
+                <div class="space-y-3">
+                  <!-- Photo Preview -->
+                  <div v-if="cardData.data.photo" class="relative w-32 h-32 mx-auto">
+                    <img
+                      :src="cardData.data.photo"
+                      alt="Photo preview"
+                      class="w-full h-full rounded-lg object-cover border-2 border-primary-200"
+                    />
+                    <button
+                      type="button"
+                      @click="removePhoto"
+                      class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <!-- Upload Input -->
+                  <div class="flex gap-2">
+                    <label class="flex-1 px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center flex items-center justify-center">
+                      <Upload class="w-4 h-4 mr-2" />
+                      Charger photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        @change="handlePhotoUpload"
+                        class="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  <!-- URL Alternative -->
+                  <input
+                    v-model="photoUrl"
+                    type="url"
+                    placeholder="Ou coller une URL..."
+                    class="input-field text-sm"
+                    @keyup.enter="setPhotoFromUrl"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -269,6 +301,8 @@ import {
   Info,
   Copy,
   Check,
+  Upload,
+  X,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -279,6 +313,7 @@ const authStore = useAuthStore()
 const showQRCode = ref(false)
 const isEditing = ref(false)
 const shareLinkCopied = ref(false)
+const photoUrl = ref('')
 
 const cardData = ref({
   name: 'Ma nouvelle carte',
@@ -294,6 +329,36 @@ const cardData = ref({
     photo: '',
   },
 })
+
+const handlePhotoUpload = (event) => {
+  const file = event.target.files?.[0]
+  if (file) {
+    // Vérifier la taille (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('❌ Fichier trop volumineux (max 2MB)')
+      return
+    }
+
+    // Lire le fichier en data:url
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      cardData.value.data.photo = e.target?.result || ''
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removePhoto = () => {
+  cardData.value.data.photo = ''
+  photoUrl.value = ''
+}
+
+const setPhotoFromUrl = () => {
+  if (photoUrl.value) {
+    cardData.value.data.photo = photoUrl.value
+    photoUrl.value = ''
+  }
+}
 
 onMounted(() => {
   // Si on a une ID dans l'URL, on charge la carte

@@ -20,7 +20,7 @@
             </div>
             <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
           </div>
-          <div class="text-3xl font-bold gradient-text">{{ store.getUserCardsCount }}</div>
+          <div class="text-3xl font-bold gradient-text">{{ stats.totalCards }}</div>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Cartes créées</p>
         </div>
 
@@ -31,9 +31,9 @@
             >
               <Eye class="w-6 h-6 text-secondary-600 dark:text-secondary-300" />
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Ce mois</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
           </div>
-          <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400">248</div>
+          <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400">{{ stats.totalViews }}</div>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Vues totales</p>
         </div>
 
@@ -44,9 +44,9 @@
             >
               <Download class="w-6 h-6 text-accent-600 dark:text-accent-300" />
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Ce mois</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
           </div>
-          <div class="text-3xl font-bold text-accent-600 dark:text-accent-400">42</div>
+          <div class="text-3xl font-bold text-accent-600 dark:text-accent-400">{{ stats.totalDownloads }}</div>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Téléchargements</p>
         </div>
       </div>
@@ -54,10 +54,29 @@
       <!-- Actions Bar -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h2 class="text-2xl font-bold">Mes cartes de visite</h2>
-        <router-link to="/editor" class="btn-primary">
-          <Plus class="w-5 h-5 inline mr-2" />
-          Créer une nouvelle carte
-        </router-link>
+        <div class="flex gap-2 flex-wrap">
+          <button
+            @click="exportCards"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <Download class="w-5 h-5" />
+            <span>Exporter</span>
+          </button>
+          <label class="px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white font-medium rounded-lg transition-colors flex items-center space-x-2 cursor-pointer">
+            <Plus class="w-5 h-5" />
+            <span>Importer</span>
+            <input
+              type="file"
+              accept=".json"
+              @change="importCards"
+              class="hidden"
+            />
+          </label>
+          <router-link to="/editor" class="btn-primary flex items-center space-x-2">
+            <Plus class="w-5 h-5" />
+            <span>Créer une carte</span>
+          </router-link>
+        </div>
       </div>
 
       <!-- Cards List -->
@@ -167,13 +186,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCardsStore } from '@/stores/cards'
 import BusinessCard from '@/components/BusinessCard.vue'
 import { CreditCard, Eye, Download, Plus, Edit, Share2, Trash2 } from 'lucide-vue-next'
 
 const store = useCardsStore()
 const copiedCardId = ref(null)
+
+const stats = computed(() => store.getGlobalStats())
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
@@ -222,5 +243,40 @@ const deleteCard = (cardId) => {
     store.deleteCard(cardId)
     alert('✅ Carte supprimée !')
   }
+}
+
+const exportCards = () => {
+  const json = store.exportCardsAsJSON()
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `cartes-digitales-${new Date().toISOString().split('T')[0]}.json`
+  link.click()
+  window.URL.revokeObjectURL(url)
+  alert('✅ Cartes exportées avec succès !')
+}
+
+const importCards = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const jsonString = e.target?.result
+      if (typeof jsonString !== 'string') return
+
+      const result = store.importCardsFromJSON(jsonString)
+      if (result.success) {
+        alert(`✅ ${result.count} carte(s) importée(s) avec succès !`)
+      } else {
+        alert(`❌ Erreur: ${result.error}`)
+      }
+    } catch (error) {
+      alert('❌ Erreur lors de la lecture du fichier')
+    }
+  }
+  reader.readAsText(file)
 }
 </script>

@@ -222,6 +222,90 @@ export const useCardsStore = defineStore('cards', () => {
     return null
   }
 
+  /**
+   * Récupère des statistiques globales
+   */
+  function getGlobalStats() {
+    const totalCards = userCards.value.length
+    const totalViews = userCards.value.reduce((sum, card) => sum + (card.views || 0), 0)
+    const totalDownloads = userCards.value.reduce((sum, card) => sum + (card.downloads || 0), 0)
+    const topCard = userCards.value.reduce((prev, current) =>
+      ((current.views || 0) > (prev.views || 0)) ? current : prev, userCards.value[0])
+
+    return {
+      totalCards,
+      totalViews,
+      totalDownloads,
+      averageViewsPerCard: totalCards > 0 ? Math.round(totalViews / totalCards) : 0,
+      topCard: topCard || null,
+    }
+  }
+
+  /**
+   * Récupère l'historique d'une carte
+   */
+  function getCardStats(cardId) {
+    const card = getCardById(cardId)
+    if (card) {
+      return {
+        views: card.views || 0,
+        downloads: card.downloads || 0,
+        createdAt: card.createdAt,
+        daysSinceCreation: Math.floor(
+          (new Date() - new Date(card.createdAt)) / (1000 * 60 * 60 * 24)
+        ),
+      }
+    }
+    return null
+  }
+
+  /**
+   * Exporte toutes les cartes en JSON
+   */
+  function exportCardsAsJSON() {
+    const data = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      cards: userCards.value,
+      templates: templates.value,
+    }
+    return JSON.stringify(data, null, 2)
+  }
+
+  /**
+   * Importe des cartes depuis un fichier JSON
+   */
+  function importCardsFromJSON(jsonString) {
+    try {
+      const data = JSON.parse(jsonString)
+
+      if (!data.cards || !Array.isArray(data.cards)) {
+        throw new Error('Format JSON invalide')
+      }
+
+      // Importer les cartes
+      data.cards.forEach((card) => {
+        // Assurer que chaque carte a un nouvel ID
+        const importedCard = {
+          ...card,
+          id: Date.now() + Math.random(),
+          createdAt: card.createdAt || new Date().toISOString(),
+        }
+        userCards.value.push(importedCard)
+      })
+
+      return {
+        success: true,
+        count: data.cards.length,
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+  }
+
   return {
     // State
     templates,
@@ -245,5 +329,9 @@ export const useCardsStore = defineStore('cards', () => {
     generateShareLink,
     incrementCardViews,
     incrementCardDownloads,
+    getGlobalStats,
+    getCardStats,
+    exportCardsAsJSON,
+    importCardsFromJSON,
   }
 })

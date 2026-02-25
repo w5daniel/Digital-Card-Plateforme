@@ -45,6 +45,18 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/share/:cardId',
+      name: 'share',
+      component: () => import('../views/ShareView.vue'),
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/pricing',
+      name: 'pricing',
+      component: () => import('../views/PricingView.vue'),
+      meta: { requiresAuth: false },
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
