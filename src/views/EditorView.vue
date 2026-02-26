@@ -203,6 +203,101 @@
               Voir tous les modèles →
             </router-link>
           </div>
+
+          <!-- Logo Upload -->
+          <div class="card p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+              <FileText class="w-5 h-5 mr-2 text-primary-600" />
+              Logo de l'entreprise
+            </h2>
+            <div class="space-y-3">
+              <!-- Logo Preview -->
+              <div v-if="cardData.data.logo" class="relative w-32 h-32 mx-auto">
+                <img
+                  :src="cardData.data.logo"
+                  alt="Logo preview"
+                  class="w-full h-full rounded-lg object-contain border-2 border-primary-200 bg-gray-50 dark:bg-slate-900 p-2"
+                />
+                <button
+                  type="button"
+                  @click="removeLogo"
+                  class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                >
+                  <X class="w-4 h-4" />
+                </button>
+              </div>
+
+              <!-- Upload Input -->
+              <label class="block px-4 py-3 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center">
+                <Upload class="w-4 h-4 mr-2 inline" />
+                Charger le logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleLogoUpload"
+                  class="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- Font Selection -->
+          <div class="card p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+              <FileText class="w-5 h-5 mr-2 text-primary-600" />
+              Police d'écriture
+            </h2>
+            <select
+              v-model="cardData.data.fontFamily"
+              class="input-field"
+            >
+              <option value="Poppins">Poppins (Moderne)</option>
+              <option value="Inter">Inter (Professionnel)</option>
+              <option value="Montserrat">Montserrat (Élégant)</option>
+              <option value="Playfair Display">Playfair Display (Sophistiqué)</option>
+              <option value="Roboto">Roboto (Classique)</option>
+              <option value="Georgia">Georgia (Traditionnel)</option>
+            </select>
+          </div>
+
+          <!-- Back Side Card -->
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-bold flex items-center">
+                <FileText class="w-5 h-5 mr-2 text-primary-600" />
+                Verso de la carte
+              </h2>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="cardData.backSide.enabled"
+                  class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                />
+                <span class="text-sm font-medium">Activer le verso</span>
+              </label>
+            </div>
+
+            <div v-if="cardData.backSide.enabled" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Titre du verso</label>
+                <input
+                  v-model="cardData.backSide.title"
+                  type="text"
+                  placeholder="Ex: Nos services, Nos produits..."
+                  class="input-field"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contenu du verso</label>
+                <textarea
+                  v-model="cardData.backSide.content"
+                  placeholder="Décrivez vos services, produits, ou informations additionnelles..."
+                  class="input-field h-24 resize-none"
+                ></textarea>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Right Panel - Preview -->
@@ -329,6 +424,13 @@ const cardData = ref({
     website: '',
     address: '',
     photo: '',
+    logo: '',
+    fontFamily: 'Poppins',
+  },
+  backSide: {
+    enabled: false,
+    title: '',
+    content: '',
   },
 })
 
@@ -351,9 +453,32 @@ const handlePhotoUpload = (event) => {
   }
 }
 
+const handleLogoUpload = (event) => {
+  const file = event.target.files?.[0]
+  if (file) {
+    // Vérifier la taille (max 1MB)
+    if (file.size > 1 * 1024 * 1024) {
+      notificationStore.error('Logo trop volumineux (max 1MB)')
+      return
+    }
+
+    // Lire le fichier en data:url
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      cardData.value.data.logo = e.target?.result || ''
+      notificationStore.success('Logo chargé avec succès')
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
 const removePhoto = () => {
   cardData.value.data.photo = ''
   photoUrl.value = ''
+}
+
+const removeLogo = () => {
+  cardData.value.data.logo = ''
 }
 
 const setPhotoFromUrl = () => {

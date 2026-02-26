@@ -1,16 +1,29 @@
 <template>
   <div
     class="business-card relative rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105"
-    :style="cardStyle"
+    :style="{
+      ...cardStyle,
+      fontFamily: card.data.fontFamily || 'Poppins',
+    }"
   >
     <!-- Decorative Elements -->
     <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
     <div class="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full -ml-24 -mb-24"></div>
 
     <div class="relative p-8 h-full flex flex-col justify-between">
-      <!-- Header with Photo -->
+      <!-- Header with Photo and Logo -->
       <div class="flex items-start justify-between">
+        <!-- Left Side: Info -->
         <div class="flex-1">
+          <!-- Logo at top -->
+          <div v-if="card.data.logo" class="mb-4 h-10 max-w-32">
+            <img
+              :src="card.data.logo"
+              alt="Logo"
+              class="h-full object-contain"
+            />
+          </div>
+
           <h2 class="text-2xl font-bold mb-1" :style="{ color: textColor }">
             {{ card.data.fullName || 'Nom Complet' }}
           </h2>
@@ -22,6 +35,7 @@
           </p>
         </div>
 
+        <!-- Right Side: Photo -->
         <div
           v-if="card.data.photo"
           class="w-20 h-20 rounded-full overflow-hidden border-4 border-white/30 shadow-lg flex-shrink-0"
