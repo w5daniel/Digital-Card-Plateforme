@@ -8,6 +8,7 @@
       <RouterView />
     </main>
     <FooterBar />
+    <ToastNotification />
   </div>
 </template>
 
@@ -16,6 +17,7 @@ import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import FooterBar from './components/FooterBar.vue'
+import ToastNotification from './components/ToastNotification.vue'
 import { useThemeStore } from './stores/themeStore'
 
 const themeStore = useThemeStore()
@@ -29,3 +31,4 @@ onMounted(() => {
 <style>
 /* Styles globaux déjà définis dans main.css */
 </style>
+

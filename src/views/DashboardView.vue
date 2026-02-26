@@ -1,184 +1,183 @@
 <template>
-  <div class="dashboard-view py-12">
+  <div class="dashboard-view min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
+      <!-- Header Section -->
       <div class="mb-12">
-        <h1 class="text-4xl font-bold mb-2">Mon Dashboard</h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          Gérez toutes vos cartes de visite en un seul endroit
-        </p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary-600 to-secondary-600 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
+              Mon Dashboard
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400">
+              Gérez toutes vos cartes de visite en un seul endroit
+            </p>
+          </div>
+          <div class="mt-6 md:mt-0 flex flex-wrap gap-3">
+            <button
+              @click="exportCards"
+              class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
+            >
+              <Download class="w-5 h-5" />
+              <span>Exporter</span>
+            </button>
+            <label class="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 dark:from-purple-600 dark:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 cursor-pointer">
+              <Plus class="w-5 h-5" />
+              <span>Importer</span>
+              <input
+                type="file"
+                accept=".json"
+                @change="importCards"
+                class="hidden"
+              />
+            </label>
+            <router-link to="/editor" class="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2">
+              <Plus class="w-5 h-5" />
+              <span>Créer une carte</span>
+            </router-link>
+          </div>
+        </div>
       </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div
-              class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center"
-            >
-              <CreditCard class="w-6 h-6 text-primary-600 dark:text-primary-300" />
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 dark:from-primary-900/50 dark:to-primary-800/30 rounded-2xl flex items-center justify-center">
+              <CreditCard class="w-7 h-7 text-primary-600 dark:text-primary-400" />
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-3xl font-bold gradient-text">{{ stats.totalCards }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Cartes créées</p>
+          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalCards }}</div>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Cartes créées</p>
         </div>
 
-        <div class="card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div
-              class="w-12 h-12 bg-secondary-100 dark:bg-secondary-900 rounded-xl flex items-center justify-center"
-            >
-              <Eye class="w-6 h-6 text-secondary-600 dark:text-secondary-300" />
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-secondary-100 to-secondary-50 dark:from-secondary-900/50 dark:to-secondary-800/30 rounded-2xl flex items-center justify-center">
+              <Eye class="w-7 h-7 text-secondary-600 dark:text-secondary-400" />
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400">{{ stats.totalViews }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Vues totales</p>
+          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalViews }}</div>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Vues totales</p>
         </div>
 
-        <div class="card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div
-              class="w-12 h-12 bg-accent-100 dark:bg-accent-900 rounded-xl flex items-center justify-center"
-            >
-              <Download class="w-6 h-6 text-accent-600 dark:text-accent-300" />
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-accent-100 to-accent-50 dark:from-accent-900/50 dark:to-accent-800/30 rounded-2xl flex items-center justify-center">
+              <Download class="w-7 h-7 text-accent-600 dark:text-accent-400" />
             </div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-3xl font-bold text-accent-600 dark:text-accent-400">{{ stats.totalDownloads }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Téléchargements</p>
+          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalDownloads }}</div>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Téléchargements</p>
         </div>
       </div>
 
-      <!-- Actions Bar -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <h2 class="text-2xl font-bold">Mes cartes de visite</h2>
-        <div class="flex gap-2 flex-wrap">
-          <button
-            @click="exportCards"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium rounded-lg transition-colors flex items-center space-x-2"
-          >
-            <Download class="w-5 h-5" />
-            <span>Exporter</span>
-          </button>
-          <label class="px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white font-medium rounded-lg transition-colors flex items-center space-x-2 cursor-pointer">
-            <Plus class="w-5 h-5" />
-            <span>Importer</span>
-            <input
-              type="file"
-              accept=".json"
-              @change="importCards"
-              class="hidden"
-            />
-          </label>
-          <router-link to="/editor" class="btn-primary flex items-center space-x-2">
-            <Plus class="w-5 h-5" />
-            <span>Créer une carte</span>
-          </router-link>
-        </div>
+      <!-- My Cards Section -->
+      <div class="mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Mes cartes de visite</h2>
       </div>
 
-      <!-- Cards List -->
-      <div v-if="store.userCards.length > 0" class="space-y-6">
+      <!-- Cards Grid -->
+      <div v-if="store.userCards.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div
           v-for="card in store.userCards"
           :key="card.id"
-          class="card p-6 hover:shadow-2xl transition-all duration-300"
+          class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
         >
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Card Preview -->
-            <div class="lg:col-span-1">
+          <!-- Card Preview Section -->
+          <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 dark:from-slate-700 dark:to-slate-600 h-64 flex items-center justify-center">
+            <div class="scale-75 origin-center">
               <BusinessCard :card="card" :showQR="false" />
             </div>
+            <!-- Status Badge -->
+            <div class="absolute top-4 right-4">
+              <span class="px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-200 dark:border-emerald-800">
+                ✓ Active
+              </span>
+            </div>
+          </div>
 
-            <!-- Card Info -->
-            <div class="lg:col-span-2 flex flex-col justify-between">
+          <!-- Card Details -->
+          <div class="p-8">
+            <div class="mb-6">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <h3 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ card.data.fullName || card.name }}</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ card.data.title }} @ {{ card.data.company }}
+                  </p>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Créée le {{ formatDate(card.createdAt) }}
+              </p>
+            </div>
+
+            <!-- Contact Info Grid -->
+            <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
               <div>
-                <div class="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 class="text-2xl font-bold mb-1">{{ card.name }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                      Créée le {{ formatDate(card.createdAt) }}
-                    </p>
-                  </div>
-                  <span
-                    class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full"
-                  >
-                    Active
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Nom complet</p>
-                    <p class="font-semibold">{{ card.data.fullName }}</p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Entreprise</p>
-                    <p class="font-semibold">{{ card.data.company }}</p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                    <p class="font-semibold">{{ card.data.email }}</p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Téléphone</p>
-                    <p class="font-semibold">{{ card.data.phone }}</p>
-                  </div>
-                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Email</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ card.data.email || '-' }}</p>
               </div>
-
-              <!-- Actions -->
-              <div class="flex flex-wrap gap-3">
-                <router-link
-                  :to="`/editor/${card.id}`"
-                  class="px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium flex items-center space-x-2"
-                >
-                  <Edit class="w-4 h-4" />
-                  <span>Modifier</span>
-                </router-link>
-                <button
-                  @click="shareCard(card.id)"
-                  class="px-4 py-2 bg-secondary-100 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-200 dark:hover:bg-secondary-800 transition-colors font-medium flex items-center space-x-2"
-                >
-                  <Share2 class="w-4 h-4" />
-                  <span>{{ copiedCardId === card.id ? 'Copié !' : 'Partager' }}</span>
-                </button>
-                <button
-                  @click="downloadVCard(card)"
-                  class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors font-medium flex items-center space-x-2"
-                >
-                  <Download class="w-4 h-4" />
-                  <span>Télécharger vCard</span>
-                </button>
-                <button
-                  @click="deleteCard(card.id)"
-                  class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium flex items-center space-x-2"
-                >
-                  <Trash2 class="w-4 h-4" />
-                  <span>Supprimer</span>
-                </button>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Téléphone</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ card.data.phone || '-' }}</p>
               </div>
+              <div class="col-span-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Adresse</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ card.data.address || '-' }}</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2">
+              <router-link
+                :to="`/editor/${card.id}`"
+                class="flex-1 min-w-fit px-4 py-2 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-xl hover:bg-primary-200 dark:hover:bg-primary-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+              >
+                <Edit class="w-4 h-4" />
+                <span>Modifier</span>
+              </router-link>
+              <button
+                @click="shareCard(card.id)"
+                class="flex-1 min-w-fit px-4 py-2 bg-secondary-100 dark:bg-secondary-900/40 text-secondary-700 dark:text-secondary-300 rounded-xl hover:bg-secondary-200 dark:hover:bg-secondary-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+              >
+                <Share2 class="w-4 h-4" />
+                <span>{{ copiedCardId === card.id ? '✓ Copié' : 'Partager' }}</span>
+              </button>
+              <button
+                @click="downloadVCard(card)"
+                class="flex-1 min-w-fit px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+              >
+                <Download class="w-4 h-4" />
+                <span>vCard</span>
+              </button>
+              <button
+                @click="deleteCard(card.id)"
+                class="flex-1 min-w-fit px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+              >
+                <Trash2 class="w-4 h-4" />
+                <span>Supprimer</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-20">
-        <div
-          class="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center"
-        >
-          <CreditCard class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+      <div v-else class="text-center py-24">
+        <div class="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-slate-800 dark:to-slate-700 rounded-3xl flex items-center justify-center">
+          <CreditCard class="w-16 h-16 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">Aucune carte créée</h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
-          Commencez par créer votre première carte de visite
+        <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-3">Aucune carte créée</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 text-lg max-w-md mx-auto">
+          Commencez par créer votre première carte de visite professionnelle
         </p>
-        <router-link to="/editor" class="btn-primary inline-flex items-center">
-          <Plus class="w-5 h-5 mr-2" />
-          Créer ma première carte
+        <router-link to="/editor" class="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+          <Plus class="w-6 h-6" />
+          <span>Créer ma première carte</span>
         </router-link>
       </div>
     </div>
@@ -188,10 +187,12 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useCardsStore } from '@/stores/cards'
+import { useNotificationStore } from '@/stores/notificationStore'
 import BusinessCard from '@/components/BusinessCard.vue'
 import { CreditCard, Eye, Download, Plus, Edit, Share2, Trash2 } from 'lucide-vue-next'
 
 const store = useCardsStore()
+const notificationStore = useNotificationStore()
 const copiedCardId = ref(null)
 
 const stats = computed(() => store.getGlobalStats())
@@ -208,6 +209,7 @@ const shareCard = (cardId) => {
     if (shareLink) {
       navigator.clipboard.writeText(shareLink).then(() => {
         copiedCardId.value = cardId
+        notificationStore.success('Lien copié dans le presse-papiers')
         setTimeout(() => {
           copiedCardId.value = null
         }, 2000)
@@ -236,16 +238,23 @@ END:VCARD`
   link.download = `${card.data.fullName || 'carte'}.vcf`
   link.click()
   window.URL.revokeObjectURL(url)
+  notificationStore.success('vCard téléchargée avec succès')
 }
 
 const deleteCard = (cardId) => {
   if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.')) {
     store.deleteCard(cardId)
-    alert('✅ Carte supprimée !')
+    notificationStore.success('Carte supprimée avec succès')
   }
 }
 
 const exportCards = () => {
+  // Vérifier qu'il y a des cartes à exporter
+  if (store.userCards.length === 0) {
+    notificationStore.error('Aucune carte à exporter. Créez d\'abord une carte.')
+    return
+  }
+
   const json = store.exportCardsAsJSON()
   const blob = new Blob([json], { type: 'application/json' })
   const url = window.URL.createObjectURL(blob)
@@ -254,7 +263,7 @@ const exportCards = () => {
   link.download = `cartes-digitales-${new Date().toISOString().split('T')[0]}.json`
   link.click()
   window.URL.revokeObjectURL(url)
-  alert('✅ Cartes exportées avec succès !')
+  notificationStore.success(`${store.userCards.length} carte(s) exportée(s) avec succès`)
 }
 
 const importCards = (event) => {
@@ -269,14 +278,16 @@ const importCards = (event) => {
 
       const result = store.importCardsFromJSON(jsonString)
       if (result.success) {
-        alert(`✅ ${result.count} carte(s) importée(s) avec succès !`)
+        notificationStore.success(`${result.count} carte(s) importée(s) avec succès`)
       } else {
-        alert(`❌ Erreur: ${result.error}`)
+        notificationStore.error(`Erreur: ${result.error}`)
       }
     } catch (error) {
-      alert('❌ Erreur lors de la lecture du fichier')
+      notificationStore.error('Erreur lors de la lecture du fichier')
     }
   }
   reader.readAsText(file)
 }
 </script>
+
+
