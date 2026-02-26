@@ -81,6 +81,9 @@
                 <router-link to="/dashboard">Tableau de bord</router-link>
               </li>
               <li>
+                <router-link to="/profile">Mon Profil</router-link>
+              </li>
+              <li>
                 <a href="#">Paramètres</a>
               </li>
               <li>
@@ -154,6 +157,14 @@
           >
             <User class="w-5 h-5" />
             <span>Tableau de bord</span>
+          </router-link>
+          <router-link
+            to="/profile"
+            @click="mobileMenuOpen = false"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+          >
+            <User class="w-5 h-5" />
+            <span>Mon Profil</span>
           </router-link>
           <button
             @click="handleLogout"

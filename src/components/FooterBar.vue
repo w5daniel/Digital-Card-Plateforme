@@ -36,6 +36,11 @@
                 >Mon dashboard</router-link
               >
             </li>
+            <li>
+              <router-link to="/about" class="hover:text-primary-400 transition-colors"
+                >À propos</router-link
+              >
+            </li>
           </ul>
         </div>
 

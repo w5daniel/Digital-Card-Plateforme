@@ -57,6 +57,18 @@ const router = createRouter({
       component: () => import('../views/PricingView.vue'),
       meta: { requiresAuth: false },
     },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/UserProfileView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('../views/AboutView.vue'),
+      meta: { requiresAuth: false },
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {

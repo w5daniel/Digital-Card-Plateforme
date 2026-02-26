@@ -113,48 +113,71 @@
 
       <!-- Recent Cards Carousel -->
       <div v-if="recentCards.length > 0" class="mb-12">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Vos cartes récentes</h3>
-        <div class="relative">
-          <!-- Carousel Container -->
-          <div class="relative rounded-2xl overflow-hidden">
-            <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-8 min-h-96 flex items-center justify-center">
-              <div v-if="currentCarouselCard" class="max-w-md mx-auto">
-                <BusinessCard :card="currentCarouselCard" :showQR="true" />
-              </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Vos cartes récentes</h3>
+        <div class="relative group">
+          <!-- Carousel Container (Reduced Size) -->
+          <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
+            <!-- Carousel Content with Smooth Animation -->
+            <div class="relative h-64 flex items-center justify-center p-6">
+              <transition name="carousel-fade" mode="out-in">
+                <div v-if="currentCarouselCard" :key="currentCarouselCard.id" class="w-full flex justify-center">
+                  <div class="w-full max-w-sm">
+                    <BusinessCard
+                      :card="currentCarouselCard"
+                      :showQR="true"
+                      :cardSize="'small'"
+                      :isFlipped="cardFlipped"
+                    />
+                  </div>
+                </div>
+              </transition>
             </div>
 
-            <!-- Navigation Buttons -->
+            <!-- Flip Button -->
+            <button
+              @click="cardFlipped = !cardFlipped"
+              class="absolute top-4 right-4 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-all z-20"
+              title="Voir l'arrière de la carte"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </button>
+
+            <!-- Navigation Buttons (Improved Style) -->
             <button
               @click="prevCarouselCard"
-              class="absolute left-4 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-all z-10"
-              :class="recentCards.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''"
+              class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-slate-700/90 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-white dark:hover:bg-slate-600 transition-all z-10 opacity-0 group-hover:opacity-100 duration-300"
+              :class="recentCards.length <= 1 ? 'cursor-not-allowed' : ''"
               :disabled="recentCards.length <= 1"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
               </svg>
             </button>
 
             <button
               @click="nextCarouselCard"
-              class="absolute right-4 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-all z-10"
-              :class="recentCards.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''"
+              class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-slate-700/90 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-white dark:hover:bg-slate-600 transition-all z-10 opacity-0 group-hover:opacity-100 duration-300"
+              :class="recentCards.length <= 1 ? 'cursor-not-allowed' : ''"
               :disabled="recentCards.length <= 1"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
             </button>
           </div>
 
-          <!-- Dots Indicator -->
-          <div v-if="recentCards.length > 1" class="flex justify-center gap-2 mt-6">
+          <!-- Dots Indicator (Enhanced) -->
+          <div v-if="recentCards.length > 1" class="flex justify-center gap-2 mt-4">
             <button
               v-for="(card, index) in recentCards"
               :key="card.id"
               @click="carouselIndex = index"
-              class="w-3 h-3 rounded-full transition-all duration-300"
-              :class="carouselIndex === index ? 'bg-primary-600 w-8' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'"
+              class="rounded-full transition-all duration-300"
+              :class="carouselIndex === index
+                ? 'bg-primary-600 w-8 h-2.5'
+                : 'bg-gray-300 dark:bg-gray-600 w-2.5 h-2.5 hover:bg-gray-400 dark:hover:bg-gray-500'"
             ></button>
           </div>
         </div>
@@ -167,16 +190,23 @@
           :key="card.id"
           class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
         >
-          <!-- Selection Checkbox -->
-          <div class="absolute top-4 left-4 z-10">
-            <label class="flex items-center space-x-2 cursor-pointer bg-white dark:bg-slate-800 rounded-lg px-3 py-2 shadow-md hover:shadow-lg transition-all">
+          <!-- Selection Checkbox (Bottom Right Corner) -->
+          <div class="absolute bottom-3 right-3 z-10">
+            <label class="flex items-center justify-center cursor-pointer bg-primary-600 hover:bg-primary-700 text-white rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-200 group/checkbox"
+              :class="selectedCardIds.has(card.id) ? 'ring-2 ring-primary-400' : ''"
+            >
               <input
                 type="checkbox"
                 :checked="selectedCardIds.has(card.id)"
                 @change="toggleCardSelection(card.id)"
-                class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                class="w-4 h-4 hidden"
               />
-              <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Sélectionner</span>
+              <svg v-if="selectedCardIds.has(card.id)" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <svg v-else class="w-5 h-5 group-hover/checkbox:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
             </label>
           </div>
 
@@ -290,6 +320,7 @@ const notificationStore = useNotificationStore()
 const copiedCardId = ref(null)
 const selectedCardIds = ref(new Set())
 const carouselIndex = ref(0)
+const cardFlipped = ref(false)
 
 const stats = computed(() => store.getGlobalStats())
 

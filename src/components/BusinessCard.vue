@@ -80,11 +80,11 @@
         </div>
       </div>
 
-      <!-- QR Code Badge (optional) -->
-      <div v-if="showQR" class="absolute bottom-6 right-6 bg-white p-3 rounded-lg shadow-lg border-2 border-gray-100">
+      <!-- QR Code Badge (optional, smaller for carousel) -->
+      <div v-if="showQR" class="absolute bottom-3 right-3 bg-white p-1 rounded shadow border border-gray-100">
         <QrcodeVue
           :value="qrCodeValue"
-          :size="120"
+          :size="60"
           level="H"
           foreground="#000000"
           background="#ffffff"
@@ -109,6 +109,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isFlipped: {
+    type: Boolean,
+    default: false,
+  },
+  cardSize: {
+    type: String,
+    default: 'normal', // 'normal' or 'small'
+  },
 })
 
 const store = useCardsStore()
@@ -120,7 +128,7 @@ const template = computed(() => {
 const cardStyle = computed(() => {
   return {
     background: `linear-gradient(135deg, ${template.value.colors.primary} 0%, ${template.value.colors.secondary} 100%)`,
-    minHeight: '280px',
+    minHeight: props.cardSize === 'small' ? '240px' : '280px',
   }
 })
 
