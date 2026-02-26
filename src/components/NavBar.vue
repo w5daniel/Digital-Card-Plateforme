@@ -60,7 +60,7 @@
             </button>
             <ul
               tabindex="0"
-              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 dark:bg-slate-800 rounded-box w-56 space-y-1"
+              class="dropdown-content z-[1] menu p-2 shadow bg-white dark:bg-slate-800 rounded-box w-56 space-y-1"
             >
               <li class="menu-title">
                 <div class="flex items-center space-x-2">
@@ -69,11 +69,13 @@
                 </div>
               </li>
               <li>
-                <label class="flex items-center space-x-2 cursor-pointer">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <label class="cursor-pointer">
                   <span>Changer la photo</span>
                   <input type="file" accept="image/*" @change="handleProfilePhotoUpload" class="hidden" />
                 </label>
+              </li>
+              <li v-if="userProfilePhoto">
+                <a @click="handleRemoveProfilePhoto" class="text-orange-500">Supprimer la photo</a>
               </li>
               <li>
                 <router-link to="/dashboard">Tableau de bord</router-link>
@@ -259,6 +261,13 @@ const handleProfilePhotoUpload = (event) => {
     localStorage.setItem(`userProfilePhoto_${authStore.user?.email}`, photoDataUrl)
   }
   reader.readAsDataURL(file)
+}
+
+const handleRemoveProfilePhoto = () => {
+  if (confirm('Êtes-vous sûr de vouloir supprimer votre photo de profil ?')) {
+    userProfilePhoto.value = null
+    localStorage.removeItem(`userProfilePhoto_${authStore.user?.email}`)
+  }
 }
 
 const handleLogout = async () => {
