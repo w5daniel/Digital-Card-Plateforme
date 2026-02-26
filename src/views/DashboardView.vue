@@ -6,7 +6,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary-600 to-secondary-600 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
-              Mon Dashboard
+              Mon tableau de bord
             </h1>
             <p class="text-lg text-gray-600 dark:text-gray-400">
               Gérez toutes vos cartes de visite en un seul endroit
