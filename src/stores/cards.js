@@ -119,6 +119,8 @@ export const useCardsStore = defineStore('cards', () => {
       createdAt: new Date().toISOString(),
       views: 0,
       downloads: 0,
+      qrScans: 0,
+      shares: 0,
       isPublic: false,
     }
     userCards.value.push(newCard)
@@ -223,12 +225,38 @@ export const useCardsStore = defineStore('cards', () => {
   }
 
   /**
+   * Incrémente les scans du QR d'une carte
+   */
+  function incrementCardQRScans(cardId) {
+    const card = getCardById(cardId)
+    if (card) {
+      card.qrScans = (card.qrScans || 0) + 1
+      return card
+    }
+    return null
+  }
+
+  /**
+   * Incrémente les partages d'une carte
+   */
+  function incrementCardShares(cardId) {
+    const card = getCardById(cardId)
+    if (card) {
+      card.shares = (card.shares || 0) + 1
+      return card
+    }
+    return null
+  }
+
+  /**
    * Récupère des statistiques globales
    */
   function getGlobalStats() {
     const totalCards = userCards.value.length
     const totalViews = userCards.value.reduce((sum, card) => sum + (card.views || 0), 0)
     const totalDownloads = userCards.value.reduce((sum, card) => sum + (card.downloads || 0), 0)
+    const totalQRScans = userCards.value.reduce((sum, card) => sum + (card.qrScans || 0), 0)
+    const totalShares = userCards.value.reduce((sum, card) => sum + (card.shares || 0), 0)
     const topCard = userCards.value.reduce((prev, current) =>
       ((current.views || 0) > (prev.views || 0)) ? current : prev, userCards.value[0])
 
@@ -236,6 +264,8 @@ export const useCardsStore = defineStore('cards', () => {
       totalCards,
       totalViews,
       totalDownloads,
+      totalQRScans,
+      totalShares,
       averageViewsPerCard: totalCards > 0 ? Math.round(totalViews / totalCards) : 0,
       topCard: topCard || null,
     }
@@ -329,6 +359,8 @@ export const useCardsStore = defineStore('cards', () => {
     generateShareLink,
     incrementCardViews,
     incrementCardDownloads,
+    incrementCardQRScans,
+    incrementCardShares,
     getGlobalStats,
     getCardStats,
     exportCardsAsJSON,

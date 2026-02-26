@@ -14,15 +14,15 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <!-- Search Input -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-semibold mb-2">Rechercher</label>
+            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Rechercher</label>
             <div class="relative">
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher un modèle..."
-                class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all"
               />
-              <svg class="w-5 h-5 absolute right-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 absolute right-3 top-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
@@ -30,34 +30,34 @@
 
           <!-- Sort Dropdown -->
           <div>
-            <label class="block text-sm font-semibold mb-2">Trier par</label>
+            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Trier par</label>
             <select
               v-model="sortBy"
-              class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all font-medium"
             >
-              <option value="popular">Populaires</option>
-              <option value="newest">Plus récents</option>
-              <option value="name">Nom (A-Z)</option>
-              <option value="rating">Mieux notés</option>
+              <option value="popular" class="text-gray-900 dark:text-white">Populaires</option>
+              <option value="newest" class="text-gray-900 dark:text-white">Plus récents</option>
+              <option value="name" class="text-gray-900 dark:text-white">Nom (A-Z)</option>
+              <option value="rating" class="text-gray-900 dark:text-white">Mieux notés</option>
             </select>
           </div>
 
           <!-- View Mode Toggle -->
           <div>
-            <label class="block text-sm font-semibold mb-2">Affichage</label>
+            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Affichage</label>
             <div class="flex gap-2">
               <button
                 @click="viewMode = 'grid'"
-                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all"
-                :class="viewMode === 'grid' ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-200 dark:border-slate-700 hover:border-primary-500'"
+                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all font-medium"
+                :class="viewMode === 'grid' ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-slate-800'"
                 title="Grille"
               >
                 <svg class="w-5 h-5 mx-auto" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
               </button>
               <button
                 @click="viewMode = 'list'"
-                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all"
-                :class="viewMode === 'list' ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-200 dark:border-slate-700 hover:border-primary-500'"
+                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all font-medium"
+                :class="viewMode === 'list' ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-slate-800'"
                 title="Liste"
               >
                 <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>

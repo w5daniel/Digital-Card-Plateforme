@@ -67,10 +67,10 @@
       </div>
 
       <!-- QR Code Badge (optional) -->
-      <div v-if="showQR" class="absolute bottom-4 right-4 bg-white p-2 rounded-lg shadow-lg">
+      <div v-if="showQR" class="absolute bottom-6 right-6 bg-white p-3 rounded-lg shadow-lg border-2 border-gray-100">
         <QrcodeVue
           :value="qrCodeValue"
-          size="64"
+          :size="120"
           level="H"
           foreground="#000000"
           background="#ffffff"

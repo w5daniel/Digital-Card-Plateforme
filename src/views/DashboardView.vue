@@ -39,44 +39,76 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex items-center justify-between mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 dark:from-primary-900/50 dark:to-primary-800/30 rounded-2xl flex items-center justify-center">
-              <CreditCard class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 dark:from-primary-900/50 dark:to-primary-800/30 rounded-xl flex items-center justify-center">
+              <CreditCard class="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalCards }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Cartes créées</p>
+          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalCards }}</div>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Cartes créées</p>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex items-center justify-between mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-secondary-100 to-secondary-50 dark:from-secondary-900/50 dark:to-secondary-800/30 rounded-2xl flex items-center justify-center">
-              <Eye class="w-7 h-7 text-secondary-600 dark:text-secondary-400" />
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-secondary-100 to-secondary-50 dark:from-secondary-900/50 dark:to-secondary-800/30 rounded-xl flex items-center justify-center">
+              <Eye class="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
             </div>
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalViews }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Vues totales</p>
+          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalViews }}</div>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Vues totales</p>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex items-center justify-between mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-accent-100 to-accent-50 dark:from-accent-900/50 dark:to-accent-800/30 rounded-2xl flex items-center justify-center">
-              <Download class="w-7 h-7 text-accent-600 dark:text-accent-400" />
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-accent-100 to-accent-50 dark:from-accent-900/50 dark:to-accent-800/30 rounded-xl flex items-center justify-center">
+              <Download class="w-6 h-6 text-accent-600 dark:text-accent-400" />
             </div>
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full">Total</span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">Total</span>
           </div>
-          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.totalDownloads }}</div>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Téléchargements</p>
+          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalDownloads }}</div>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Téléchargements</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/50 dark:to-amber-800/30 rounded-xl flex items-center justify-center">
+              <QrCode class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">Total</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalQRScans }}</div>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Scans QR</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-rose-100 to-rose-50 dark:from-rose-900/50 dark:to-rose-800/30 rounded-xl flex items-center justify-center">
+              <Share2 class="w-6 h-6 text-rose-600 dark:text-rose-400" />
+            </div>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-full">Total</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalShares }}</div>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Partages</p>
         </div>
       </div>
 
       <!-- My Cards Section -->
-      <div class="mb-8">
+      <div class="mb-8 flex items-center justify-between">
         <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Mes cartes de visite</h2>
+        <div v-if="store.userCards.length > 0" class="flex items-center space-x-3">
+          <button
+            @click="toggleSelectAll"
+            class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors flex items-center space-x-2 text-sm font-medium"
+            :class="selectedCardIds.size > 0 ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-700' : ''"
+          >
+            <Check class="w-4 h-4" :class="selectedCardIds.size > 0 ? 'text-primary-600' : 'text-gray-400'" />
+            <span>{{ selectedCardIds.size > 0 ? `${selectedCardIds.size} sélectionnée(s)` : 'Sélectionner tout' }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- Cards Grid -->
@@ -84,8 +116,21 @@
         <div
           v-for="card in store.userCards"
           :key="card.id"
-          class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+          class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
         >
+          <!-- Selection Checkbox -->
+          <div class="absolute top-4 left-4 z-10">
+            <label class="flex items-center space-x-2 cursor-pointer bg-white dark:bg-slate-800 rounded-lg px-3 py-2 shadow-md hover:shadow-lg transition-all">
+              <input
+                type="checkbox"
+                :checked="selectedCardIds.has(card.id)"
+                @change="toggleCardSelection(card.id)"
+                class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+              />
+              <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Sélectionner</span>
+            </label>
+          </div>
+
           <!-- Card Preview Section -->
           <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 dark:from-slate-700 dark:to-slate-600 h-64 flex items-center justify-center">
             <div class="scale-75 origin-center">
@@ -189,11 +234,12 @@ import { ref, computed } from 'vue'
 import { useCardsStore } from '@/stores/cards'
 import { useNotificationStore } from '@/stores/notificationStore'
 import BusinessCard from '@/components/BusinessCard.vue'
-import { CreditCard, Eye, Download, Plus, Edit, Share2, Trash2 } from 'lucide-vue-next'
+import { CreditCard, Eye, Download, Plus, Edit, Share2, Trash2, QrCode, Check } from 'lucide-vue-next'
 
 const store = useCardsStore()
 const notificationStore = useNotificationStore()
 const copiedCardId = ref(null)
+const selectedCardIds = ref(new Set())
 
 const stats = computed(() => store.getGlobalStats())
 
@@ -207,6 +253,7 @@ const shareCard = (cardId) => {
   if (card) {
     const shareLink = store.generateShareLink(cardId)
     if (shareLink) {
+      store.incrementCardShares(cardId)
       navigator.clipboard.writeText(shareLink).then(() => {
         copiedCardId.value = cardId
         notificationStore.success('Lien copié dans le presse-papiers')
@@ -244,18 +291,45 @@ END:VCARD`
 const deleteCard = (cardId) => {
   if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.')) {
     store.deleteCard(cardId)
+    selectedCardIds.value.delete(cardId)
     notificationStore.success('Carte supprimée avec succès')
   }
 }
 
+const toggleCardSelection = (cardId) => {
+  if (selectedCardIds.value.has(cardId)) {
+    selectedCardIds.value.delete(cardId)
+  } else {
+    selectedCardIds.value.add(cardId)
+  }
+}
+
+const toggleSelectAll = () => {
+  if (selectedCardIds.value.size === store.userCards.length) {
+    selectedCardIds.value.clear()
+  } else {
+    store.userCards.forEach(card => selectedCardIds.value.add(card.id))
+  }
+}
+
 const exportCards = () => {
-  // Vérifier qu'il y a des cartes à exporter
-  if (store.userCards.length === 0) {
+  // Déterminer les cartes à exporter
+  const cardsToExport = selectedCardIds.value.size > 0
+    ? store.userCards.filter(card => selectedCardIds.value.has(card.id))
+    : store.userCards
+
+  if (cardsToExport.length === 0) {
     notificationStore.error('Aucune carte à exporter. Créez d\'abord une carte.')
     return
   }
 
-  const json = store.exportCardsAsJSON()
+  const json = JSON.stringify({
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    cards: cardsToExport,
+    templates: store.templates,
+  }, null, 2)
+
   const blob = new Blob([json], { type: 'application/json' })
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -263,7 +337,7 @@ const exportCards = () => {
   link.download = `cartes-digitales-${new Date().toISOString().split('T')[0]}.json`
   link.click()
   window.URL.revokeObjectURL(url)
-  notificationStore.success(`${store.userCards.length} carte(s) exportée(s) avec succès`)
+  notificationStore.success(`${cardsToExport.length} carte(s) exportée(s) avec succès`)
 }
 
 const importCards = (event) => {

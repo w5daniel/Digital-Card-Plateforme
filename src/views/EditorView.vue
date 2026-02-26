@@ -287,6 +287,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import { useAuthStore } from '@/stores/authStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 import BusinessCard from '@/components/BusinessCard.vue'
 import {
   User,
@@ -309,6 +310,7 @@ const router = useRouter()
 const route = useRoute()
 const store = useCardsStore()
 const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 const showQRCode = ref(false)
 const isEditing = ref(false)
@@ -335,7 +337,7 @@ const handlePhotoUpload = (event) => {
   if (file) {
     // Vérifier la taille (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert('❌ Fichier trop volumineux (max 2MB)')
+      notificationStore.error('Fichier trop volumineux (max 2MB)')
       return
     }
 
@@ -343,6 +345,7 @@ const handlePhotoUpload = (event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       cardData.value.data.photo = e.target?.result || ''
+      notificationStore.success('Photo chargée avec succès')
     }
     reader.readAsDataURL(file)
   }
@@ -387,11 +390,11 @@ const saveCard = () => {
     if (isEditing.value) {
       // Mise à jour d'une carte existante
       store.updateCard(cardData.value.id, cardData.value)
-      alert('✅ Carte mise à jour avec succès !')
+      notificationStore.success('Carte mise à jour avec succès !')
     } else {
       // Création d'une nouvelle carte
       store.addCard(cardData.value)
-      alert('✅ Carte enregistrée avec succès !')
+      notificationStore.success('Carte enregistrée avec succès !')
     }
     router.push('/dashboard')
   }
@@ -417,23 +420,25 @@ END:VCARD`
   link.download = `${cardData.value.data.fullName || 'carte'}.vcf`
   link.click()
   window.URL.revokeObjectURL(url)
-  alert('📥 Fichier vCard téléchargé !')
+  notificationStore.success('Fichier vCard téléchargé avec succès !')
 }
 
 const shareCard = () => {
   if (isEditing.value) {
     const shareLink = store.generateShareLink(cardData.value.id)
+    store.incrementCardShares(cardData.value.id)
     if (shareLink) {
       // Copier dans le presse-papiers
       navigator.clipboard.writeText(shareLink).then(() => {
         shareLinkCopied.value = true
+        notificationStore.success('Lien de partage copié !')
         setTimeout(() => {
           shareLinkCopied.value = false
         }, 2000)
       })
     }
   } else {
-    alert('💾 Enregistrez d\'abord la carte pour la partager !')
+    notificationStore.warning('Enregistrez d\'abord la carte pour la partager')
   }
 }
 </script>
