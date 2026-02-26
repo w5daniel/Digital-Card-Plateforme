@@ -111,6 +111,55 @@
         </div>
       </div>
 
+      <!-- Recent Cards Carousel -->
+      <div v-if="recentCards.length > 0" class="mb-12">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Vos cartes récentes</h3>
+        <div class="relative">
+          <!-- Carousel Container -->
+          <div class="relative rounded-2xl overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-8 min-h-96 flex items-center justify-center">
+              <div v-if="currentCarouselCard" class="max-w-md mx-auto">
+                <BusinessCard :card="currentCarouselCard" :showQR="true" />
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <button
+              @click="prevCarouselCard"
+              class="absolute left-4 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-all z-10"
+              :class="recentCards.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''"
+              :disabled="recentCards.length <= 1"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <button
+              @click="nextCarouselCard"
+              class="absolute right-4 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-all z-10"
+              :class="recentCards.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''"
+              :disabled="recentCards.length <= 1"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Dots Indicator -->
+          <div v-if="recentCards.length > 1" class="flex justify-center gap-2 mt-6">
+            <button
+              v-for="(card, index) in recentCards"
+              :key="card.id"
+              @click="carouselIndex = index"
+              class="w-3 h-3 rounded-full transition-all duration-300"
+              :class="carouselIndex === index ? 'bg-primary-600 w-8' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'"
+            ></button>
+          </div>
+        </div>
+      </div>
+
       <!-- Cards Grid -->
       <div v-if="store.userCards.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div
@@ -240,8 +289,31 @@ const store = useCardsStore()
 const notificationStore = useNotificationStore()
 const copiedCardId = ref(null)
 const selectedCardIds = ref(new Set())
+const carouselIndex = ref(0)
 
 const stats = computed(() => store.getGlobalStats())
+
+const recentCards = computed(() => {
+  // Get the 4 most recent cards
+  return [...store.userCards].sort((a, b) =>
+    new Date(b.createdAt) - new Date(a.createdAt)
+  ).slice(0, 4)
+})
+
+const currentCarouselCard = computed(() => {
+  if (recentCards.value.length === 0) return null
+  return recentCards.value[carouselIndex.value % recentCards.value.length]
+})
+
+const nextCarouselCard = () => {
+  if (recentCards.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value + 1) % recentCards.value.length
+}
+
+const prevCarouselCard = () => {
+  if (recentCards.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value - 1 + recentCards.value.length) % recentCards.value.length
+}
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
