@@ -31,4 +31,3 @@ onMounted(() => {
 <style>
 /* Styles globaux déjà définis dans main.css */
 </style>
-

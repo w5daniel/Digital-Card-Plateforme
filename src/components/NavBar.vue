@@ -52,9 +52,16 @@
             >
               <!-- User Profile Photo or Initial -->
               <div v-if="userProfilePhoto" class="w-10 h-10 rounded-full overflow-hidden">
-                <img :src="userProfilePhoto" :alt="authStore.user?.name" class="w-full h-full object-cover" />
+                <img
+                  :src="userProfilePhoto"
+                  :alt="authStore.user?.name"
+                  class="w-full h-full object-cover"
+                />
               </div>
-              <div v-else class="bg-gradient-to-br from-primary-500 to-secondary-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+              <div
+                v-else
+                class="bg-gradient-to-br from-primary-500 to-secondary-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold"
+              >
                 {{ userInitial }}
               </div>
             </button>
@@ -65,13 +72,20 @@
               <li class="menu-title">
                 <div class="flex items-center space-x-2">
                   <span>{{ authStore.user?.name }}</span>
-                  <span v-if="authStore.hasPremium()" class="badge badge-primary text-xs">Premium</span>
+                  <span v-if="authStore.hasPremium()" class="badge badge-primary text-xs"
+                    >Premium</span
+                  >
                 </div>
               </li>
               <li>
                 <label class="cursor-pointer">
                   <span>Changer la photo</span>
-                  <input type="file" accept="image/*" @change="handleProfilePhotoUpload" class="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    @change="handleProfilePhotoUpload"
+                    class="hidden"
+                  />
                 </label>
               </li>
               <li v-if="userProfilePhoto">
@@ -102,7 +116,11 @@
           </template>
 
           <!-- Create Card Button (when authenticated) -->
-          <router-link v-if="authStore.isAuthenticated" to="/editor" class="btn-primary flex items-center space-x-2">
+          <router-link
+            v-if="authStore.isAuthenticated"
+            to="/editor"
+            class="btn-primary flex items-center space-x-2"
+          >
             <Plus class="w-5 h-5" />
             <span>Créer une carte</span>
           </router-link>
@@ -145,7 +163,10 @@
         </button>
 
         <!-- Mobile Auth Section -->
-        <div v-if="authStore.isAuthenticated" class="space-y-2 pt-4 border-t border-gray-200 dark:border-slate-700">
+        <div
+          v-if="authStore.isAuthenticated"
+          class="space-y-2 pt-4 border-t border-gray-200 dark:border-slate-700"
+        >
           <div class="px-4 py-2">
             <p class="text-sm text-gray-600 dark:text-gray-400">Utilisateur</p>
             <p class="font-semibold">{{ authStore.user?.name }}</p>

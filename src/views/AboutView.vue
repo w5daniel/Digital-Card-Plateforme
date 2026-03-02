@@ -26,7 +26,7 @@
         <p class="text-lg text-gray-700 dark:text-gray-300 mb-8">
           Nous croyons qu'une carte de visite professionnelle est bien plus qu'un simple bout de
           papier. C'est une extension de votre identité, un reflet de votre professionnalisme et de
-          votre créativité. Digital Card Platform a été créé pour démocratiser l'accès à des outils
+          votre créativité. ECODEV Card Pro a été créé pour démocratiser l'accès à des outils
           professionnels de création de cartes de visite numériques.
         </p>
 
@@ -241,7 +241,7 @@
           Prêt à créer votre carte professionnelle ?
         </h2>
         <p class="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-          Rejoignez des milliers de professionnels qui font confiance à Digital Card Platform pour
+          Rejoignez des milliers de professionnels qui font confiance à ECODEV CARD PRO pour
           présenter leur identité professionnelle.
         </p>
         <router-link
@@ -250,21 +250,6 @@
         >
           Créer Ma Carte Maintenant
         </router-link>
-      </div>
-    </div>
-
-    <!-- Footer Info -->
-    <div
-      class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 mt-20 py-12"
-    >
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p class="text-gray-600 dark:text-gray-400 mb-2">
-          Développé par
-          <span class="font-semibold text-gray-900 dark:text-white">ECODEV INTERNATIONAL</span>
-        </p>
-        <p class="text-sm text-gray-500 dark:text-gray-500">
-          © 2024 Digital Card Platform. Tous droits réservés.
-        </p>
       </div>
     </div>
   </div>

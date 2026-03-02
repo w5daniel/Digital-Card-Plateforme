@@ -70,7 +70,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo de profil</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >Photo de profil</label
+                >
                 <div class="space-y-3">
                   <!-- Photo Preview -->
                   <div v-if="cardData.data.photo" class="relative w-32 h-32 mx-auto">
@@ -90,7 +92,9 @@
 
                   <!-- Upload Input -->
                   <div class="flex gap-2">
-                    <label class="flex-1 px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center flex items-center justify-center">
+                    <label
+                      class="flex-1 px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center flex items-center justify-center"
+                    >
                       <Upload class="w-4 h-4 mr-2" />
                       Charger photo
                       <input
@@ -228,15 +232,12 @@
               </div>
 
               <!-- Upload Input -->
-              <label class="block px-4 py-3 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center">
+              <label
+                class="block px-4 py-3 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center"
+              >
                 <Upload class="w-4 h-4 mr-2 inline" />
                 Charger le logo
-                <input
-                  type="file"
-                  accept="image/*"
-                  @change="handleLogoUpload"
-                  class="hidden"
-                />
+                <input type="file" accept="image/*" @change="handleLogoUpload" class="hidden" />
               </label>
             </div>
           </div>
@@ -247,10 +248,7 @@
               <FileText class="w-5 h-5 mr-2 text-primary-600" />
               Police d'écriture
             </h2>
-            <select
-              v-model="cardData.data.fontFamily"
-              class="input-field"
-            >
+            <select v-model="cardData.data.fontFamily" class="input-field">
               <option value="Poppins">Poppins (Moderne)</option>
               <option value="Inter">Inter (Professionnel)</option>
               <option value="Montserrat">Montserrat (Élégant)</option>
@@ -279,7 +277,9 @@
 
             <div v-if="cardData.backSide.enabled" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Titre du verso</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >Titre du verso</label
+                >
                 <input
                   v-model="cardData.backSide.title"
                   type="text"
@@ -289,7 +289,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contenu du verso</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >Contenu du verso</label
+                >
                 <textarea
                   v-model="cardData.backSide.content"
                   placeholder="Décrivez vos services, produits, ou informations additionnelles..."
@@ -563,7 +565,7 @@ const shareCard = () => {
       })
     }
   } else {
-    notificationStore.warning('Enregistrez d\'abord la carte pour la partager')
+    notificationStore.warning("Enregistrez d'abord la carte pour la partager")
   }
 }
 </script>

@@ -257,8 +257,10 @@ export const useCardsStore = defineStore('cards', () => {
     const totalDownloads = userCards.value.reduce((sum, card) => sum + (card.downloads || 0), 0)
     const totalQRScans = userCards.value.reduce((sum, card) => sum + (card.qrScans || 0), 0)
     const totalShares = userCards.value.reduce((sum, card) => sum + (card.shares || 0), 0)
-    const topCard = userCards.value.reduce((prev, current) =>
-      ((current.views || 0) > (prev.views || 0)) ? current : prev, userCards.value[0])
+    const topCard = userCards.value.reduce(
+      (prev, current) => ((current.views || 0) > (prev.views || 0) ? current : prev),
+      userCards.value[0],
+    )
 
     return {
       totalCards,
@@ -282,7 +284,7 @@ export const useCardsStore = defineStore('cards', () => {
         downloads: card.downloads || 0,
         createdAt: card.createdAt,
         daysSinceCreation: Math.floor(
-          (new Date() - new Date(card.createdAt)) / (1000 * 60 * 60 * 24)
+          (new Date() - new Date(card.createdAt)) / (1000 * 60 * 60 * 24),
         ),
       }
     }

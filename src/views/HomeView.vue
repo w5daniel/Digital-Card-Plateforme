@@ -55,7 +55,19 @@
             <div class="absolute top-0 right-0 w-full animate-bounce-slow">
               <div
                 class="rounded-2xl shadow-2xl overflow-hidden transform rotate-6 hover:rotate-0 transition-transform duration-300"
-                style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e72 25%, #a78bfa 50%, #60a5fa 75%, #4ade80 100%); width: 480px; aspect-ratio: 16/9; transform: perspective(1200px) rotateX(8px) rotateY(-8px) rotateZ(6deg);"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #ff6b6b 0%,
+                    #ff8e72 25%,
+                    #a78bfa 50%,
+                    #60a5fa 75%,
+                    #4ade80 100%
+                  );
+                  width: 480px;
+                  aspect-ratio: 16/9;
+                  transform: perspective(1200px) rotateX(8px) rotateY(-8px) rotateZ(6deg);
+                "
               >
                 <div class="relative p-8 h-full flex flex-col justify-between">
                   <div class="w-10 h-10 bg-white/20 rounded-2xl"></div>
@@ -85,7 +97,12 @@
             >
               <div
                 class="rounded-2xl shadow-2xl overflow-hidden transform -rotate-6 hover:rotate-0 transition-transform duration-300"
-                style="background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #3b82f6 100%); width: 480px; aspect-ratio: 16/9; transform: perspective(1200px) rotateX(-6px) rotateY(8px) rotateZ(-6deg);"
+                style="
+                  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #3b82f6 100%);
+                  width: 480px;
+                  aspect-ratio: 16/9;
+                  transform: perspective(1200px) rotateX(-6px) rotateY(8px) rotateZ(-6deg);
+                "
               >
                 <div class="relative p-8 h-full flex flex-col justify-between">
                   <div class="w-10 h-10 bg-white/20 rounded-2xl"></div>
@@ -115,7 +132,12 @@
             >
               <div
                 class="rounded-2xl shadow-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-300"
-                style="background: linear-gradient(135deg, #f97316 0%, #f43f5e 50%, #06b6d4 100%); width: 480px; aspect-ratio: 16/9; transform: perspective(1200px) rotateX(5px) rotateY(-5px) rotateZ(3deg);"
+                style="
+                  background: linear-gradient(135deg, #f97316 0%, #f43f5e 50%, #06b6d4 100%);
+                  width: 480px;
+                  aspect-ratio: 16/9;
+                  transform: perspective(1200px) rotateX(5px) rotateY(-5px) rotateZ(3deg);
+                "
               >
                 <div class="relative p-8 h-full flex flex-col justify-between">
                   <div class="w-10 h-10 bg-white/20 rounded-2xl"></div>
@@ -176,7 +198,7 @@
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
         <h2 class="text-4xl md:text-5xl font-bold mb-6">Prêt à créer votre carte de visite ?</h2>
         <p class="text-xl mb-8 opacity-90">
-          Rejoignez des milliers de professionnels qui font confiance à ECODEV-CARD Pro
+          Rejoignez des milliers de professionnels qui font confiance à ECODEV CARD PRO
         </p>
         <router-link
           to="/editor"

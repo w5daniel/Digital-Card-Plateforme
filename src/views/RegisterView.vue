@@ -15,7 +15,7 @@
         </router-link>
         <h1 class="text-3xl font-bold mb-2">Inscription</h1>
         <p class="text-gray-600 dark:text-gray-400">
-          Créez votre compte ECODEV-CARD puis commencez
+          Créez votre compte ECODEV CARD PRO puis commencez
         </p>
       </div>
 

@@ -14,7 +14,9 @@
           <p class="text-sm text-gray-600 dark:text-gray-400">Cartes digitales</p>
         </router-link>
         <h1 class="text-3xl font-bold mb-2">Connexion</h1>
-        <p class="text-gray-600 dark:text-gray-400">Connectez-vous à votre compte ECODEV-CARD</p>
+        <p class="text-gray-600 dark:text-gray-400">
+          Connectez-vous à votre compte ECODEV CARD PRO
+        </p>
       </div>
 
       <!-- Form Card -->
