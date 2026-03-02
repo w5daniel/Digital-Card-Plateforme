@@ -5,7 +5,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold mb-4">Plans Tarifaires</h1>
+        <h1 class="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Plans Tarifaires</h1>
         <p class="text-xl text-gray-600 dark:text-gray-400">
           Choisissez le plan qui vous convient et créez des cartes illimitées
         </p>
@@ -16,27 +16,27 @@
         <!-- Free Plan -->
         <div class="card p-8 relative">
           <div class="mb-6">
-            <h2 class="text-2xl font-bold mb-2">Plan Gratuit</h2>
+            <h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Plan Gratuit</h2>
             <p class="text-gray-600 dark:text-gray-400">Parfait pour débuter</p>
           </div>
 
           <div class="mb-6">
-            <span class="text-5xl font-bold">0€</span>
+            <span class="text-5xl font-bold text-gray-900 dark:text-white">0€</span>
             <span class="text-gray-600 dark:text-gray-400">/mois</span>
           </div>
 
           <ul class="space-y-3 mb-8">
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>3 Cartes maximum</span>
+              <span class="text-gray-900 dark:text-white">3 Cartes maximum</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Templates gratuits</span>
+              <span class="text-gray-900 dark:text-white">Templates gratuits</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Export vCard</span>
+              <span class="text-gray-900 dark:text-white">Export vCard</span>
             </li>
             <li class="flex items-center space-x-3">
               <X class="w-5 h-5 text-red-500" />
@@ -67,39 +67,39 @@
           </div>
 
           <div class="mb-6">
-            <h2 class="text-2xl font-bold mb-2">Plan Premium</h2>
+            <h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Plan Premium</h2>
             <p class="text-gray-600 dark:text-gray-400">Pour les professionnels</p>
           </div>
 
           <div class="mb-6">
-            <span class="text-5xl font-bold">9,99€</span>
+            <span class="text-5xl font-bold text-gray-900 dark:text-white">9,99€</span>
             <span class="text-gray-600 dark:text-gray-400">/mois</span>
           </div>
 
           <ul class="space-y-3 mb-8">
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Cartes illimitées</span>
+              <span class="text-gray-900 dark:text-white">Cartes illimitées</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Tous les templates</span>
+              <span class="text-gray-900 dark:text-white">Tous les templates</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Export vCard + QR Code</span>
+              <span class="text-gray-900 dark:text-white">Export vCard + QR Code</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Import/Export JSON</span>
+              <span class="text-gray-900 dark:text-white">Import/Export JSON</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Analytics avancé</span>
+              <span class="text-gray-900 dark:text-white">Analytics avancé</span>
             </li>
             <li class="flex items-center space-x-3">
               <Check class="w-5 h-5 text-green-500" />
-              <span>Support prioritaire</span>
+              <span class="text-gray-900 dark:text-white">Support prioritaire</span>
             </li>
           </ul>
 
@@ -114,42 +114,33 @@
 
       <!-- Features Comparison -->
       <div class="card p-8">
-        <h3 class="text-2xl font-bold mb-6">Comparaison des Features</h3>
+        <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Comparaison des Features</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-gray-200 dark:border-slate-700">
-                <th class="text-left py-3 font-semibold">Feature</th>
-                <th class="text-center py-3 font-semibold">Gratuit</th>
-                <th class="text-center py-3 font-semibold">Premium</th>
+                <th class="text-left py-3 font-semibold text-gray-900 dark:text-white">Feature</th>
+                <th class="text-center py-3 font-semibold text-gray-900 dark:text-white">Gratuit</th>
+                <th class="text-center py-3 font-semibold text-gray-900 dark:text-white">Premium</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
               <tr>
-                <td class="py-3">Nombre de cartes</td>
-                <td class="text-center">3</td>
+                <td class="py-3 text-gray-900 dark:text-white">Nombre de cartes</td>
+                <td class="text-center text-gray-900 dark:text-white">3</td>
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
                 </td>
               </tr>
               <tr>
-                <td class="py-3">Templates</td>
-                <td class="text-center">6</td>
+                <td class="py-3 text-gray-900 dark:text-white">Templates</td>
+                <td class="text-center text-gray-900 dark:text-white">6</td>
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
                 </td>
               </tr>
               <tr>
-                <td class="py-3">QR Code</td>
-                <td class="text-center">
-                  <Check class="w-5 h-5 text-green-500 inline" />
-                </td>
-                <td class="text-center">
-                  <Check class="w-5 h-5 text-green-500 inline" />
-                </td>
-              </tr>
-              <tr>
-                <td class="py-3">Export vCard</td>
+                <td class="py-3 text-gray-900 dark:text-white">QR Code</td>
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
                 </td>
@@ -158,7 +149,7 @@
                 </td>
               </tr>
               <tr>
-                <td class="py-3">Partage publique</td>
+                <td class="py-3 text-gray-900 dark:text-white">Export vCard</td>
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
                 </td>
@@ -167,14 +158,23 @@
                 </td>
               </tr>
               <tr>
-                <td class="py-3">Import/Export JSON</td>
+                <td class="py-3 text-gray-900 dark:text-white">Partage publique</td>
+                <td class="text-center">
+                  <Check class="w-5 h-5 text-green-500 inline" />
+                </td>
+                <td class="text-center">
+                  <Check class="w-5 h-5 text-green-500 inline" />
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 text-gray-900 dark:text-white">Import/Export JSON</td>
                 <td class="text-center" />
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
                 </td>
               </tr>
               <tr>
-                <td class="py-3">Analytics</td>
+                <td class="py-3 text-gray-900 dark:text-white">Analytics</td>
                 <td class="text-center" />
                 <td class="text-center">
                   <Check class="w-5 h-5 text-green-500 inline" />
@@ -193,7 +193,7 @@
     >
       <div class="card max-w-md w-full p-8">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-2xl font-bold">Paiement Sécurisé</h3>
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Paiement Sécurisé</h3>
           <button @click="showPaymentModal = false" class="btn btn-ghost btn-sm btn-circle">
             <X class="w-6 h-6" />
           </button>
@@ -252,18 +252,18 @@
           <!-- Total -->
           <div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
             <div class="flex justify-between mb-2">
-              <span>Plan Premium mensuel</span>
-              <span>9,99€</span>
+              <span class="text-gray-700 dark:text-gray-300">Plan Premium mensuel</span>
+              <span class="text-gray-700 dark:text-gray-300">9,99€</span>
             </div>
             <div class="flex justify-between mb-2">
-              <span>Tax (20%)</span>
-              <span>2,00€</span>
+              <span class="text-gray-700 dark:text-gray-300">Tax (20%)</span>
+              <span class="text-gray-700 dark:text-gray-300">2,00€</span>
             </div>
             <div
               class="border-t border-gray-200 dark:border-slate-600 pt-2 flex justify-between font-bold"
             >
-              <span>Total</span>
-              <span>11,99€</span>
+              <span class="text-gray-900 dark:text-white">Total</span>
+              <span class="text-gray-900 dark:text-white">11,99€</span>
             </div>
           </div>
 

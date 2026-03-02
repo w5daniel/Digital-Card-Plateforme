@@ -99,7 +99,7 @@
         <div class="space-y-6">
           <!-- Theme Toggle -->
           <div
-            class="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-gray-700"
+            class="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-slate-700"
           >
             <div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Thème</h3>
@@ -121,7 +121,7 @@
 
           <!-- Download Data -->
           <div
-            class="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-gray-700"
+            class="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-slate-700"
           >
             <div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -171,7 +171,7 @@ const cardsStore = useCardsStore()
 const themeStore = useThemeStore()
 
 const userProfilePhoto = ref(null)
-const isDarkMode = ref(false)
+const isDarkMode = computed(() => themeStore.darkMode)
 
 const stats = computed(() => cardsStore.getGlobalStats())
 
@@ -187,7 +187,6 @@ onMounted(() => {
       userProfilePhoto.value = saved
     }
   }
-  isDarkMode.value = themeStore.isDark
 })
 
 const handleProfilePhotoUpload = (event) => {
@@ -205,8 +204,7 @@ const handleProfilePhotoUpload = (event) => {
 }
 
 const toggleTheme = () => {
-  themeStore.toggleTheme()
-  isDarkMode.value = themeStore.isDark
+  themeStore.toggleDarkMode()
 }
 
 const downloadUserData = () => {

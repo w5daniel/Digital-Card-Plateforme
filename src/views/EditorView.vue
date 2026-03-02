@@ -1,9 +1,9 @@
 <template>
-  <div class="editor-view py-12">
+  <div class="editor-view py-12 min-h-screen bg-gray-50 dark:bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-2">Créer une carte de visite</h1>
+        <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Créer une carte de visite</h1>
         <p class="text-gray-600 dark:text-gray-400">
           Personnalisez votre carte de visite professionnelle
         </p>
@@ -14,7 +14,7 @@
         <div class="space-y-6">
           <!-- Card Name -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <FileText class="w-5 h-5 mr-2 text-primary-600" />
               Nom de la carte
             </h2>
@@ -28,7 +28,7 @@
 
           <!-- Personal Information -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <User class="w-5 h-5 mr-2 text-primary-600" />
               Informations personnelles
             </h2>
@@ -47,7 +47,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2"
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                   >Titre professionnel *</label
                 >
                 <input
@@ -60,7 +60,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Entreprise</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Entreprise</label>
                 <input
                   v-model="cardData.data.company"
                   type="text"
@@ -121,13 +121,13 @@
 
           <!-- Contact Information -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <Phone class="w-5 h-5 mr-2 text-primary-600" />
               Coordonnées
             </h2>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
                 <input
                   v-model="cardData.data.email"
                   type="email"
@@ -138,7 +138,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Téléphone</label>
                 <input
                   v-model="cardData.data.phone"
                   type="tel"
@@ -148,7 +148,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Site web</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Site web</label>
                 <input
                   v-model="cardData.data.website"
                   type="url"
@@ -158,7 +158,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Adresse</label>
                 <input
                   v-model="cardData.data.address"
                   type="text"
@@ -171,7 +171,7 @@
 
           <!-- Template Selection -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <Palette class="w-5 h-5 mr-2 text-primary-600" />
               Choisir un modèle
             </h2>
@@ -183,8 +183,8 @@
                 class="p-3 rounded-xl border-2 transition-all duration-200 text-left"
                 :class="
                   cardData.template === template.slug
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-gray-200 hover:border-primary-300'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-gray-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-500'
                 "
               >
                 <div class="flex items-center space-x-2 mb-2">
@@ -197,7 +197,7 @@
                     :style="{ backgroundColor: template.colors.secondary }"
                   ></div>
                 </div>
-                <p class="text-sm font-semibold">{{ template.name }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ template.name }}</p>
               </button>
             </div>
             <router-link
@@ -210,7 +210,7 @@
 
           <!-- Logo Upload -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <FileText class="w-5 h-5 mr-2 text-primary-600" />
               Logo de l'entreprise
             </h2>
@@ -244,7 +244,7 @@
 
           <!-- Font Selection -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
               <FileText class="w-5 h-5 mr-2 text-primary-600" />
               Police d'écriture
             </h2>
@@ -261,7 +261,7 @@
           <!-- Back Side Card -->
           <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold flex items-center">
+              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
                 <FileText class="w-5 h-5 mr-2 text-primary-600" />
                 Verso de la carte
               </h2>
@@ -271,7 +271,7 @@
                   v-model="cardData.backSide.enabled"
                   class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
                 />
-                <span class="text-sm font-medium">Activer le verso</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">Activer le verso</span>
               </label>
             </div>
 
@@ -300,35 +300,58 @@
               </div>
             </div>
           </div>
+
+          <!-- QR Code Section -->
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
+                <QrCode class="w-5 h-5 mr-2 text-primary-600" />
+                QR Code sur la carte
+              </h2>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="cardData.data.showQR"
+                  class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                />
+                <span class="text-sm font-medium text-gray-900 dark:text-white">Activer le QR code</span>
+              </label>
+            </div>
+
+            <div v-if="cardData.data.showQR" class="space-y-3">
+              <div class="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-200 dark:border-primary-800">
+                <p class="text-sm text-primary-700 dark:text-primary-300 font-medium mb-1">
+                  QR code généré automatiquement
+                </p>
+                <p class="text-xs text-primary-600 dark:text-primary-400">
+                  Le QR code encode vos coordonnées au format vCard et sera placé automatiquement :
+                  <br />• <strong>Sans photo</strong> : centré à droite de la carte
+                  <br />• <strong>Avec photo</strong> : en bas à droite de la carte
+                </p>
+              </div>
+            </div>
+
+            <div v-else class="p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Activez le QR code pour permettre à vos contacts de scanner et enregistrer vos coordonnées instantanément.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Right Panel - Preview -->
         <div class="lg:sticky lg:top-24 h-fit">
           <div class="card p-6">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold flex items-center">
+              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
                 <Eye class="w-5 h-5 mr-2 text-primary-600" />
                 Aperçu en direct
               </h2>
-              <div class="flex space-x-2">
-                <button
-                  @click="showQRCode = !showQRCode"
-                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                  :class="
-                    showQRCode
-                      ? 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-300'
-                      : 'text-gray-600 dark:text-gray-400'
-                  "
-                  title="Afficher/Masquer QR Code"
-                >
-                  <QrCode class="w-5 h-5" />
-                </button>
-              </div>
             </div>
 
             <!-- Card Preview -->
             <div class="mb-6">
-              <BusinessCard :card="cardData" :showQR="showQRCode" />
+              <BusinessCard :card="cardData" :showQR="cardData.data.showQR" />
             </div>
 
             <!-- Info Box -->
@@ -409,7 +432,6 @@ const store = useCardsStore()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
-const showQRCode = ref(false)
 const isEditing = ref(false)
 const shareLinkCopied = ref(false)
 const photoUrl = ref('')
@@ -428,6 +450,7 @@ const cardData = ref({
     photo: '',
     logo: '',
     fontFamily: 'Poppins',
+    showQR: false,
   },
   backSide: {
     enabled: false,

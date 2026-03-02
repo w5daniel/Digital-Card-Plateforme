@@ -7,9 +7,7 @@
       <div class="mb-12">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1
-              class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary-600 to-secondary-600 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent"
-            >
+            <h1 class="text-4xl md:text-5xl font-bold mb-3 text-gray-900 dark:text-white">
               Mon tableau de bord
             </h1>
             <p class="text-lg text-gray-600 dark:text-gray-400">
@@ -138,6 +136,98 @@
             {{ stats.totalShares }}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Partages</p>
+        </div>
+      </div>
+
+      <!-- Glassmorphism 3D Carousel -->
+      <div v-if="store.userCards.length > 0" class="mb-12">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+          Aperçu de vos cartes
+        </h2>
+        <div
+          class="relative rounded-3xl overflow-hidden py-10 px-4 carousel-animated-bg"
+        >
+          <!-- Decorative glow blobs -->
+          <div class="absolute top-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
+          <div class="absolute bottom-0 right-1/4 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/2 pointer-events-none"></div>
+
+          <!-- 3D Scene -->
+          <div
+            class="relative flex items-center justify-center"
+            style="height: 270px; perspective: 1200px; perspective-origin: 50% 50%;"
+          >
+            <div
+              v-for="(card, idx) in store.userCards"
+              :key="card.id"
+              class="absolute cursor-pointer"
+              :style="getCarouselCardStyle(idx)"
+              @click="carouselIndex = idx"
+              @mouseenter="hoveredCarouselIdx = idx"
+              @mouseleave="hoveredCarouselIdx = null"
+            >
+              <div class="w-72 select-none">
+                <BusinessCard
+                  :card="card"
+                  :showQR="false"
+                  cardSize="small"
+                  :isFlipped="hoveredCarouselIdx === idx"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Controls -->
+          <div class="flex justify-center items-center space-x-6 mt-6 relative z-10">
+            <!-- Prev Button -->
+            <button
+              @click="prevCarousel"
+              :disabled="store.userCards.length <= 1"
+              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+              style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);"
+            >
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <!-- Dot Indicators -->
+            <div class="flex items-center space-x-2">
+              <button
+                v-for="(card, idx) in store.userCards"
+                :key="idx"
+                @click="carouselIndex = idx"
+                class="rounded-full transition-all duration-300"
+                :style="carouselIndex === idx
+                  ? 'width: 24px; height: 8px; background: rgba(255,255,255,0.95);'
+                  : 'width: 8px; height: 8px; background: rgba(255,255,255,0.45);'"
+              ></button>
+            </div>
+
+            <!-- Next Button -->
+            <button
+              @click="nextCarousel"
+              :disabled="store.userCards.length <= 1"
+              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+              style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);"
+            >
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Active card label -->
+          <div v-if="store.userCards[carouselIndex]" class="text-center mt-3 relative z-10">
+            <p class="text-white font-semibold text-sm drop-shadow">
+              {{ store.userCards[carouselIndex].data?.fullName || store.userCards[carouselIndex].name }}
+            </p>
+            <p class="text-white/70 text-xs">
+              {{ store.userCards[carouselIndex].data?.title }}
+              <span v-if="store.userCards[carouselIndex].data?.company">
+                @ {{ store.userCards[carouselIndex].data?.company }}
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -357,8 +447,59 @@ const notificationStore = useNotificationStore()
 const copiedCardId = ref(null)
 const selectedCardIds = ref(new Set())
 const flippedCards = ref(new Set())
+const carouselIndex = ref(0)
+const hoveredCarouselIdx = ref(null)
 
 const stats = computed(() => store.getGlobalStats())
+
+const prevCarousel = () => {
+  carouselIndex.value = carouselIndex.value > 0
+    ? carouselIndex.value - 1
+    : store.userCards.length - 1
+}
+
+const nextCarousel = () => {
+  carouselIndex.value = carouselIndex.value < store.userCards.length - 1
+    ? carouselIndex.value + 1
+    : 0
+}
+
+const getCarouselCardStyle = (idx) => {
+  const offset = idx - carouselIndex.value
+  const absOffset = Math.abs(offset)
+
+  // Only render up to 2 cards on each side
+  if (absOffset > 2) {
+    return { display: 'none' }
+  }
+
+  const translateXPx = offset * 265
+  const rotateYDeg = offset * -32
+  const translateZPx = absOffset === 0 ? 0 : absOffset === 1 ? -60 : -130
+  const scale = 1 - absOffset * 0.18
+  const blurPx = absOffset * 1.5
+  const opacity = 1 - absOffset * 0.2
+  const zIndex = 10 - absOffset
+
+  const transform = [
+    `translate(-50%, -50%)`,
+    `translateX(${translateXPx}px)`,
+    `rotateY(${rotateYDeg}deg)`,
+    `translateZ(${translateZPx}px)`,
+    `scale(${scale})`,
+  ].join(' ')
+
+  return {
+    top: '50%',
+    left: '50%',
+    transform,
+    filter: blurPx > 0 ? `blur(${blurPx}px)` : 'none',
+    opacity,
+    zIndex,
+    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+    transformStyle: 'preserve-3d',
+  }
+}
 
 const toggleCardFlip = (cardId) => {
   const next = new Set(flippedCards.value)
@@ -497,3 +638,29 @@ const importCards = (event) => {
   reader.readAsText(file)
 }
 </script>
+
+<style scoped>
+@keyframes carouselFlow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.carousel-animated-bg {
+  background: linear-gradient(
+    270deg,
+    #0f172a,
+    #1e293b,
+    #0c1a35,
+    #0f3460,
+    #1a2744,
+    #1e3a5f,
+    #0d2137,
+    #162032,
+    #1e293b,
+    #0f172a
+  );
+  background-size: 600% 600%;
+  animation: carouselFlow 30s ease infinite;
+}
+</style>

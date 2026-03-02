@@ -13,14 +13,14 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue'),
-      meta: { requiresAuth: false },
+      component: () => import('../views/AuthView.vue'),
+      meta: { requiresAuth: false, hideLayout: true },
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/RegisterView.vue'),
-      meta: { requiresAuth: false },
+      component: () => import('../views/AuthView.vue'),
+      meta: { requiresAuth: false, hideLayout: true },
     },
     {
       path: '/gallery',
@@ -94,6 +94,9 @@ router.beforeEach((to, from, next) => {
   if (requiresAuth && !isAuthenticated) {
     // Redirect to login if route requires auth
     next('/login')
+  } else if (to.meta.hideLayout && isAuthenticated) {
+    // Already logged in — redirect away from auth pages
+    next('/dashboard')
   } else {
     next()
   }

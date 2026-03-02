@@ -1,5 +1,5 @@
 <template>
-  <div class="home-view">
+  <div class="home-view bg-white dark:bg-slate-900">
     <!-- Hero Section -->
     <section class="relative py-20 overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,7 +12,7 @@
               ✨ Nouvelle génération de cartes de visite
             </div>
 
-            <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+            <h1 class="text-5xl md:text-6xl font-bold leading-tight text-gray-900 dark:text-white">
               Créez des cartes de visite
               <span class="gradient-text">numériques</span>
               qui impressionnent
@@ -186,7 +186,7 @@
             >
               <component :is="feature.icon" class="w-8 h-8 text-white" />
             </div>
-            <h3 class="text-xl font-bold mb-3">{{ feature.title }}</h3>
+            <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">{{ feature.title }}</h3>
             <p class="text-gray-600 dark:text-gray-400">{{ feature.description }}</p>
           </div>
         </div>

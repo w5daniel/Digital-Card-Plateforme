@@ -1,258 +1,249 @@
 <template>
-  <div
-    class="gallery-view py-12 bg-gradient-to-br from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 min-h-screen"
-  >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Galerie de modèles</h1>
-        <p class="text-xl text-gray-600 dark:text-gray-400">
-          Choisissez parmi notre collection de {{ allTemplates.length }} modèles professionnels
-        </p>
-      </div>
+  <div class="min-h-screen bg-white dark:bg-slate-950">
 
-      <!-- Search and Controls Bar -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <!-- Search Input -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white"
-              >Rechercher</label
+    <!-- ══════════════════════════ HERO ══════════════════════════ -->
+    <section class="relative">
+      <!-- Animated bg -->
+      <div class="absolute inset-0 gallery-hero-bg"></div>
+      <!-- Glow orbs -->
+      <div class="absolute top-0 left-1/3 w-96 h-96 bg-primary-500/10 blur-3xl rounded-full pointer-events-none"></div>
+      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary-500/10 blur-3xl rounded-full pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col lg:flex-row items-center justify-between gap-12">
+
+        <!-- Left — Text -->
+        <div class="flex-1 text-center lg:text-left">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary-400/30 bg-primary-500/10 text-primary-300 text-xs font-bold uppercase tracking-widest mb-6">
+            <Sparkles class="w-3.5 h-3.5" />
+            {{ allTemplates.length }} modèles prêts à l'emploi
+          </span>
+
+          <h1 class="text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5">
+            Trouvez votre<br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
+              style professionnel
+            </span>
+          </h1>
+
+          <p class="text-white/60 text-lg leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+            Des cartes de visite digitales conçues pour impressionner. Chaque modèle est entièrement personnalisable en quelques clics.
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+            <button
+              @click="scrollToGrid"
+              class="flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 w-full sm:w-auto justify-center"
             >
-            <div class="relative">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher un modèle..."
-                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all"
-              />
-              <svg
-                class="w-5 h-5 absolute right-3 top-3.5 text-gray-400 dark:text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                ></path>
-              </svg>
+              <span>Parcourir les modèles</span>
+              <ArrowDown class="w-4 h-4" />
+            </button>
+            <div class="flex items-center gap-2 text-white/50 text-sm">
+              <div class="flex -space-x-0.5">
+                <Star v-for="i in 5" :key="i" class="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+              </div>
+              <span>4.9/5 · +2 400 professionnels</span>
             </div>
           </div>
+        </div>
 
-          <!-- Sort Dropdown -->
-          <div>
-            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white"
-              >Trier par</label
-            >
-            <select
-              v-model="sortBy"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all font-medium"
-            >
-              <option value="popular" class="text-gray-900 dark:text-white">Populaires</option>
-              <option value="newest" class="text-gray-900 dark:text-white">Plus récents</option>
-              <option value="name" class="text-gray-900 dark:text-white">Nom (A-Z)</option>
-              <option value="rating" class="text-gray-900 dark:text-white">Mieux notés</option>
-            </select>
-          </div>
-
-          <!-- View Mode Toggle -->
-          <div>
-            <label class="block text-sm font-semibold mb-2 text-gray-900 dark:text-white"
-              >Affichage</label
-            >
-            <div class="flex gap-2">
-              <button
-                @click="viewMode = 'grid'"
-                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all font-medium"
-                :class="
-                  viewMode === 'grid'
-                    ? 'bg-primary-500 border-primary-500 text-white'
-                    : 'border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-slate-800'
-                "
-                title="Grille"
-              >
-                <svg class="w-5 h-5 mx-auto" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z" />
-                </svg>
-              </button>
-              <button
-                @click="viewMode = 'list'"
-                class="flex-1 px-3 py-3 rounded-lg border-2 transition-all font-medium"
-                :class="
-                  viewMode === 'list'
-                    ? 'bg-primary-500 border-primary-500 text-white'
-                    : 'border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-slate-800'
-                "
-                title="Liste"
-              >
-                <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
+        <!-- Right — Floating cards fan -->
+        <div class="hidden lg:block flex-shrink-0 relative" style="width: 520px; height: 260px;">
+          <div
+            v-for="(hCard, i) in heroCards"
+            :key="hCard.id"
+            class="absolute pointer-events-none"
+            :class="`hero-card hero-card-${i}`"
+          >
+            <div style="width: 500px;">
+              <BusinessCard :card="hCard" :isFlipped="false" :showQR="false" />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Filter Tabs -->
-      <div class="flex justify-center mb-8 overflow-x-auto pb-2">
-        <div class="inline-flex bg-white dark:bg-slate-800 rounded-xl shadow-md p-1 gap-1">
+      <!-- Wave break -->
+      <div class="relative z-10" style="height: 60px; margin-top: -1px;">
+        <svg viewBox="0 0 1440 60" class="absolute bottom-0 w-full h-full" preserveAspectRatio="none">
+          <path
+            d="M0,30 C480,60 960,0 1440,30 L1440,60 L0,60 Z"
+            class="fill-white dark:fill-slate-950"
+          />
+        </svg>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ TOOLBAR ══════════════════════════ -->
+    <div id="gallery-grid" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+
+        <!-- Search -->
+        <div class="relative flex-1 min-w-0 w-full md:w-auto">
+          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Rechercher un modèle..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm transition-all"
+          />
+        </div>
+
+        <!-- Category pills -->
+        <div class="flex bg-gray-100 dark:bg-slate-800 rounded-xl p-1 gap-1 flex-shrink-0">
           <button
             v-for="tab in filterTabs"
             :key="tab.value"
             @click="activeFilter = tab.value"
-            class="px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all duration-200 text-sm"
+            class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap"
             :class="
               activeFilter === tab.value
-                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
-                : 'text-gray-600 dark:text-gray-300 hover:text-primary-600'
+                ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             "
           >
             {{ tab.label }}
-            <span class="ml-2 text-xs opacity-75">({{ tab.count }})</span>
+            <span class="ml-1 text-xs opacity-60">({{ tab.count }})</span>
           </button>
         </div>
+
+        <!-- Sort -->
+        <select
+          v-model="sortBy"
+          class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0 transition-all"
+        >
+          <option value="popular">Populaires</option>
+          <option value="newest">Plus récents</option>
+          <option value="name">Nom A–Z</option>
+          <option value="rating">Mieux notés</option>
+        </select>
       </div>
 
-      <!-- Results Count -->
-      <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        Affichage de <span class="font-semibold">{{ displayedTemplates.length }}</span> sur
-        <span class="font-semibold">{{ filteredTemplates.length }}</span> modèles
-      </div>
+      <!-- Results info -->
+      <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">
+        <span class="font-semibold text-gray-900 dark:text-white">{{ filteredTemplates.length }}</span>
+        modèle{{ filteredTemplates.length > 1 ? 's' : '' }}
+        <template v-if="searchQuery">
+          pour « <span class="text-primary-500 font-medium">{{ searchQuery }}</span> »
+        </template>
+      </p>
+    </div>
 
-      <!-- Templates Grid / List -->
+    <!-- ══════════════════════════ GRID ══════════════════════════ -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+
       <div
-        :class="{
-          'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8': viewMode === 'grid',
-          'space-y-4': viewMode === 'list',
-        }"
+        ref="cardsGridRef"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         <div
-          v-for="template in displayedTemplates"
+          v-for="template in filteredTemplates"
           :key="template.id"
-          class="card card-hover cursor-pointer group transition-all duration-300"
-          :class="{
-            'h-full': viewMode === 'grid',
-            'flex items-center p-6 bg-white dark:bg-slate-800': viewMode === 'list',
-          }"
+          class="group relative rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+          @mouseenter="hoveredId = template.id"
+          @mouseleave="hoveredId = null"
           @click="selectTemplate(template)"
         >
-          <!-- Template Preview (Grid) -->
-          <div v-if="viewMode === 'grid'" class="relative h-48 overflow-hidden rounded-t-lg">
-            <img
-              :src="template.thumbnail"
-              :alt="template.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-
-            <!-- Premium Badge -->
-            <div v-if="template.isPremium" class="absolute top-4 right-4">
-              <span
-                class="px-3 py-1 bg-accent-400 text-white text-xs font-bold rounded-full flex items-center space-x-1"
-              >
-                <Crown class="w-3 h-3" />
-                <span>Premium</span>
-              </span>
+          <!-- Live card preview (scaled) -->
+          <div class="relative bg-gray-100 dark:bg-slate-800" style="aspect-ratio: 16/9; overflow: hidden;">
+            <div
+              :style="{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '500px',
+                transformOrigin: 'top left',
+                transform: `scale(${cardScale})`,
+                pointerEvents: 'none',
+              }"
+            >
+              <BusinessCard
+                :card="buildPreviewCard(template)"
+                :isFlipped="hoveredId === template.id"
+                :showQR="false"
+              />
             </div>
+          </div>
 
-            <!-- Category Badge -->
-            <div class="absolute bottom-4 left-4">
-              <span class="px-3 py-1 glass text-white text-xs font-semibold rounded-full">
-                {{ template.category }}
-              </span>
-            </div>
+          <!-- Hover overlay — gradient from bottom, shows info + CTA -->
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black/92 via-black/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5"
+          >
+            <div class="translate-y-3 group-hover:translate-y-0 transition-transform duration-300 delay-50">
+              <!-- Color swatches + category -->
+              <div class="flex items-center gap-2 mb-2">
+                <div
+                  v-for="c in [template.colors.primary, template.colors.secondary]"
+                  :key="c"
+                  class="w-3.5 h-3.5 rounded-full border-2 border-white/30 shadow-sm"
+                  :style="{ background: c }"
+                ></div>
+                <span class="text-white/50 text-xs font-medium ml-1">{{ template.category }}</span>
+              </div>
 
-            <!-- Rating -->
-            <div class="absolute top-4 left-4">
-              <div class="flex items-center space-x-1 bg-white/95 rounded-lg px-2 py-1">
-                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                  />
-                </svg>
-                <span class="text-xs font-bold">{{ template.rating || '5.0' }}</span>
+              <h3 class="text-white font-extrabold text-xl mb-1">{{ template.name }}</h3>
+              <p class="text-white/60 text-xs mb-4 line-clamp-2 leading-relaxed">{{ template.description || 'Modèle professionnel élégant' }}</p>
+
+              <div class="flex items-center gap-2">
+                <button
+                  @click.stop="selectTemplate(template)"
+                  class="flex items-center gap-2 bg-white hover:bg-primary-500 hover:text-white text-gray-900 text-xs font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-lg"
+                >
+                  Utiliser ce modèle
+                  <ArrowRight class="w-3.5 h-3.5" />
+                </button>
+                <div class="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-lg px-2.5 py-2">
+                  <Star class="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  <span class="text-white text-xs font-semibold">{{ template.rating || '5.0' }}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Template Info -->
-          <div class="p-6" :class="{ 'flex-1 ml-6': viewMode === 'list' }">
-            <div class="flex items-start justify-between mb-2">
-              <h3 class="text-xl font-bold">{{ template.name }}</h3>
-              <svg
-                v-if="viewMode === 'list'"
-                class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L12.17 12l-3.58 3.59z" />
-              </svg>
-            </div>
-
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {{ template.description || 'Modèle professionnel de haute qualité' }}
-            </p>
-
-            <!-- Color Swatches -->
-            <div class="flex items-center space-x-3 mb-4">
-              <div
-                v-for="color in [template.colors.primary, template.colors.secondary]"
-                :key="color"
-                class="w-6 h-6 rounded-full border-2 border-white shadow-md"
-                :style="{ backgroundColor: color }"
-              ></div>
-            </div>
-
-            <!-- Stats (Hidden in list view for cleaner look) -->
-            <div
-              v-if="viewMode === 'grid'"
-              class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-4"
+          <!-- Badges (always visible) -->
+          <div class="absolute top-3 right-3 z-10">
+            <span
+              v-if="template.isPremium"
+              class="flex items-center gap-1 px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg"
             >
-              <span>👁️ {{ template.views || 0 }} vues</span>
-              <span>⭐ {{ template.rating || '5.0' }}/5</span>
-            </div>
+              <Crown class="w-3 h-3" />
+              Premium
+            </span>
+            <span
+              v-else
+              class="px-2.5 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-lg"
+            >
+              Gratuit
+            </span>
+          </div>
 
-            <!-- Action Button -->
-            <button class="w-full btn-primary text-sm">
-              <Eye class="w-4 h-4 inline mr-2" />
-              Utiliser ce modèle
-            </button>
+          <!-- Rating chip (visible when not hovered) -->
+          <div class="absolute bottom-3 left-3 z-10 group-hover:opacity-0 transition-opacity duration-200">
+            <div class="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-lg px-2 py-1">
+              <Star class="w-3 h-3 text-yellow-400 fill-yellow-400" />
+              <span class="text-white text-xs font-semibold">{{ template.rating || '5.0' }}</span>
+            </div>
+          </div>
+
+          <!-- Category chip (bottom-right, visible when not hovered) -->
+          <div class="absolute bottom-3 right-3 z-10 group-hover:opacity-0 transition-opacity duration-200">
+            <span class="px-2.5 py-1 bg-black/40 backdrop-blur-sm text-white text-xs font-medium rounded-lg">
+              {{ template.category }}
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div v-if="filteredTemplates.length === 0" class="text-center py-20">
-        <div
-          class="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center"
-        >
-          <Layout class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+      <!-- Empty state -->
+      <div v-if="filteredTemplates.length === 0" class="text-center py-24">
+        <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+          <Layout class="w-10 h-10 text-gray-400" />
         </div>
-        <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
-          Aucun modèle trouvé
-        </h3>
-        <p class="text-gray-500 dark:text-gray-400">Essayez un autre filtre ou recherche</p>
-      </div>
-
-      <!-- Load More / Pagination -->
-      <div
-        v-if="displayedTemplates.length < filteredTemplates.length"
-        class="flex justify-center mt-12"
-      >
+        <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Aucun modèle trouvé</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Essayez un autre terme ou réinitialisez les filtres</p>
         <button
-          @click="loadMore"
-          class="px-8 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold hover:shadow-lg transition-all duration-200"
+          @click="searchQuery = ''; activeFilter = 'all'"
+          class="px-5 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors"
         >
-          Charger plus de modèles
+          Réinitialiser les filtres
         </button>
       </div>
     </div>
@@ -260,93 +251,155 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
-import { Crown, Eye, Layout } from 'lucide-vue-next'
+import BusinessCard from '@/components/BusinessCard.vue'
+import { Search, Crown, Star, Layout, ArrowDown, ArrowRight, Sparkles } from 'lucide-vue-next'
 
 const router = useRouter()
-const store = useCardsStore()
+const store  = useCardsStore()
 
-const activeFilter = ref('all')
-const searchQuery = ref('')
-const sortBy = ref('popular')
-const viewMode = ref('grid')
-const itemsPerPage = ref(9)
-const displayCount = ref(9)
+// ── UI state ──────────────────────────────────────────────────────────
+const activeFilter  = ref('all')
+const searchQuery   = ref('')
+const sortBy        = ref('popular')
+const hoveredId     = ref(null)
+const cardsGridRef  = ref(null)
+const cardScale     = ref(0.72) // fallback until ResizeObserver kicks in
 
-const filterTabs = computed(() => [
-  { label: 'Tous les modèles', value: 'all', count: store.getAllTemplates.length },
-  { label: 'Gratuits', value: 'free', count: store.getFreeTemplates.length },
-  { label: 'Premium', value: 'premium', count: store.getPremiumTemplates.length },
-])
+// ── Sample persons for live previews ──────────────────────────────────
+const samplePersons = [
+  { fullName: 'Sophie Martin',  title: 'Directrice Marketing', company: 'InnovateLab',    email: 'sophie@innovatelab.fr',  phone: '+33 6 12 34 56 78', website: 'innovatelab.fr'  },
+  { fullName: 'Marc Dubois',    title: 'CEO & Fondateur',       company: 'TechVision',     email: 'marc@techvision.io',     phone: '+33 7 98 76 54 32', website: 'techvision.io'   },
+  { fullName: 'Léa Rousseau',   title: 'Designer UX/UI',        company: 'Creative Studio',email: 'lea@creativestudio.fr', phone: '+33 6 45 67 89 01', website: 'creativestudio.fr'},
+  { fullName: 'Nicolas Petit',  title: 'Architecte Solutions',  company: 'DataBridge',     email: 'nicolas@databridge.fr', phone: '+33 7 23 45 67 89', website: 'databridge.fr'   },
+  { fullName: 'Emma Bernard',   title: 'Consultant Senior',     company: 'Stratégie & Co', email: 'emma@strategie-co.fr',  phone: '+33 6 87 65 43 21', website: 'strategie.co.fr' },
+  { fullName: 'Lucas Moreau',   title: 'Ingénieur DevOps',      company: 'CloudPro',       email: 'lucas@cloudpro.fr',     phone: '+33 7 11 22 33 44', website: 'cloudpro.fr'     },
+]
 
+const buildPreviewCard = (template, idx = null) => {
+  const i = idx !== null ? idx : store.getAllTemplates.findIndex(t => t.id === template.id)
+  const person = samplePersons[i % samplePersons.length]
+  return {
+    id:       `preview-${template.slug}`,
+    template:  template.slug,
+    data:     { ...person, showQR: false },
+    backSide: { enabled: false },
+  }
+}
+
+// ── Hero cards (first 3 templates) ────────────────────────────────────
+const heroCards = computed(() =>
+  store.getAllTemplates.slice(0, 3).map((t, i) => buildPreviewCard(t, i))
+)
+
+// ── Computed filters ───────────────────────────────────────────────────
 const allTemplates = computed(() => store.getAllTemplates)
 
+const filterTabs = computed(() => [
+  { label: 'Tous',     value: 'all',     count: store.getAllTemplates.length    },
+  { label: 'Gratuits', value: 'free',    count: store.getFreeTemplates.length   },
+  { label: 'Premium',  value: 'premium', count: store.getPremiumTemplates.length },
+])
+
 const filteredTemplates = computed(() => {
-  let templates = []
+  let list =
+    activeFilter.value === 'free'    ? store.getFreeTemplates    :
+    activeFilter.value === 'premium' ? store.getPremiumTemplates :
+                                       store.getAllTemplates
 
-  // Apply filter by free/premium
-  if (activeFilter.value === 'free') {
-    templates = store.getFreeTemplates
-  } else if (activeFilter.value === 'premium') {
-    templates = store.getPremiumTemplates
-  } else {
-    templates = store.getAllTemplates
-  }
-
-  // Apply search filter
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    templates = templates.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        (t.description && t.description.toLowerCase().includes(query)),
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      (t.description && t.description.toLowerCase().includes(q))
     )
   }
 
-  // Apply sort
-  const sorted = [...templates]
-  if (sortBy.value === 'newest') {
-    sorted.reverse()
-  } else if (sortBy.value === 'name') {
-    sorted.sort((a, b) => a.name.localeCompare(b.name))
-  } else if (sortBy.value === 'rating') {
-    sorted.sort((a, b) => (b.rating || 5) - (a.rating || 5))
-  }
-  // 'popular' is default order (as defined in store)
-
+  const sorted = [...list]
+  if      (sortBy.value === 'newest') sorted.reverse()
+  else if (sortBy.value === 'name')   sorted.sort((a, b) => a.name.localeCompare(b.name))
+  else if (sortBy.value === 'rating') sorted.sort((a, b) => (b.rating || 5) - (a.rating || 5))
   return sorted
 })
 
-const displayedTemplates = computed(() => {
-  return filteredTemplates.value.slice(0, displayCount.value)
+// ── Responsive card scale via ResizeObserver ───────────────────────────
+let ro = null
+
+const computeScale = () => {
+  if (!cardsGridRef.value) return
+  const gridW = cardsGridRef.value.clientWidth
+  const cols  = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
+  const colW  = (gridW - (cols - 1) * 24) / cols      // gap-6 = 24px
+  cardScale.value = Math.min(1, colW / 500)
+}
+
+onMounted(() => {
+  computeScale()
+  ro = new ResizeObserver(computeScale)
+  if (cardsGridRef.value) ro.observe(cardsGridRef.value)
 })
 
+onBeforeUnmount(() => ro?.disconnect())
+
+// ── Actions ────────────────────────────────────────────────────────────
 const selectTemplate = (template) => {
   store.currentTemplate = template.slug
   router.push('/editor')
 }
 
-const loadMore = () => {
-  displayCount.value += itemsPerPage.value
+const scrollToGrid = () => {
+  document.getElementById('gallery-grid')?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>
 
 <style scoped>
-.card {
-  @apply bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-2xl transition-shadow duration-300;
+/* ── Hero animated background ─────────────────────────────────────── */
+@keyframes heroBg {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.gallery-hero-bg {
+  background: linear-gradient(
+    270deg, #0f172a, #1e1b4b, #0c1a35, #0f3460, #1a1745, #1e293b, #0d2137, #0f172a
+  );
+  background-size: 600% 600%;
+  animation: heroBg 20s ease infinite;
 }
 
-.card-hover {
-  @apply transform hover:-translate-y-2 transition-transform duration-300;
+/* ── Hero floating card animations ────────────────────────────────── */
+@keyframes hFloat0 {
+  0%, 100% { transform: rotate(-12deg) scale(0.44) translateY(0px);   }
+  50%       { transform: rotate(-12deg) scale(0.44) translateY(-10px); }
+}
+@keyframes hFloat1 {
+  0%, 100% { transform: scale(0.52) translateY(-10px); }
+  50%       { transform: scale(0.52) translateY(-22px); }
+}
+@keyframes hFloat2 {
+  0%, 100% { transform: rotate(12deg) scale(0.44) translateY(4px);   }
+  50%       { transform: rotate(12deg) scale(0.44) translateY(-6px);  }
 }
 
-.btn-primary {
-  @apply bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-semibold;
-}
+.hero-card { position: absolute; }
 
-.glass {
-  @apply bg-white/20 backdrop-blur-md border border-white/30;
+.hero-card-0 {
+  top: 80px; left: 10px;
+  z-index: 1; opacity: 0.70;
+  animation: hFloat0 5.5s ease-in-out infinite;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.55));
+}
+.hero-card-1 {
+  top: 20px; left: 145px;
+  z-index: 3;
+  animation: hFloat1 4.5s ease-in-out infinite 0.6s;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.65));
+}
+.hero-card-2 {
+  top: 80px; left: 285px;
+  z-index: 1; opacity: 0.70;
+  animation: hFloat2 6s ease-in-out infinite 1.2s;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.55));
 }
 </style>

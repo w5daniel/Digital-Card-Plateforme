@@ -3,24 +3,27 @@
     id="app"
     class="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-gray-900 dark:text-white transition-colors duration-200"
   >
-    <NavBar />
+    <NavBar v-if="!hideLayout" />
     <main class="flex-grow">
       <RouterView />
     </main>
-    <FooterBar />
+    <FooterBar v-if="!hideLayout" />
     <ToastNotification />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { RouterView } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import FooterBar from './components/FooterBar.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import { useThemeStore } from './stores/themeStore'
 
 const themeStore = useThemeStore()
+const route = useRoute()
+
+const hideLayout = computed(() => !!route.meta?.hideLayout)
 
 onMounted(() => {
   // S'assurer que le thème est appliqué au montage
