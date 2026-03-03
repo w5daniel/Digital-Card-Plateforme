@@ -7,7 +7,30 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const error = ref(null)
 
+  // ── Photo de profil — source unique de vérité (NavBar + ProfileView) ──
+  const profilePhoto = ref(null)
+
   const isAuthenticated = computed(() => !!user.value && !!token.value)
+
+  function _loadProfilePhoto() {
+    if (user.value?.email) {
+      profilePhoto.value = localStorage.getItem(`userProfilePhoto_${user.value.email}`) || null
+    }
+  }
+
+  function setProfilePhoto(dataUrl) {
+    profilePhoto.value = dataUrl
+    if (user.value?.email) {
+      localStorage.setItem(`userProfilePhoto_${user.value.email}`, dataUrl)
+    }
+  }
+
+  function removeProfilePhoto() {
+    profilePhoto.value = null
+    if (user.value?.email) {
+      localStorage.removeItem(`userProfilePhoto_${user.value.email}`)
+    }
+  }
 
   /**
    * Connexion utilisateur
@@ -18,7 +41,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Validation
         if (!email || !password || password.length < 6) {
           error.value = 'Email ou mot de passe invalide'
           isLoading.value = false
@@ -26,15 +48,12 @@ export const useAuthStore = defineStore('auth', () => {
           return
         }
 
-        // Simulation d'appel API: POST /api/auth/login
-        // En production: fetch('https://api.example.com/auth/login', {...})
-
         const mockUser = {
           id: 1,
           email: email,
           name: email.split('@')[0],
           createdAt: new Date().toISOString(),
-          isPremium: false, // Backend détermine le statut premium
+          isPremium: false,
         }
         const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
@@ -42,6 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = mockToken
         localStorage.setItem('authToken', mockToken)
         localStorage.setItem('user', JSON.stringify(mockUser))
+        _loadProfilePhoto()
 
         isLoading.value = false
         resolve(mockUser)
@@ -58,7 +78,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Validation
         if (!email || !password || !fullName) {
           error.value = 'Tous les champs sont requis'
           isLoading.value = false
@@ -80,10 +99,6 @@ export const useAuthStore = defineStore('auth', () => {
           return
         }
 
-        // Vérification email unique (en production, côté backend)
-        // if (email existe déjà) { error.value = 'Email déjà utilisé' }
-
-        // Simulation d'appel API: POST /api/auth/register
         const mockUser = {
           id: Date.now(),
           email: email,
@@ -97,6 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = mockToken
         localStorage.setItem('authToken', mockToken)
         localStorage.setItem('user', JSON.stringify(mockUser))
+        _loadProfilePhoto()
 
         isLoading.value = false
         resolve(mockUser)
@@ -110,6 +126,7 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     user.value = null
     token.value = null
+    profilePhoto.value = null
     localStorage.removeItem('authToken')
     localStorage.removeItem('user')
   }
@@ -124,6 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (storedToken && storedUser) {
       token.value = storedToken
       user.value = JSON.parse(storedUser)
+      _loadProfilePhoto()
     }
   }
 
@@ -142,7 +160,6 @@ export const useAuthStore = defineStore('auth', () => {
           return
         }
 
-        // Simulation d'appel API: POST /api/premium/upgrade avec paiement Stripe
         if (user.value) {
           user.value.isPremium = true
           user.value.premiumUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
@@ -160,30 +177,26 @@ export const useAuthStore = defineStore('auth', () => {
    */
   function hasPremium() {
     if (!user.value?.isPremium) return false
-
     if (user.value.premiumUntil) {
       return new Date() < new Date(user.value.premiumUntil)
     }
-
     return true
   }
 
   return {
-    // State
     user,
     token,
     isLoading,
     error,
-
-    // Getters
+    profilePhoto,
     isAuthenticated,
-
-    // Methods
     login,
     register,
     logout,
     restoreSession,
     upgradeToPremium,
     hasPremium,
+    setProfilePhoto,
+    removeProfilePhoto,
   }
 })

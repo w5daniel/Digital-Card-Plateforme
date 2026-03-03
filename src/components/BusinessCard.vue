@@ -18,7 +18,7 @@
           <!-- Header: nom + titre + photo -->
           <div class="flex items-start justify-between">
             <!-- Info gauche — rétrécit si QR centré-droit -->
-            <div :class="shouldShowQR && !card.data.photo ? 'flex-1 pr-36' : 'flex-1'">
+            <div :class="shouldShowQR && !card.data.photo ? 'flex-1 pr-40' : 'flex-1'">
               <div v-if="card.data.logo" class="mb-3 h-8 max-w-28">
                 <img :src="card.data.logo" alt="Logo" class="h-full object-contain" />
               </div>
@@ -43,20 +43,16 @@
             <div
               v-if="shouldShowQR && !card.data.photo"
               class="absolute right-3 top-1/2 -translate-y-1/2"
-              style="width: 138px; flex-shrink: 0;"
+              style="width: 152px; flex-shrink: 0; line-height: 0; mix-blend-mode: multiply;"
             >
-              <div class="p-0.5 rounded-xl shadow-xl" :style="qrGradientStyle">
-                <div class="bg-white rounded-[10px] p-2" style="line-height: 0;">
-                  <QrcodeVue :value="qrCodeValue" :size="126" level="L" foreground="#1a1a2e" background="#ffffff" />
-                </div>
-              </div>
+              <QrcodeVue :value="qrCodeValue" :size="152" level="L" foreground="#1a1a2e" background="#ffffff" />
             </div>
           </div>
 
           <!-- Coordonnées -->
           <div
             class="space-y-1.5 mt-2"
-            :style="shouldShowQR && card.data.photo ? { paddingRight: '120px' } : {}"
+            :style="shouldShowQR && card.data.photo ? { paddingRight: '132px' } : {}"
           >
             <div v-if="card.data.email" class="flex items-center space-x-1.5" :style="{ color: textColor }">
               <Mail class="w-3 h-3 opacity-70 flex-shrink-0" />
@@ -80,13 +76,9 @@
           <div
             v-if="shouldShowQR && card.data.photo"
             class="absolute bottom-3 right-3"
-            style="width: 116px;"
+            style="width: 120px; line-height: 0; mix-blend-mode: multiply;"
           >
-            <div class="p-0.5 rounded-xl shadow-xl" :style="qrGradientStyle">
-              <div class="bg-white rounded-[10px] p-2" style="line-height: 0;">
-                <QrcodeVue :value="qrCodeValue" :size="104" level="L" foreground="#1a1a2e" background="#ffffff" />
-              </div>
-            </div>
+            <QrcodeVue :value="qrCodeValue" :size="120" level="L" foreground="#1a1a2e" background="#ffffff" />
           </div>
         </div>
       </div>
@@ -207,15 +199,6 @@ const textColor = computed(() => {
 // Afficher le QR si activé via prop showQR OU via card.data.showQR (recto seulement)
 const shouldShowQR = computed(() => {
   return props.showQR || props.card.data?.showQR
-})
-
-// Gradient artistique pour le wrapper QR (utilise les couleurs du template)
-const qrGradientStyle = computed(() => {
-  const p = template.value.colors.primary
-  const s = template.value.colors.secondary
-  return {
-    background: `linear-gradient(135deg, ${p} 0%, ${s} 100%)`,
-  }
 })
 
 // Découpe le contenu du verso en lignes pour un affichage en colonne

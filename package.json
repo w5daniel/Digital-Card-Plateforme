@@ -13,6 +13,8 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0",
     "lucide-vue-next": "^0.563.0",
     "pinia": "^3.0.4",
     "qrcode-vue3": "^1.7.1",

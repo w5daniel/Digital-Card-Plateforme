@@ -60,8 +60,8 @@
                 ? 'ring-primary-500'
                 : 'ring-transparent hover:ring-primary-400'"
             >
-              <div v-if="userProfilePhoto" class="w-10 h-10 rounded-full overflow-hidden">
-                <img :src="userProfilePhoto" :alt="authStore.user?.name" class="w-full h-full object-cover" />
+              <div v-if="authStore.profilePhoto" class="w-10 h-10 rounded-full overflow-hidden">
+                <img :src="authStore.profilePhoto" :alt="authStore.user?.name" class="w-full h-full object-cover" />
               </div>
               <div
                 v-else
@@ -103,7 +103,7 @@
                 </label>
 
                 <button
-                  v-if="userProfilePhoto"
+                  v-if="authStore.profilePhoto"
                   @click="handleRemoveProfilePhoto"
                   class="w-full flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                 >
@@ -304,7 +304,6 @@ const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 const dropdownOpen = ref(false)
 const logoPath = '/logo-ECODEV.png'
-const userProfilePhoto = ref(null)
 
 const navItems = [
   { path: '/', label: 'Accueil', icon: Home },
@@ -314,8 +313,6 @@ const navItems = [
 ]
 
 onMounted(() => {
-  const savedPhoto = localStorage.getItem(`userProfilePhoto_${authStore.user?.email}`)
-  if (savedPhoto) userProfilePhoto.value = savedPhoto
   document.addEventListener('click', handleOutsideClick)
 })
 
@@ -335,24 +332,20 @@ const userInitial = computed(() => {
   return authStore.user?.name?.charAt(0).toUpperCase() || 'U'
 })
 
+// Photo de profil synchronisée via authStore (source unique de vérité)
 const handleProfilePhotoUpload = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
   if (file.size > 2 * 1024 * 1024) { alert('Fichier trop volumineux (max 2MB)'); return }
   if (!file.type.startsWith('image/')) { alert('Veuillez sélectionner une image'); return }
   const reader = new FileReader()
-  reader.onload = (e) => {
-    const photoDataUrl = e.target?.result
-    userProfilePhoto.value = photoDataUrl
-    localStorage.setItem(`userProfilePhoto_${authStore.user?.email}`, photoDataUrl)
-  }
+  reader.onload = (e) => authStore.setProfilePhoto(e.target?.result)
   reader.readAsDataURL(file)
 }
 
 const handleRemoveProfilePhoto = () => {
   if (confirm('Supprimer votre photo de profil ?')) {
-    userProfilePhoto.value = null
-    localStorage.removeItem(`userProfilePhoto_${authStore.user?.email}`)
+    authStore.removeProfilePhoto()
   }
 }
 

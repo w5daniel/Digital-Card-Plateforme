@@ -377,19 +377,68 @@
                 <span>Modifier</span>
               </router-link>
               <button
-                @click="shareCard(card.id)"
+                @click="openShareModal(card)"
                 class="flex-1 min-w-fit px-4 py-2 bg-secondary-100 dark:bg-secondary-900/40 text-secondary-700 dark:text-secondary-300 rounded-xl hover:bg-secondary-200 dark:hover:bg-secondary-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
               >
                 <Share2 class="w-4 h-4" />
-                <span>{{ copiedCardId === card.id ? '✓ Copié' : 'Partager' }}</span>
+                <span>Partager</span>
               </button>
-              <button
-                @click="downloadVCard(card)"
-                class="flex-1 min-w-fit px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
-              >
-                <Download class="w-4 h-4" />
-                <span>vCard</span>
-              </button>
+
+              <!-- Download dropdown -->
+              <div class="relative flex-1 min-w-fit">
+                <button
+                  @click="activeDownloadCardId = activeDownloadCardId === card.id ? null : card.id"
+                  class="w-full px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-all duration-200 font-semibold flex items-center justify-center gap-1.5 text-sm"
+                >
+                  <Download class="w-4 h-4 shrink-0" />
+                  <span>Télécharger</span>
+                  <ChevronDown class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" :class="activeDownloadCardId === card.id ? 'rotate-180' : ''" />
+                </button>
+
+                <!-- Backdrop -->
+                <div v-if="activeDownloadCardId === card.id" class="fixed inset-0 z-10" @click="activeDownloadCardId = null" />
+
+                <!-- Dropdown panel -->
+                <div v-if="activeDownloadCardId === card.id" class="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 min-w-[160px]">
+                  <button
+                    @click="downloadVCard(card); activeDownloadCardId = null"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center shrink-0">
+                      <UserIcon class="w-3.5 h-3.5 text-sky-500" />
+                    </div>
+                    <div class="text-left">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200 text-xs">vCard (.vcf)</div>
+                    </div>
+                  </button>
+                  <button
+                    @click="downloadPDF(card); activeDownloadCardId = null"
+                    :disabled="exportLoading === card.id + '-pdf'"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                      <Loader2 v-if="exportLoading === card.id + '-pdf'" class="w-3.5 h-3.5 text-red-500 animate-spin" />
+                      <FileText v-else class="w-3.5 h-3.5 text-red-500" />
+                    </div>
+                    <div class="text-left">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200 text-xs">PDF</div>
+                    </div>
+                  </button>
+                  <button
+                    @click="downloadPNG(card); activeDownloadCardId = null"
+                    :disabled="exportLoading === card.id + '-png'"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                      <Loader2 v-if="exportLoading === card.id + '-png'" class="w-3.5 h-3.5 text-violet-500 animate-spin" />
+                      <ImageIcon v-else class="w-3.5 h-3.5 text-violet-500" />
+                    </div>
+                    <div class="text-left">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200 text-xs">Image PNG</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
               <button
                 @click="deleteCard(card.id)"
                 class="flex-1 min-w-fit px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
@@ -423,13 +472,83 @@
       </div>
     </div>
   </div>
+
+  <!-- Hidden full-size card for PDF/PNG export -->
+  <div class="fixed pointer-events-none" style="left:-9999px;top:-9999px;z-index:-1;">
+    <div v-if="exportCard" ref="exportPreviewRef" style="width:500px;">
+      <BusinessCard :card="exportCard" :showQR="false" />
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <Teleport to="body">
+    <Transition name="modal-fade">
+      <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showShareModal = false" />
+        <div class="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="font-bold text-gray-900 dark:text-white text-lg">Partager la carte</h3>
+              <p class="text-xs text-gray-400 mt-0.5">{{ activeShareCard?.data?.fullName || activeShareCard?.name }}</p>
+            </div>
+            <button @click="showShareModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Share link -->
+          <div class="mb-5">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Lien de partage</label>
+            <div class="flex gap-2">
+              <input :value="currentShareLink" readonly class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 min-w-0" />
+              <button @click="copyShareLink" class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 shrink-0 flex items-center justify-center w-10" :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'">
+                <Check v-if="linkCopied" class="w-4 h-4" />
+                <Copy v-else class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Social options -->
+          <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Via</p>
+          <div class="grid grid-cols-3 gap-3">
+            <button @click="shareViaWhatsApp" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </div>
+              <span class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">WhatsApp</span>
+            </button>
+            <button @click="shareViaEmail" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
+                <Mail class="w-5 h-5 text-white" />
+              </div>
+              <span class="text-[11px] font-medium text-sky-700 dark:text-sky-400">Email</span>
+            </button>
+            <button @click="shareNative" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center">
+                <Share2 class="w-5 h-5 text-white" />
+              </div>
+              <span class="text-[11px] font-medium text-violet-700 dark:text-violet-400">Plus</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+
+  <!-- Ring burst canvas -->
+  <canvas ref="confettiCanvas" class="fixed inset-0 z-[60] pointer-events-none" style="width:100%;height:100%;" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
 import { useCardsStore } from '@/stores/cards'
 import { useNotificationStore } from '@/stores/notificationStore'
 import BusinessCard from '@/components/BusinessCard.vue'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import {
   CreditCard,
   Eye,
@@ -440,18 +559,46 @@ import {
   Trash2,
   QrCode,
   Check,
+  ChevronDown,
+  FileText,
+  Image as ImageIcon,
+  User as UserIcon,
+  Mail,
+  Loader2,
+  X,
+  Copy,
 } from 'lucide-vue-next'
 
 const store = useCardsStore()
 const notificationStore = useNotificationStore()
-const copiedCardId = ref(null)
-const selectedCardIds = ref(new Set())
-const flippedCards = ref(new Set())
-const carouselIndex = ref(0)
+
+// ── Existing state ────────────────────────────────────────────
+const selectedCardIds    = ref(new Set())
+const flippedCards       = ref(new Set())
+const carouselIndex      = ref(0)
 const hoveredCarouselIdx = ref(null)
+
+// ── New state ─────────────────────────────────────────────────
+const activeDownloadCardId = ref(null)
+const showShareModal       = ref(false)
+const activeShareCard      = ref(null)
+const linkCopied           = ref(false)
+const exportLoading        = ref('')
+const exportCard           = ref(null)
+const exportPreviewRef     = ref(null)
+const confettiCanvas       = ref(null)
+let   confettiFrame        = null
 
 const stats = computed(() => store.getGlobalStats())
 
+const currentShareLink = computed(() => {
+  if (activeShareCard.value?.id) {
+    return store.generateShareLink(activeShareCard.value.id) || ''
+  }
+  return ''
+})
+
+// ── Carousel ──────────────────────────────────────────────────
 const prevCarousel = () => {
   carouselIndex.value = carouselIndex.value > 0
     ? carouselIndex.value - 1
@@ -467,99 +614,43 @@ const nextCarousel = () => {
 const getCarouselCardStyle = (idx) => {
   const offset = idx - carouselIndex.value
   const absOffset = Math.abs(offset)
-
-  // Only render up to 2 cards on each side
-  if (absOffset > 2) {
-    return { display: 'none' }
-  }
-
+  if (absOffset > 2) return { display: 'none' }
   const translateXPx = offset * 265
-  const rotateYDeg = offset * -32
+  const rotateYDeg   = offset * -32
   const translateZPx = absOffset === 0 ? 0 : absOffset === 1 ? -60 : -130
-  const scale = 1 - absOffset * 0.18
-  const blurPx = absOffset * 1.5
-  const opacity = 1 - absOffset * 0.2
-  const zIndex = 10 - absOffset
-
+  const scale        = 1 - absOffset * 0.18
+  const blurPx       = absOffset * 1.5
+  const opacity      = 1 - absOffset * 0.2
+  const zIndex       = 10 - absOffset
   const transform = [
-    `translate(-50%, -50%)`,
+    'translate(-50%, -50%)',
     `translateX(${translateXPx}px)`,
     `rotateY(${rotateYDeg}deg)`,
     `translateZ(${translateZPx}px)`,
     `scale(${scale})`,
   ].join(' ')
-
   return {
-    top: '50%',
-    left: '50%',
-    transform,
+    top: '50%', left: '50%', transform,
     filter: blurPx > 0 ? `blur(${blurPx}px)` : 'none',
-    opacity,
-    zIndex,
+    opacity, zIndex,
     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
     transformStyle: 'preserve-3d',
   }
 }
 
+// ── Card actions ──────────────────────────────────────────────
 const toggleCardFlip = (cardId) => {
   const next = new Set(flippedCards.value)
-  if (next.has(cardId)) {
-    next.delete(cardId)
-  } else {
-    next.add(cardId)
-  }
+  next.has(cardId) ? next.delete(cardId) : next.add(cardId)
   flippedCards.value = next
 }
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString('fr-FR', options)
-}
-
-const shareCard = (cardId) => {
-  const card = store.getCardById(cardId)
-  if (card) {
-    const shareLink = store.generateShareLink(cardId)
-    if (shareLink) {
-      store.incrementCardShares(cardId)
-      navigator.clipboard.writeText(shareLink).then(() => {
-        copiedCardId.value = cardId
-        notificationStore.success('Lien copié dans le presse-papiers')
-        setTimeout(() => {
-          copiedCardId.value = null
-        }, 2000)
-      })
-    }
-  }
-}
-
-const downloadVCard = (card) => {
-  const vCardContent = `BEGIN:VCARD
-VERSION:3.0
-FN:${card.data.fullName}
-TITLE:${card.data.title}
-ORG:${card.data.company}
-EMAIL:${card.data.email}
-TEL:${card.data.phone}
-URL:${card.data.website}
-ADR:;;${card.data.address};;;;
-PHOTO;VALUE=URI:${card.data.photo}
-END:VCARD`
-
-  const blob = new Blob([vCardContent], { type: 'text/vcard' })
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${card.data.fullName || 'carte'}.vcf`
-  link.click()
-  window.URL.revokeObjectURL(url)
-  notificationStore.success('vCard téléchargée avec succès')
+  return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const deleteCard = (cardId) => {
-  if (
-    confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.')
-  ) {
+  if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.')) {
     store.deleteCard(cardId)
     selectedCardIds.value.delete(cardId)
     notificationStore.success('Carte supprimée avec succès')
@@ -582,31 +673,117 @@ const toggleSelectAll = () => {
   }
 }
 
-const exportCards = () => {
-  // Déterminer les cartes à exporter
-  const cardsToExport =
-    selectedCardIds.value.size > 0
-      ? store.userCards.filter((card) => selectedCardIds.value.has(card.id))
-      : store.userCards
+// ── Share ─────────────────────────────────────────────────────
+const openShareModal = (card) => {
+  activeShareCard.value = card
+  store.incrementCardShares?.(card.id)
+  launchRingBurst()
+  showShareModal.value = true
+}
 
+const copyShareLink = async () => {
+  await navigator.clipboard.writeText(currentShareLink.value)
+  linkCopied.value = true
+  notificationStore.success('Lien copié !')
+  setTimeout(() => { linkCopied.value = false }, 2000)
+}
+
+const shareViaWhatsApp = () => {
+  const text = `Découvrez ma carte de visite digitale : ${currentShareLink.value}`
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+}
+
+const shareViaEmail = () => {
+  const name    = activeShareCard.value?.data?.fullName || 'Ma carte'
+  const subject = encodeURIComponent(`Carte de visite — ${name}`)
+  const body    = encodeURIComponent(`Bonjour,\n\nDécouvrez ma carte de visite digitale :\n${currentShareLink.value}`)
+  window.location.href = `mailto:?subject=${subject}&body=${body}`
+}
+
+const shareNative = async () => {
+  if (navigator.share) {
+    await navigator.share({
+      title: activeShareCard.value?.data?.fullName || 'Ma carte de visite',
+      url: currentShareLink.value,
+    }).catch(() => {})
+  } else {
+    copyShareLink()
+  }
+}
+
+// ── Download ──────────────────────────────────────────────────
+const downloadVCard = (card) => {
+  const vCardContent = `BEGIN:VCARD\nVERSION:3.0\nFN:${card.data.fullName}\nTITLE:${card.data.title}\nORG:${card.data.company}\nEMAIL:${card.data.email}\nTEL:${card.data.phone}\nURL:${card.data.website}\nADR:;;${card.data.address};;;;\nPHOTO;VALUE=URI:${card.data.photo}\nEND:VCARD`
+  const blob = new Blob([vCardContent], { type: 'text/vcard' })
+  const url  = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${card.data.fullName || 'carte'}.vcf`
+  link.click()
+  window.URL.revokeObjectURL(url)
+  notificationStore.success('vCard téléchargée avec succès')
+}
+
+const captureExportCard = async (card, key) => {
+  exportCard.value   = card
+  exportLoading.value = key
+  await nextTick()
+  const canvas = await html2canvas(exportPreviewRef.value, {
+    scale: 3,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    logging: false,
+  })
+  exportCard.value = null
+  return canvas
+}
+
+const downloadPDF = async (card) => {
+  const key = card.id + '-pdf'
+  try {
+    const canvas = await captureExportCard(card, key)
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] })
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height)
+    pdf.save(`${card.data.fullName || 'carte'}.pdf`)
+    notificationStore.success('PDF téléchargé !')
+    store.incrementCardDownloads?.(card.id)
+  } catch {
+    notificationStore.error('Erreur lors de la génération du PDF')
+  } finally {
+    exportLoading.value = ''
+  }
+}
+
+const downloadPNG = async (card) => {
+  const key = card.id + '-png'
+  try {
+    const canvas = await captureExportCard(card, key)
+    const link   = document.createElement('a')
+    link.download = `${card.data.fullName || 'carte'}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    notificationStore.success('Image PNG téléchargée !')
+    store.incrementCardDownloads?.(card.id)
+  } catch {
+    notificationStore.error("Erreur lors de l'export de l'image")
+  } finally {
+    exportLoading.value = ''
+  }
+}
+
+// ── Export JSON ───────────────────────────────────────────────
+const exportCards = () => {
+  const cardsToExport = selectedCardIds.value.size > 0
+    ? store.userCards.filter((card) => selectedCardIds.value.has(card.id))
+    : store.userCards
   if (cardsToExport.length === 0) {
     notificationStore.error("Aucune carte à exporter. Créez d'abord une carte.")
     return
   }
-
-  const json = JSON.stringify(
-    {
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      cards: cardsToExport,
-      templates: store.templates,
-    },
-    null,
-    2,
-  )
-
+  const json = JSON.stringify({ version: '1.0', exportedAt: new Date().toISOString(), cards: cardsToExport, templates: store.templates }, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
-  const url = window.URL.createObjectURL(blob)
+  const url  = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
   link.download = `cartes-digitales-${new Date().toISOString().split('T')[0]}.json`
@@ -618,28 +795,78 @@ const exportCards = () => {
 const importCards = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
-
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
       const jsonString = e.target?.result
       if (typeof jsonString !== 'string') return
-
       const result = store.importCardsFromJSON(jsonString)
       if (result.success) {
         notificationStore.success(`${result.count} carte(s) importée(s) avec succès`)
       } else {
         notificationStore.error(`Erreur: ${result.error}`)
       }
-    } catch (error) {
+    } catch {
       notificationStore.error('Erreur lors de la lecture du fichier')
     }
   }
   reader.readAsText(file)
 }
+
+// ── Ring burst ────────────────────────────────────────────────
+const launchRingBurst = () => {
+  const canvas = confettiCanvas.value
+  if (!canvas) return
+  canvas.width  = window.innerWidth
+  canvas.height = window.innerHeight
+  const ctx = canvas.getContext('2d')
+  const cx = canvas.width / 2
+  const cy = canvas.height / 2
+  const DURATION = 850
+  const rings = [0, 130, 270].map((delay) => ({ delay, maxR: 80 + Math.random() * 60 }))
+  if (confettiFrame) cancelAnimationFrame(confettiFrame)
+  const t0 = performance.now()
+  const tick = (now) => {
+    const elapsed = now - t0
+    const t = Math.min(elapsed / DURATION, 1)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    for (const ring of rings) {
+      const rt = Math.max(0, Math.min((elapsed - ring.delay) / (DURATION - ring.delay), 1))
+      if (rt <= 0) continue
+      const eased  = 1 - Math.pow(1 - rt, 2)
+      const radius = ring.maxR * eased
+      const alpha  = rt < 0.4 ? rt / 0.4 : 1 - (rt - 0.4) / 0.6
+      ctx.save()
+      ctx.globalAlpha = alpha * 0.3
+      ctx.strokeStyle = '#e63950'
+      ctx.lineWidth   = 1.5
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.restore()
+    }
+    if (t < 1) {
+      confettiFrame = requestAnimationFrame(tick)
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      confettiFrame = null
+    }
+  }
+  confettiFrame = requestAnimationFrame(tick)
+}
+
+onUnmounted(() => { if (confettiFrame) cancelAnimationFrame(confettiFrame) })
 </script>
 
 <style scoped>
+/* Modal fade transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active { transition: opacity 0.2s ease; }
+.modal-fade-enter-from,
+.modal-fade-leave-to { opacity: 0; }
+.modal-fade-enter-from .relative { transform: scale(0.95) translateY(8px); opacity: 0; }
+.modal-fade-enter-active .relative { transition: transform 0.2s ease, opacity 0.2s ease; }
+
 @keyframes carouselFlow {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }

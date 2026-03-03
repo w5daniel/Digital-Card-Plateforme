@@ -14,10 +14,18 @@
         <div class="space-y-6">
           <!-- Card Name -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <FileText class="w-5 h-5 mr-2 text-primary-600" />
-              Nom de la carte
-            </h2>
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
+                  <FileText class="w-5 h-5 mr-2 text-primary-600" />
+                  Nom de la carte
+                </h2>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-7">
+                  Identifiant visible dans votre tableau de bord (pas sur la carte)
+                </p>
+              </div>
+              <span class="text-[10px] font-semibold text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-full shrink-0 mt-1">Requis</span>
+            </div>
             <input
               v-model="cardData.name"
               type="text"
@@ -337,6 +345,69 @@
               </p>
             </div>
           </div>
+
+          <!-- Visibility Section -->
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
+                <Globe class="w-5 h-5 mr-2 text-primary-600" />
+                Visibilité de la carte
+              </h2>
+            </div>
+
+            <!-- Toggle pill selector -->
+            <div class="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600 mb-4">
+              <button
+                type="button"
+                @click="cardData.isPublic = false"
+                class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
+                :class="!cardData.isPublic
+                  ? 'bg-gray-700 dark:bg-slate-600 text-white'
+                  : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+              >
+                <Lock class="w-4 h-4" />
+                Privée
+              </button>
+              <button
+                type="button"
+                @click="cardData.isPublic = true"
+                class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
+                :class="cardData.isPublic
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+              >
+                <Globe class="w-4 h-4" />
+                Publique
+              </button>
+            </div>
+
+            <!-- Description -->
+            <div
+              class="p-4 rounded-xl border transition-all duration-200"
+              :class="cardData.isPublic
+                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                : 'bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-600'"
+            >
+              <div class="flex items-start gap-3">
+                <component
+                  :is="cardData.isPublic ? Globe : Lock"
+                  class="w-5 h-5 shrink-0 mt-0.5"
+                  :class="cardData.isPublic ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'"
+                />
+                <div>
+                  <p class="text-sm font-semibold" :class="cardData.isPublic ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'">
+                    {{ cardData.isPublic ? 'Carte publique' : 'Carte privée' }}
+                  </p>
+                  <p class="text-xs mt-0.5" :class="cardData.isPublic ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-500 dark:text-gray-400'">
+                    {{ cardData.isPublic
+                      ? 'Accessible à tous via le lien de partage — idéale pour le réseautage.'
+                      : 'Visible uniquement par vous — personne d\'autre ne peut y accéder.'
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Right Panel - Preview -->
@@ -350,7 +421,7 @@
             </div>
 
             <!-- Card Preview -->
-            <div class="mb-6">
+            <div ref="cardPreviewRef" class="mb-6">
               <BusinessCard :card="cardData" :showQR="cardData.data.showQR" />
             </div>
 
@@ -369,6 +440,7 @@
 
             <!-- Action Buttons -->
             <div class="space-y-3">
+              <!-- Save -->
               <button
                 @click="saveCard"
                 class="w-full btn-primary flex items-center justify-center"
@@ -379,19 +451,69 @@
                 Enregistrer la carte
               </button>
 
-              <button
-                @click="downloadVCard"
-                class="w-full btn-secondary flex items-center justify-center"
-              >
-                <Download class="w-5 h-5 mr-2" />
-                Télécharger vCard
-              </button>
+              <!-- Download dropdown -->
+              <div class="relative">
+                <button
+                  @click="showDownloadMenu = !showDownloadMenu"
+                  class="w-full btn-secondary flex items-center justify-center gap-2"
+                >
+                  <Download class="w-5 h-5" />
+                  Télécharger
+                  <ChevronDown
+                    class="w-4 h-4 ml-auto transition-transform duration-200"
+                    :class="showDownloadMenu ? 'rotate-180' : ''"
+                  />
+                </button>
 
+                <!-- Backdrop -->
+                <div
+                  v-if="showDownloadMenu"
+                  class="fixed inset-0 z-10"
+                  @click="showDownloadMenu = false"
+                />
+
+                <!-- Dropdown panel -->
+                <div
+                  v-if="showDownloadMenu"
+                  class="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20"
+                >
+                  <button
+                    @click="downloadPDF(); showDownloadMenu = false"
+                    :disabled="exportLoading"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                  >
+                    <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                      <Loader2 v-if="exportLoading === 'pdf'" class="w-4 h-4 text-red-500 animate-spin" />
+                      <FileText v-else class="w-4 h-4 text-red-500" />
+                    </div>
+                    <div class="text-left">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200">PDF</div>
+                      <div class="text-xs text-gray-400">Document haute qualité</div>
+                    </div>
+                  </button>
+                  <button
+                    @click="downloadPNG(); showDownloadMenu = false"
+                    :disabled="exportLoading"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                  >
+                    <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                      <Loader2 v-if="exportLoading === 'png'" class="w-4 h-4 text-violet-500 animate-spin" />
+                      <ImageIcon v-else class="w-4 h-4 text-violet-500" />
+                    </div>
+                    <div class="text-left">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200">Image PNG</div>
+                      <div class="text-xs text-gray-400">Pour partager en image</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Share -->
               <button
-                @click="shareCard"
-                class="w-full px-6 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold rounded-xl hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors flex items-center justify-center"
+                @click="openShareModal"
+                class="w-full px-6 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold rounded-xl hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors flex items-center justify-center gap-2"
               >
-                <Share2 class="w-5 h-5 mr-2" />
+                <Share2 class="w-5 h-5" />
                 Partager
               </button>
             </div>
@@ -400,15 +522,106 @@
       </div>
     </div>
   </div>
+
+  <!-- ── Share Modal ──────────────────────────────────────────── -->
+  <Teleport to="body">
+    <Transition name="modal-fade">
+      <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showShareModal = false" />
+
+        <!-- Panel -->
+        <div class="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 animate-modal-in">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="font-bold text-gray-900 dark:text-white text-lg">Partager la carte</h3>
+              <p class="text-xs text-gray-400 mt-0.5">{{ cardData.data.fullName || 'Votre carte' }}</p>
+            </div>
+            <button
+              @click="showShareModal = false"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Share link -->
+          <div class="mb-5">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Lien de partage</label>
+            <div class="flex gap-2">
+              <input
+                :value="currentShareLink"
+                readonly
+                class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 min-w-0"
+              />
+              <button
+                @click="copyShareLink"
+                class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 shrink-0 flex items-center justify-center w-10"
+                :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'"
+              >
+                <Check v-if="linkCopied" class="w-4 h-4" />
+                <Copy v-else class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Social share options -->
+          <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Via</p>
+          <div class="grid grid-cols-3 gap-3">
+            <!-- WhatsApp -->
+            <button
+              @click="shareViaWhatsApp"
+              class="flex flex-col items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+            >
+              <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </div>
+              <span class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">WhatsApp</span>
+            </button>
+
+            <!-- Email -->
+            <button
+              @click="shareViaEmail"
+              class="flex flex-col items-center gap-2 p-3 rounded-xl bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-colors"
+            >
+              <div class="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
+                <Mail class="w-5 h-5 text-white" />
+              </div>
+              <span class="text-[11px] font-medium text-sky-700 dark:text-sky-400">Email</span>
+            </button>
+
+            <!-- Native share / more -->
+            <button
+              @click="shareNative"
+              class="flex flex-col items-center gap-2 p-3 rounded-xl bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+            >
+              <div class="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center">
+                <Share2 class="w-5 h-5 text-white" />
+              </div>
+              <span class="text-[11px] font-medium text-violet-700 dark:text-violet-400">Plus</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+
+  <!-- Confetti canvas -->
+  <canvas ref="confettiCanvas" class="fixed inset-0 z-[60] pointer-events-none" style="width:100%;height:100%;" />
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import BusinessCard from '@/components/BusinessCard.vue'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import {
   User,
   Phone,
@@ -424,6 +637,12 @@ import {
   Check,
   Upload,
   X,
+  Globe,
+  Lock,
+  ChevronDown,
+  Image as ImageIcon,
+  Mail,
+  Loader2,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -433,8 +652,16 @@ const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
 const isEditing = ref(false)
-const shareLinkCopied = ref(false)
 const photoUrl = ref('')
+
+// ── New UI state ──────────────────────────────────────────────
+const showDownloadMenu = ref(false)
+const showShareModal   = ref(false)
+const exportLoading    = ref('')      // 'pdf' | 'png' | ''
+const linkCopied       = ref(false)
+const cardPreviewRef   = ref(null)
+const confettiCanvas   = ref(null)
+let   confettiFrame    = null
 
 const cardData = ref({
   name: 'Ma nouvelle carte',
@@ -457,6 +684,7 @@ const cardData = ref({
     title: '',
     content: '',
   },
+  isPublic: false,
 })
 
 const handlePhotoUpload = (event) => {
@@ -532,7 +760,12 @@ onMounted(() => {
 })
 
 const isFormValid = computed(() => {
-  return cardData.value.data.fullName && cardData.value.data.title && cardData.value.data.email
+  return (
+    cardData.value.name?.trim() &&
+    cardData.value.data.fullName &&
+    cardData.value.data.title &&
+    cardData.value.data.email
+  )
 })
 
 const saveCard = () => {
@@ -580,15 +813,190 @@ const shareCard = () => {
     if (shareLink) {
       // Copier dans le presse-papiers
       navigator.clipboard.writeText(shareLink).then(() => {
-        shareLinkCopied.value = true
         notificationStore.success('Lien de partage copié !')
-        setTimeout(() => {
-          shareLinkCopied.value = false
-        }, 2000)
       })
     }
   } else {
     notificationStore.warning("Enregistrez d'abord la carte pour la partager")
   }
 }
+
+// ── Export helpers ────────────────────────────────────────────
+const captureCard = async () => {
+  const el = cardPreviewRef.value
+  if (!el) throw new Error('Preview not found')
+  return html2canvas(el, {
+    scale: 3,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    logging: false,
+  })
+}
+
+const downloadPDF = async () => {
+  exportLoading.value = 'pdf'
+  try {
+    const canvas = await captureCard()
+    const imgW = canvas.width
+    const imgH = canvas.height
+    // Business card proportion in landscape A4
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [imgW, imgH] })
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgW, imgH)
+    pdf.save(`${cardData.value.data.fullName || 'carte'}.pdf`)
+    notificationStore.success('PDF téléchargé !')
+    store.incrementCardDownloads?.(cardData.value.id)
+  } catch {
+    notificationStore.error('Erreur lors de la génération du PDF')
+  } finally {
+    exportLoading.value = ''
+  }
+}
+
+const downloadPNG = async () => {
+  exportLoading.value = 'png'
+  try {
+    const canvas = await captureCard()
+    const link = document.createElement('a')
+    link.download = `${cardData.value.data.fullName || 'carte'}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    notificationStore.success('Image PNG téléchargée !')
+    store.incrementCardDownloads?.(cardData.value.id)
+  } catch {
+    notificationStore.error("Erreur lors de l'export de l'image")
+  } finally {
+    exportLoading.value = ''
+  }
+}
+
+// ── Share modal + confetti ────────────────────────────────────
+const currentShareLink = computed(() => {
+  if (isEditing.value && cardData.value.id) {
+    return store.generateShareLink(cardData.value.id) || ''
+  }
+  return `${window.location.origin}/share/preview`
+})
+
+const openShareModal = () => {
+  if (!isEditing.value) {
+    notificationStore.warning("Enregistrez d'abord la carte pour la partager")
+    return
+  }
+  store.incrementCardShares?.(cardData.value.id)
+  launchConfetti()
+  showShareModal.value = true
+}
+
+const copyShareLink = async () => {
+  await navigator.clipboard.writeText(currentShareLink.value)
+  linkCopied.value = true
+  notificationStore.success('Lien copié !')
+  setTimeout(() => { linkCopied.value = false }, 2000)
+}
+
+const shareViaWhatsApp = () => {
+  const text = `Découvrez ma carte de visite digitale : ${currentShareLink.value}`
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+}
+
+const shareViaEmail = () => {
+  const name = cardData.value.data.fullName || 'Ma carte'
+  const subject = encodeURIComponent(`Carte de visite — ${name}`)
+  const body = encodeURIComponent(`Bonjour,\n\nDécouvrez ma carte de visite digitale :\n${currentShareLink.value}`)
+  window.location.href = `mailto:?subject=${subject}&body=${body}`
+}
+
+const shareNative = async () => {
+  if (navigator.share) {
+    await navigator.share({
+      title: cardData.value.data.fullName || 'Ma carte de visite',
+      url: currentShareLink.value,
+    }).catch(() => {})
+  } else {
+    copyShareLink()
+  }
+}
+
+// ── Ring burst animation ──────────────────────────────────────
+const launchConfetti = () => {
+  const canvas = confettiCanvas.value
+  if (!canvas) return
+  canvas.width  = window.innerWidth
+  canvas.height = window.innerHeight
+  const ctx = canvas.getContext('2d')
+
+  const cx = canvas.width  / 2
+  const cy = canvas.height / 2
+  const DURATION = 850
+
+  // Staggered expanding rings
+  const rings = [0, 130, 270].map((delay) => ({ delay, maxR: 80 + Math.random() * 60 }))
+
+  if (confettiFrame) cancelAnimationFrame(confettiFrame)
+  const t0 = performance.now()
+
+  const tick = (now) => {
+    const elapsed = now - t0
+    const t = Math.min(elapsed / DURATION, 1)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (const ring of rings) {
+      const rt = Math.max(0, Math.min((elapsed - ring.delay) / (DURATION - ring.delay), 1))
+      if (rt <= 0) continue
+      const eased  = 1 - Math.pow(1 - rt, 2)
+      const radius = ring.maxR * eased
+      const alpha  = rt < 0.4 ? rt / 0.4 : 1 - (rt - 0.4) / 0.6
+      ctx.save()
+      ctx.globalAlpha = alpha * 0.3
+      ctx.strokeStyle = '#e63950'
+      ctx.lineWidth   = 1.5
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    if (t < 1) {
+      confettiFrame = requestAnimationFrame(tick)
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      confettiFrame = null
+    }
+  }
+
+  confettiFrame = requestAnimationFrame(tick)
+}
+
+onUnmounted(() => {
+  if (confettiFrame) cancelAnimationFrame(confettiFrame)
+})
 </script>
+
+<style scoped>
+/* Modal fade transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-fade-enter-active .relative,
+.modal-fade-leave-active .relative {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-from .relative {
+  transform: scale(0.95) translateY(8px);
+  opacity: 0;
+}
+
+/* Loader spin */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>
