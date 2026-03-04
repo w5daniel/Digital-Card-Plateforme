@@ -62,14 +62,16 @@
           <h4 class="font-semibold mb-4">Contact</h4>
           <ul class="space-y-2 text-sm text-gray-400">
             <li class="flex items-center space-x-2">
-              <Mail class="w-4 h-4" />
-              <span>internship@ecodev.dev</span>
+              <Mail class="w-4 h-4 flex-shrink-0" />
+              <a href="mailto:internship@ecodev.dev" class="hover:text-primary-400 transition-colors">
+                internship@ecodev.dev
+              </a>
             </li>
             <li class="flex items-center space-x-2">
-              <Phone class="w-4 h-4" />
+              <Phone class="w-4 h-4 flex-shrink-0" />
               <div class="flex flex-col space-y-1">
-                <span>+226 56 34 34 12</span>
-                <span>+226 51 08 80 80</span>
+                <a href="tel:+22656343412" class="hover:text-primary-400 transition-colors">+226 56 34 34 12</a>
+                <a href="tel:+22651088080" class="hover:text-primary-400 transition-colors">+226 51 08 80 80</a>
               </div>
             </li>
             <li class="flex items-center space-x-2">

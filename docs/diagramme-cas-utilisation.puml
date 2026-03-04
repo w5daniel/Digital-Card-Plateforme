@@ -1,0 +1,138 @@
+@startuml
+title Diagramme de Cas d'Utilisation
+title Plateforme de Cartes de Visite Numeriques
+
+skinparam handwritten false
+skinparam shadowing false
+skinparam usecase {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    FontSize 11
+}
+skinparam actor {
+    BackgroundColor #FFF9C4
+    BorderColor #F57C00
+    BorderThickness 2
+    FontSize 11
+}
+skinparam package {
+    BackgroundColor #F5F5F5
+    BorderColor #424242
+    FontStyle bold
+}
+skinparam note {
+    BackgroundColor #FFF9C4
+    BorderColor #F9A825
+    FontSize 10
+}
+
+left to right direction
+
+' ============================================
+' ACTEURS
+' ============================================
+
+actor "Visiteur" as V
+actor "Utilisateur\nInscrit" as U
+actor "Administrateur" as A
+
+' Heritage des acteurs (correction prof)
+U -up-|> V : herite
+A -up-|> U : herite
+
+' ============================================
+' SYSTEME
+' ============================================
+
+rectangle "Plateforme de Cartes de Visite Numeriques" #FFFFFF {
+
+    ' --- Espace Public (vert) ---
+    package "Espace Public" #E8F5E9 {
+        usecase "Parcourir la galerie\nde modeles" as UC_Gallery
+        usecase "S'inscrire" as UC_Register
+        usecase "Se connecter" as UC_Login
+        usecase "Voir carte partagee" as UC_ViewShared
+    }
+
+    ' --- Gestion des cartes (bleu) ---
+    package "Gestion des Cartes" #E3F2FD {
+        usecase "Creer une carte" as UC_Create #FFE082
+        usecase "Modifier une carte" as UC_Edit
+        usecase "Supprimer une carte" as UC_Delete
+        usecase "Consulter mes cartes" as UC_List
+        usecase "Exporter (vCard / PDF)" as UC_Export
+        usecase "Partager la carte" as UC_Share
+        usecase "Selectionner un modele" as UC_Template
+        usecase "Generer un QR code" as UC_QR
+    }
+
+    ' --- Compte et abonnement (orange) ---
+    package "Compte & Abonnement" #FFF3E0 {
+        usecase "Gerer mon profil" as UC_Profile
+        usecase "Consulter\nstatistiques" as UC_Stats
+        usecase "Souscrire\nPremium" as UC_Subscribe #FFE082
+        usecase "Effectuer\nun paiement" as UC_Pay
+    }
+
+    ' --- Administration (rouge) ---
+    package "Administration" #FFEBEE {
+        usecase "Gerer les\nutilisateurs" as UC_Users
+        usecase "Gerer les\nmodeles" as UC_Templates
+        usecase "Moderer\nle contenu" as UC_Moderate
+        usecase "Configurer\nle systeme" as UC_Config
+    }
+
+}
+
+' ============================================
+' ASSOCIATIONS
+' ============================================
+
+V --> UC_Gallery
+V --> UC_Register
+V --> UC_Login
+V --> UC_ViewShared
+
+U --> UC_Create
+U --> UC_Edit
+U --> UC_Delete
+U --> UC_List
+U --> UC_Export
+U --> UC_Share
+U --> UC_Profile
+U --> UC_Stats
+U --> UC_Subscribe
+
+A --> UC_Users
+A --> UC_Templates
+A --> UC_Moderate
+A --> UC_Config
+
+' ============================================
+' INCLUDE
+' ============================================
+
+UC_Create .down.> UC_Template : <<include>>
+UC_Create .down.> UC_QR      : <<include>>
+UC_Edit   .down.> UC_Template : <<include>>
+UC_Subscribe .right.> UC_Pay : <<include>>
+
+' ============================================
+' NOTES
+' ============================================
+
+note bottom of UC_Create
+  <b>Contrainte metier :</b>
+  GRATUIT : max 2 cartes
+  PREMIUM : illimite
+end note
+
+note bottom of UC_Subscribe
+  <b>Premium donne acces a :</b>
+  modeles exclusifs,
+  cartes illimitees,
+  statistiques avancees
+end note
+
+@enduml

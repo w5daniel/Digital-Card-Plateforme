@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { ADMIN_EMAIL } from '../data/mockData'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -11,6 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
   const profilePhoto = ref(null)
 
   const isAuthenticated = computed(() => !!user.value && !!token.value)
+  const isAdmin = computed(() => user.value?.role === 'admin')
 
   function _loadProfilePhoto() {
     if (user.value?.email) {
@@ -34,90 +36,93 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Connexion utilisateur
+   * Mock : admin@ecodev.dev → role 'admin', tout autre email → role 'user'
    */
-  function login(email, password) {
+  async function login(email, password) {
     isLoading.value = true
     error.value = null
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!email || !password || password.length < 6) {
-          error.value = 'Email ou mot de passe invalide'
-          isLoading.value = false
-          reject(new Error(error.value))
-          return
-        }
+    try {
+      // TODO: remplacer par `const res = await api.post('/auth/login', { email, password })`
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-        const mockUser = {
-          id: 1,
-          email: email,
-          name: email.split('@')[0],
-          createdAt: new Date().toISOString(),
-          isPremium: false,
-        }
-        const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      if (!email || !password || password.length < 6) {
+        throw new Error('Email ou mot de passe invalide')
+      }
 
-        user.value = mockUser
-        token.value = mockToken
-        localStorage.setItem('authToken', mockToken)
-        localStorage.setItem('user', JSON.stringify(mockUser))
-        _loadProfilePhoto()
+      const role = email.toLowerCase() === ADMIN_EMAIL ? 'admin' : 'user'
 
-        isLoading.value = false
-        resolve(mockUser)
-      }, 500)
-    })
+      const mockUser = {
+        id: role === 'admin' ? 0 : Date.now(),
+        email: email,
+        name: role === 'admin' ? 'Administrateur' : email.split('@')[0],
+        role,
+        createdAt: new Date().toISOString(),
+        isPremium: role === 'admin',
+      }
+      const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+      user.value = mockUser
+      token.value = mockToken
+      localStorage.setItem('authToken', mockToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      _loadProfilePhoto()
+
+      return mockUser
+    } catch (err) {
+      error.value = err.message || 'Erreur de connexion'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   /**
-   * Inscription utilisateur
+   * Inscription utilisateur — rôle 'user' toujours (jamais admin par inscription)
    */
-  function register(email, password, confirmPassword, fullName) {
+  async function register(email, password, confirmPassword, fullName) {
     isLoading.value = true
     error.value = null
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!email || !password || !fullName) {
-          error.value = 'Tous les champs sont requis'
-          isLoading.value = false
-          reject(new Error(error.value))
-          return
-        }
+    try {
+      // TODO: remplacer par `const res = await api.post('/auth/register', { email, password, fullName })`
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-        if (password !== confirmPassword) {
-          error.value = 'Les mots de passe ne correspondent pas'
-          isLoading.value = false
-          reject(new Error(error.value))
-          return
-        }
+      if (!email || !password || !fullName) {
+        throw new Error('Tous les champs sont requis')
+      }
 
-        if (password.length < 6) {
-          error.value = 'Le mot de passe doit contenir au moins 6 caractères'
-          isLoading.value = false
-          reject(new Error(error.value))
-          return
-        }
+      if (password !== confirmPassword) {
+        throw new Error('Les mots de passe ne correspondent pas')
+      }
 
-        const mockUser = {
-          id: Date.now(),
-          email: email,
-          name: fullName,
-          createdAt: new Date().toISOString(),
-          isPremium: false,
-        }
-        const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      if (password.length < 6) {
+        throw new Error('Le mot de passe doit contenir au moins 6 caractères')
+      }
 
-        user.value = mockUser
-        token.value = mockToken
-        localStorage.setItem('authToken', mockToken)
-        localStorage.setItem('user', JSON.stringify(mockUser))
-        _loadProfilePhoto()
+      const mockUser = {
+        id: Date.now(),
+        email: email,
+        name: fullName,
+        role: 'user',
+        createdAt: new Date().toISOString(),
+        isPremium: false,
+      }
+      const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-        isLoading.value = false
-        resolve(mockUser)
-      }, 500)
-    })
+      user.value = mockUser
+      token.value = mockToken
+      localStorage.setItem('authToken', mockToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      _loadProfilePhoto()
+
+      return mockUser
+    } catch (err) {
+      error.value = err.message || "Erreur d'inscription"
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   /**
@@ -141,6 +146,8 @@ export const useAuthStore = defineStore('auth', () => {
     if (storedToken && storedUser) {
       token.value = storedToken
       user.value = JSON.parse(storedUser)
+      // Rétrocompatibilité : sessions créées avant l'ajout du champ role
+      if (!user.value.role) user.value.role = 'user'
       _loadProfilePhoto()
     }
   }
@@ -148,28 +155,28 @@ export const useAuthStore = defineStore('auth', () => {
   /**
    * Upgrader au plan premium
    */
-  function upgradeToPremium() {
+  async function upgradeToPremium() {
     isLoading.value = true
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!user.value) {
-          error.value = 'Vous devez être connecté'
-          isLoading.value = false
-          reject(new Error(error.value))
-          return
-        }
+    try {
+      // TODO: remplacer par `const res = await api.post('/billing/upgrade')`
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        if (user.value) {
-          user.value.isPremium = true
-          user.value.premiumUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-          localStorage.setItem('user', JSON.stringify(user.value))
-        }
+      if (!user.value) {
+        throw new Error('Vous devez être connecté')
+      }
 
-        isLoading.value = false
-        resolve(user.value)
-      }, 1000)
-    })
+      user.value.isPremium = true
+      user.value.premiumUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+      localStorage.setItem('user', JSON.stringify(user.value))
+
+      return user.value
+    } catch (err) {
+      error.value = err.message || 'Erreur lors de la mise à niveau'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   /**
@@ -190,6 +197,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     profilePhoto,
     isAuthenticated,
+    isAdmin,
     login,
     register,
     logout,

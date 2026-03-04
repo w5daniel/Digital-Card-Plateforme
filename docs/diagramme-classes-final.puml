@@ -1,0 +1,238 @@
+@startuml
+title Diagramme de Classes — Plateforme de Cartes de Visite Numériques
+
+skinparam handwritten false
+skinparam shadowing false
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    BorderThickness 2
+    ArrowColor #424242
+    FontSize 11
+}
+
+' ============================================
+' DISPOSITION DES CLASSES (haut → bas)
+' ============================================
+
+' ── Ligne 1 : Utilisateur (centre) ──────────
+class Utilisateur {
+    - id : entier
+    - prenom : chaine
+    - nom : chaine
+    - email : chaine {unique}
+    - motDePasse : chaine
+    - photoProfile : chaine
+    - dateCreation : dateHeure
+    __
+    + inscrire() : booleen
+    + connecter() : booleen
+    + deconnecter() : vide
+    + modifierProfil() : booleen
+    + supprimerCompte() : booleen
+}
+
+' ── Ligne 1 bis : Administrateur (hérite) ───
+class Administrateur {
+    __
+    + gererUtilisateurs() : vide
+    + gererModeles() : vide
+    + gererCartes() : vide
+    + moderer() : vide
+    + configurerSysteme() : vide
+}
+
+' ── Ligne 2 : CarteVisite ───────────────────
+class CarteVisite {
+    - id : entier
+    - nom : chaine
+    - estPublique : booleen
+    - jetonPartage : chaine {unique}
+    - urlCodeQR : chaine
+    - dateCreation : dateHeure
+    - dateModification : dateHeure
+    __
+    + creer() : booleen
+    + modifier() : booleen
+    + supprimer() : booleen
+    + dupliquer() : CarteVisite
+    + genererCodeQR() : chaine
+    + exporterVCard() : fichier
+    + exporterPDF() : fichier
+    + partager() : chaine
+}
+
+' ── Ligne 2 : Abonnement ────────────────────
+class Abonnement {
+    - id : entier
+    - plan : enumeration\n  {GRATUIT, PREMIUM}
+    - statut : enumeration\n  {ACTIF, EXPIRE}
+    - dateDebut : dateHeure
+    - dateFin : dateHeure
+    __
+    + sAbonner() : booleen
+    + annuler() : booleen
+    + estActif() : booleen
+    + renouveler() : booleen
+}
+
+' ── Ligne 3 : DonneesCarte ──────────────────
+class DonneesCarte {
+    - id : entier
+    - nomComplet : chaine
+    - titre : chaine
+    - entreprise : chaine
+    - email : chaine
+    - telephone : chaine
+    - siteWeb : chaine
+    - adresse : chaine
+    - photo : chaine
+    __
+    + enregistrer() : booleen
+    + valider() : booleen
+}
+
+' ── Ligne 3 : Modele ────────────────────────
+class Modele {
+    - id : entier
+    - nom : chaine
+    - slug : chaine {unique}
+    - categorie : chaine
+    - miniature : chaine
+    - estPremium : booleen
+    - estActif : booleen
+    - couleurPrimaire : chaine
+    - couleurSecondaire : chaine
+    - couleurTexte : chaine
+    - disposition : json
+    - dateCreation : dateHeure
+    __
+    + creer() : booleen
+    + modifier() : booleen
+    + supprimer() : booleen
+    + appliquerALaCarte() : booleen
+}
+
+' ── Ligne 3 : Evenements ────────────────────
+class Evenements {
+    - id : entier
+    - typeEvenement : enumeration\n  {VUE, TELECHARGEMENT,\n  SCAN_QR, PARTAGE_LIEN,\n  PARTAGE_EMAIL, PARTAGE_SOCIAL}
+    - adresseIP : chaine
+    - navigateur : chaine
+    - dateEvenement : dateHeure
+    __
+    + enregistrer() : vide
+    + obtenirHistorique() : json
+    + compterParType() : entier
+    + obtenirRapport() : json
+}
+
+' ── Ligne 3 : Paiement ──────────────────────
+class Paiement {
+    - id : entier
+    - montant : decimal
+    - devise : chaine
+    - statut : enumeration\n  {EN_ATTENTE, REUSSI,\n  ECHOUE, REMBOURSE}
+    - methode : enumeration\n  {CARTE, MOBILE_MONEY,\n  VIREMENT}
+    - reference : chaine {unique}
+    - dateTransaction : dateHeure
+    __
+    + initier() : booleen
+    + confirmer() : booleen
+    + rembourser() : booleen
+    + obtenirRecu() : fichier
+}
+
+' ============================================
+' RELATIONS
+' ============================================
+
+' 1. Héritage : Administrateur spécialise Utilisateur
+Administrateur --|> Utilisateur
+
+' 2. Utilisateur possède plusieurs CarteVisite (association)
+Utilisateur "1" -- "0..*" CarteVisite : possede >
+
+' 3. CarteVisite contient DonneesCarte (composition ◆)
+'    La suppression d'une carte entraîne la suppression de ses données
+CarteVisite "1" *-- "1" DonneesCarte : contient >
+
+' 4. CarteVisite utilise un Modele (association)
+CarteVisite "0..*" -- "1" Modele : utilise >
+
+' 5. CarteVisite génère des Evenements (association)
+CarteVisite "1" -- "0..*" Evenements : genere >
+
+' 6. Utilisateur souscrit à un Abonnement (association)
+Utilisateur "1" -- "0..1" Abonnement : souscrit >
+
+' 7. Utilisateur effectue des Paiements (association)
+Utilisateur "1" -- "0..*" Paiement : effectue >
+
+' 8. Paiement active un Abonnement (association)
+Paiement "0..*" -- "1" Abonnement : active >
+
+' ============================================
+' NOTES EXPLICATIVES
+' ============================================
+
+note top of Utilisateur
+  <b>Classe mere</b>
+  Classe de base pour tous les
+  utilisateurs. L attribut estPremium
+  est derive de la relation
+  avec Abonnement.
+end note
+
+note right of Administrateur
+  <b>Specialisation</b>
+  Herite de Utilisateur.
+  Dispose de droits de gestion,
+  moderation et configuration.
+end note
+
+note top of CarteVisite
+  <b>Entite principale</b>
+  Carte creee et geree par
+  un utilisateur. Les cles
+  etrangeres sont representees
+  par les associations UML.
+end note
+
+note left of DonneesCarte
+  <b>Composition</b>
+  Donnees personnelles de la
+  carte. Supprimees si la
+  carte est supprimee (losange
+  plein = composition).
+end note
+
+note right of Modele
+  <b>Modeles de design</b>
+  Predefinis ou personnalises.
+  estPremium distingue les
+  modeles gratuits / premium.
+end note
+
+note bottom of Evenements
+  <b>Historique d activite</b>
+  Enregistre chaque interaction
+  (vues, partages, scans QR,
+  telechargements) par carte.
+end note
+
+note bottom of Abonnement
+  <b>Plan utilisateur</b>
+  Determine les droits (nombre
+  de cartes, acces aux modeles
+  premium, fonctionnalites).
+end note
+
+note right of Paiement
+  <b>Transactions financieres</b>
+  Gere les paiements lies a
+  l activation du plan Premium.
+end note
+
+@enduml

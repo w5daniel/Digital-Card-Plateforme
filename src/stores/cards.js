@@ -1,94 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { CARD_TEMPLATES } from '../data/mockData'
 
 export const useCardsStore = defineStore('cards', () => {
   // Templates prédéfinis
-  const templates = ref([
-    {
-      id: 1,
-      name: 'Modern',
-      slug: 'modern',
-      category: 'Professionnel',
-      isPremium: false,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Modern+Template',
-      colors: {
-        primary: '#e63950',
-        secondary: '#0ba5e9',
-        text: '#ffffff',
-      },
-    },
-    {
-      id: 2,
-      name: 'Minimal',
-      slug: 'minimal',
-      category: 'Minimaliste',
-      isPremium: false,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Minimal+Template',
-      colors: {
-        primary: '#1f2937',
-        secondary: '#9ca3af',
-        text: '#ffffff',
-      },
-    },
-    {
-      id: 3,
-      name: 'Creative',
-      slug: 'creative',
-      category: 'Créatif',
-      isPremium: true,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Creative+Template',
-      colors: {
-        primary: '#7c3aed',
-        secondary: '#ec4899',
-        text: '#ffffff',
-      },
-    },
-    {
-      id: 4,
-      name: 'Professional',
-      slug: 'professional',
-      category: 'Professionnel',
-      isPremium: false,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Professional+Template',
-      colors: {
-        primary: '#0369a1',
-        secondary: '#0ba5e9',
-        text: '#ffffff',
-      },
-    },
-    {
-      id: 5,
-      name: 'Elegant',
-      slug: 'elegant',
-      category: 'Élégant',
-      isPremium: true,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Elegant+Template',
-      colors: {
-        primary: '#d97706',
-        secondary: '#f59e0b',
-        text: '#ffffff',
-      },
-    },
-    {
-      id: 6,
-      name: 'Tech',
-      slug: 'tech',
-      category: 'Technologie',
-      isPremium: false,
-      thumbnail: 'https://via.placeholder.com/400x300?text=Tech+Template',
-      colors: {
-        primary: '#06b6d4',
-        secondary: '#14b8a6',
-        text: '#ffffff',
-      },
-    },
-  ])
+  const templates = ref([...CARD_TEMPLATES])
 
   // Cartes de l'utilisateur
   const userCards = ref([])
 
   // Template actuellement sélectionné
   const currentTemplate = ref(null)
+
+  // État de chargement partagé
+  const isLoading = ref(false)
+  const error = ref(null)
 
   // ===== GETTERS =====
 
@@ -112,19 +38,30 @@ export const useCardsStore = defineStore('cards', () => {
   /**
    * Ajoute une nouvelle carte
    */
-  function addCard(card) {
-    const newCard = {
-      id: Date.now(), // ID temporaire basé sur le timestamp
-      ...card,
-      createdAt: new Date().toISOString(),
-      views: 0,
-      downloads: 0,
-      qrScans: 0,
-      shares: 0,
-      isPublic: false,
+  async function addCard(card) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // TODO: remplacer par `const res = await api.post('/cards', card)`
+      const newCard = {
+        id: Date.now(),
+        ...card,
+        createdAt: new Date().toISOString(),
+        views: 0,
+        downloads: 0,
+        qrScans: 0,
+        shares: 0,
+        isPublic: false,
+      }
+      userCards.value.push(newCard)
+      return newCard
+    } catch (err) {
+      error.value = err.message || 'Erreur lors de la création'
+      throw err
+    } finally {
+      isLoading.value = false
     }
-    userCards.value.push(newCard)
-    return newCard
   }
 
   /**
@@ -137,43 +74,76 @@ export const useCardsStore = defineStore('cards', () => {
   /**
    * Met à jour une carte existante
    */
-  function updateCard(cardId, updates) {
-    const card = getCardById(cardId)
-    if (card) {
-      Object.assign(card, updates)
-      return card
+  async function updateCard(cardId, updates) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // TODO: remplacer par `const res = await api.put(`/cards/${cardId}`, updates)`
+      const card = getCardById(cardId)
+      if (card) {
+        Object.assign(card, updates)
+        return card
+      }
+      return null
+    } catch (err) {
+      error.value = err.message || 'Erreur lors de la mise à jour'
+      throw err
+    } finally {
+      isLoading.value = false
     }
-    return null
   }
 
   /**
    * Supprime une carte
    */
-  function deleteCard(cardId) {
-    const index = userCards.value.findIndex((c) => c.id === cardId)
-    if (index !== -1) {
-      userCards.value.splice(index, 1)
-      return true
+  async function deleteCard(cardId) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // TODO: remplacer par `await api.delete(`/cards/${cardId}`)`
+      const index = userCards.value.findIndex((c) => c.id === cardId)
+      if (index !== -1) {
+        userCards.value.splice(index, 1)
+        return true
+      }
+      return false
+    } catch (err) {
+      error.value = err.message || 'Erreur lors de la suppression'
+      throw err
+    } finally {
+      isLoading.value = false
     }
-    return false
   }
 
   /**
    * Duplique une carte
    */
-  function duplicateCard(cardId) {
-    const original = getCardById(cardId)
-    if (original) {
-      const duplicate = {
-        ...original,
-        id: Date.now(),
-        name: `${original.name} (Copie)`,
-        createdAt: new Date().toISOString(),
+  async function duplicateCard(cardId) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // TODO: remplacer par `const res = await api.post(`/cards/${cardId}/duplicate`)`
+      const original = getCardById(cardId)
+      if (original) {
+        const duplicate = {
+          ...original,
+          id: Date.now(),
+          name: `${original.name} (Copie)`,
+          createdAt: new Date().toISOString(),
+        }
+        userCards.value.push(duplicate)
+        return duplicate
       }
-      userCards.value.push(duplicate)
-      return duplicate
+      return null
+    } catch (err) {
+      error.value = err.message || 'Erreur lors de la duplication'
+      throw err
+    } finally {
+      isLoading.value = false
     }
-    return null
   }
 
   /**
@@ -343,6 +313,8 @@ export const useCardsStore = defineStore('cards', () => {
     templates,
     userCards,
     currentTemplate,
+    isLoading,
+    error,
 
     // Getters
     getAllTemplates,

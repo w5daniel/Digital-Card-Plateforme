@@ -14,13 +14,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/AuthView.vue'),
-      meta: { requiresAuth: false, hideLayout: true },
+      meta: { requiresAuth: false, hideLayout: true, guestOnly: true },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/AuthView.vue'),
-      meta: { requiresAuth: false, hideLayout: true },
+      meta: { requiresAuth: false, hideLayout: true, guestOnly: true },
     },
     {
       path: '/gallery',
@@ -75,6 +75,40 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
       meta: { requiresAuth: false },
     },
+
+    // ── Administration ────────────────────────────────────────────────────
+    {
+      path: '/admin',
+      component: () => import('../layouts/AdminLayout.vue'),
+      meta: { requiresAdmin: true, hideLayout: true },
+      children: [
+        {
+          path: '',
+          name: 'admin-dashboard',
+          component: () => import('../views/admin/AdminDashboardView.vue'),
+        },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: () => import('../views/admin/AdminUsersView.vue'),
+        },
+        {
+          path: 'templates',
+          name: 'admin-templates',
+          component: () => import('../views/admin/AdminTemplatesView.vue'),
+        },
+        {
+          path: 'cards',
+          name: 'admin-cards',
+          component: () => import('../views/admin/AdminCardsView.vue'),
+        },
+        {
+          path: 'settings',
+          name: 'admin-settings',
+          component: () => import('../views/admin/AdminSettingsView.vue'),
+        },
+      ],
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
@@ -85,7 +119,7 @@ const router = createRouter({
   },
 })
 
-// Navigation guard for authentication
+// ── Navigation guard ──────────────────────────────────────────────────────────
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
@@ -94,18 +128,31 @@ router.beforeEach((to, from, next) => {
     authStore.restoreSession()
   }
 
-  const requiresAuth = to.meta.requiresAuth
   const isAuthenticated = authStore.isAuthenticated
+  const isAdmin = authStore.isAdmin
+
+  // Vérifie si une des routes matchées exige l'admin (parent ou enfant)
+  const requiresAdmin = to.matched.some((r) => r.meta.requiresAdmin)
+  const requiresAuth  = to.meta.requiresAuth
+
+  if (requiresAdmin) {
+    // Accès admin : doit être connecté ET avoir le rôle admin
+    if (!isAuthenticated) return next('/login')
+    if (!isAdmin) return next('/dashboard')
+    return next()
+  }
 
   if (requiresAuth && !isAuthenticated) {
-    // Redirect to login if route requires auth
-    next('/login')
-  } else if (to.meta.hideLayout && isAuthenticated) {
-    // Already logged in — redirect away from auth pages
-    next('/dashboard')
-  } else {
-    next()
+    // Route protégée sans accès admin
+    return next('/login')
   }
+
+  if (to.meta.guestOnly && isAuthenticated) {
+    // Déjà connecté : redirige vers admin ou dashboard selon le rôle
+    return next(isAdmin ? '/admin' : '/dashboard')
+  }
+
+  next()
 })
 
 export default router

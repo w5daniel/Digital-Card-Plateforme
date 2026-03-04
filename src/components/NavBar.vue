@@ -50,11 +50,133 @@
             <Moon v-else class="w-5 h-5" />
           </button>
 
+          <!-- Notification Bell (authenticated) -->
+          <div v-if="authStore.isAuthenticated" class="relative">
+            <button
+              @click.stop="toggleNotifPanel"
+              class="relative p-2 rounded-lg transition-colors"
+              :class="themeStore.darkMode
+                ? 'text-gray-300 hover:bg-slate-800'
+                : 'text-gray-500 hover:bg-gray-100'"
+              title="Notifications"
+            >
+              <Bell class="w-5 h-5" />
+              <span
+                v-if="notifStore.unreadCount > 0"
+                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
+              >
+                {{ notifStore.unreadCount > 99 ? '99+' : notifStore.unreadCount }}
+              </span>
+            </button>
+
+            <!-- Notification Panel -->
+            <div
+              v-if="notifPanelOpen"
+              class="absolute right-0 top-14 w-80 rounded-xl shadow-xl border overflow-hidden z-50"
+              :class="themeStore.darkMode
+                ? 'bg-slate-800 border-slate-700'
+                : 'bg-white border-gray-200'"
+            >
+              <!-- Panel Header -->
+              <div
+                class="flex items-center justify-between px-4 py-3 border-b"
+                :class="themeStore.darkMode ? 'border-slate-700 bg-slate-900/40' : 'border-gray-100 bg-gray-50'"
+              >
+                <div class="flex items-center space-x-2">
+                  <Bell class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'" />
+                  <span class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'">
+                    Notifications
+                  </span>
+                  <span
+                    v-if="notifStore.unreadCount > 0"
+                    class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
+                  >
+                    {{ notifStore.unreadCount }}
+                  </span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <button
+                    v-if="notifStore.unreadCount > 0"
+                    @click="notifStore.markAllAsRead()"
+                    class="text-xs px-2 py-1 rounded transition-colors"
+                    :class="themeStore.darkMode ? 'text-primary-400 hover:bg-slate-700' : 'text-primary-600 hover:bg-gray-100'"
+                    title="Tout marquer comme lu"
+                  >
+                    Tout lire
+                  </button>
+                  <button
+                    v-if="notifStore.inbox.length > 0"
+                    @click="notifStore.clearInbox()"
+                    class="text-xs px-2 py-1 rounded transition-colors"
+                    :class="themeStore.darkMode ? 'text-gray-400 hover:bg-slate-700' : 'text-gray-500 hover:bg-gray-100'"
+                    title="Effacer tout"
+                  >
+                    Effacer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Notification List -->
+              <div class="max-h-80 overflow-y-auto">
+                <!-- Empty State -->
+                <div
+                  v-if="notifStore.inbox.length === 0"
+                  class="flex flex-col items-center justify-center py-10 px-4 text-center"
+                >
+                  <Bell class="w-8 h-8 mb-2 opacity-30" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+                  <p class="text-sm" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                    Aucune notification
+                  </p>
+                </div>
+
+                <!-- Notification Items -->
+                <button
+                  v-for="notif in notifStore.inbox"
+                  :key="notif.id"
+                  @click="notifStore.markAsRead(notif.id)"
+                  class="w-full flex items-start space-x-3 px-4 py-3 text-left transition-colors border-b last:border-b-0"
+                  :class="[
+                    themeStore.darkMode ? 'border-slate-700/60 hover:bg-slate-700/50' : 'border-gray-100 hover:bg-gray-50',
+                    !notif.read ? (themeStore.darkMode ? 'bg-slate-700/30' : 'bg-primary-50/60') : ''
+                  ]"
+                >
+                  <!-- Type Icon -->
+                  <span class="mt-0.5 flex-shrink-0">
+                    <CheckCircle2 v-if="notif.type === 'success'" class="w-4 h-4 text-green-500" />
+                    <XCircle      v-else-if="notif.type === 'error'"   class="w-4 h-4 text-red-500" />
+                    <AlertTriangle v-else-if="notif.type === 'warning'" class="w-4 h-4 text-yellow-500" />
+                    <Info          v-else                               class="w-4 h-4 text-blue-500" />
+                  </span>
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <p
+                      class="text-sm leading-snug truncate"
+                      :class="[
+                        themeStore.darkMode ? 'text-gray-200' : 'text-gray-800',
+                        !notif.read ? 'font-medium' : ''
+                      ]"
+                    >
+                      {{ notif.message }}
+                    </p>
+                    <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                      {{ formatNotifTime(notif.timestamp) }}
+                    </p>
+                  </div>
+                  <!-- Unread dot -->
+                  <span
+                    v-if="!notif.read"
+                    class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-primary-500"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- User Menu (authenticated) -->
           <div v-if="authStore.isAuthenticated" class="relative">
             <!-- Avatar Button -->
             <button
-              @click="dropdownOpen = !dropdownOpen"
+              @click="dropdownOpen = !dropdownOpen; notifPanelOpen = false"
               class="flex items-center rounded-full ring-2 transition-all duration-200"
               :class="dropdownOpen
                 ? 'ring-primary-500'
@@ -121,6 +243,17 @@
                 >
                   <LayoutDashboard class="w-4 h-4 opacity-60" />
                   <span>Tableau de bord</span>
+                </router-link>
+
+                <!-- Lien admin — visible uniquement pour les admins -->
+                <router-link
+                  v-if="authStore.isAdmin"
+                  to="/admin"
+                  @click="dropdownOpen = false"
+                  class="flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Shield class="w-4 h-4" />
+                  <span>Administration</span>
                 </router-link>
 
                 <router-link
@@ -293,16 +426,19 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Home, Layout, Edit, User as UserIcon, Menu, X, Plus, Sun, Moon, LayoutDashboard, LogOut } from 'lucide-vue-next'
+import { Home, Layout, Edit, User as UserIcon, Menu, X, Plus, Sun, Moon, LayoutDashboard, LogOut, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Shield } from 'lucide-vue-next'
 import { useThemeStore } from '../stores/themeStore'
 import { useAuthStore } from '../stores/authStore'
+import { useNotificationStore } from '../stores/notificationStore'
 
 const route = useRoute()
 const router = useRouter()
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
+const notifStore = useNotificationStore()
 const mobileMenuOpen = ref(false)
 const dropdownOpen = ref(false)
+const notifPanelOpen = ref(false)
 const logoPath = '/logo-ECODEV.png'
 
 const navItems = [
@@ -321,7 +457,26 @@ onBeforeUnmount(() => {
 })
 
 const handleOutsideClick = (e) => {
-  if (!e.target.closest('.relative')) dropdownOpen.value = false
+  if (!e.target.closest('.relative')) {
+    dropdownOpen.value = false
+    notifPanelOpen.value = false
+  }
+}
+
+const toggleNotifPanel = () => {
+  notifPanelOpen.value = !notifPanelOpen.value
+  dropdownOpen.value = false
+}
+
+const formatNotifTime = (timestamp) => {
+  const diff = Date.now() - new Date(timestamp).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "à l'instant"
+  if (mins < 60) return `il y a ${mins}min`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `il y a ${hrs}h`
+  const days = Math.floor(hrs / 24)
+  return `il y a ${days}j`
 }
 
 const isActive = (path) => route.path === path
