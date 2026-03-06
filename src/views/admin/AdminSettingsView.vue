@@ -3,7 +3,7 @@
     <!-- Limites & Quotas -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
     >
       <div
         class="px-5 py-4 border-b"
@@ -69,7 +69,7 @@
     <!-- Informations générales -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
     >
       <div
         class="px-5 py-4 border-b"
@@ -124,7 +124,7 @@
     <!-- Toggles système -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
     >
       <div
         class="px-5 py-4 border-b"
@@ -186,7 +186,7 @@
           ? 'border-red-500/50 bg-red-500/5'
           : themeStore.darkMode
             ? 'bg-onyx-800 border-onyx-700'
-            : 'bg-white border-onyx-200'
+            : 'bg-powder-50 border-powder-200'
       "
     >
       <div

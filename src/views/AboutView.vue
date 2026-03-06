@@ -19,7 +19,7 @@
     <!-- Main Content -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <!-- Mission Section -->
-      <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-3xl shadow-sm p-8 md:p-12 mb-16">
+      <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-3xl shadow-sm p-8 md:p-12 mb-16">
         <h2 class="text-3xl md:text-4xl font-bold text-onyx-950 dark:text-powder-50 mb-8">
           Notre Mission
         </h2>
@@ -161,7 +161,7 @@
         <div class="grid md:grid-cols-3 gap-8">
           <!-- Feature 1 -->
           <div
-            class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
+            class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
             <div
               class="w-16 h-16 bg-onyx-900 rounded-xl flex items-center justify-center mb-6"
@@ -186,7 +186,7 @@
 
           <!-- Feature 2 -->
           <div
-            class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
+            class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
             <div
               class="w-16 h-16 bg-onyx-800 rounded-xl flex items-center justify-center mb-6"
@@ -209,7 +209,7 @@
 
           <!-- Feature 3 -->
           <div
-            class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
+            class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
             <div
               class="w-16 h-16 bg-flame-500 rounded-xl flex items-center justify-center mb-6"

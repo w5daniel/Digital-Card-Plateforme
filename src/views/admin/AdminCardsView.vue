@@ -76,7 +76,7 @@
               :class="[
                 themeStore.darkMode
                   ? 'bg-onyx-900 hover:bg-onyx-800'
-                  : 'bg-white hover:bg-powder-50',
+                  : 'bg-powder-50 hover:bg-powder-100',
                 card.flagged
                   ? themeStore.darkMode
                     ? 'border-l-2 border-red-500'
@@ -236,7 +236,7 @@
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-onyx-200'"
       >
         <h3
           class="font-semibold mb-2"

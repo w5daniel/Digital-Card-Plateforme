@@ -17,13 +17,13 @@
           <div class="mt-6 md:mt-0 flex flex-wrap gap-3">
             <button
               @click="exportCards"
-              class="px-6 py-3 bg-onyx-800 hover:bg-onyx-700 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2"
+              class="px-6 py-3 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2"
             >
               <Download class="w-5 h-5" />
               <span>Exporter</span>
             </button>
             <label
-              class="px-6 py-3 bg-onyx-700 hover:bg-onyx-600 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
             >
               <Plus class="w-5 h-5" />
               <span>Importer</span>
@@ -43,7 +43,7 @@
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
         <div
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -61,7 +61,7 @@
         </div>
 
         <div
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -79,7 +79,7 @@
         </div>
 
         <div
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -99,7 +99,7 @@
         </div>
 
         <div
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -119,7 +119,7 @@
         </div>
 
         <div
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -239,7 +239,7 @@
         <div v-if="store.userCards.length > 0" class="flex items-center space-x-3">
           <button
             @click="toggleSelectAll"
-            class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
+            class="px-4 py-2 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
             :class="
               selectedCardIds.size > 0
                 ? 'bg-flame-50 dark:bg-flame-900/20 border-flame-300 dark:border-flame-700'
@@ -266,7 +266,7 @@
         <div
           v-for="card in store.userCards"
           :key="card.id"
-          class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
+          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
         >
           <!-- Checkbox de sélection (top-left, discret) -->
           <div class="absolute top-3 left-3 z-20">
@@ -276,7 +276,7 @@
               :class="
                 selectedCardIds.has(card.id)
                   ? 'bg-flame-600 border-flame-600 text-white'
-                  : 'bg-white/90 dark:bg-onyx-700/90 border-gray-300 dark:border-slate-500 text-transparent hover:border-flame-400'
+                  : 'bg-white/90 dark:bg-onyx-700/90 border-powder-300 dark:border-onyx-500 text-transparent hover:border-flame-400'
               "
               :title="selectedCardIds.has(card.id) ? 'Désélectionner' : 'Sélectionner'"
             >
@@ -399,7 +399,7 @@
                 <div v-if="activeDownloadCardId === card.id" class="fixed inset-0 z-10" @click="activeDownloadCardId = null" />
 
                 <!-- Dropdown panel -->
-                <div v-if="activeDownloadCardId === card.id" class="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-onyx-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 min-w-[160px]">
+                <div v-if="activeDownloadCardId === card.id" class="absolute bottom-full mb-2 left-0 right-0 bg-powder-50 dark:bg-onyx-800 rounded-xl shadow-xl border border-powder-100 dark:border-onyx-700 overflow-hidden z-20 min-w-[160px]">
                   <button
                     @click="downloadVCard(card); activeDownloadCardId = null"
                     class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors"
@@ -414,7 +414,7 @@
                   <button
                     @click="downloadPDF(card); activeDownloadCardId = null"
                     :disabled="exportLoading === card.id + '-pdf'"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
                   >
                     <div class="w-7 h-7 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                       <Loader2 v-if="exportLoading === card.id + '-pdf'" class="w-3.5 h-3.5 text-red-500 animate-spin" />
@@ -427,7 +427,7 @@
                   <button
                     @click="downloadPNG(card); activeDownloadCardId = null"
                     :disabled="exportLoading === card.id + '-png'"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
                   >
                     <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
                       <Loader2 v-if="exportLoading === card.id + '-png'" class="w-3.5 h-3.5 text-violet-500 animate-spin" />
@@ -485,7 +485,7 @@
     <Transition name="modal-fade">
       <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showShareModal = false" />
-        <div class="relative w-full max-w-sm bg-white dark:bg-onyx-800 rounded-2xl shadow-2xl p-6">
+        <div class="relative w-full max-w-sm bg-powder-50 dark:bg-onyx-800 rounded-2xl shadow-2xl p-6">
           <!-- Header -->
           <div class="flex items-center justify-between mb-5">
             <div>
@@ -501,7 +501,7 @@
           <div class="mb-5">
             <label class="block text-xs font-medium text-onyx-500 dark:text-onyx-400 mb-2">Lien de partage</label>
             <div class="flex gap-2">
-              <input :value="currentShareLink" readonly class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-powder-50 dark:bg-onyx-700 border border-gray-200 dark:border-slate-600 text-onyx-600 dark:text-onyx-300 min-w-0" />
+              <input :value="currentShareLink" readonly class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-powder-50 dark:bg-onyx-700 border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 min-w-0" />
               <button @click="copyShareLink" class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 shrink-0 flex items-center justify-center w-10" :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-flame-500 hover:bg-flame-600 text-white'">
                 <Check v-if="linkCopied" class="w-4 h-4" />
                 <Copy v-else class="w-4 h-4" />

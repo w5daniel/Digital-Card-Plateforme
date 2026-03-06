@@ -11,22 +11,22 @@
           v-model="search"
           type="text"
           placeholder="Rechercher un utilisateur..."
-          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
           :class="
             themeStore.darkMode
-              ? 'bg-slate-800 border-slate-700 text-white placeholder-gray-500'
-              : 'bg-white border-gray-200 text-onyx-900 placeholder-gray-400'
+              ? 'bg-onyx-800 border-onyx-700 text-white placeholder-onyx-500'
+              : 'bg-powder-50 border-powder-200 text-onyx-900 placeholder-onyx-400'
           "
         />
       </div>
       <div class="flex items-center space-x-2">
         <select
           v-model="filterStatus"
-          class="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          class="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
           :class="
             themeStore.darkMode
-              ? 'bg-slate-800 border-slate-700 text-white'
-              : 'bg-white border-gray-200 text-onyx-900'
+              ? 'bg-onyx-800 border-onyx-700 text-white'
+              : 'bg-powder-50 border-powder-200 text-onyx-900'
           "
         >
           <option value="">Tous les statuts</option>
@@ -35,11 +35,11 @@
         </select>
         <select
           v-model="filterPlan"
-          class="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          class="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
           :class="
             themeStore.darkMode
-              ? 'bg-slate-800 border-slate-700 text-white'
-              : 'bg-white border-gray-200 text-onyx-900'
+              ? 'bg-onyx-800 border-onyx-700 text-white'
+              : 'bg-powder-50 border-powder-200 text-onyx-900'
           "
         >
           <option value="">Tous les plans</option>
@@ -57,14 +57,14 @@
     <!-- Table -->
     <div
       class="rounded-xl border overflow-hidden"
-      :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+      :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr
               :class="
-                themeStore.darkMode ? 'bg-slate-800 text-onyx-400' : 'bg-gray-50 text-onyx-500'
+                themeStore.darkMode ? 'bg-onyx-800 text-onyx-400' : 'bg-powder-50 text-onyx-500'
               "
             >
               <th class="text-left px-4 py-3 font-medium">Utilisateur</th>
@@ -78,15 +78,15 @@
           </thead>
           <tbody
             class="divide-y"
-            :class="themeStore.darkMode ? 'divide-slate-700' : 'divide-gray-100'"
+            :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'"
           >
             <tr
               v-for="user in filteredUsers"
               :key="user.id"
               :class="
                 themeStore.darkMode
-                  ? 'bg-slate-900 hover:bg-slate-800'
-                  : 'bg-white hover:bg-gray-50'
+                  ? 'bg-onyx-950 hover:bg-onyx-800'
+                  : 'bg-powder-50 hover:bg-powder-100'
               "
             >
               <!-- Avatar + nom + email -->
@@ -96,8 +96,8 @@
                     class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                     :class="
                       user.status === 'blocked'
-                        ? 'bg-gray-400'
-                        : 'bg-gradient-to-br from-primary-500 to-secondary-500'
+                        ? 'bg-onyx-400'
+                        : 'bg-flame-500'
                     "
                   >
                     {{ user.name.charAt(0) }}
@@ -127,8 +127,8 @@
                     user.role === 'admin'
                       ? 'bg-red-500/10 text-red-500'
                       : themeStore.darkMode
-                        ? 'bg-slate-700 text-onyx-300'
-                        : 'bg-gray-100 text-onyx-600'
+                        ? 'bg-onyx-700 text-onyx-300'
+                        : 'bg-powder-100 text-onyx-600'
                   "
                 >
                   {{ user.role === 'admin' ? 'Admin' : 'User' }}
@@ -143,8 +143,8 @@
                     user.isPremium
                       ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
                       : themeStore.darkMode
-                        ? 'bg-slate-700 text-onyx-400'
-                        : 'bg-gray-100 text-onyx-500'
+                        ? 'bg-onyx-700 text-onyx-400'
+                        : 'bg-powder-100 text-onyx-500'
                   "
                 >
                   {{ user.isPremium ? 'Premium' : 'Gratuit' }}
@@ -197,8 +197,8 @@
                       user.isPremium
                         ? 'text-yellow-500 hover:bg-yellow-500/10'
                         : themeStore.darkMode
-                          ? 'text-onyx-400 hover:bg-slate-700'
-                          : 'text-onyx-400 hover:bg-gray-100'
+                          ? 'text-onyx-400 hover:bg-onyx-700'
+                          : 'text-onyx-400 hover:bg-powder-100'
                     "
                     :title="user.isPremium ? 'Retirer Premium' : 'Attribuer Premium'"
                   >
@@ -259,7 +259,7 @@
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <h3
           class="font-semibold mb-2"
@@ -277,8 +277,8 @@
             class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'border-slate-600 text-onyx-300 hover:bg-slate-700'
-                : 'border-gray-200 text-onyx-700 hover:bg-gray-50'
+                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
+                : 'border-powder-200 text-onyx-700 hover:bg-powder-100'
             "
           >
             Annuler

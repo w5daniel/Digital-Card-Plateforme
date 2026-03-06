@@ -6,7 +6,7 @@
         v-for="kpi in kpis"
         :key="kpi.label"
         class="rounded-xl p-4 border transition-all hover:shadow-md"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <div class="flex items-start justify-between">
           <div>
@@ -36,11 +36,11 @@
       <!-- Activité récente -->
       <div
         class="lg:col-span-2 rounded-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <div
           class="flex items-center justify-between px-5 py-4 border-b"
-          :class="themeStore.darkMode ? 'border-slate-700' : 'border-onyx-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
         >
           <h2
             class="font-semibold text-sm"
@@ -52,7 +52,7 @@
             Derniers événements
           </span>
         </div>
-        <ul class="divide-y" :class="themeStore.darkMode ? 'divide-slate-700' : 'divide-gray-100'">
+        <ul class="divide-y" :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'">
           <li
             v-for="(item, i) in adminStore.recentActivity"
             :key="i"
@@ -91,7 +91,7 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
+            themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
           "
         >
           <h3
@@ -114,10 +114,10 @@
             </div>
             <div
               class="w-full h-1.5 rounded-full"
-              :class="themeStore.darkMode ? 'bg-slate-700' : 'bg-gray-100'"
+              :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-100'"
             >
               <div
-                class="h-1.5 rounded-full bg-gray-400"
+                class="h-1.5 rounded-full bg-onyx-400"
                 :style="{
                   width: `${((adminStore.stats.totalUsers - adminStore.stats.premiumUsers) / adminStore.stats.totalUsers) * 100}%`,
                 }"
@@ -127,14 +127,14 @@
               <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'"
                 >Plan premium</span
               >
-              <span class="font-medium text-primary-500">{{ adminStore.stats.premiumUsers }}</span>
+              <span class="font-medium text-flame-500">{{ adminStore.stats.premiumUsers }}</span>
             </div>
             <div
               class="w-full h-1.5 rounded-full"
-              :class="themeStore.darkMode ? 'bg-slate-700' : 'bg-gray-100'"
+              :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-100'"
             >
               <div
-                class="h-1.5 rounded-full bg-primary-500"
+                class="h-1.5 rounded-full bg-flame-500"
                 :style="{
                   width: `${(adminStore.stats.premiumUsers / adminStore.stats.totalUsers) * 100}%`,
                 }"
@@ -147,7 +147,7 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
+            themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
           "
         >
           <h3
@@ -187,7 +187,7 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
+            themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
           "
         >
           <h3
@@ -204,8 +204,8 @@
               class="flex items-center space-x-2 text-xs py-1.5 px-2 rounded-lg transition-colors"
               :class="
                 themeStore.darkMode
-                  ? 'text-onyx-400 hover:bg-slate-700 hover:text-white'
-                  : 'text-onyx-600 hover:bg-gray-100'
+                  ? 'text-onyx-400 hover:bg-onyx-700 hover:text-white'
+                  : 'text-onyx-600 hover:bg-powder-100'
               "
             >
               <component :is="link.icon" class="w-3.5 h-3.5" />
@@ -253,8 +253,8 @@ const kpis = computed(() => [
     sub: `${adminStore.stats.publicCards} publiques`,
     subColor: themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
     icon: CreditCard,
-    iconBg: 'bg-primary-500/10',
-    iconColor: 'text-primary-500',
+    iconBg: 'bg-flame-500/10',
+    iconColor: 'text-flame-500',
   },
   {
     label: 'Modèles',

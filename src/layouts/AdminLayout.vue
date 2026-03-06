@@ -15,7 +15,7 @@
       class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 transition-transform duration-300 border-r"
       :class="[
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        themeStore.darkMode ? 'bg-onyx-900 border-onyx-700/60' : 'bg-white border-powder-200',
+        themeStore.darkMode ? 'bg-onyx-900 border-onyx-700/60' : 'bg-powder-50 border-powder-200',
       ]"
     >
       <!-- Logo + badge admin -->

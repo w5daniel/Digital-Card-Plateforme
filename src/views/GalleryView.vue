@@ -32,7 +32,7 @@
           <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
             <button
               @click="scrollToGrid"
-              class="flex items-center gap-2 bg-white text-onyx-900 font-bold px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 w-full sm:w-auto justify-center"
+              class="flex items-center gap-2 bg-flame-500 hover:bg-flame-600 text-white font-bold px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 w-full sm:w-auto justify-center"
             >
               <span>Parcourir les modèles</span>
               <ArrowDown class="w-4 h-4" />
@@ -83,7 +83,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher un modèle..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-900 text-onyx-900 dark:text-white placeholder-onyx-400 dark:placeholder-onyx-500 focus:outline-none focus:ring-2 focus:ring-flame-500 text-sm transition-all"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-powder-50 dark:bg-onyx-900 text-onyx-900 dark:text-white placeholder-onyx-400 dark:placeholder-onyx-500 focus:outline-none focus:ring-2 focus:ring-flame-500 text-sm transition-all"
           />
         </div>
 
@@ -108,7 +108,7 @@
         <!-- Sort -->
         <select
           v-model="sortBy"
-          class="px-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-900 text-onyx-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-flame-500 flex-shrink-0 transition-all"
+          class="px-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-powder-50 dark:bg-onyx-900 text-onyx-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-flame-500 flex-shrink-0 transition-all"
         >
           <option value="popular">Populaires</option>
           <option value="newest">Plus récents</option>
@@ -185,7 +185,7 @@
               <div class="flex items-center gap-2">
                 <button
                   @click.stop="selectTemplate(template)"
-                  class="flex items-center gap-2 bg-white hover:bg-flame-500 hover:text-white text-onyx-900 text-xs font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-lg"
+                  class="flex items-center gap-2 bg-flame-500 hover:bg-flame-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-lg"
                 >
                   Utiliser ce modèle
                   <ArrowRight class="w-3.5 h-3.5" />

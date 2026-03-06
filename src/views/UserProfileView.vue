@@ -8,7 +8,7 @@
         <aside class="w-full lg:w-64 shrink-0 space-y-5">
 
           <!-- User card -->
-          <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+          <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
             <div class="flex flex-col items-center text-center">
 
               <!-- Circular avatar with ring -->
@@ -52,7 +52,7 @@
               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 text-sm"
               :class="activeTab === item.id
                 ? 'bg-flame-500 text-white font-semibold shadow-sm shadow-flame-500/20'
-                : 'text-onyx-600 dark:text-powder-400 hover:bg-white dark:hover:bg-onyx-800 hover:shadow-sm font-medium'"
+                : 'text-onyx-600 dark:text-powder-400 hover:bg-powder-50 dark:hover:bg-onyx-800 hover:shadow-sm font-medium'"
             >
               <component
                 :is="item.icon"
@@ -64,7 +64,7 @@
           </nav>
 
           <!-- Mini stats card -->
-          <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-5">
+          <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-5">
             <p class="text-xs font-semibold text-onyx-500 dark:text-powder-500 uppercase tracking-wider mb-3">Statistiques</p>
             <div class="grid grid-cols-2 gap-3">
               <div v-for="stat in statItems" :key="stat.label" class="text-center">
@@ -77,7 +77,7 @@
           <!-- Logout -->
           <button
             @click="handleLogout"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-onyx-500 dark:text-powder-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-white dark:hover:bg-onyx-800 transition-all duration-200"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-onyx-500 dark:text-powder-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-powder-50 dark:hover:bg-onyx-800 transition-all duration-200"
           >
             <LogOut class="w-[18px] h-[18px]" />
             Se déconnecter
@@ -91,7 +91,7 @@
           <template v-if="activeTab === 'profile'">
 
             <!-- Personal info card -->
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Informations personnelles</h2>
@@ -201,7 +201,7 @@
             </div>
 
             <!-- Danger zone -->
-            <div class="bg-white dark:bg-onyx-900 rounded-2xl shadow-sm p-6 border border-red-100 dark:border-red-900/20">
+            <div class="bg-powder-50 dark:bg-onyx-900 rounded-2xl shadow-sm p-6 border border-red-100 dark:border-red-900/20">
               <div class="flex items-center justify-between mb-4">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Zone dangereuse</h2>
@@ -229,7 +229,7 @@
           <!-- ═══ TAB : SECURITE ════════════════════════════════════ -->
           <template v-if="activeTab === 'security'">
 
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Changer le mot de passe</h2>
@@ -298,7 +298,7 @@
             </div>
 
             <!-- Active session -->
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-5">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Session active</h2>
@@ -326,7 +326,7 @@
           <!-- ═══ TAB : PREFERENCES ═══════════════════════════════════ -->
           <template v-if="activeTab === 'preferences'">
 
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Préférences</h2>
@@ -382,7 +382,7 @@
             </div>
 
             <!-- Export data -->
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 bg-onyx-100 dark:bg-onyx-800 rounded-lg flex items-center justify-center">
@@ -407,7 +407,7 @@
           <!-- ═══ TAB : ABONNEMENT ══════════════════════════════════ -->
           <template v-if="activeTab === 'subscription'">
 
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Mon abonnement</h2>
@@ -520,7 +520,7 @@
           <!-- ═══ TAB : FACTURATION ══════════════════════════════════ -->
           <template v-if="activeTab === 'billing'">
 
-            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Facturation</h2>

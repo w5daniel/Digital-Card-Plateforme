@@ -3,7 +3,7 @@
     class="sticky top-0 z-50 border-b transition-colors duration-200"
     :class="themeStore.darkMode
       ? 'bg-onyx-950 border-onyx-800'
-      : 'bg-white border-powder-200 shadow-sm'"
+      : 'bg-powder-50 border-powder-200 shadow-sm'"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
@@ -75,7 +75,7 @@
               class="absolute right-0 top-14 w-80 rounded-xl shadow-xl border overflow-hidden z-50"
               :class="themeStore.darkMode
                 ? 'bg-onyx-900 border-onyx-800'
-                : 'bg-white border-powder-200'"
+                : 'bg-powder-50 border-powder-200'"
             >
               <!-- Panel Header -->
               <div
@@ -187,7 +187,7 @@
               </div>
               <div
                 v-else
-                class="bg-onyx-900 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm"
+                class="bg-flame-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm"
               >
                 {{ userInitial }}
               </div>
@@ -200,7 +200,7 @@
               class="absolute right-0 top-14 w-56 rounded-xl shadow-xl border overflow-hidden z-50"
               :class="themeStore.darkMode
                 ? 'bg-onyx-900 border-onyx-800'
-                : 'bg-white border-powder-200'"
+                : 'bg-powder-50 border-powder-200'"
             >
               <!-- User Info Header -->
               <div class="px-4 py-3 border-b" :class="themeStore.darkMode ? 'border-onyx-800 bg-onyx-950/40' : 'border-powder-100 bg-powder-50'">

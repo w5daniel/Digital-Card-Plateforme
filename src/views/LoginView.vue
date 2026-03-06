@@ -20,7 +20,7 @@
       </div>
 
       <!-- Form Card -->
-      <div class="card bg-white dark:bg-onyx-800 shadow-xl p-8">
+      <div class="card bg-powder-50 dark:bg-onyx-800 shadow-xl p-8">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <!-- Email Input -->
           <div class="form-control w-full">

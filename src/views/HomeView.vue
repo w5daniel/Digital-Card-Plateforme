@@ -172,7 +172,7 @@
             class="card p-8 card-hover text-center"
           >
             <div
-              class="w-16 h-16 mx-auto mb-6 bg-onyx-900 dark:bg-onyx-800 rounded-2xl flex items-center justify-center shadow-lg"
+              class="w-16 h-16 mx-auto mb-6 bg-flame-500 dark:bg-onyx-800 rounded-2xl flex items-center justify-center shadow-lg"
             >
               <component :is="feature.icon" class="w-8 h-8 text-white" />
             </div>
@@ -184,10 +184,10 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-onyx-950">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-        <h2 class="text-4xl md:text-5xl font-bold mb-6">Prêt à créer votre carte de visite ?</h2>
-        <p class="text-xl mb-8 opacity-90">
+    <section class="py-20 bg-powder-100 dark:bg-onyx-950 transition-colors duration-200">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-onyx-950 dark:text-white">Prêt à créer votre carte de visite ?</h2>
+        <p class="text-xl mb-8 text-onyx-600 dark:text-powder-300">
           Rejoignez des milliers de professionnels qui font confiance à ECODEV CARD PRO
         </p>
         <router-link

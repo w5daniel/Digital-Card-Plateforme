@@ -14,7 +14,7 @@
       <!-- Pricing Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <!-- Free Plan -->
-        <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8">
+        <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8">
           <div class="mb-6">
             <h2 class="text-2xl font-bold mb-2 text-onyx-950 dark:text-powder-50">Plan Gratuit</h2>
             <p class="text-onyx-600 dark:text-powder-400">Parfait pour débuter</p>
@@ -52,14 +52,14 @@
             </li>
           </ul>
 
-          <button v-if="!authStore.hasPremium()" class="btn btn-outline w-full" disabled>
+          <button v-if="!authStore.hasPremium()" class="w-full py-3 px-6 rounded-xl bg-powder-200 text-onyx-500 font-semibold cursor-not-allowed opacity-70" disabled>
             Plan Actuel
           </button>
           <button v-else class="btn btn-outline w-full" disabled>Vous êtes Premium</button>
         </div>
 
         <!-- Premium Plan -->
-        <div class="bg-white dark:bg-onyx-900 border-2 border-flame-500 rounded-2xl p-8 relative shadow-md">
+        <div class="bg-powder-50 dark:bg-onyx-900 border-2 border-flame-500 rounded-2xl p-8 relative shadow-md">
           <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
             <span class="bg-flame-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
               ⭐ POPULAIRE
@@ -103,7 +103,7 @@
             </li>
           </ul>
 
-          <button v-if="authStore.hasPremium()" class="btn btn-primary w-full" disabled>
+          <button v-if="authStore.hasPremium()" class="w-full py-3 px-6 rounded-xl bg-flame-500 text-white font-semibold cursor-not-allowed opacity-70" disabled>
             ✓ Plan Actif
           </button>
           <button v-else @click="showPaymentModal = true" class="bg-flame-500 hover:bg-flame-600 text-white w-full font-semibold rounded-xl py-3 px-6 transition-colors">
@@ -113,7 +113,7 @@
       </div>
 
       <!-- Features Comparison -->
-      <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8">
+      <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8">
         <h3 class="text-2xl font-bold mb-6 text-onyx-950 dark:text-powder-50">Comparaison des Features</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -191,7 +191,7 @@
       v-if="showPaymentModal"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     >
-      <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl max-w-md w-full p-8">
+      <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl max-w-md w-full p-8">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-2xl font-bold text-onyx-950 dark:text-powder-50">Paiement Sécurisé</h3>
           <button @click="showPaymentModal = false" class="btn btn-ghost btn-sm btn-circle">
@@ -269,7 +269,7 @@
 
           <!-- Buttons -->
           <div class="flex gap-2">
-            <button type="button" @click="showPaymentModal = false" class="bg-white dark:bg-onyx-900 border border-onyx-200 dark:border-onyx-700 text-onyx-800 dark:text-powder-200 rounded-xl py-3 px-6 flex-1 hover:bg-powder-50 transition-colors">
+            <button type="button" @click="showPaymentModal = false" class="bg-powder-50 dark:bg-onyx-900 border border-onyx-200 dark:border-onyx-700 text-onyx-800 dark:text-powder-200 rounded-xl py-3 px-6 flex-1 hover:bg-powder-50 transition-colors">
               Annuler
             </button>
             <button type="submit" :disabled="isProcessing" class="bg-flame-500 hover:bg-flame-600 text-white font-semibold rounded-xl py-3 px-6 flex-1 transition-colors disabled:opacity-50">

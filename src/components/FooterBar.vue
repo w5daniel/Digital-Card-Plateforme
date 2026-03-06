@@ -14,7 +14,7 @@
 
         <!-- Links -->
         <div>
-          <h4 class="font-semibold mb-4">Liens rapides</h4>
+          <h4 class="font-semibold mb-4 text-powder-100">Liens rapides</h4>
           <ul class="space-y-2 text-sm text-powder-400">
             <li>
               <router-link to="/" class="hover:text-flame-400 transition-colors"
@@ -46,7 +46,7 @@
 
         <!-- Resources -->
         <div>
-          <h4 class="font-semibold mb-4">Ressources</h4>
+          <h4 class="font-semibold mb-4 text-powder-100">Ressources</h4>
           <ul class="space-y-2 text-sm text-powder-400">
             <li>
               <a href="#" class="hover:text-flame-400 transition-colors">Documentation API</a>
@@ -59,7 +59,7 @@
 
         <!-- Contact -->
         <div>
-          <h4 class="font-semibold mb-4">Contact</h4>
+          <h4 class="font-semibold mb-4 text-powder-100">Contact</h4>
           <ul class="space-y-2 text-sm text-powder-400">
             <li class="flex items-center space-x-2">
               <Mail class="w-4 h-4 flex-shrink-0" />

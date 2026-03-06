@@ -20,7 +20,7 @@
         v-for="tmpl in adminStore.templates"
         :key="tmpl.id"
         class="rounded-xl border overflow-hidden hover:shadow-md transition-shadow"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <!-- Preview couleur -->
         <div
@@ -115,7 +115,7 @@
     >
       <div
         class="w-full max-w-md rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <h3
           class="font-semibold mb-4"
@@ -225,7 +225,7 @@
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
       >
         <h3
           class="font-semibold mb-2"
