@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12"
+    class="min-h-screen bg-gradient-to-br from-powder-50 to-powder-100 dark:from-onyx-900 dark:to-onyx-800 py-12"
   >
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Card Found -->
@@ -8,7 +8,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
           <h1 class="text-4xl font-bold mb-2">{{ card.name }}</h1>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-onyx-500 dark:text-onyx-400">
             Carte partagée par {{ card.data.fullName }}
           </p>
         </div>
@@ -25,18 +25,18 @@
             <div class="lg:col-span-2 space-y-6">
               <div>
                 <h2 class="text-3xl font-bold mb-1">{{ card.data.fullName }}</h2>
-                <p class="text-lg text-primary-600 dark:text-primary-400 font-semibold">
+                <p class="text-lg text-flame-600 dark:text-flame-400 font-semibold">
                   {{ card.data.title }}
                 </p>
-                <p v-if="card.data.company" class="text-gray-600 dark:text-gray-400">
+                <p v-if="card.data.company" class="text-onyx-500 dark:text-onyx-400">
                   {{ card.data.company }}
                 </p>
               </div>
 
               <!-- Contact Details -->
-              <div class="space-y-3 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+              <div class="space-y-3 bg-powder-100 dark:bg-onyx-800 p-4 rounded-lg">
                 <div v-if="card.data.email" class="flex items-center space-x-3">
-                  <Mail class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                  <Mail class="w-5 h-5 text-flame-600 dark:text-flame-400" />
                   <a
                     :href="`mailto:${card.data.email}`"
                     class="text-blue-600 dark:text-blue-400 hover:underline"
@@ -45,7 +45,7 @@
                   </a>
                 </div>
                 <div v-if="card.data.phone" class="flex items-center space-x-3">
-                  <Phone class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                  <Phone class="w-5 h-5 text-flame-600 dark:text-flame-400" />
                   <a
                     :href="`tel:${card.data.phone}`"
                     class="text-blue-600 dark:text-blue-400 hover:underline"
@@ -54,7 +54,7 @@
                   </a>
                 </div>
                 <div v-if="card.data.website" class="flex items-center space-x-3">
-                  <Globe class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                  <Globe class="w-5 h-5 text-flame-600 dark:text-flame-400" />
                   <a
                     :href="card.data.website"
                     target="_blank"
@@ -64,7 +64,7 @@
                   </a>
                 </div>
                 <div v-if="card.data.address" class="flex items-start space-x-3">
-                  <MapPin class="w-5 h-5 text-primary-600 dark:text-primary-400 mt-1" />
+                  <MapPin class="w-5 h-5 text-flame-600 dark:text-flame-400 mt-1" />
                   <p>{{ card.data.address }}</p>
                 </div>
               </div>
@@ -72,14 +72,14 @@
               <!-- Stats -->
               <div class="grid grid-cols-2 gap-4">
                 <div class="stat-box">
-                  <Eye class="w-5 h-5 text-secondary-600 dark:text-secondary-400 mb-2" />
+                  <Eye class="w-5 h-5 text-onyx-600 dark:text-onyx-400 mb-2" />
                   <p class="text-2xl font-bold">{{ card.views }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Vues</p>
+                  <p class="text-sm text-onyx-500 dark:text-onyx-400">Vues</p>
                 </div>
                 <div class="stat-box">
                   <Download class="w-5 h-5 text-accent-600 dark:text-accent-400 mb-2" />
                   <p class="text-2xl font-bold">{{ card.downloads }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">vCards téléchargées</p>
+                  <p class="text-sm text-onyx-500 dark:text-onyx-400">vCards téléchargées</p>
                 </div>
               </div>
             </div>
@@ -97,7 +97,7 @@
           </button>
           <router-link
             to="/"
-            class="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white font-semibold rounded-lg transition-colors flex items-center space-x-2"
+            class="px-6 py-3 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-lg transition-colors flex items-center space-x-2"
           >
             <Home class="w-5 h-5" />
             <span>Retour à l'accueil</span>
@@ -118,12 +118,12 @@
       <!-- Card Not Found -->
       <div v-else class="text-center py-20">
         <div
-          class="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center"
+          class="w-24 h-24 mx-auto mb-6 bg-powder-100 dark:bg-onyx-800 rounded-full flex items-center justify-center"
         >
-          <AlertCircle class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+          <AlertCircle class="w-12 h-12 text-onyx-400 dark:text-onyx-500" />
         </div>
-        <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">Carte non trouvée</h2>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
+        <h2 class="text-2xl font-bold text-onyx-700 dark:text-powder-300 mb-2">Carte non trouvée</h2>
+        <p class="text-onyx-500 dark:text-onyx-400 mb-6">
           Cette carte n'existe pas ou a été supprimée
         </p>
         <router-link to="/" class="btn-primary inline-flex items-center">
@@ -189,6 +189,6 @@ END:VCARD`
 
 <style scoped>
 .stat-box {
-  @apply bg-gray-50 dark:bg-slate-700 p-4 rounded-lg text-center;
+  @apply bg-powder-100 dark:bg-onyx-700 p-4 rounded-lg text-center;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex h-screen overflow-hidden"
-    :class="themeStore.darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-gray-900'"
+    :class="themeStore.darkMode ? 'bg-onyx-950 text-white' : 'bg-powder-50 text-onyx-900'"
   >
     <!-- Overlay mobile -->
     <div
@@ -15,20 +15,20 @@
       class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 transition-transform duration-300 border-r"
       :class="[
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        themeStore.darkMode ? 'bg-slate-900 border-slate-700/60' : 'bg-white border-gray-200',
+        themeStore.darkMode ? 'bg-onyx-900 border-onyx-700/60' : 'bg-white border-powder-200',
       ]"
     >
       <!-- Logo + badge admin -->
       <div
         class="flex items-center justify-between px-3 py-3 border-b"
-        :class="themeStore.darkMode ? 'border-slate-700/60' : 'border-gray-200'"
+        :class="themeStore.darkMode ? 'border-onyx-700/60' : 'border-powder-200'"
       >
         <div class="flex items-center space-x-2 min-w-0">
           <img src="/logo-ECODEV.png" alt="ECODEV" class="h-7 w-auto flex-shrink-0" />
           <div class="min-w-0">
             <p
               class="text-xs font-medium leading-tight truncate"
-              :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >
               Administration
             </p>
@@ -41,7 +41,7 @@
           </div>
         </div>
         <button class="lg:hidden p-1 rounded flex-shrink-0" @click="sidebarOpen = false">
-          <X class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+          <X class="w-4 h-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
         </button>
       </div>
 
@@ -55,10 +55,10 @@
           class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150"
           :class="
             isActive(item.to)
-              ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-500/20'
+              ? 'bg-flame-500/10 text-flame-600 dark:text-flame-400 border border-flame-500/20'
               : themeStore.darkMode
-                ? 'text-gray-400 hover:bg-slate-800 hover:text-white'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
+                : 'text-onyx-600 hover:bg-powder-100 hover:text-onyx-900'
           "
         >
           <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
@@ -75,11 +75,11 @@
         <!-- Séparateur -->
         <div
           class="pt-3 mt-3 border-t"
-          :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
         >
           <p
             class="px-3 text-[10px] font-semibold uppercase tracking-wider mb-2"
-            :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+            :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
           >
             Navigation
           </p>
@@ -88,8 +88,8 @@
             class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'text-gray-400 hover:bg-slate-800 hover:text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
+                : 'text-onyx-600 hover:bg-powder-100'
             "
           >
             <ExternalLink class="w-4 h-4" />
@@ -100,8 +100,8 @@
             class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'text-gray-400 hover:bg-slate-800 hover:text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
+                : 'text-onyx-600 hover:bg-powder-100'
             "
           >
             <LayoutDashboard class="w-4 h-4" />
@@ -113,7 +113,7 @@
       <!-- Pied de sidebar : user info + déco/dark -->
       <div
         class="px-3 py-3 border-t space-y-1"
-        :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+        :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
       >
         <!-- Theme toggle -->
         <button
@@ -121,8 +121,8 @@
           class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors"
           :class="
             themeStore.darkMode
-              ? 'text-yellow-400 hover:bg-slate-800'
-              : 'text-gray-500 hover:bg-gray-100'
+              ? 'text-yellow-400 hover:bg-onyx-800'
+              : 'text-onyx-500 hover:bg-powder-100'
           "
         >
           <Sun v-if="themeStore.darkMode" class="w-4 h-4" />
@@ -132,24 +132,24 @@
         <!-- User + logout -->
         <div
           class="flex items-center justify-between px-3 py-2 rounded-lg"
-          :class="themeStore.darkMode ? 'bg-slate-800' : 'bg-gray-100'"
+          :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'"
         >
           <div class="flex items-center space-x-2 min-w-0">
             <div
-              class="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+              class="w-7 h-7 rounded-full bg-gradient-to-br from-flame-500 to-onyx-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
             >
               {{ adminInitial }}
             </div>
             <div class="min-w-0">
               <p
                 class="text-xs font-medium truncate"
-                :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+                :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
               >
                 {{ authStore.user?.name }}
               </p>
               <p
                 class="text-[10px] truncate"
-                :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
               >
                 {{ authStore.user?.email }}
               </p>
@@ -160,8 +160,8 @@
             class="p-1.5 rounded transition-colors flex-shrink-0"
             :class="
               themeStore.darkMode
-                ? 'text-gray-400 hover:text-red-400 hover:bg-slate-700'
-                : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                ? 'text-onyx-400 hover:text-red-400 hover:bg-onyx-700'
+                : 'text-onyx-500 hover:text-red-500 hover:bg-red-50'
             "
             title="Déconnexion"
           >
@@ -178,8 +178,8 @@
         class="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 h-14 border-b backdrop-blur-md flex-shrink-0"
         :class="
           themeStore.darkMode
-            ? 'bg-slate-950/80 border-slate-700/60'
-            : 'bg-white/80 border-gray-200'
+            ? 'bg-onyx-950/80 border-onyx-700/60'
+            : 'bg-white/80 border-powder-200'
         "
       >
         <!-- Gauche : hamburger mobile + fil d'ariane -->
@@ -188,8 +188,8 @@
             class="lg:hidden p-2 rounded-lg transition-colors"
             :class="
               themeStore.darkMode
-                ? 'text-gray-300 hover:bg-slate-800'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'text-onyx-300 hover:bg-onyx-800'
+                : 'text-onyx-600 hover:bg-powder-100'
             "
             @click="sidebarOpen = true"
           >
@@ -198,11 +198,11 @@
           <div>
             <p
               class="font-semibold text-sm"
-              :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
             >
               {{ currentPageTitle }}
             </p>
-            <p class="text-[11px]" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+            <p class="text-[11px]" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
               Administration ECODEV
             </p>
           </div>

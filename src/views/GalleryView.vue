@@ -1,26 +1,26 @@
 <template>
-  <div class="min-h-screen bg-white dark:bg-slate-950">
+  <div class="min-h-screen bg-powder-50 dark:bg-onyx-950">
 
     <!-- ══════════════════════════ HERO ══════════════════════════ -->
     <section class="relative">
       <!-- Animated bg -->
       <div class="absolute inset-0 gallery-hero-bg"></div>
       <!-- Glow orbs -->
-      <div class="absolute top-0 left-1/3 w-96 h-96 bg-primary-500/10 blur-3xl rounded-full pointer-events-none"></div>
-      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary-500/10 blur-3xl rounded-full pointer-events-none"></div>
+      <div class="absolute top-0 left-1/3 w-96 h-96 bg-onyx-800/20 blur-3xl rounded-full pointer-events-none"></div>
+      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-onyx-700/15 blur-3xl rounded-full pointer-events-none"></div>
 
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col lg:flex-row items-center justify-between gap-12">
 
         <!-- Left — Text -->
         <div class="flex-1 text-center lg:text-left">
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary-400/30 bg-primary-500/10 text-primary-300 text-xs font-bold uppercase tracking-widest mb-6">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-flame-400/30 bg-flame-500/10 text-flame-300 text-xs font-bold uppercase tracking-widest mb-6">
             <Sparkles class="w-3.5 h-3.5" />
             {{ allTemplates.length }} modèles prêts à l'emploi
           </span>
 
           <h1 class="text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5">
             Trouvez votre<br />
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">
+            <span class="text-flame-400">
               style professionnel
             </span>
           </h1>
@@ -32,7 +32,7 @@
           <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
             <button
               @click="scrollToGrid"
-              class="flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 w-full sm:w-auto justify-center"
+              class="flex items-center gap-2 bg-white text-onyx-900 font-bold px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 w-full sm:w-auto justify-center"
             >
               <span>Parcourir les modèles</span>
               <ArrowDown class="w-4 h-4" />
@@ -66,7 +66,7 @@
         <svg viewBox="0 0 1440 60" class="absolute bottom-0 w-full h-full" preserveAspectRatio="none">
           <path
             d="M0,30 C480,60 960,0 1440,30 L1440,60 L0,60 Z"
-            class="fill-white dark:fill-slate-950"
+            class="fill-powder-50 dark:fill-onyx-950"
           />
         </svg>
       </div>
@@ -78,17 +78,17 @@
 
         <!-- Search -->
         <div class="relative flex-1 min-w-0 w-full md:w-auto">
-          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher un modèle..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm transition-all"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-900 text-onyx-900 dark:text-white placeholder-onyx-400 dark:placeholder-onyx-500 focus:outline-none focus:ring-2 focus:ring-flame-500 text-sm transition-all"
           />
         </div>
 
         <!-- Category pills -->
-        <div class="flex bg-gray-100 dark:bg-slate-800 rounded-xl p-1 gap-1 flex-shrink-0">
+        <div class="flex bg-powder-100 dark:bg-onyx-800 rounded-xl p-1 gap-1 flex-shrink-0">
           <button
             v-for="tab in filterTabs"
             :key="tab.value"
@@ -96,8 +96,8 @@
             class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap"
             :class="
               activeFilter === tab.value
-                ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                ? 'bg-white dark:bg-onyx-700 text-onyx-900 dark:text-white shadow-sm'
+                : 'text-onyx-500 dark:text-powder-400 hover:text-onyx-700 dark:hover:text-powder-200'
             "
           >
             {{ tab.label }}
@@ -108,7 +108,7 @@
         <!-- Sort -->
         <select
           v-model="sortBy"
-          class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0 transition-all"
+          class="px-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-900 text-onyx-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-flame-500 flex-shrink-0 transition-all"
         >
           <option value="popular">Populaires</option>
           <option value="newest">Plus récents</option>
@@ -118,11 +118,11 @@
       </div>
 
       <!-- Results info -->
-      <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">
-        <span class="font-semibold text-gray-900 dark:text-white">{{ filteredTemplates.length }}</span>
+      <p class="mt-5 text-sm text-onyx-500 dark:text-onyx-400">
+        <span class="font-semibold text-onyx-900 dark:text-white">{{ filteredTemplates.length }}</span>
         modèle{{ filteredTemplates.length > 1 ? 's' : '' }}
         <template v-if="searchQuery">
-          pour « <span class="text-primary-500 font-medium">{{ searchQuery }}</span> »
+          pour « <span class="text-flame-500 font-medium">{{ searchQuery }}</span> »
         </template>
       </p>
     </div>
@@ -143,7 +143,7 @@
           @click="selectTemplate(template)"
         >
           <!-- Live card preview (scaled) -->
-          <div class="relative bg-gray-100 dark:bg-slate-800" style="aspect-ratio: 16/9; overflow: hidden;">
+          <div class="relative bg-powder-100 dark:bg-onyx-800" style="aspect-ratio: 16/9; overflow: hidden;">
             <div
               :style="{
                 position: 'absolute',
@@ -185,7 +185,7 @@
               <div class="flex items-center gap-2">
                 <button
                   @click.stop="selectTemplate(template)"
-                  class="flex items-center gap-2 bg-white hover:bg-primary-500 hover:text-white text-gray-900 text-xs font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-lg"
+                  class="flex items-center gap-2 bg-white hover:bg-flame-500 hover:text-white text-onyx-900 text-xs font-bold px-4 py-2 rounded-lg transition-colors duration-200 shadow-lg"
                 >
                   Utiliser ce modèle
                   <ArrowRight class="w-3.5 h-3.5" />
@@ -234,14 +234,14 @@
 
       <!-- Empty state -->
       <div v-if="filteredTemplates.length === 0" class="text-center py-24">
-        <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-          <Layout class="w-10 h-10 text-gray-400" />
+        <div class="w-20 h-20 mx-auto mb-6 bg-powder-100 dark:bg-onyx-800 rounded-full flex items-center justify-center">
+          <Layout class="w-10 h-10 text-onyx-400" />
         </div>
-        <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Aucun modèle trouvé</h3>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Essayez un autre terme ou réinitialisez les filtres</p>
+        <h3 class="text-xl font-bold text-onyx-700 dark:text-powder-300 mb-2">Aucun modèle trouvé</h3>
+        <p class="text-onyx-500 dark:text-onyx-400 text-sm mb-6">Essayez un autre terme ou réinitialisez les filtres</p>
         <button
           @click="searchQuery = ''; activeFilter = 'all'"
-          class="px-5 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors"
+          class="px-5 py-2.5 bg-flame-500 text-white rounded-xl text-sm font-semibold hover:bg-flame-600 transition-colors"
         >
           Réinitialiser les filtres
         </button>
@@ -362,9 +362,9 @@ const scrollToGrid = () => {
 }
 .gallery-hero-bg {
   background: linear-gradient(
-    270deg, #0f172a, #1e1b4b, #0c1a35, #0f3460, #1a1745, #1e293b, #0d2137, #0f172a
+    270deg, #0a100d, #1c2a24, #141f1b, #0f1a16, #0a100d
   );
-  background-size: 600% 600%;
+  background-size: 400% 400%;
   animation: heroBg 20s ease infinite;
 }
 

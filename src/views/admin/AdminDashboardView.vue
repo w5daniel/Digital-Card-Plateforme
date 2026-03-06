@@ -6,19 +6,19 @@
         v-for="kpi in kpis"
         :key="kpi.label"
         class="rounded-xl p-4 border transition-all hover:shadow-md"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'"
       >
         <div class="flex items-start justify-between">
           <div>
             <p
               class="text-xs font-medium mb-1"
-              :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >
               {{ kpi.label }}
             </p>
             <p
               class="text-2xl font-bold"
-              :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
             >
               {{ kpi.value }}
             </p>
@@ -36,19 +36,19 @@
       <!-- Activité récente -->
       <div
         class="lg:col-span-2 rounded-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'"
       >
         <div
           class="flex items-center justify-between px-5 py-4 border-b"
-          :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-slate-700' : 'border-onyx-200'"
         >
           <h2
             class="font-semibold text-sm"
-            :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+            :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
           >
             Activité récente
           </h2>
-          <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+          <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
             Derniers événements
           </span>
         </div>
@@ -66,11 +66,11 @@
             <div class="flex-1 min-w-0">
               <p
                 class="text-sm truncate"
-                :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+                :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
               >
                 {{ item.label }}
               </p>
-              <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
                 {{ formatDate(item.time) }}
               </p>
             </div>
@@ -78,7 +78,7 @@
           <li
             v-if="adminStore.recentActivity.length === 0"
             class="px-5 py-8 text-center text-sm"
-            :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+            :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
           >
             Aucune activité récente
           </li>
@@ -91,23 +91,23 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
+            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
           "
         >
           <h3
             class="text-sm font-semibold mb-3"
-            :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+            :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
           >
             Répartition utilisateurs
           </h3>
           <div class="space-y-2">
             <div class="flex justify-between items-center text-sm">
-              <span :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-600'"
+              <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'"
                 >Plan gratuit</span
               >
               <span
                 class="font-medium"
-                :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+                :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
               >
                 {{ adminStore.stats.totalUsers - adminStore.stats.premiumUsers }}
               </span>
@@ -124,7 +124,7 @@
               />
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-600'"
+              <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'"
                 >Plan premium</span
               >
               <span class="font-medium text-primary-500">{{ adminStore.stats.premiumUsers }}</span>
@@ -147,12 +147,12 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
+            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
           "
         >
           <h3
             class="text-sm font-semibold mb-3"
-            :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+            :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
           >
             Alertes
           </h3>
@@ -187,12 +187,12 @@
         <div
           class="rounded-xl border p-4"
           :class="
-            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
+            themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-onyx-200'
           "
         >
           <h3
             class="text-sm font-semibold mb-3"
-            :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+            :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
           >
             Accès rapides
           </h3>
@@ -204,8 +204,8 @@
               class="flex items-center space-x-2 text-xs py-1.5 px-2 rounded-lg transition-colors"
               :class="
                 themeStore.darkMode
-                  ? 'text-gray-400 hover:bg-slate-700 hover:text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'text-onyx-400 hover:bg-slate-700 hover:text-white'
+                  : 'text-onyx-600 hover:bg-gray-100'
               "
             >
               <component :is="link.icon" class="w-3.5 h-3.5" />
@@ -251,7 +251,7 @@ const kpis = computed(() => [
     label: 'Cartes créées',
     value: adminStore.stats.totalCards,
     sub: `${adminStore.stats.publicCards} publiques`,
-    subColor: themeStore.darkMode ? 'text-gray-400' : 'text-gray-500',
+    subColor: themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
     icon: CreditCard,
     iconBg: 'bg-primary-500/10',
     iconColor: 'text-primary-500',
@@ -269,7 +269,7 @@ const kpis = computed(() => [
     label: 'Vues totales',
     value: adminStore.stats.totalViews.toLocaleString('fr-FR'),
     sub: `sur toutes les cartes`,
-    subColor: themeStore.darkMode ? 'text-gray-400' : 'text-gray-500',
+    subColor: themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
     icon: Eye,
     iconBg: 'bg-green-500/10',
     iconColor: 'text-green-500',

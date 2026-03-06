@@ -6,8 +6,8 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950;
-    @apply text-gray-800 dark:text-gray-100;
+    @apply bg-powder-50 dark:bg-onyx-950;
+    @apply text-onyx-800 dark:text-powder-100;
     @apply font-sans;
     @apply transition-colors duration-200;
   }
@@ -18,47 +18,73 @@
   h4,
   h5,
   h6 {
-    @apply font-display dark:text-white;
+    @apply font-display text-onyx-950 dark:text-powder-50;
   }
 }
 
 @layer components {
+  /* Bouton principal — Blazing Flame 500, 10% de la palette */
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+    @apply px-6 py-3 bg-flame-500 hover:bg-flame-600 active:bg-flame-700
+           text-white font-semibold rounded-xl
+           shadow-sm hover:shadow-md
+           transition-all duration-200;
   }
 
+  /* Bouton secondaire — fond blanc, bordure onyx légère */
   .btn-secondary {
-    @apply px-6 py-3 bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-300 font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-2 border-primary-200 dark:border-primary-800 hover:border-primary-300 dark:hover:border-primary-600;
+    @apply px-6 py-3 bg-white dark:bg-onyx-900
+           text-onyx-800 dark:text-powder-200
+           font-semibold rounded-xl
+           border border-onyx-200 dark:border-onyx-700
+           hover:border-onyx-300 dark:hover:border-onyx-600
+           hover:bg-powder-50 dark:hover:bg-onyx-800
+           shadow-sm hover:shadow-md
+           transition-all duration-200;
   }
 
+  /* Carte — fond blanc, bordure powder-200 */
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden;
+    @apply bg-white dark:bg-onyx-900
+           border border-powder-200 dark:border-onyx-800
+           rounded-2xl shadow-sm hover:shadow-md
+           transition-all duration-300 overflow-hidden;
   }
 
   .card-hover {
-    @apply transform hover:-translate-y-2 transition-all duration-300;
+    @apply transform hover:-translate-y-1 transition-all duration-300;
   }
 
+  /* Champ de formulaire */
   .input-field {
-    @apply w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-700 rounded-xl focus:border-primary-400 focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900 outline-none transition-all duration-200 bg-white dark:bg-slate-700 text-gray-800 dark:text-white;
+    @apply w-full px-4 py-3
+           border border-powder-200 dark:border-onyx-700
+           rounded-xl
+           focus:border-flame-400 focus:ring-2 focus:ring-flame-100 dark:focus:ring-flame-900/30
+           outline-none transition-all duration-200
+           bg-powder-100 dark:bg-onyx-800
+           text-onyx-900 dark:text-powder-100
+           placeholder-onyx-400 dark:placeholder-onyx-500;
   }
 
+  /* Texte accent — flame au lieu de dégradé coloré */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 bg-clip-text text-transparent;
+    @apply text-flame-500;
   }
 
+  /* Titre de section */
   .section-title {
-    @apply text-4xl md:text-5xl font-bold mb-4 gradient-text;
+    @apply text-4xl md:text-5xl font-bold mb-4 text-onyx-950 dark:text-powder-50;
   }
 }
 
 @layer utilities {
   .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.08);
   }
 
   .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }

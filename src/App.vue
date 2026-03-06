@@ -1,7 +1,7 @@
 <template>
   <div
     id="app"
-    class="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-gray-900 dark:text-white transition-colors duration-200"
+    class="min-h-screen flex flex-col bg-powder-50 dark:bg-onyx-950 text-onyx-900 dark:text-powder-100 transition-colors duration-200"
   >
     <NavBar v-if="!hideLayout" />
     <main class="flex-grow">

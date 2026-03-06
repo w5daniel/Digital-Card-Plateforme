@@ -3,16 +3,16 @@
     <!-- Filtres -->
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400" />
         <input
           v-model="search"
           type="text"
           placeholder="Titre, propriétaire..."
-          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
           :class="
             themeStore.darkMode
-              ? 'bg-slate-800 border-slate-700 text-white placeholder-gray-500'
-              : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+              ? 'bg-onyx-800 border-onyx-700 text-white placeholder-onyx-500'
+              : 'bg-powder-100 border-onyx-200 text-onyx-900 placeholder-onyx-400'
           "
         />
       </div>
@@ -24,10 +24,10 @@
           class="px-3 py-2 rounded-lg border text-xs font-medium transition-colors"
           :class="
             activeFilter === f.value
-              ? 'bg-primary-500 border-primary-500 text-white'
+              ? 'bg-flame-500 border-flame-500 text-white'
               : themeStore.darkMode
-                ? 'border-slate-700 text-gray-400 hover:bg-slate-800'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-800'
+                : 'border-onyx-200 text-onyx-600 hover:bg-powder-50'
           "
         >
           {{ f.label }}
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Compteur -->
-    <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+    <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
       {{ filteredCards.length }} carte(s) —
       {{ adminStore.stats.totalViews.toLocaleString('fr-FR') }} vues totales
     </p>
@@ -47,14 +47,14 @@
     <!-- Table -->
     <div
       class="rounded-xl border overflow-hidden"
-      :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+      :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr
               :class="
-                themeStore.darkMode ? 'bg-slate-800 text-gray-400' : 'bg-gray-50 text-gray-500'
+                themeStore.darkMode ? 'bg-onyx-800 text-onyx-400' : 'bg-powder-50 text-onyx-500'
               "
             >
               <th class="text-left px-4 py-3 font-medium">Carte</th>
@@ -68,15 +68,15 @@
           </thead>
           <tbody
             class="divide-y"
-            :class="themeStore.darkMode ? 'divide-slate-700' : 'divide-gray-100'"
+            :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'"
           >
             <tr
               v-for="card in filteredCards"
               :key="card.id"
               :class="[
                 themeStore.darkMode
-                  ? 'bg-slate-900 hover:bg-slate-800'
-                  : 'bg-white hover:bg-gray-50',
+                  ? 'bg-onyx-900 hover:bg-onyx-800'
+                  : 'bg-white hover:bg-powder-50',
                 card.flagged
                   ? themeStore.darkMode
                     ? 'border-l-2 border-red-500'
@@ -92,13 +92,13 @@
                     <CreditCard
                       v-else
                       class="w-4 h-4"
-                      :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                      :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
                     />
                   </div>
                   <div>
                     <p
                       class="font-medium"
-                      :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+                      :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
                     >
                       {{ card.title }}
                     </p>
@@ -120,7 +120,7 @@
               <td class="px-4 py-3 hidden sm:table-cell">
                 <span
                   class="text-sm"
-                  :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+                  :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
                 >
                   {{ card.ownerName }}
                 </span>
@@ -130,7 +130,7 @@
               <td class="px-4 py-3 hidden md:table-cell">
                 <span
                   class="text-xs"
-                  :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
                 >
                   {{ card.template }}
                 </span>
@@ -144,8 +144,8 @@
                     card.visibility === 'public'
                       ? 'bg-blue-500/10 text-blue-500'
                       : themeStore.darkMode
-                        ? 'bg-slate-700 text-gray-400'
-                        : 'bg-gray-100 text-gray-500'
+                        ? 'bg-onyx-700 text-onyx-400'
+                        : 'bg-powder-100 text-onyx-500'
                   "
                 >
                   {{ card.visibility === 'public' ? 'Publique' : 'Privée' }}
@@ -157,9 +157,9 @@
                 <div class="flex items-center space-x-1">
                   <Eye
                     class="w-3.5 h-3.5"
-                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                    :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
                   />
-                  <span :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">{{
+                  <span :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'">{{
                     card.views
                   }}</span>
                 </div>
@@ -169,7 +169,7 @@
               <td class="px-4 py-3 hidden lg:table-cell">
                 <span
                   class="text-xs"
-                  :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
                 >
                   {{ formatDate(card.createdAt) }}
                 </span>
@@ -195,8 +195,8 @@
                       card.flagged
                         ? 'text-red-500 hover:bg-red-500/10'
                         : themeStore.darkMode
-                          ? 'text-gray-400 hover:bg-slate-700'
-                          : 'text-gray-400 hover:bg-gray-100'
+                          ? 'text-onyx-400 hover:bg-onyx-700'
+                          : 'text-onyx-400 hover:bg-powder-100'
                     "
                     :title="card.flagged ? 'Retirer le signalement' : 'Signaler'"
                   >
@@ -218,7 +218,7 @@
               <td
                 colspan="7"
                 class="px-4 py-12 text-center text-sm"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
               >
                 Aucune carte trouvée
               </td>
@@ -236,15 +236,15 @@
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
       >
         <h3
           class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           Supprimer la carte
         </h3>
-        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-600'">
+        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
           Supprimer définitivement <strong>"{{ cardToDelete.title }}"</strong> de
           {{ cardToDelete.ownerName }} ?
         </p>
@@ -254,8 +254,8 @@
             class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'border-slate-600 text-gray-300 hover:bg-slate-700'
-                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
+                : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'
             "
           >
             Annuler

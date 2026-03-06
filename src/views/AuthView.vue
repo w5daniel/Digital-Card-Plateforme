@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-    <!-- Animated dark gradient background -->
+  <div class="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-onyx-950">
+    <!-- Static dark background -->
     <div class="absolute inset-0 auth-animated-bg"></div>
 
-    <!-- Floating blur blobs -->
+    <!-- Floating blur blobs (onyx tinted) -->
     <div
-      class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"
+      class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-onyx-800/20 blur-3xl pointer-events-none"
     ></div>
     <div
-      class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-violet-500/10 blur-3xl pointer-events-none"
+      class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-onyx-800/20 blur-3xl pointer-events-none"
     ></div>
 
     <!-- Main card -->
@@ -21,10 +21,10 @@
       >
         <!-- Decorative orbs -->
         <div
-          class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/10 pointer-events-none"
+          class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/5 pointer-events-none"
         ></div>
         <div
-          class="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-black/15 pointer-events-none"
+          class="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-black/20 pointer-events-none"
         ></div>
 
         <!-- Logo -->
@@ -80,21 +80,21 @@
       </div>
 
       <!-- ══════════════════ RIGHT — Form Panel ══════════════════ -->
-      <div class="flex-1 bg-white dark:bg-slate-900 flex flex-col min-h-[640px]">
+      <div class="flex-1 bg-powder-50 dark:bg-onyx-900 flex flex-col min-h-[640px]">
         <!-- Mobile logo -->
         <div class="flex justify-center pt-8 pb-2 lg:hidden">
           <router-link to="/" class="flex flex-col items-center">
             <img src="/logo-ECODEV.png" alt="ECODEV" class="h-10 w-auto" />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cartes digitales</p>
+            <p class="text-xs text-onyx-500 dark:text-powder-500 mt-1">Cartes digitales</p>
           </router-link>
         </div>
 
         <!-- Tab switcher -->
         <div class="px-8 pt-10 pb-6">
-          <div class="relative flex bg-gray-100 dark:bg-slate-800 rounded-2xl p-1.5">
+          <div class="relative flex bg-powder-100 dark:bg-onyx-800 rounded-2xl p-1.5">
             <!-- Sliding pill -->
             <div
-              class="absolute top-1.5 bottom-1.5 bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-all duration-300 ease-out"
+              class="absolute top-1.5 bottom-1.5 bg-white dark:bg-onyx-700 rounded-xl shadow-sm transition-all duration-300 ease-out"
               :style="pillStyle"
             ></div>
             <button
@@ -102,7 +102,9 @@
               @click="switchTo('login')"
               class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200"
               :class="
-                !isRegister ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
+                !isRegister
+                  ? 'text-onyx-900 dark:text-powder-50'
+                  : 'text-onyx-400 dark:text-powder-500'
               "
             >
               Connexion
@@ -112,7 +114,9 @@
               @click="switchTo('register')"
               class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors duration-200"
               :class="
-                isRegister ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
+                isRegister
+                  ? 'text-onyx-900 dark:text-powder-50'
+                  : 'text-onyx-400 dark:text-powder-500'
               "
             >
               Inscription
@@ -125,20 +129,20 @@
           <Transition :name="slideDir" mode="out-in">
             <!-- ── Login Form ── -->
             <div v-if="!isRegister" key="login-form">
-              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
+              <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
                 Connectez-vous à votre compte ECODEV CARD PRO
               </p>
               <form @submit.prevent="handleLogin" class="space-y-5">
                 <!-- Email -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Email
                   </label>
                   <div class="relative">
                     <Mail
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="loginEmail"
@@ -153,13 +157,13 @@
                 <!-- Password -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Mot de passe
                   </label>
                   <div class="relative">
                     <Lock
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="loginPassword"
@@ -171,7 +175,7 @@
                     <button
                       type="button"
                       @click="showLoginPassword = !showLoginPassword"
-                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
                     >
                       <Eye v-if="!showLoginPassword" class="w-4 h-4" />
                       <EyeOff v-else class="w-4 h-4" />
@@ -185,13 +189,13 @@
                     <input
                       type="checkbox"
                       v-model="rememberMe"
-                      class="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500 bg-white dark:bg-slate-700"
+                      class="w-4 h-4 rounded border-powder-300 dark:border-onyx-600 text-flame-600 focus:ring-flame-500 bg-powder-100 dark:bg-onyx-800"
                     />
-                    <span class="text-gray-600 dark:text-gray-400">Se souvenir</span>
+                    <span class="text-onyx-600 dark:text-powder-400">Se souvenir</span>
                   </label>
                   <button
                     type="button"
-                    class="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                    class="text-flame-600 dark:text-flame-400 hover:underline font-medium"
                   >
                     Mot de passe oublié ?
                   </button>
@@ -216,9 +220,9 @@
 
               <!-- Demo hint -->
               <div
-                class="mt-6 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-800/40"
+                class="mt-6 p-3 rounded-xl bg-powder-100 dark:bg-onyx-800 border border-powder-200 dark:border-onyx-700"
               >
-                <p class="text-xs text-blue-600 dark:text-blue-400">
+                <p class="text-xs text-onyx-600 dark:text-powder-400">
                   <strong>Mode démo :</strong> n'importe quel email + mot de passe ≥ 6 caractères
                 </p>
               </div>
@@ -226,20 +230,20 @@
 
             <!-- ── Register Form ── -->
             <div v-else key="register-form">
-              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
+              <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
                 Créez votre compte ECODEV CARD PRO gratuitement
               </p>
               <form @submit.prevent="handleRegister" class="space-y-4">
                 <!-- Full name -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Nom complet
                   </label>
                   <div class="relative">
                     <User
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="regFullName"
@@ -254,13 +258,13 @@
                 <!-- Email -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Email
                   </label>
                   <div class="relative">
                     <Mail
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="regEmail"
@@ -275,16 +279,16 @@
                 <!-- Password -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Mot de passe
-                    <span class="ml-1 text-xs text-gray-400 font-normal"
+                    <span class="ml-1 text-xs text-onyx-400 font-normal"
                       >(6 caractères minimum)</span
                     >
                   </label>
                   <div class="relative">
                     <Lock
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="regPassword"
@@ -296,7 +300,7 @@
                     <button
                       type="button"
                       @click="showRegPassword = !showRegPassword"
-                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
                     >
                       <Eye v-if="!showRegPassword" class="w-4 h-4" />
                       <EyeOff v-else class="w-4 h-4" />
@@ -309,7 +313,7 @@
                       :key="i"
                       class="h-1 flex-1 rounded-full transition-colors duration-300"
                       :class="
-                        i <= passwordStrength ? strengthColor : 'bg-gray-200 dark:bg-slate-700'
+                        i <= passwordStrength ? strengthColor : 'bg-powder-200 dark:bg-onyx-700'
                       "
                     ></div>
                   </div>
@@ -318,13 +322,13 @@
                 <!-- Confirm Password -->
                 <div>
                   <label
-                    class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
                   >
                     Confirmer le mot de passe
                   </label>
                   <div class="relative">
                     <Lock
-                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
                     />
                     <input
                       v-model="regConfirm"
@@ -365,9 +369,9 @@
                 </button>
 
                 <!-- Terms -->
-                <p class="text-xs text-center text-gray-400 dark:text-gray-500">
+                <p class="text-xs text-center text-onyx-400 dark:text-powder-500">
                   En créant un compte, vous acceptez nos
-                  <button type="button" class="text-primary-500 hover:underline">
+                  <button type="button" class="text-flame-500 hover:underline">
                     conditions d'utilisation
                   </button>
                 </p>
@@ -485,59 +489,35 @@ watch(isRegister, () => {
 
 <style scoped>
 /* ── Animated background ──────────────────────────────────────────── */
-@keyframes authBg {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
 .auth-animated-bg {
-  background: linear-gradient(
-    270deg,
-    #0f172a,
-    #1e1b4b,
-    #0c1a35,
-    #0f3460,
-    #1a1745,
-    #1e293b,
-    #0d2137,
-    #0f172a
-  );
-  background-size: 600% 600%;
-  animation: authBg 20s ease infinite;
+  background: #0a100d;
 }
 
 /* ── Brand panel ──────────────────────────────────────────────────── */
 .auth-brand-panel {
-  background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 55%, #2563eb 100%);
+  background: #1c2a24;
 }
 
 /* ── Input ────────────────────────────────────────────────────────── */
 .auth-input {
-  @apply w-full rounded-xl border border-gray-200 dark:border-slate-700
-         bg-gray-50 dark:bg-slate-800
-         text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+  @apply w-full rounded-xl border border-powder-200 dark:border-onyx-700
+         bg-powder-100 dark:bg-onyx-800
+         text-onyx-900 dark:text-white placeholder-onyx-400 dark:placeholder-onyx-500
          py-2.5 text-sm
-         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+         focus:outline-none focus:ring-2 focus:ring-flame-500 focus:border-transparent
          transition-all duration-200;
 }
 
 /* ── Submit button ────────────────────────────────────────────────── */
 .auth-submit-btn {
   @apply w-full flex items-center justify-center space-x-2
-         bg-gradient-to-r from-primary-600 to-primary-500
-         hover:from-primary-700 hover:to-primary-600
+         bg-flame-500 hover:bg-flame-600
          disabled:opacity-60 disabled:cursor-not-allowed
          text-white font-semibold rounded-xl
          py-3 px-6 text-sm
-         shadow-lg shadow-primary-500/30
+         shadow-sm
          transition-all duration-200
-         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+         focus:outline-none focus:ring-2 focus:ring-flame-500 focus:ring-offset-2;
 }
 
 /* ── Spinner ──────────────────────────────────────────────────────── */

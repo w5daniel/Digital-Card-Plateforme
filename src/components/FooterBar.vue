@@ -1,13 +1,13 @@
 <template>
-  <footer class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white mt-20">
+  <footer class="bg-onyx-950 text-powder-200 mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- About -->
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
-            <img src="/logo-ECODEV.png" alt="ECODEV" class="h-8 w-auto" />
+            <img src="/logo-ECODEV.png" alt="ECODEV" class="h-8 w-auto filter brightness-0 invert" />
           </div>
-          <p class="text-gray-400 text-sm">
+          <p class="text-powder-400 text-sm">
             Créez, gérez et partagez vos cartes de visite numériques en quelques clics.
           </p>
         </div>
@@ -15,29 +15,29 @@
         <!-- Links -->
         <div>
           <h4 class="font-semibold mb-4">Liens rapides</h4>
-          <ul class="space-y-2 text-sm text-gray-400">
+          <ul class="space-y-2 text-sm text-powder-400">
             <li>
-              <router-link to="/" class="hover:text-primary-400 transition-colors"
+              <router-link to="/" class="hover:text-flame-400 transition-colors"
                 >Accueil</router-link
               >
             </li>
             <li>
-              <router-link to="/gallery" class="hover:text-primary-400 transition-colors"
+              <router-link to="/gallery" class="hover:text-flame-400 transition-colors"
                 >Galerie</router-link
               >
             </li>
             <li>
-              <router-link to="/editor" class="hover:text-primary-400 transition-colors"
+              <router-link to="/editor" class="hover:text-flame-400 transition-colors"
                 >Créer une carte</router-link
               >
             </li>
             <li>
-              <router-link to="/dashboard" class="hover:text-primary-400 transition-colors"
+              <router-link to="/dashboard" class="hover:text-flame-400 transition-colors"
                 >Mon dashboard</router-link
               >
             </li>
             <li>
-              <router-link to="/about" class="hover:text-primary-400 transition-colors"
+              <router-link to="/about" class="hover:text-flame-400 transition-colors"
                 >À propos</router-link
               >
             </li>
@@ -47,31 +47,31 @@
         <!-- Resources -->
         <div>
           <h4 class="font-semibold mb-4">Ressources</h4>
-          <ul class="space-y-2 text-sm text-gray-400">
+          <ul class="space-y-2 text-sm text-powder-400">
             <li>
-              <a href="#" class="hover:text-primary-400 transition-colors">Documentation API</a>
+              <a href="#" class="hover:text-flame-400 transition-colors">Documentation API</a>
             </li>
-            <li><a href="#" class="hover:text-primary-400 transition-colors">Tutoriels</a></li>
-            <li><a href="#" class="hover:text-primary-400 transition-colors">Support</a></li>
-            <li><a href="#" class="hover:text-primary-400 transition-colors">FAQ</a></li>
+            <li><a href="#" class="hover:text-flame-400 transition-colors">Tutoriels</a></li>
+            <li><a href="#" class="hover:text-flame-400 transition-colors">Support</a></li>
+            <li><a href="#" class="hover:text-flame-400 transition-colors">FAQ</a></li>
           </ul>
         </div>
 
         <!-- Contact -->
         <div>
           <h4 class="font-semibold mb-4">Contact</h4>
-          <ul class="space-y-2 text-sm text-gray-400">
+          <ul class="space-y-2 text-sm text-powder-400">
             <li class="flex items-center space-x-2">
               <Mail class="w-4 h-4 flex-shrink-0" />
-              <a href="mailto:internship@ecodev.dev" class="hover:text-primary-400 transition-colors">
-                internship@ecodev.dev
+              <a href="mailto:contact@ecodev.dev" class="hover:text-flame-400 transition-colors">
+                contact@ecodev.dev
               </a>
             </li>
             <li class="flex items-center space-x-2">
               <Phone class="w-4 h-4 flex-shrink-0" />
               <div class="flex flex-col space-y-1">
-                <a href="tel:+22656343412" class="hover:text-primary-400 transition-colors">+226 56 34 34 12</a>
-                <a href="tel:+22651088080" class="hover:text-primary-400 transition-colors">+226 51 08 80 80</a>
+                <a href="tel:+22656343412" class="hover:text-flame-400 transition-colors">+226 56 34 34 12</a>
+                <a href="tel:+22651088080" class="hover:text-flame-400 transition-colors">+226 51 08 80 80</a>
               </div>
             </li>
             <li class="flex items-center space-x-2">
@@ -83,9 +83,9 @@
       </div>
 
       <!-- Bottom Bar -->
-      <div class="border-t border-gray-700 mt-8 pt-8">
+      <div class="border-t border-onyx-800 mt-8 pt-8">
         <div
-          class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 space-y-6 md:space-y-0"
+          class="flex flex-col md:flex-row justify-between items-center text-sm text-powder-400 space-y-6 md:space-y-0"
         >
           <p>&copy; 2026 ECODEV INTERNATIONAL. Tous droits réservés.</p>
 
@@ -153,7 +153,7 @@
               href="https://x.com/ECODEV_INT?t=BDNVS8Zr5bNkLnHD2GKFrQ&s=09"
               target="_blank"
               rel="noopener noreferrer"
-              class="hover:text-gray-400 transition-colors"
+              class="hover:text-onyx-400 transition-colors"
               title="X (Twitter)"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -165,9 +165,9 @@
           </div>
 
           <div class="flex space-x-6">
-            <a href="#" class="hover:text-primary-400 transition-colors">Confidentialité</a>
-            <a href="#" class="hover:text-primary-400 transition-colors">Conditions</a>
-            <a href="#" class="hover:text-primary-400 transition-colors">Cookies</a>
+            <a href="#" class="hover:text-flame-400 transition-colors">Confidentialité</a>
+            <a href="#" class="hover:text-flame-400 transition-colors">Conditions</a>
+            <a href="#" class="hover:text-flame-400 transition-colors">Cookies</a>
           </div>
         </div>
       </div>

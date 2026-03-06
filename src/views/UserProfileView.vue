@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#f0f2f5] dark:bg-slate-900 py-8 transition-colors duration-300">
+  <div class="min-h-screen bg-powder-50 dark:bg-onyx-950 py-8 transition-colors duration-300">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <div class="flex flex-col lg:flex-row gap-6 items-start">
@@ -8,22 +8,22 @@
         <aside class="w-full lg:w-64 shrink-0 space-y-5">
 
           <!-- User card -->
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+          <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
             <div class="flex flex-col items-center text-center">
 
               <!-- Circular avatar with ring -->
               <div class="relative mb-4 group">
-                <div class="absolute -inset-[3px] rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 opacity-80"></div>
+                <div class="absolute -inset-[3px] rounded-full bg-flame-500 opacity-80"></div>
                 <label class="relative block cursor-pointer">
                   <img
                     v-if="authStore.profilePhoto"
                     :src="authStore.profilePhoto"
                     alt="avatar"
-                    class="relative w-24 h-24 rounded-full object-cover border-[3px] border-white dark:border-slate-800"
+                    class="relative w-24 h-24 rounded-full object-cover border-[3px] border-white dark:border-onyx-900"
                   />
                   <div
                     v-else
-                    class="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-3xl font-bold border-[3px] border-white dark:border-slate-800"
+                    class="relative w-24 h-24 rounded-full bg-onyx-900 flex items-center justify-center text-white text-3xl font-bold border-[3px] border-white dark:border-onyx-900"
                   >
                     {{ userInitial }}
                   </div>
@@ -34,10 +34,10 @@
                 </label>
               </div>
 
-              <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide">
+              <h2 class="text-sm font-bold text-onyx-900 dark:text-powder-100 uppercase tracking-wide">
                 {{ authStore.user?.name || 'Utilisateur' }}
               </h2>
-              <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+              <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">
                 {{ authStore.user?.email }}
               </p>
             </div>
@@ -51,25 +51,25 @@
               @click="activeTab = item.id"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 text-sm"
               :class="activeTab === item.id
-                ? 'bg-primary-500 text-white font-semibold shadow-md shadow-primary-500/25'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm font-medium'"
+                ? 'bg-flame-500 text-white font-semibold shadow-sm shadow-flame-500/20'
+                : 'text-onyx-600 dark:text-powder-400 hover:bg-white dark:hover:bg-onyx-800 hover:shadow-sm font-medium'"
             >
               <component
                 :is="item.icon"
                 class="w-[18px] h-[18px] shrink-0"
-                :class="activeTab === item.id ? 'text-white' : 'text-gray-400 dark:text-gray-500'"
+                :class="activeTab === item.id ? 'text-white' : 'text-onyx-500 dark:text-powder-500'"
               />
               {{ item.label }}
             </button>
           </nav>
 
           <!-- Mini stats card -->
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5">
-            <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Statistiques</p>
+          <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-5">
+            <p class="text-xs font-semibold text-onyx-500 dark:text-powder-500 uppercase tracking-wider mb-3">Statistiques</p>
             <div class="grid grid-cols-2 gap-3">
               <div v-for="stat in statItems" :key="stat.label" class="text-center">
                 <div class="text-xl font-bold" :class="stat.color">{{ stat.value }}</div>
-                <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 uppercase tracking-wider">{{ stat.label }}</div>
+                <div class="text-[10px] text-onyx-500 dark:text-powder-500 mt-0.5 uppercase tracking-wider">{{ stat.label }}</div>
               </div>
             </div>
           </div>
@@ -77,7 +77,7 @@
           <!-- Logout -->
           <button
             @click="handleLogout"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-onyx-500 dark:text-powder-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-white dark:hover:bg-onyx-800 transition-all duration-200"
           >
             <LogOut class="w-[18px] h-[18px]" />
             Se déconnecter
@@ -91,31 +91,31 @@
           <template v-if="activeTab === 'profile'">
 
             <!-- Personal info card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Informations personnelles</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Mettez à jour vos informations de profil</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Informations personnelles</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Mettez à jour vos informations de profil</p>
                 </div>
-                <div class="w-9 h-9 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <User class="w-4 h-4 text-primary-500" />
+                <div class="w-9 h-9 bg-flame-50 dark:bg-flame-900/30 rounded-lg flex items-center justify-center">
+                  <User class="w-4 h-4 text-flame-500" />
                 </div>
               </div>
 
               <!-- Photo section -->
-              <div class="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-slate-700">
+              <div class="flex items-center gap-4 mb-6 pb-6 border-b border-powder-100 dark:border-onyx-800">
                 <div class="relative group shrink-0">
-                  <div class="absolute -inset-[2px] rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 opacity-70"></div>
+                  <div class="absolute -inset-[2px] rounded-full bg-flame-500 opacity-70"></div>
                   <label class="relative block cursor-pointer">
                     <img
                       v-if="authStore.profilePhoto"
                       :src="authStore.profilePhoto"
                       alt="avatar"
-                      class="relative w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-800"
+                      class="relative w-14 h-14 rounded-full object-cover border-2 border-white dark:border-onyx-900"
                     />
                     <div
                       v-else
-                      class="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-lg font-bold border-2 border-white dark:border-slate-800"
+                      class="relative w-14 h-14 rounded-full bg-onyx-900 flex items-center justify-center text-white text-lg font-bold border-2 border-white dark:border-onyx-900"
                     >
                       {{ userInitial }}
                     </div>
@@ -126,17 +126,17 @@
                   </label>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-gray-900 dark:text-white">Photo de profil</p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">JPG, PNG ou WebP · Max 5 Mo</p>
+                  <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100">Photo de profil</p>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mb-2">JPG, PNG ou WebP · Max 5 Mo</p>
                   <div class="flex gap-2">
-                    <label class="cursor-pointer px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">
+                    <label class="cursor-pointer px-3 py-1.5 text-xs font-semibold rounded-lg bg-flame-500 hover:bg-flame-600 text-white transition-colors">
                       Changer
                       <input type="file" accept="image/*" @change="handlePhotoUpload" class="hidden" />
                     </label>
                     <button
                       v-if="authStore.profilePhoto"
                       @click="removePhoto"
-                      class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      class="px-3 py-1.5 text-xs font-medium rounded-lg text-onyx-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       Supprimer
                     </button>
@@ -148,49 +148,49 @@
               <form @submit.prevent="saveProfile" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Nom complet</label>
+                    <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5">Nom complet</label>
                     <input
                       v-model="profileForm.name"
                       type="text"
                       placeholder="Votre nom complet"
-                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Adresse email</label>
+                    <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5">Adresse email</label>
                     <input
                       v-model="profileForm.email"
                       type="email"
                       placeholder="votre@email.com"
-                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
                     />
                   </div>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Titre professionnel</label>
+                  <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5">Titre professionnel</label>
                   <input
                     v-model="profileForm.title"
                     type="text"
                     placeholder="Ex : Développeur Web · Chef de projet"
-                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Biographie</label>
+                  <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5">Biographie</label>
                   <textarea
                     v-model="profileForm.bio"
                     rows="3"
                     placeholder="Parlez de vous en quelques mots..."
                     maxlength="200"
-                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 resize-none bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 resize-none bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
                   />
-                  <p class="text-[10px] text-gray-400 mt-1 text-right">{{ profileForm.bio.length }} / 200</p>
+                  <p class="text-[10px] text-onyx-500 dark:text-powder-500 mt-1 text-right">{{ profileForm.bio.length }} / 200</p>
                 </div>
                 <div class="flex justify-end">
                   <button
                     type="submit"
                     :disabled="profileLoading"
-                    class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white transition-colors shadow-sm"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-flame-500 hover:bg-flame-600 disabled:opacity-50 text-white transition-colors shadow-sm"
                   >
                     <Loader2 v-if="profileLoading" class="w-4 h-4 animate-spin" />
                     <Save v-else class="w-4 h-4" />
@@ -201,11 +201,11 @@
             </div>
 
             <!-- Danger zone -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-red-100 dark:border-red-900/20">
+            <div class="bg-white dark:bg-onyx-900 rounded-2xl shadow-sm p-6 border border-red-100 dark:border-red-900/20">
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Zone dangereuse</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Actions irréversibles</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Zone dangereuse</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Actions irréversibles</p>
                 </div>
                 <div class="w-9 h-9 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
                   <AlertTriangle class="w-4 h-4 text-red-500" />
@@ -213,8 +213,8 @@
               </div>
               <div class="flex items-center justify-between p-4 rounded-xl bg-red-50/50 dark:bg-red-900/10">
                 <div>
-                  <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Supprimer le compte</p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Toutes vos données seront supprimées</p>
+                  <p class="text-sm font-medium text-onyx-900 dark:text-powder-100">Supprimer le compte</p>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Toutes vos données seront supprimées</p>
                 </div>
                 <button
                   @click="confirmDeleteAccount"
@@ -229,11 +229,11 @@
           <!-- ═══ TAB : SECURITE ════════════════════════════════════ -->
           <template v-if="activeTab === 'security'">
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Changer le mot de passe</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Utilisez un mot de passe fort et unique</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Changer le mot de passe</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Utilisez un mot de passe fort et unique</p>
                 </div>
                 <div class="w-9 h-9 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
                   <Lock class="w-4 h-4 text-emerald-500" />
@@ -242,7 +242,7 @@
 
               <form @submit.prevent="changePassword" class="space-y-4">
                 <div v-for="field in passwordFields" :key="field.key">
-                  <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ field.label }}</label>
+                  <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5">{{ field.label }}</label>
                   <div class="relative">
                     <input
                       v-model="passwordForm[field.key]"
@@ -251,14 +251,14 @@
                       class="w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2"
                       :class="
                         field.key === 'confirm' && passwordForm.confirm && passwordForm.new !== passwordForm.confirm
-                          ? 'bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-700 text-gray-900 dark:text-white focus:ring-red-400/30'
-                          : 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white focus:ring-primary-500/30 focus:border-primary-500'
+                          ? 'bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-700 text-onyx-900 dark:text-powder-100 focus:ring-red-400/30'
+                          : 'bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 focus:ring-flame-500/30 focus:border-flame-500'
                       "
                     />
                     <button
                       type="button"
                       @click="showPasswords[field.key] = !showPasswords[field.key]"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-onyx-500 hover:text-onyx-700 dark:text-powder-500 dark:hover:text-powder-300 transition-colors"
                     >
                       <Eye v-if="!showPasswords[field.key]" class="w-4 h-4" />
                       <EyeOff v-else class="w-4 h-4" />
@@ -270,7 +270,7 @@
                       <div
                         v-for="n in 4" :key="n"
                         class="h-1 flex-1 rounded-full transition-all duration-300"
-                        :class="passwordStrength.score >= n ? passwordStrength.color : 'bg-gray-200 dark:bg-slate-600'"
+                        :class="passwordStrength.score >= n ? passwordStrength.color : 'bg-powder-200 dark:bg-onyx-600'"
                       />
                     </div>
                     <p class="text-[10px] font-medium" :class="passwordStrength.textColor">{{ passwordStrength.label }}</p>
@@ -298,22 +298,22 @@
             </div>
 
             <!-- Active session -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-5">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Session active</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Appareils connectés</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Session active</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Appareils connectés</p>
                 </div>
-                <div class="w-9 h-9 bg-secondary-50 dark:bg-secondary-900/30 rounded-lg flex items-center justify-center">
-                  <Monitor class="w-4 h-4 text-secondary-500" />
+                <div class="w-9 h-9 bg-onyx-50 dark:bg-onyx-900/30 rounded-lg flex items-center justify-center">
+                  <Monitor class="w-4 h-4 text-onyx-500" />
                 </div>
               </div>
               <div class="flex items-center justify-between p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-800/30">
                 <div class="flex items-center gap-3">
                   <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Session actuelle</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500">Navigateur Web · {{ formattedLoginDate }}</p>
+                    <p class="text-sm font-medium text-onyx-900 dark:text-powder-100">Session actuelle</p>
+                    <p class="text-xs text-onyx-500 dark:text-powder-500">Navigateur Web · {{ formattedLoginDate }}</p>
                   </div>
                 </div>
                 <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -326,18 +326,18 @@
           <!-- ═══ TAB : PREFERENCES ═══════════════════════════════════ -->
           <template v-if="activeTab === 'preferences'">
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Préférences</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Personnalisez votre expérience</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Préférences</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Personnalisez votre expérience</p>
                 </div>
                 <div class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
                   <Sliders class="w-4 h-4 text-indigo-500" />
                 </div>
               </div>
 
-              <div class="divide-y divide-gray-100 dark:divide-slate-700">
+              <div class="divide-y divide-powder-100 dark:divide-onyx-800">
                 <div
                   v-for="pref in prefItems"
                   :key="pref.key"
@@ -348,8 +348,8 @@
                       <component :is="pref.icon" class="w-4 h-4" :class="pref.iconClass" />
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ pref.label }}</p>
-                      <p class="text-xs text-gray-400 dark:text-gray-500">{{ pref.desc }}</p>
+                      <p class="text-sm font-medium text-onyx-900 dark:text-powder-100">{{ pref.label }}</p>
+                      <p class="text-xs text-onyx-500 dark:text-powder-500">{{ pref.desc }}</p>
                     </div>
                   </div>
                   <!-- Toggle -->
@@ -357,8 +357,8 @@
                     @click="togglePref(pref)"
                     class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 shrink-0"
                     :class="getPrefValue(pref.key)
-                      ? 'bg-primary-500'
-                      : 'bg-gray-200 dark:bg-slate-600'"
+                      ? 'bg-flame-500'
+                      : 'bg-powder-200 dark:bg-onyx-700'"
                     role="switch"
                     :aria-checked="getPrefValue(pref.key)"
                   >
@@ -373,7 +373,7 @@
               <div class="flex justify-end pt-5 mt-1">
                 <button
                   @click="savePreferences"
-                  class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-primary-500 hover:bg-primary-600 text-white transition-colors shadow-sm"
+                  class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-flame-500 hover:bg-flame-600 text-white transition-colors shadow-sm"
                 >
                   <Save class="w-4 h-4" />
                   Sauvegarder
@@ -382,20 +382,20 @@
             </div>
 
             <!-- Export data -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 bg-gray-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
-                    <Download class="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <div class="w-9 h-9 bg-onyx-100 dark:bg-onyx-800 rounded-lg flex items-center justify-center">
+                    <Download class="w-4 h-4 text-onyx-500 dark:text-powder-500" />
                   </div>
                   <div>
-                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">Exporter vos données</h2>
-                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ stats.totalCards }} carte(s) · format JSON</p>
+                    <h2 class="text-sm font-bold text-onyx-900 dark:text-powder-100">Exporter vos données</h2>
+                    <p class="text-xs text-onyx-500 dark:text-powder-500">{{ stats.totalCards }} carte(s) · format JSON</p>
                   </div>
                 </div>
                 <button
                   @click="downloadData"
-                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors bg-onyx-100 dark:bg-onyx-800 text-onyx-600 dark:text-powder-400 hover:bg-onyx-200 dark:hover:bg-onyx-700"
                 >
                   <Download class="w-3.5 h-3.5" />
                   Télécharger
@@ -407,11 +407,11 @@
           <!-- ═══ TAB : ABONNEMENT ══════════════════════════════════ -->
           <template v-if="activeTab === 'subscription'">
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Mon abonnement</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Gérez votre plan</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Mon abonnement</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Gérez votre plan</p>
                 </div>
                 <div class="w-9 h-9 bg-accent-50 dark:bg-accent-900/30 rounded-lg flex items-center justify-center">
                   <Star class="w-4 h-4 text-accent-500" />
@@ -423,28 +423,28 @@
                 class="rounded-xl p-4 mb-6 border"
                 :class="authStore.hasPremium()
                   ? 'bg-accent-50/50 dark:bg-accent-900/15 border-accent-200 dark:border-accent-800/30'
-                  : 'bg-gray-50 dark:bg-slate-700/30 border-gray-100 dark:border-slate-700'"
+                  : 'bg-powder-50 dark:bg-onyx-800/30 border-powder-100 dark:border-onyx-800'"
               >
                 <div class="flex items-center justify-between">
                   <div>
                     <div class="flex items-center gap-2 mb-0.5">
-                      <span class="text-sm font-bold" :class="authStore.hasPremium() ? 'text-accent-600 dark:text-accent-400' : 'text-gray-900 dark:text-white'">
+                      <span class="text-sm font-bold" :class="authStore.hasPremium() ? 'text-accent-600 dark:text-accent-400' : 'text-onyx-900 dark:text-powder-100'">
                         Plan {{ authStore.hasPremium() ? 'Premium' : 'Gratuit' }}
                       </span>
                       <span v-if="authStore.hasPremium()" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded-full uppercase">Actif</span>
                     </div>
-                    <p v-if="authStore.hasPremium() && authStore.user?.premiumUntil" class="text-xs text-gray-400 dark:text-gray-500">
+                    <p v-if="authStore.hasPremium() && authStore.user?.premiumUntil" class="text-xs text-onyx-500 dark:text-powder-500">
                       Renouvellement le {{ formatDate(authStore.user.premiumUntil) }}
                     </p>
-                    <p v-else-if="!authStore.hasPremium()" class="text-xs text-gray-400 dark:text-gray-500">
+                    <p v-else-if="!authStore.hasPremium()" class="text-xs text-onyx-500 dark:text-powder-500">
                       {{ stats.totalCards }} / 2 cartes utilisées
                     </p>
                   </div>
                   <div v-if="!authStore.hasPremium()" class="flex flex-col items-end gap-1">
-                    <div class="h-1.5 w-20 rounded-full overflow-hidden bg-gray-200 dark:bg-slate-600">
+                    <div class="h-1.5 w-20 rounded-full overflow-hidden bg-powder-200 dark:bg-onyx-700">
                       <div
                         class="h-full rounded-full transition-all duration-500"
-                        :class="stats.totalCards >= 2 ? 'bg-red-500' : 'bg-primary-500'"
+                        :class="stats.totalCards >= 2 ? 'bg-red-500' : 'bg-flame-500'"
                         :style="{ width: `${Math.min((stats.totalCards / 2) * 100, 100)}%` }"
                       />
                     </div>
@@ -458,16 +458,16 @@
                 <div
                   class="rounded-xl border p-5 transition-all"
                   :class="!authStore.hasPremium()
-                    ? 'border-primary-300 dark:border-primary-700 bg-primary-50/30 dark:bg-primary-900/10'
-                    : 'border-gray-100 dark:border-slate-700'"
+                    ? 'border-flame-300 dark:border-flame-700 bg-flame-50/30 dark:bg-flame-900/10'
+                    : 'border-powder-100 dark:border-onyx-800'"
                 >
                   <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-bold text-sm text-gray-900 dark:text-white">Gratuit</h3>
-                    <span v-if="!authStore.hasPremium()" class="text-[10px] font-bold text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-full">Actuel</span>
+                    <h3 class="font-bold text-sm text-onyx-900 dark:text-powder-100">Gratuit</h3>
+                    <span v-if="!authStore.hasPremium()" class="text-[10px] font-bold text-flame-500 bg-flame-50 dark:bg-flame-900/30 px-2 py-0.5 rounded-full">Actuel</span>
                   </div>
-                  <div class="text-xl font-bold text-gray-900 dark:text-white mb-3">0 €<span class="text-xs font-normal text-gray-400">/mois</span></div>
+                  <div class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-3">0 €<span class="text-xs font-normal text-onyx-500 dark:text-powder-500">/mois</span></div>
                   <ul class="space-y-2">
-                    <li v-for="f in freeFeatures" :key="f" class="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <li v-for="f in freeFeatures" :key="f" class="flex items-start gap-2 text-xs text-onyx-500 dark:text-powder-500">
                       <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                       {{ f }}
                     </li>
@@ -479,16 +479,16 @@
                   class="rounded-xl border p-5 relative overflow-hidden transition-all"
                   :class="authStore.hasPremium()
                     ? 'border-accent-300 dark:border-accent-700 bg-accent-50/30 dark:bg-accent-900/10'
-                    : 'border-gray-100 dark:border-slate-700 hover:border-accent-200 dark:hover:border-accent-800'"
+                    : 'border-powder-100 dark:border-onyx-800 hover:border-accent-200 dark:hover:border-accent-800'"
                 >
                   <div class="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-500 text-white">Populaire</div>
                   <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-bold text-sm text-gray-900 dark:text-white">Premium</h3>
+                    <h3 class="font-bold text-sm text-onyx-900 dark:text-powder-100">Premium</h3>
                     <span v-if="authStore.hasPremium()" class="text-[10px] font-bold text-accent-600 bg-accent-50 dark:bg-accent-900/30 px-2 py-0.5 rounded-full">Actuel</span>
                   </div>
-                  <div class="text-xl font-bold text-gray-900 dark:text-white mb-3">9,99 €<span class="text-xs font-normal text-gray-400">/mois</span></div>
+                  <div class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-3">9,99 €<span class="text-xs font-normal text-onyx-500 dark:text-powder-500">/mois</span></div>
                   <ul class="space-y-2">
-                    <li v-for="f in premiumFeatures" :key="f" class="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <li v-for="f in premiumFeatures" :key="f" class="flex items-start gap-2 text-xs text-onyx-500 dark:text-powder-500">
                       <CheckCircle class="w-3.5 h-3.5 text-accent-500 shrink-0 mt-0.5" />
                       {{ f }}
                     </li>
@@ -507,10 +507,10 @@
                   <Star v-else class="w-4 h-4" />
                   {{ upgradeLoading ? 'Traitement...' : 'Passer au Premium' }}
                 </button>
-                <p class="text-[10px] text-center text-gray-400 mt-2">Sans engagement · Annulation à tout moment</p>
+                <p class="text-[10px] text-center text-onyx-500 dark:text-powder-500 mt-2">Sans engagement · Annulation à tout moment</p>
               </div>
               <div v-else class="flex justify-end">
-                <button @click="confirmCancelSubscription" class="text-xs text-gray-400 hover:text-red-500 transition-colors underline">
+                <button @click="confirmCancelSubscription" class="text-xs text-onyx-500 dark:text-powder-500 hover:text-red-500 transition-colors underline">
                   Annuler l'abonnement
                 </button>
               </div>
@@ -520,11 +520,11 @@
           <!-- ═══ TAB : FACTURATION ══════════════════════════════════ -->
           <template v-if="activeTab === 'billing'">
 
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
+            <div class="bg-white dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-6">
               <div class="flex items-center justify-between mb-6">
                 <div>
-                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Facturation</h2>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Historique de vos paiements</p>
+                  <h2 class="text-base font-bold text-onyx-900 dark:text-powder-100">Facturation</h2>
+                  <p class="text-xs text-onyx-500 dark:text-powder-500 mt-0.5">Historique de vos paiements</p>
                 </div>
                 <div class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
                   <CreditCard class="w-4 h-4 text-indigo-500" />
@@ -535,7 +535,7 @@
               <div v-if="mockInvoices.length > 0" class="overflow-x-auto">
                 <table class="w-full text-sm">
                   <thead>
-                    <tr class="text-left text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-slate-700">
+                    <tr class="text-left text-[10px] uppercase tracking-wider text-onyx-500 dark:text-powder-500 border-b border-powder-100 dark:border-onyx-800">
                       <th class="pb-3 font-semibold">Facture</th>
                       <th class="pb-3 font-semibold">Date</th>
                       <th class="pb-3 font-semibold">Montant</th>
@@ -543,14 +543,14 @@
                       <th class="pb-3 font-semibold text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
+                  <tbody class="divide-y divide-powder-50 dark:divide-onyx-800/50">
                     <tr v-for="inv in mockInvoices" :key="inv.id" class="group">
                       <td class="py-3.5">
-                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ inv.description }}</div>
-                        <div class="text-[10px] text-gray-400 font-mono mt-0.5">#{{ inv.id }}</div>
+                        <div class="text-sm font-medium text-onyx-900 dark:text-powder-100">{{ inv.description }}</div>
+                        <div class="text-[10px] text-onyx-500 dark:text-powder-500 font-mono mt-0.5">#{{ inv.id }}</div>
                       </td>
-                      <td class="py-3.5 text-xs text-gray-500 dark:text-gray-400">{{ inv.date }}</td>
-                      <td class="py-3.5 font-semibold text-sm text-gray-900 dark:text-white">{{ inv.amount }}</td>
+                      <td class="py-3.5 text-xs text-onyx-500 dark:text-powder-500">{{ inv.date }}</td>
+                      <td class="py-3.5 font-semibold text-sm text-onyx-900 dark:text-powder-100">{{ inv.amount }}</td>
                       <td class="py-3.5">
                         <span
                           class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
@@ -565,7 +565,7 @@
                       <td class="py-3.5 text-right">
                         <button
                           @click="downloadInvoice(inv)"
-                          class="text-xs font-medium text-secondary-500 hover:text-secondary-600 transition-colors opacity-0 group-hover:opacity-100"
+                          class="text-xs font-medium text-onyx-500 dark:text-powder-500 hover:text-onyx-800 dark:hover:text-powder-200 transition-colors opacity-0 group-hover:opacity-100"
                         >
                           Télécharger
                         </button>
@@ -577,14 +577,14 @@
 
               <!-- Empty state -->
               <div v-else class="text-center py-14">
-                <div class="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
-                  <Receipt class="w-7 h-7 text-gray-300 dark:text-gray-600" />
+                <div class="w-14 h-14 rounded-2xl bg-powder-100 dark:bg-onyx-800 flex items-center justify-center mx-auto mb-3">
+                  <Receipt class="w-7 h-7 text-onyx-300 dark:text-onyx-600" />
                 </div>
-                <p class="font-semibold text-sm text-gray-900 dark:text-white mb-1">Aucune facture</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mb-5">Vos factures apparaîtront après votre premier paiement</p>
+                <p class="font-semibold text-sm text-onyx-900 dark:text-powder-100 mb-1">Aucune facture</p>
+                <p class="text-xs text-onyx-500 dark:text-powder-500 mb-5">Vos factures apparaîtront après votre premier paiement</p>
                 <button
                   @click="activeTab = 'subscription'"
-                  class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold transition-colors"
+                  class="px-4 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 text-white text-xs font-semibold transition-colors"
                 >
                   Voir les plans
                 </button>
@@ -634,8 +634,8 @@ const navItems = [
 const stats = computed(() => cardsStore.getGlobalStats())
 
 const statItems = computed(() => [
-  { label: 'Cartes',   value: stats.value.totalCards,   color: 'text-primary-500' },
-  { label: 'Vues',     value: stats.value.totalViews,   color: 'text-secondary-500' },
+  { label: 'Cartes',   value: stats.value.totalCards,   color: 'text-flame-500' },
+  { label: 'Vues',     value: stats.value.totalViews,   color: 'text-onyx-500' },
   { label: 'Scans QR', value: stats.value.totalQRScans, color: 'text-emerald-500' },
   { label: 'Partages', value: stats.value.totalShares,  color: 'text-accent-500' },
 ])
@@ -757,8 +757,8 @@ const prefItems = [
     label: 'Mode sombre',
     desc: 'Réduire la fatigue oculaire',
     icon: Moon,
-    bgClass: 'bg-gray-100 dark:bg-slate-700',
-    iconClass: 'text-gray-500 dark:text-gray-400',
+    bgClass: 'bg-onyx-100 dark:bg-onyx-800',
+    iconClass: 'text-onyx-500 dark:text-powder-500',
     isTheme: true,
   },
   {
@@ -766,8 +766,8 @@ const prefItems = [
     label: 'Notifications email',
     desc: 'Recevoir un email quand une carte est consultée',
     icon: Mail,
-    bgClass: 'bg-secondary-50 dark:bg-secondary-900/30',
-    iconClass: 'text-secondary-500',
+    bgClass: 'bg-onyx-50 dark:bg-onyx-900/30',
+    iconClass: 'text-onyx-500',
   },
   {
     key: 'qrNotif',

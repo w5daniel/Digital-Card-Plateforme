@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4 py-12"
+    class="min-h-screen bg-gradient-to-br from-powder-50 to-powder-100 dark:from-onyx-900 dark:to-onyx-800 flex items-center justify-center px-4 py-12"
   >
     <div class="w-full max-w-md">
       <!-- Logo Section -->
@@ -11,16 +11,16 @@
             alt="ECODEV Logo"
             class="h-12 w-auto transform group-hover:scale-110 transition-transform duration-300 drop-shadow-md"
           />
-          <p class="text-sm text-gray-600 dark:text-gray-400">Cartes digitales</p>
+          <p class="text-sm text-onyx-500 dark:text-onyx-400">Cartes digitales</p>
         </router-link>
         <h1 class="text-3xl font-bold mb-2">Connexion</h1>
-        <p class="text-gray-600 dark:text-gray-400">
+        <p class="text-onyx-500 dark:text-onyx-400">
           Connectez-vous à votre compte ECODEV CARD PRO
         </p>
       </div>
 
       <!-- Form Card -->
-      <div class="card bg-white dark:bg-slate-800 shadow-xl p-8">
+      <div class="card bg-white dark:bg-onyx-800 shadow-xl p-8">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <!-- Email Input -->
           <div class="form-control w-full">
@@ -31,7 +31,7 @@
               v-model="email"
               type="email"
               placeholder="votre@email.com"
-              class="input input-bordered w-full bg-gray-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="input input-bordered w-full bg-powder-100 dark:bg-onyx-700 dark:border-onyx-600 focus:outline-none focus:ring-2 focus:ring-flame-500"
               required
             />
           </div>
@@ -45,7 +45,7 @@
               v-model="password"
               type="password"
               placeholder="••••••••"
-              class="input input-bordered w-full bg-gray-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="input input-bordered w-full bg-powder-100 dark:bg-onyx-700 dark:border-onyx-600 focus:outline-none focus:ring-2 focus:ring-flame-500"
               required
             />
           </div>
@@ -83,11 +83,11 @@
 
         <!-- Register Link -->
         <div class="text-center">
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-onyx-500 dark:text-onyx-400">
             Pas encore de compte?
             <router-link
               to="/register"
-              class="font-semibold text-primary-600 dark:text-primary-400 hover:underline"
+              class="font-semibold text-flame-600 dark:text-flame-400 hover:underline"
             >
               S'inscrire
             </router-link>

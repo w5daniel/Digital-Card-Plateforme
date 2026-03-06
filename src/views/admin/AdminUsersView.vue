@@ -5,7 +5,7 @@
       <div class="relative w-full sm:w-72">
         <Search
           class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-400'"
+          :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-400'"
         />
         <input
           v-model="search"
@@ -15,7 +15,7 @@
           :class="
             themeStore.darkMode
               ? 'bg-slate-800 border-slate-700 text-white placeholder-gray-500'
-              : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+              : 'bg-white border-gray-200 text-onyx-900 placeholder-gray-400'
           "
         />
       </div>
@@ -26,7 +26,7 @@
           :class="
             themeStore.darkMode
               ? 'bg-slate-800 border-slate-700 text-white'
-              : 'bg-white border-gray-200 text-gray-900'
+              : 'bg-white border-gray-200 text-onyx-900'
           "
         >
           <option value="">Tous les statuts</option>
@@ -39,7 +39,7 @@
           :class="
             themeStore.darkMode
               ? 'bg-slate-800 border-slate-700 text-white'
-              : 'bg-white border-gray-200 text-gray-900'
+              : 'bg-white border-gray-200 text-onyx-900'
           "
         >
           <option value="">Tous les plans</option>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Compteur -->
-    <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+    <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
       {{ filteredUsers.length }} utilisateur(s) trouvé(s)
     </p>
 
@@ -64,7 +64,7 @@
           <thead>
             <tr
               :class="
-                themeStore.darkMode ? 'bg-slate-800 text-gray-400' : 'bg-gray-50 text-gray-500'
+                themeStore.darkMode ? 'bg-slate-800 text-onyx-400' : 'bg-gray-50 text-onyx-500'
               "
             >
               <th class="text-left px-4 py-3 font-medium">Utilisateur</th>
@@ -105,13 +105,13 @@
                   <div class="min-w-0">
                     <p
                       class="font-medium truncate"
-                      :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+                      :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
                     >
                       {{ user.name }}
                     </p>
                     <p
                       class="text-xs truncate"
-                      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                      :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
                     >
                       {{ user.email }}
                     </p>
@@ -127,8 +127,8 @@
                     user.role === 'admin'
                       ? 'bg-red-500/10 text-red-500'
                       : themeStore.darkMode
-                        ? 'bg-slate-700 text-gray-300'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-slate-700 text-onyx-300'
+                        : 'bg-gray-100 text-onyx-600'
                   "
                 >
                   {{ user.role === 'admin' ? 'Admin' : 'User' }}
@@ -143,8 +143,8 @@
                     user.isPremium
                       ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
                       : themeStore.darkMode
-                        ? 'bg-slate-700 text-gray-400'
-                        : 'bg-gray-100 text-gray-500'
+                        ? 'bg-slate-700 text-onyx-400'
+                        : 'bg-gray-100 text-onyx-500'
                   "
                 >
                   {{ user.isPremium ? 'Premium' : 'Gratuit' }}
@@ -171,7 +171,7 @@
 
               <!-- Cartes -->
               <td class="px-4 py-3 hidden lg:table-cell">
-                <span :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">{{
+                <span :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'">{{
                   user.cardCount
                 }}</span>
               </td>
@@ -180,7 +180,7 @@
               <td class="px-4 py-3 hidden lg:table-cell">
                 <span
                   class="text-xs"
-                  :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
                 >
                   {{ formatDate(user.createdAt) }}
                 </span>
@@ -197,8 +197,8 @@
                       user.isPremium
                         ? 'text-yellow-500 hover:bg-yellow-500/10'
                         : themeStore.darkMode
-                          ? 'text-gray-400 hover:bg-slate-700'
-                          : 'text-gray-400 hover:bg-gray-100'
+                          ? 'text-onyx-400 hover:bg-slate-700'
+                          : 'text-onyx-400 hover:bg-gray-100'
                     "
                     :title="user.isPremium ? 'Retirer Premium' : 'Attribuer Premium'"
                   >
@@ -241,7 +241,7 @@
               <td
                 colspan="7"
                 class="px-4 py-12 text-center text-sm"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
               >
                 Aucun utilisateur trouvé
               </td>
@@ -263,11 +263,11 @@
       >
         <h3
           class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           Supprimer l'utilisateur
         </h3>
-        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-600'">
+        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
           Supprimer définitivement <strong>{{ userToDelete.name }}</strong> ? Cette action est
           irréversible.
         </p>
@@ -277,8 +277,8 @@
             class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'border-slate-600 text-gray-300 hover:bg-slate-700'
-                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? 'border-slate-600 text-onyx-300 hover:bg-slate-700'
+                : 'border-gray-200 text-onyx-700 hover:bg-gray-50'
             "
           >
             Annuler

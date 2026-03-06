@@ -1,9 +1,9 @@
 <template>
   <nav
-    class="sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-200"
+    class="sticky top-0 z-50 border-b transition-colors duration-200"
     :class="themeStore.darkMode
-      ? 'bg-slate-900/80 border-slate-700/60'
-      : 'bg-white/60 border-gray-200/60 shadow-md'"
+      ? 'bg-onyx-950 border-onyx-800'
+      : 'bg-white border-powder-200 shadow-sm'"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
@@ -14,7 +14,7 @@
             alt="ECODEV Logo"
             class="h-10 w-auto transform group-hover:scale-110 transition-transform duration-300 drop-shadow-md"
           />
-          <p class="text-xs text-gray-500 dark:text-gray-400">Cartes digitales</p>
+          <p class="text-xs text-onyx-600 dark:text-powder-400">Cartes digitales</p>
         </router-link>
 
         <!-- Navigation Desktop -->
@@ -26,8 +26,8 @@
             class="px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2"
             :class="
               isActive(item.path)
-                ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                ? 'bg-flame-50 dark:bg-flame-950/30 text-flame-600 dark:text-flame-400'
+                : 'text-onyx-600 dark:text-powder-400 hover:bg-powder-100 dark:hover:bg-onyx-800'
             "
           >
             <component :is="item.icon" class="w-5 h-5" />
@@ -42,8 +42,8 @@
             @click="themeStore.toggleDarkMode()"
             class="p-2 rounded-lg transition-colors"
             :class="themeStore.darkMode
-              ? 'text-yellow-400 hover:bg-slate-800'
-              : 'text-gray-500 hover:bg-gray-100'"
+              ? 'text-yellow-400 hover:bg-onyx-800'
+              : 'text-onyx-500 hover:bg-powder-100'"
             :title="themeStore.darkMode ? 'Mode clair' : 'Mode sombre'"
           >
             <Sun v-if="themeStore.darkMode" class="w-5 h-5" />
@@ -56,14 +56,14 @@
               @click.stop="toggleNotifPanel"
               class="relative p-2 rounded-lg transition-colors"
               :class="themeStore.darkMode
-                ? 'text-gray-300 hover:bg-slate-800'
-                : 'text-gray-500 hover:bg-gray-100'"
+                ? 'text-powder-400 hover:bg-onyx-800'
+                : 'text-onyx-600 hover:bg-powder-100'"
               title="Notifications"
             >
               <Bell class="w-5 h-5" />
               <span
                 v-if="notifStore.unreadCount > 0"
-                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none"
+                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-flame-500 text-white text-[10px] font-bold leading-none"
               >
                 {{ notifStore.unreadCount > 99 ? '99+' : notifStore.unreadCount }}
               </span>
@@ -74,22 +74,22 @@
               v-if="notifPanelOpen"
               class="absolute right-0 top-14 w-80 rounded-xl shadow-xl border overflow-hidden z-50"
               :class="themeStore.darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-white border-gray-200'"
+                ? 'bg-onyx-900 border-onyx-800'
+                : 'bg-white border-powder-200'"
             >
               <!-- Panel Header -->
               <div
                 class="flex items-center justify-between px-4 py-3 border-b"
-                :class="themeStore.darkMode ? 'border-slate-700 bg-slate-900/40' : 'border-gray-100 bg-gray-50'"
+                :class="themeStore.darkMode ? 'border-onyx-800 bg-onyx-950/40' : 'border-powder-100 bg-powder-50'"
               >
                 <div class="flex items-center space-x-2">
-                  <Bell class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'" />
-                  <span class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'">
+                  <Bell class="w-4 h-4" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-600'" />
+                  <span class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'">
                     Notifications
                   </span>
                   <span
                     v-if="notifStore.unreadCount > 0"
-                    class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
+                    class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-flame-500 text-white"
                   >
                     {{ notifStore.unreadCount }}
                   </span>
@@ -99,7 +99,7 @@
                     v-if="notifStore.unreadCount > 0"
                     @click="notifStore.markAllAsRead()"
                     class="text-xs px-2 py-1 rounded transition-colors"
-                    :class="themeStore.darkMode ? 'text-primary-400 hover:bg-slate-700' : 'text-primary-600 hover:bg-gray-100'"
+                    :class="themeStore.darkMode ? 'text-flame-400 hover:bg-onyx-800' : 'text-flame-600 hover:bg-powder-100'"
                     title="Tout marquer comme lu"
                   >
                     Tout lire
@@ -108,7 +108,7 @@
                     v-if="notifStore.inbox.length > 0"
                     @click="notifStore.clearInbox()"
                     class="text-xs px-2 py-1 rounded transition-colors"
-                    :class="themeStore.darkMode ? 'text-gray-400 hover:bg-slate-700' : 'text-gray-500 hover:bg-gray-100'"
+                    :class="themeStore.darkMode ? 'text-powder-400 hover:bg-onyx-800' : 'text-onyx-500 hover:bg-powder-100'"
                     title="Effacer tout"
                   >
                     Effacer
@@ -123,8 +123,8 @@
                   v-if="notifStore.inbox.length === 0"
                   class="flex flex-col items-center justify-center py-10 px-4 text-center"
                 >
-                  <Bell class="w-8 h-8 mb-2 opacity-30" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-                  <p class="text-sm" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                  <Bell class="w-8 h-8 mb-2 opacity-30" :class="themeStore.darkMode ? 'text-powder-400' : 'text-onyx-500'" />
+                  <p class="text-sm" :class="themeStore.darkMode ? 'text-powder-400' : 'text-onyx-500'">
                     Aucune notification
                   </p>
                 </div>
@@ -136,8 +136,8 @@
                   @click="notifStore.markAsRead(notif.id)"
                   class="w-full flex items-start space-x-3 px-4 py-3 text-left transition-colors border-b last:border-b-0"
                   :class="[
-                    themeStore.darkMode ? 'border-slate-700/60 hover:bg-slate-700/50' : 'border-gray-100 hover:bg-gray-50',
-                    !notif.read ? (themeStore.darkMode ? 'bg-slate-700/30' : 'bg-primary-50/60') : ''
+                    themeStore.darkMode ? 'border-onyx-800/60 hover:bg-onyx-800/50' : 'border-powder-100 hover:bg-powder-50',
+                    !notif.read ? (themeStore.darkMode ? 'bg-onyx-800/30' : 'bg-flame-50/60') : ''
                   ]"
                 >
                   <!-- Type Icon -->
@@ -152,20 +152,20 @@
                     <p
                       class="text-sm leading-snug truncate"
                       :class="[
-                        themeStore.darkMode ? 'text-gray-200' : 'text-gray-800',
+                        themeStore.darkMode ? 'text-powder-200' : 'text-onyx-800',
                         !notif.read ? 'font-medium' : ''
                       ]"
                     >
                       {{ notif.message }}
                     </p>
-                    <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                    <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-powder-500' : 'text-onyx-400'">
                       {{ formatNotifTime(notif.timestamp) }}
                     </p>
                   </div>
                   <!-- Unread dot -->
                   <span
                     v-if="!notif.read"
-                    class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-primary-500"
+                    class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-flame-500"
                   />
                 </button>
               </div>
@@ -179,15 +179,15 @@
               @click="dropdownOpen = !dropdownOpen; notifPanelOpen = false"
               class="flex items-center rounded-full ring-2 transition-all duration-200"
               :class="dropdownOpen
-                ? 'ring-primary-500'
-                : 'ring-transparent hover:ring-primary-400'"
+                ? 'ring-flame-500'
+                : 'ring-transparent hover:ring-flame-400'"
             >
               <div v-if="authStore.profilePhoto" class="w-10 h-10 rounded-full overflow-hidden">
                 <img :src="authStore.profilePhoto" :alt="authStore.user?.name" class="w-full h-full object-cover" />
               </div>
               <div
                 v-else
-                class="bg-gradient-to-br from-primary-500 to-secondary-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm"
+                class="bg-onyx-900 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm"
               >
                 {{ userInitial }}
               </div>
@@ -199,18 +199,18 @@
               v-click-outside="() => dropdownOpen = false"
               class="absolute right-0 top-14 w-56 rounded-xl shadow-xl border overflow-hidden z-50"
               :class="themeStore.darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-white border-gray-200'"
+                ? 'bg-onyx-900 border-onyx-800'
+                : 'bg-white border-powder-200'"
             >
               <!-- User Info Header -->
-              <div class="px-4 py-3 border-b" :class="themeStore.darkMode ? 'border-slate-700 bg-slate-900/40' : 'border-gray-100 bg-gray-50'">
-                <p class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'">
+              <div class="px-4 py-3 border-b" :class="themeStore.darkMode ? 'border-onyx-800 bg-onyx-950/40' : 'border-powder-100 bg-powder-50'">
+                <p class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'">
                   {{ authStore.user?.name }}
                 </p>
-                <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-powder-400' : 'text-onyx-500'">
                   {{ authStore.user?.email }}
                 </p>
-                <span v-if="authStore.hasPremium && authStore.hasPremium()" class="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
+                <span v-if="authStore.hasPremium && authStore.hasPremium()" class="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-flame-50 dark:bg-flame-900/30 text-flame-700 dark:text-flame-300">
                   Premium
                 </span>
               </div>
@@ -218,7 +218,7 @@
               <!-- Menu Items -->
               <div class="py-1">
                 <label class="flex items-center space-x-3 px-4 py-2.5 cursor-pointer transition-colors text-sm"
-                  :class="themeStore.darkMode ? 'text-gray-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-gray-50'">
+                  :class="themeStore.darkMode ? 'text-powder-200 hover:bg-onyx-800' : 'text-onyx-700 hover:bg-powder-50'">
                   <UserIcon class="w-4 h-4 opacity-60" />
                   <span>Changer la photo</span>
                   <input type="file" accept="image/*" @change="handleProfilePhotoUpload" class="hidden" />
@@ -233,13 +233,13 @@
                   <span>Supprimer la photo</span>
                 </button>
 
-                <div class="my-1 border-t" :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-100'"></div>
+                <div class="my-1 border-t" :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'"></div>
 
                 <router-link
                   to="/dashboard"
                   @click="dropdownOpen = false"
                   class="flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm"
-                  :class="themeStore.darkMode ? 'text-gray-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-gray-50'"
+                  :class="themeStore.darkMode ? 'text-powder-200 hover:bg-onyx-800' : 'text-onyx-700 hover:bg-powder-50'"
                 >
                   <LayoutDashboard class="w-4 h-4 opacity-60" />
                   <span>Tableau de bord</span>
@@ -260,13 +260,13 @@
                   to="/profile"
                   @click="dropdownOpen = false"
                   class="flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm"
-                  :class="themeStore.darkMode ? 'text-gray-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-gray-50'"
+                  :class="themeStore.darkMode ? 'text-powder-200 hover:bg-onyx-800' : 'text-onyx-700 hover:bg-powder-50'"
                 >
                   <UserIcon class="w-4 h-4 opacity-60" />
                   <span>Mon Profil</span>
                 </router-link>
 
-                <div class="my-1 border-t" :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-100'"></div>
+                <div class="my-1 border-t" :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'"></div>
 
                 <button
                   @click="handleLogout"
@@ -284,7 +284,7 @@
             <router-link
               to="/login"
               class="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-              :class="themeStore.darkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+              :class="themeStore.darkMode ? 'text-powder-300 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
             >
               Se connecter
             </router-link>
@@ -309,7 +309,7 @@
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
           class="md:hidden p-2 rounded-lg transition-colors"
-          :class="themeStore.darkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+          :class="themeStore.darkMode ? 'text-powder-300 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
         >
           <Menu v-if="!mobileMenuOpen" class="w-6 h-6" />
           <X v-else class="w-6 h-6" />
@@ -320,7 +320,7 @@
       <div
         v-if="mobileMenuOpen"
         class="md:hidden py-4 space-y-1 border-t animate-fade-in"
-        :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-100'"
+        :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'"
       >
         <router-link
           v-for="item in navItems"
@@ -330,8 +330,8 @@
           class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
           :class="
             isActive(item.path)
-              ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+              ? 'bg-flame-50 dark:bg-flame-950/30 text-flame-600 dark:text-flame-400'
+              : 'text-onyx-600 dark:text-powder-400 hover:bg-powder-100 dark:hover:bg-onyx-800'
           "
         >
           <component :is="item.icon" class="w-5 h-5" />
@@ -342,7 +342,7 @@
         <button
           @click="themeStore.toggleDarkMode()"
           class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
-          :class="themeStore.darkMode ? 'text-yellow-400 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+          :class="themeStore.darkMode ? 'text-yellow-400 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
         >
           <Sun v-if="themeStore.darkMode" class="w-5 h-5" />
           <Moon v-else class="w-5 h-5" />
@@ -353,17 +353,17 @@
         <div
           v-if="authStore.isAuthenticated"
           class="space-y-1 pt-3 border-t mt-2"
-          :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-200'"
         >
-          <div class="px-4 py-2 rounded-lg" :class="themeStore.darkMode ? 'bg-slate-800' : 'bg-gray-50'">
-            <p class="text-sm" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Connecté en tant que</p>
-            <p class="font-semibold" :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'">{{ authStore.user?.name }}</p>
+          <div class="px-4 py-2 rounded-lg" :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-50'">
+            <p class="text-sm" :class="themeStore.darkMode ? 'text-powder-400' : 'text-onyx-500'">Connecté en tant que</p>
+            <p class="font-semibold" :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'">{{ authStore.user?.name }}</p>
           </div>
           <router-link
             to="/dashboard"
             @click="mobileMenuOpen = false"
             class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
-            :class="themeStore.darkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+            :class="themeStore.darkMode ? 'text-powder-300 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
           >
             <LayoutDashboard class="w-5 h-5" />
             <span>Tableau de bord</span>
@@ -372,7 +372,7 @@
             to="/profile"
             @click="mobileMenuOpen = false"
             class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
-            :class="themeStore.darkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+            :class="themeStore.darkMode ? 'text-powder-300 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
           >
             <UserIcon class="w-5 h-5" />
             <span>Mon Profil</span>
@@ -393,7 +393,7 @@
               to="/login"
               @click="mobileMenuOpen = false"
               class="block px-4 py-3 rounded-lg font-medium text-center transition-colors"
-              :class="themeStore.darkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-600 hover:bg-gray-100'"
+              :class="themeStore.darkMode ? 'text-powder-300 hover:bg-onyx-800' : 'text-onyx-600 hover:bg-powder-100'"
             >
               Se connecter
             </router-link>

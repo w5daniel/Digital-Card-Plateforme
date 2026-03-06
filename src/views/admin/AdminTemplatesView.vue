@@ -2,12 +2,12 @@
   <div class="space-y-4">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+      <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
         {{ adminStore.templates.length }} modèle(s) actif(s)
       </p>
       <button
         @click="openModal()"
-        class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors"
+        class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 text-white text-sm font-medium transition-colors"
       >
         <Plus class="w-4 h-4" />
         <span>Nouveau modèle</span>
@@ -20,7 +20,7 @@
         v-for="tmpl in adminStore.templates"
         :key="tmpl.id"
         class="rounded-xl border overflow-hidden hover:shadow-md transition-shadow"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
       >
         <!-- Preview couleur -->
         <div
@@ -55,16 +55,16 @@
             <div>
               <h3
                 class="font-semibold text-sm"
-                :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+                :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
               >
                 {{ tmpl.name }}
               </h3>
-              <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+              <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
                 {{ tmpl.category }}
               </p>
             </div>
           </div>
-          <p class="text-xs mb-3" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+          <p class="text-xs mb-3" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
             Utilisé {{ tmpl.usageCount }} fois
           </p>
 
@@ -77,8 +77,8 @@
                 tmpl.isPremium
                   ? 'border-yellow-500/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10'
                   : themeStore.darkMode
-                    ? 'border-slate-600 text-gray-400 hover:bg-slate-700'
-                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    ? 'border-onyx-600 text-onyx-400 hover:bg-onyx-700'
+                    : 'border-onyx-200 text-onyx-500 hover:bg-powder-50'
               "
             >
               {{ tmpl.isPremium ? 'Retirer Premium' : 'Marquer Premium' }}
@@ -88,8 +88,8 @@
               class="p-1.5 rounded-lg transition-colors"
               :class="
                 themeStore.darkMode
-                  ? 'text-gray-400 hover:bg-slate-700'
-                  : 'text-gray-400 hover:bg-gray-100'
+                  ? 'text-onyx-400 hover:bg-onyx-700'
+                  : 'text-onyx-400 hover:bg-powder-100'
               "
               title="Modifier"
             >
@@ -115,11 +115,11 @@
     >
       <div
         class="w-full max-w-md rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
       >
         <h3
           class="font-semibold mb-4"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           {{ editingTemplate ? 'Modifier le modèle' : 'Nouveau modèle' }}
         </h3>
@@ -128,41 +128,41 @@
           <div>
             <label
               class="block text-xs font-medium mb-1"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
               >Nom</label
             >
             <input
               v-model="form.name"
               type="text"
-              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
-                  ? 'bg-slate-700 border-slate-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-onyx-700 border-onyx-600 text-white'
+                  : 'bg-powder-100 border-onyx-200 text-onyx-900'
               "
             />
           </div>
           <div>
             <label
               class="block text-xs font-medium mb-1"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
               >Catégorie</label
             >
             <input
               v-model="form.category"
               type="text"
-              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
-                  ? 'bg-slate-700 border-slate-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-onyx-700 border-onyx-600 text-white'
+                  : 'bg-powder-100 border-onyx-200 text-onyx-900'
               "
             />
           </div>
           <div>
             <label
               class="block text-xs font-medium mb-1"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
               >Couleur de prévisualisation</label
             >
             <div class="flex items-center space-x-3">
@@ -173,7 +173,7 @@
               />
               <span
                 class="text-sm"
-                :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
                 >{{ form.preview }}</span
               >
             </div>
@@ -183,12 +183,12 @@
               v-model="form.isPremium"
               type="checkbox"
               id="tmpl-premium"
-              class="w-4 h-4 rounded accent-primary-500"
+              class="w-4 h-4 rounded accent-flame-500"
             />
             <label
               for="tmpl-premium"
               class="text-sm"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
               >Modèle Premium</label
             >
           </div>
@@ -200,8 +200,8 @@
             class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'border-slate-600 text-gray-300 hover:bg-slate-700'
-                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
+                : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'
             "
           >
             Annuler
@@ -209,7 +209,7 @@
           <button
             @click="saveTemplate"
             :disabled="!form.name"
-            class="flex-1 px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+            class="flex-1 px-4 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
           >
             {{ editingTemplate ? 'Enregistrer' : 'Créer' }}
           </button>
@@ -225,15 +225,15 @@
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
       >
         <h3
           class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           Supprimer le modèle
         </h3>
-        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-600'">
+        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
           Supprimer <strong>{{ templateToDelete.name }}</strong> utilisé
           {{ templateToDelete.usageCount }} fois ?
         </p>
@@ -243,8 +243,8 @@
             class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
             :class="
               themeStore.darkMode
-                ? 'border-slate-600 text-gray-300 hover:bg-slate-700'
-                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
+                : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'
             "
           >
             Annuler

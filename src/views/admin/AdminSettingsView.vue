@@ -3,20 +3,20 @@
     <!-- Limites & Quotas -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
     >
       <div
         class="px-5 py-4 border-b"
-        :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+        :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
       >
         <h2
           class="font-semibold text-sm flex items-center space-x-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
-          <Sliders class="w-4 h-4 text-primary-500" />
+          <Sliders class="w-4 h-4 text-flame-500" />
           <span>Limites & Quotas</span>
         </h2>
-        <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+        <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
           Nombre maximum de cartes par utilisateur
         </p>
       </div>
@@ -25,7 +25,7 @@
           <div>
             <label
               class="block text-xs font-medium mb-1.5"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
             >
               Cartes max — Plan gratuit
             </label>
@@ -34,18 +34,18 @@
               type="number"
               min="1"
               max="100"
-              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
-                  ? 'bg-slate-700 border-slate-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-onyx-700 border-onyx-600 text-white'
+                  : 'bg-powder-100 border-onyx-200 text-onyx-900'
               "
             />
           </div>
           <div>
             <label
               class="block text-xs font-medium mb-1.5"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+              :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
             >
               Cartes max — Plan Premium
             </label>
@@ -54,11 +54,11 @@
               type="number"
               min="1"
               max="500"
-              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
-                  ? 'bg-slate-700 border-slate-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-onyx-700 border-onyx-600 text-white'
+                  : 'bg-powder-100 border-onyx-200 text-onyx-900'
               "
             />
           </div>
@@ -69,15 +69,15 @@
     <!-- Informations générales -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
     >
       <div
         class="px-5 py-4 border-b"
-        :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+        :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
       >
         <h2
           class="font-semibold text-sm flex items-center space-x-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           <Info class="w-4 h-4 text-blue-500" />
           <span>Informations générales</span>
@@ -87,34 +87,34 @@
         <div>
           <label
             class="block text-xs font-medium mb-1.5"
-            :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+            :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
             >Nom de l'application</label
           >
           <input
             v-model="draft.appName"
             type="text"
-            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
             :class="
               themeStore.darkMode
-                ? 'bg-slate-700 border-slate-600 text-white'
-                : 'bg-white border-gray-200 text-gray-900'
+                ? 'bg-onyx-700 border-onyx-600 text-white'
+                : 'bg-powder-100 border-onyx-200 text-onyx-900'
             "
           />
         </div>
         <div>
           <label
             class="block text-xs font-medium mb-1.5"
-            :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
+            :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
             >Email de support</label
           >
           <input
             v-model="draft.supportEmail"
             type="email"
-            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
             :class="
               themeStore.darkMode
-                ? 'bg-slate-700 border-slate-600 text-white'
-                : 'bg-white border-gray-200 text-gray-900'
+                ? 'bg-onyx-700 border-onyx-600 text-white'
+                : 'bg-powder-100 border-onyx-200 text-onyx-900'
             "
           />
         </div>
@@ -124,21 +124,21 @@
     <!-- Toggles système -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
     >
       <div
         class="px-5 py-4 border-b"
-        :class="themeStore.darkMode ? 'border-slate-700' : 'border-gray-200'"
+        :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
       >
         <h2
           class="font-semibold text-sm flex items-center space-x-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
         >
           <ToggleRight class="w-4 h-4 text-green-500" />
           <span>Options du système</span>
         </h2>
       </div>
-      <div class="divide-y" :class="themeStore.darkMode ? 'divide-slate-700' : 'divide-gray-100'">
+      <div class="divide-y" :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'">
         <div
           v-for="toggle in toggleOptions"
           :key="toggle.key"
@@ -147,13 +147,13 @@
           <div>
             <p
               class="text-sm font-medium"
-              :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
             >
               {{ toggle.label }}
             </p>
             <p
               class="text-xs mt-0.5"
-              :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >
               {{ toggle.desc }}
             </p>
@@ -163,10 +163,10 @@
             class="relative inline-flex flex-shrink-0 h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none"
             :class="
               draft[toggle.key]
-                ? 'bg-primary-500'
+                ? 'bg-flame-500'
                 : themeStore.darkMode
-                  ? 'bg-slate-600'
-                  : 'bg-gray-300'
+                  ? 'bg-onyx-600'
+                  : 'bg-onyx-300'
             "
           >
             <span
@@ -185,8 +185,8 @@
         draft.maintenanceMode
           ? 'border-red-500/50 bg-red-500/5'
           : themeStore.darkMode
-            ? 'bg-slate-800 border-slate-700'
-            : 'bg-white border-gray-200'
+            ? 'bg-onyx-800 border-onyx-700'
+            : 'bg-white border-onyx-200'
       "
     >
       <div
@@ -195,8 +195,8 @@
           draft.maintenanceMode
             ? 'border-red-500/30'
             : themeStore.darkMode
-              ? 'border-slate-700'
-              : 'border-gray-200'
+              ? 'border-onyx-700'
+              : 'border-onyx-200'
         "
       >
         <h2 class="font-semibold text-sm flex items-center space-x-2 text-red-500">
@@ -209,7 +209,7 @@
           <div>
             <p
               class="text-sm font-medium"
-              :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
             >
               Mode maintenance
             </p>
@@ -224,8 +224,8 @@
               draft.maintenanceMode
                 ? 'bg-red-500'
                 : themeStore.darkMode
-                  ? 'bg-slate-600'
-                  : 'bg-gray-300'
+                  ? 'bg-onyx-600'
+                  : 'bg-onyx-300'
             "
           >
             <span
@@ -250,8 +250,8 @@
         class="px-4 py-2 rounded-lg border text-sm transition-colors"
         :class="
           themeStore.darkMode
-            ? 'border-slate-600 text-gray-400 hover:bg-slate-800'
-            : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+            ? 'border-onyx-600 text-onyx-400 hover:bg-onyx-800'
+            : 'border-onyx-200 text-onyx-500 hover:bg-powder-50'
         "
       >
         Réinitialiser par défaut
@@ -264,7 +264,7 @@
         <button
           @click="saveSettings"
           :disabled="!isDirty"
-          class="px-5 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 disabled:opacity-40 text-white text-sm font-medium transition-colors"
+          class="px-5 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 disabled:opacity-40 text-white text-sm font-medium transition-colors"
         >
           Enregistrer les modifications
         </button>

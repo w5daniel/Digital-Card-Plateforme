@@ -1,10 +1,10 @@
 <template>
-  <div class="editor-view py-12 min-h-screen bg-gray-50 dark:bg-slate-900">
+  <div class="editor-view py-12 min-h-screen bg-powder-50 dark:bg-onyx-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Créer une carte de visite</h1>
-        <p class="text-gray-600 dark:text-gray-400">
+        <h1 class="text-4xl font-bold mb-2 text-onyx-950 dark:text-powder-50">Créer une carte de visite</h1>
+        <p class="text-onyx-600 dark:text-powder-400">
           Personnalisez votre carte de visite professionnelle
         </p>
       </div>
@@ -16,15 +16,15 @@
           <div class="card p-6">
             <div class="flex items-start justify-between mb-4">
               <div>
-                <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
-                  <FileText class="w-5 h-5 mr-2 text-primary-600" />
+                <h2 class="text-xl font-bold flex items-center text-onyx-900 dark:text-white">
+                  <FileText class="w-5 h-5 mr-2 text-flame-500" />
                   Nom de la carte
                 </h2>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-7">
+                <p class="text-xs text-onyx-400 dark:text-onyx-500 mt-1 ml-7">
                   Identifiant visible dans votre tableau de bord (pas sur la carte)
                 </p>
               </div>
-              <span class="text-[10px] font-semibold text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-full shrink-0 mt-1">Requis</span>
+              <span class="text-[10px] font-semibold bg-flame-50 dark:bg-flame-900/30 text-flame-500 px-2 py-0.5 rounded-full shrink-0 mt-1">Requis</span>
             </div>
             <input
               v-model="cardData.name"
@@ -36,13 +36,13 @@
 
           <!-- Personal Information -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <User class="w-5 h-5 mr-2 text-primary-600" />
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <User class="w-5 h-5 mr-2 text-flame-500" />
               Informations personnelles
             </h2>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
                   >Nom complet *</label
                 >
                 <input
@@ -55,7 +55,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
                   >Titre professionnel *</label
                 >
                 <input
@@ -68,7 +68,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Entreprise</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Entreprise</label>
                 <input
                   v-model="cardData.data.company"
                   type="text"
@@ -78,7 +78,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
                   >Photo de profil</label
                 >
                 <div class="space-y-3">
@@ -87,7 +87,7 @@
                     <img
                       :src="cardData.data.photo"
                       alt="Photo preview"
-                      class="w-full h-full rounded-lg object-cover border-2 border-primary-200"
+                      class="w-full h-full rounded-lg object-cover border-2 border-powder-300"
                     />
                     <button
                       type="button"
@@ -101,7 +101,7 @@
                   <!-- Upload Input -->
                   <div class="flex gap-2">
                     <label
-                      class="flex-1 px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center flex items-center justify-center"
+                      class="flex-1 px-4 py-2 bg-flame-50 dark:bg-flame-900/20 text-flame-700 dark:text-flame-300 rounded-lg hover:bg-flame-100 transition-colors font-medium cursor-pointer text-center flex items-center justify-center"
                     >
                       <Upload class="w-4 h-4 mr-2" />
                       Charger photo
@@ -129,13 +129,13 @@
 
           <!-- Contact Information -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <Phone class="w-5 h-5 mr-2 text-primary-600" />
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <Phone class="w-5 h-5 mr-2 text-flame-500" />
               Coordonnées
             </h2>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Email *</label>
                 <input
                   v-model="cardData.data.email"
                   type="email"
@@ -146,7 +146,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Téléphone</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Téléphone</label>
                 <input
                   v-model="cardData.data.phone"
                   type="tel"
@@ -156,7 +156,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Site web</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Site web</label>
                 <input
                   v-model="cardData.data.website"
                   type="url"
@@ -166,7 +166,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Adresse</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Adresse</label>
                 <input
                   v-model="cardData.data.address"
                   type="text"
@@ -179,8 +179,8 @@
 
           <!-- Template Selection -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <Palette class="w-5 h-5 mr-2 text-primary-600" />
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <Palette class="w-5 h-5 mr-2 text-flame-500" />
               Choisir un modèle
             </h2>
             <div class="grid grid-cols-2 gap-3">
@@ -191,8 +191,8 @@
                 class="p-3 rounded-xl border-2 transition-all duration-200 text-left"
                 :class="
                   cardData.template === template.slug
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-500'
+                    ? 'border-flame-500 bg-flame-50 dark:bg-flame-900/20'
+                    : 'border-powder-200 dark:border-onyx-700 hover:border-flame-300 dark:hover:border-flame-500'
                 "
               >
                 <div class="flex items-center space-x-2 mb-2">
@@ -205,12 +205,12 @@
                     :style="{ backgroundColor: template.colors.secondary }"
                   ></div>
                 </div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ template.name }}</p>
+                <p class="text-sm font-semibold text-onyx-900 dark:text-white">{{ template.name }}</p>
               </button>
             </div>
             <router-link
               to="/gallery"
-              class="block mt-4 text-center text-sm text-primary-600 hover:text-primary-700 font-medium"
+              class="block mt-4 text-center text-sm text-flame-600 hover:text-flame-700 font-medium"
             >
               Voir tous les modèles →
             </router-link>
@@ -218,8 +218,8 @@
 
           <!-- Logo Upload -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <FileText class="w-5 h-5 mr-2 text-primary-600" />
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <FileText class="w-5 h-5 mr-2 text-flame-500" />
               Logo de l'entreprise
             </h2>
             <div class="space-y-3">
@@ -228,7 +228,7 @@
                 <img
                   :src="cardData.data.logo"
                   alt="Logo preview"
-                  class="w-full h-full rounded-lg object-contain border-2 border-primary-200 bg-gray-50 dark:bg-slate-900 p-2"
+                  class="w-full h-full rounded-lg object-contain border-2 border-powder-300 bg-powder-50 dark:bg-onyx-900 p-2"
                 />
                 <button
                   type="button"
@@ -241,7 +241,7 @@
 
               <!-- Upload Input -->
               <label
-                class="block px-4 py-3 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors font-medium cursor-pointer text-center"
+                class="block px-4 py-3 bg-flame-50 dark:bg-flame-900/20 text-flame-700 dark:text-flame-300 rounded-lg hover:bg-flame-100 transition-colors font-medium cursor-pointer text-center"
               >
                 <Upload class="w-4 h-4 mr-2 inline" />
                 Charger le logo
@@ -252,8 +252,8 @@
 
           <!-- Font Selection -->
           <div class="card p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <FileText class="w-5 h-5 mr-2 text-primary-600" />
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <FileText class="w-5 h-5 mr-2 text-flame-500" />
               Police d'écriture
             </h2>
             <select v-model="cardData.data.fontFamily" class="input-field">
@@ -269,23 +269,23 @@
           <!-- Back Side Card -->
           <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
-                <FileText class="w-5 h-5 mr-2 text-primary-600" />
+              <h2 class="text-xl font-bold flex items-center text-onyx-900 dark:text-white">
+                <FileText class="w-5 h-5 mr-2 text-flame-500" />
                 Verso de la carte
               </h2>
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
                   v-model="cardData.backSide.enabled"
-                  class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                  class="w-4 h-4 rounded border-powder-300 text-flame-600 focus:ring-2 focus:ring-flame-500"
                 />
-                <span class="text-sm font-medium text-gray-900 dark:text-white">Activer le verso</span>
+                <span class="text-sm font-medium text-onyx-900 dark:text-white">Activer le verso</span>
               </label>
             </div>
 
             <div v-if="cardData.backSide.enabled" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
                   >Titre du verso</label
                 >
                 <input
@@ -297,7 +297,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
                   >Contenu du verso</label
                 >
                 <textarea
@@ -312,26 +312,26 @@
           <!-- QR Code Section -->
           <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
-                <QrCode class="w-5 h-5 mr-2 text-primary-600" />
+              <h2 class="text-xl font-bold flex items-center text-onyx-900 dark:text-white">
+                <QrCode class="w-5 h-5 mr-2 text-flame-500" />
                 QR Code sur la carte
               </h2>
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
                   v-model="cardData.data.showQR"
-                  class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                  class="w-4 h-4 rounded border-powder-300 text-flame-600 focus:ring-2 focus:ring-flame-500"
                 />
-                <span class="text-sm font-medium text-gray-900 dark:text-white">Activer le QR code</span>
+                <span class="text-sm font-medium text-onyx-900 dark:text-white">Activer le QR code</span>
               </label>
             </div>
 
             <div v-if="cardData.data.showQR" class="space-y-3">
-              <div class="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-200 dark:border-primary-800">
-                <p class="text-sm text-primary-700 dark:text-primary-300 font-medium mb-1">
+              <div class="p-4 bg-flame-50 dark:bg-flame-900/20 rounded-xl border border-flame-200 dark:border-flame-800">
+                <p class="text-sm text-flame-700 dark:text-flame-300 font-medium mb-1">
                   QR code généré automatiquement
                 </p>
-                <p class="text-xs text-primary-600 dark:text-primary-400">
+                <p class="text-xs text-flame-700 dark:text-flame-300">
                   Le QR code encode vos coordonnées au format vCard et sera placé automatiquement :
                   <br />• <strong>Sans photo</strong> : centré à droite de la carte
                   <br />• <strong>Avec photo</strong> : en bas à droite de la carte
@@ -339,8 +339,8 @@
               </div>
             </div>
 
-            <div v-else class="p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+            <div v-else class="p-4 bg-powder-50 dark:bg-onyx-700 rounded-xl">
+              <p class="text-sm text-onyx-500 dark:text-onyx-400">
                 Activez le QR code pour permettre à vos contacts de scanner et enregistrer vos coordonnées instantanément.
               </p>
             </div>
@@ -349,21 +349,21 @@
           <!-- Visibility Section -->
           <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
-                <Globe class="w-5 h-5 mr-2 text-primary-600" />
+              <h2 class="text-xl font-bold flex items-center text-onyx-900 dark:text-white">
+                <Globe class="w-5 h-5 mr-2 text-flame-500" />
                 Visibilité de la carte
               </h2>
             </div>
 
             <!-- Toggle pill selector -->
-            <div class="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600 mb-4">
+            <div class="flex rounded-xl overflow-hidden border border-powder-200 dark:border-onyx-600 mb-4">
               <button
                 type="button"
                 @click="cardData.isPublic = false"
                 class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
                 :class="!cardData.isPublic
-                  ? 'bg-gray-700 dark:bg-slate-600 text-white'
-                  : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                  ? 'bg-onyx-700 dark:bg-onyx-600 text-white'
+                  : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'"
               >
                 <Lock class="w-4 h-4" />
                 Privée
@@ -374,7 +374,7 @@
                 class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
                 :class="cardData.isPublic
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                  : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'"
               >
                 <Globe class="w-4 h-4" />
                 Publique
@@ -386,19 +386,19 @@
               class="p-4 rounded-xl border transition-all duration-200"
               :class="cardData.isPublic
                 ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
-                : 'bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-600'"
+                : 'bg-powder-50 dark:bg-onyx-700 border-powder-200 dark:border-onyx-600'"
             >
               <div class="flex items-start gap-3">
                 <component
                   :is="cardData.isPublic ? Globe : Lock"
                   class="w-5 h-5 shrink-0 mt-0.5"
-                  :class="cardData.isPublic ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'"
+                  :class="cardData.isPublic ? 'text-emerald-500' : 'text-onyx-400 dark:text-onyx-500'"
                 />
                 <div>
-                  <p class="text-sm font-semibold" :class="cardData.isPublic ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'">
+                  <p class="text-sm font-semibold" :class="cardData.isPublic ? 'text-emerald-700 dark:text-emerald-400' : 'text-onyx-700 dark:text-onyx-300'">
                     {{ cardData.isPublic ? 'Carte publique' : 'Carte privée' }}
                   </p>
-                  <p class="text-xs mt-0.5" :class="cardData.isPublic ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-500 dark:text-gray-400'">
+                  <p class="text-xs mt-0.5" :class="cardData.isPublic ? 'text-emerald-600 dark:text-emerald-500' : 'text-onyx-500 dark:text-onyx-400'">
                     {{ cardData.isPublic
                       ? 'Accessible à tous via le lien de partage — idéale pour le réseautage.'
                       : 'Visible uniquement par vous — personne d\'autre ne peut y accéder.'
@@ -414,8 +414,8 @@
         <div class="lg:sticky lg:top-24 h-fit">
           <div class="card p-6">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold flex items-center text-gray-900 dark:text-white">
-                <Eye class="w-5 h-5 mr-2 text-primary-600" />
+              <h2 class="text-xl font-bold flex items-center text-onyx-900 dark:text-white">
+                <Eye class="w-5 h-5 mr-2 text-flame-500" />
                 Aperçu en direct
               </h2>
             </div>
@@ -475,34 +475,34 @@
                 <!-- Dropdown panel -->
                 <div
                   v-if="showDownloadMenu"
-                  class="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20"
+                  class="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-onyx-800 rounded-xl shadow-xl border border-powder-100 dark:border-onyx-700 overflow-hidden z-20"
                 >
                   <button
                     @click="downloadPDF(); showDownloadMenu = false"
                     :disabled="exportLoading"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors disabled:opacity-50"
                   >
                     <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                       <Loader2 v-if="exportLoading === 'pdf'" class="w-4 h-4 text-red-500 animate-spin" />
                       <FileText v-else class="w-4 h-4 text-red-500" />
                     </div>
                     <div class="text-left">
-                      <div class="font-semibold text-gray-800 dark:text-gray-200">PDF</div>
-                      <div class="text-xs text-gray-400">Document haute qualité</div>
+                      <div class="font-semibold text-onyx-800 dark:text-onyx-200">PDF</div>
+                      <div class="text-xs text-onyx-400">Document haute qualité</div>
                     </div>
                   </button>
                   <button
                     @click="downloadPNG(); showDownloadMenu = false"
                     :disabled="exportLoading"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-t border-gray-100 dark:border-slate-700 disabled:opacity-50"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
                   >
                     <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
                       <Loader2 v-if="exportLoading === 'png'" class="w-4 h-4 text-violet-500 animate-spin" />
                       <ImageIcon v-else class="w-4 h-4 text-violet-500" />
                     </div>
                     <div class="text-left">
-                      <div class="font-semibold text-gray-800 dark:text-gray-200">Image PNG</div>
-                      <div class="text-xs text-gray-400">Pour partager en image</div>
+                      <div class="font-semibold text-onyx-800 dark:text-onyx-200">Image PNG</div>
+                      <div class="text-xs text-onyx-400">Pour partager en image</div>
                     </div>
                   </button>
                 </div>
@@ -531,16 +531,16 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showShareModal = false" />
 
         <!-- Panel -->
-        <div class="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 animate-modal-in">
+        <div class="relative w-full max-w-sm bg-white dark:bg-onyx-800 rounded-2xl shadow-2xl p-6 animate-modal-in">
           <!-- Header -->
           <div class="flex items-center justify-between mb-5">
             <div>
-              <h3 class="font-bold text-gray-900 dark:text-white text-lg">Partager la carte</h3>
-              <p class="text-xs text-gray-400 mt-0.5">{{ cardData.data.fullName || 'Votre carte' }}</p>
+              <h3 class="font-bold text-onyx-900 dark:text-white text-lg">Partager la carte</h3>
+              <p class="text-xs text-onyx-400 mt-0.5">{{ cardData.data.fullName || 'Votre carte' }}</p>
             </div>
             <button
               @click="showShareModal = false"
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-onyx-400 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors"
             >
               <X class="w-4 h-4" />
             </button>
@@ -548,17 +548,17 @@
 
           <!-- Share link -->
           <div class="mb-5">
-            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Lien de partage</label>
+            <label class="block text-xs font-medium text-onyx-500 dark:text-onyx-400 mb-2">Lien de partage</label>
             <div class="flex gap-2">
               <input
                 :value="currentShareLink"
                 readonly
-                class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 min-w-0"
+                class="flex-1 px-3 py-2.5 text-xs rounded-lg bg-powder-50 dark:bg-onyx-700 border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 min-w-0"
               />
               <button
                 @click="copyShareLink"
                 class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 shrink-0 flex items-center justify-center w-10"
-                :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'"
+                :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-flame-500 hover:bg-flame-600 text-white'"
               >
                 <Check v-if="linkCopied" class="w-4 h-4" />
                 <Copy v-else class="w-4 h-4" />
@@ -567,7 +567,7 @@
           </div>
 
           <!-- Social share options -->
-          <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Via</p>
+          <p class="text-xs font-medium text-onyx-400 dark:text-onyx-500 uppercase tracking-wider mb-3">Via</p>
           <div class="grid grid-cols-3 gap-3">
             <!-- WhatsApp -->
             <button
