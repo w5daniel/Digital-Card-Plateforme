@@ -5,7 +5,7 @@
         <!-- About -->
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
-            <img src="/logo-ECODEV.png" alt="ECODEV" class="h-8 w-auto filter brightness-0 invert" />
+            <img src="/logo-ECODEV.png" alt="ECODEV" class="h-8 w-auto" />
           </div>
           <p class="text-powder-400 text-sm">
             Créez, gérez et partagez vos cartes de visite numériques en quelques clics.
