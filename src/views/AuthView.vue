@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-onyx-950">
+  <div
+    class="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-onyx-950"
+  >
     <!-- Static dark background -->
     <div class="absolute inset-0 auth-animated-bg"></div>
 
@@ -32,7 +34,7 @@
           <img
             src="/logo-ECODEV.png"
             alt="ECODEV"
-            class="h-9 w-auto filter brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity"
+            class="h-9 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
           />
           <div class="border-l border-white/30 pl-3">
             <p class="text-xs font-semibold text-white/80 uppercase tracking-widest">Card Pro</p>

@@ -1,7 +1,7 @@
 <template>
   <div class="home-view bg-powder-50 dark:bg-onyx-950">
     <!-- Hero Section -->
-    <section class="relative py-20 overflow-hidden bg-powder-50 dark:bg-onyx-950">
+    <section class="relative py-20 overflow-hidden bg-powder-200 dark:bg-onyx-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <!-- Texte du hero avec des animations pour rendre la page d'accueil plus dynamique et engageante -->
@@ -156,7 +156,7 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-20 bg-powder-50 dark:bg-onyx-950 transition-colors duration-200">
+    <section class="py-20 bg-powder-50 dark:bg-onyx-900 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="section-title">Fonctionnalités puissantes</h2>
@@ -169,10 +169,10 @@
           <div
             v-for="feature in features"
             :key="feature.title"
-            class="card p-8 card-hover text-center"
+            class="card card-hover p-8 text-center !bg-powder-100 dark:!bg-onyx-800"
           >
             <div
-              class="w-16 h-16 mx-auto mb-6 bg-flame-500 dark:bg-onyx-800 rounded-2xl flex items-center justify-center shadow-lg"
+              class="w-16 h-16 mx-auto mb-6 bg-flame-500  rounded-2xl flex items-center justify-center shadow-lg"
             >
               <component :is="feature.icon" class="w-8 h-8 text-white" />
             </div>
@@ -184,7 +184,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-powder-100 dark:bg-onyx-950 transition-colors duration-200">
+    <section class="py-20 bg-powder-200 dark:bg-onyx-950 transition-colors duration-200">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-4xl md:text-5xl font-bold mb-6 text-onyx-950 dark:text-white">Prêt à créer votre carte de visite ?</h2>
         <p class="text-xl mb-8 text-onyx-600 dark:text-powder-300">

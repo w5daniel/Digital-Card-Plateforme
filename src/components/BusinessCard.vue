@@ -1,18 +1,13 @@
 <template>
   <!-- Perspective wrapper for 3D flip -->
   <div class="card-perspective">
-    <div
-      class="card-flip-inner"
-      :class="isFlipped ? 'is-flipped' : ''"
-    >
+    <div class="card-flip-inner" :class="isFlipped ? 'is-flipped' : ''">
       <!-- FACE AVANT (recto) -->
       <div
         class="business-card card-face card-front rounded-2xl shadow-2xl overflow-hidden"
         :style="{ ...cardStyle, fontFamily: card.data.fontFamily || 'Poppins' }"
       >
-        <!-- Decorative Elements -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full -ml-24 -mb-24 pointer-events-none"></div>
+        <!-- Decorative Elements removed -->
 
         <div class="relative p-5 h-full flex flex-col justify-between">
           <!-- Header: nom + titre + photo -->
@@ -43,9 +38,15 @@
             <div
               v-if="shouldShowQR && !card.data.photo"
               class="absolute right-3 top-1/2 -translate-y-1/2"
-              style="width: 152px; flex-shrink: 0; line-height: 0; mix-blend-mode: multiply;"
+              style="width: 152px; flex-shrink: 0; line-height: 0; mix-blend-mode: multiply"
             >
-              <QrcodeVue :value="qrCodeValue" :size="152" level="L" foreground="#1a1a2e" background="#ffffff" />
+              <QrcodeVue
+                :value="qrCodeValue"
+                :size="152"
+                level="L"
+                foreground="#1a1a2e"
+                background="#ffffff"
+              />
             </div>
           </div>
 
@@ -54,19 +55,35 @@
             class="space-y-1.5 mt-2"
             :style="shouldShowQR && card.data.photo ? { paddingRight: '132px' } : {}"
           >
-            <div v-if="card.data.email" class="flex items-center space-x-1.5" :style="{ color: textColor }">
+            <div
+              v-if="card.data.email"
+              class="flex items-center space-x-1.5"
+              :style="{ color: textColor }"
+            >
               <Mail class="w-3 h-3 opacity-70 flex-shrink-0" />
               <span class="text-xs truncate">{{ card.data.email }}</span>
             </div>
-            <div v-if="card.data.phone" class="flex items-center space-x-1.5" :style="{ color: textColor }">
+            <div
+              v-if="card.data.phone"
+              class="flex items-center space-x-1.5"
+              :style="{ color: textColor }"
+            >
               <Phone class="w-3 h-3 opacity-70 flex-shrink-0" />
               <span class="text-xs truncate">{{ card.data.phone }}</span>
             </div>
-            <div v-if="card.data.website" class="flex items-center space-x-1.5" :style="{ color: textColor }">
+            <div
+              v-if="card.data.website"
+              class="flex items-center space-x-1.5"
+              :style="{ color: textColor }"
+            >
               <Globe class="w-3 h-3 opacity-70 flex-shrink-0" />
               <span class="text-xs truncate">{{ card.data.website }}</span>
             </div>
-            <div v-if="card.data.address" class="flex items-center space-x-1.5" :style="{ color: textColor }">
+            <div
+              v-if="card.data.address"
+              class="flex items-center space-x-1.5"
+              :style="{ color: textColor }"
+            >
               <MapPin class="w-3 h-3 opacity-70 flex-shrink-0" />
               <span class="text-xs truncate">{{ card.data.address }}</span>
             </div>
@@ -76,9 +93,15 @@
           <div
             v-if="shouldShowQR && card.data.photo"
             class="absolute bottom-3 right-3"
-            style="width: 120px; line-height: 0; mix-blend-mode: multiply;"
+            style="width: 120px; line-height: 0; mix-blend-mode: multiply"
           >
-            <QrcodeVue :value="qrCodeValue" :size="120" level="L" foreground="#1a1a2e" background="#ffffff" />
+            <QrcodeVue
+              :value="qrCodeValue"
+              :size="120"
+              level="L"
+              foreground="#1a1a2e"
+              background="#ffffff"
+            />
           </div>
         </div>
       </div>
@@ -88,13 +111,14 @@
         class="business-card card-face card-back rounded-2xl shadow-2xl overflow-hidden"
         :style="{ ...cardStyle, fontFamily: card.data.fontFamily || 'Poppins' }"
       >
-        <!-- Decorative Elements -->
-        <div class="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mt-32 pointer-events-none"></div>
-        <div class="absolute bottom-0 right-0 w-48 h-48 bg-black/10 rounded-full -mr-24 -mb-24 pointer-events-none"></div>
+        <!-- Decorative Elements removed -->
 
         <div class="relative p-6 h-full flex flex-col justify-start overflow-hidden">
           <!-- Contenu verso personnalisé -->
-          <div v-if="card.backSide?.enabled && (card.backSide?.title || card.backSide?.content)" class="flex flex-col h-full">
+          <div
+            v-if="card.backSide?.enabled && (card.backSide?.title || card.backSide?.content)"
+            class="flex flex-col h-full"
+          >
             <!-- Titre -->
             <div v-if="card.backSide.title" class="mb-3 pb-2 border-b border-white/20">
               <h3 class="text-lg font-bold leading-tight" :style="{ color: textColor }">
@@ -116,7 +140,8 @@
                   v-if="line.trim()"
                   class="text-xs leading-snug"
                   :style="{ color: textColor }"
-                >{{ line }}</span>
+                  >{{ line }}</span
+                >
                 <!-- Ligne vide = espace vertical -->
                 <div v-else class="h-2"></div>
               </div>
@@ -127,7 +152,11 @@
           <div v-else class="flex flex-col items-center justify-center h-full space-y-4">
             <!-- Logo si disponible -->
             <div v-if="card.data.logo" class="h-12 max-w-40">
-              <img :src="card.data.logo" alt="Logo" class="h-full object-contain filter brightness-0 invert opacity-90" />
+              <img
+                :src="card.data.logo"
+                alt="Logo"
+                class="h-full object-contain filter brightness-0 invert opacity-90"
+              />
             </div>
             <!-- Nom et titre centrés -->
             <div class="text-center space-y-1">
@@ -137,7 +166,11 @@
               <p class="text-sm opacity-75" :style="{ color: textColor }">
                 {{ card.data.title || '' }}
               </p>
-              <p v-if="card.data.company" class="text-xs font-semibold opacity-60" :style="{ color: textColor }">
+              <p
+                v-if="card.data.company"
+                class="text-xs font-semibold opacity-60"
+                :style="{ color: textColor }"
+              >
                 {{ card.data.company }}
               </p>
             </div>
@@ -216,12 +249,12 @@ const qrCodeValue = computed(() => {
     parts.push(`N:${last};${first};;;`)
     parts.push(`FN:${props.card.data.fullName}`)
   }
-  if (props.card.data.title)    parts.push(`TITLE:${props.card.data.title}`)
-  if (props.card.data.company)  parts.push(`ORG:${props.card.data.company}`)
-  if (props.card.data.phone)    parts.push(`TEL:${props.card.data.phone}`)
-  if (props.card.data.email)    parts.push(`EMAIL:${props.card.data.email}`)
-  if (props.card.data.website)  parts.push(`URL:${props.card.data.website}`)
-  if (props.card.data.address)  parts.push(`ADR:;;${props.card.data.address};;;;`)
+  if (props.card.data.title) parts.push(`TITLE:${props.card.data.title}`)
+  if (props.card.data.company) parts.push(`ORG:${props.card.data.company}`)
+  if (props.card.data.phone) parts.push(`TEL:${props.card.data.phone}`)
+  if (props.card.data.email) parts.push(`EMAIL:${props.card.data.email}`)
+  if (props.card.data.website) parts.push(`URL:${props.card.data.website}`)
+  if (props.card.data.address) parts.push(`ADR:;;${props.card.data.address};;;;`)
   parts.push('END:VCARD')
   return parts.join('\n')
 })

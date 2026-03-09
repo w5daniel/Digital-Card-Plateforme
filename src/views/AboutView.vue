@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="min-h-screen bg-powder-50 dark:bg-onyx-950"
-  >
+  <div class="min-h-screen bg-powder-200 dark:bg-onyx-950">
     <!-- Hero Section -->
     <div class="relative overflow-hidden pt-20 pb-32 sm:pt-32 sm:pb-40">
       <div class="absolute inset-0 bg-flame-500/5"></div>
@@ -19,7 +17,9 @@
     <!-- Main Content -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <!-- Mission Section -->
-      <div class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-3xl shadow-sm p-8 md:p-12 mb-16">
+      <div
+        class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-3xl shadow-sm p-8 md:p-12 mb-16"
+      >
         <h2 class="text-3xl md:text-4xl font-bold text-onyx-950 dark:text-powder-50 mb-8">
           Notre Mission
         </h2>
@@ -155,7 +155,9 @@
 
       <!-- Features Section -->
       <div class="mb-16">
-        <h2 class="text-3xl md:text-4xl font-bold text-onyx-950 dark:text-powder-50 mb-12 text-center">
+        <h2
+          class="text-3xl md:text-4xl font-bold text-onyx-950 dark:text-powder-50 mb-12 text-center"
+        >
           Nos Fonctionnalités
         </h2>
         <div class="grid md:grid-cols-3 gap-8">
@@ -163,9 +165,7 @@
           <div
             class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
-            <div
-              class="w-16 h-16 bg-onyx-900 rounded-xl flex items-center justify-center mb-6"
-            >
+            <div class="w-16 h-16 bg-flame-500 rounded-xl flex items-center justify-center mb-6">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
@@ -188,9 +188,7 @@
           <div
             class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
-            <div
-              class="w-16 h-16 bg-onyx-800 rounded-xl flex items-center justify-center mb-6"
-            >
+            <div class="w-16 h-16 bg-flame-500 rounded-xl flex items-center justify-center mb-6">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
@@ -211,9 +209,7 @@
           <div
             class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
           >
-            <div
-              class="w-16 h-16 bg-flame-500 rounded-xl flex items-center justify-center mb-6"
-            >
+            <div class="w-16 h-16 bg-flame-500 rounded-xl flex items-center justify-center mb-6">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
@@ -235,12 +231,12 @@
 
       <!-- CTA Section -->
       <div
-        class="bg-onyx-950 rounded-3xl shadow-sm p-12 text-center"
+        class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-3xl shadow-sm p-12 text-center"
       >
-        <h2 class="text-3xl md:text-4xl font-bold text-powder-50 mb-6">
+        <h2 class="text-3xl md:text-4xl font-bold text-onyx-950 dark:text-powder-50 mb-6">
           Prêt à créer votre carte professionnelle ?
         </h2>
-        <p class="text-lg text-powder-300/90 mb-8 max-w-2xl mx-auto">
+        <p class="text-lg text-onyx-600 dark:text-powder-300/90 mb-8 max-w-2xl mx-auto">
           Rejoignez des milliers de professionnels qui font confiance à ECODEV CARD PRO pour
           présenter leur identité professionnelle.
         </p>

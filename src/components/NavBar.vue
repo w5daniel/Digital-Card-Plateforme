@@ -1,9 +1,9 @@
 <template>
   <nav
-    class="sticky top-0 z-50 border-b transition-colors duration-200"
+    class="sticky top-0 z-50 border-b transition-colors duration-200 backdrop-blur-md"
     :class="themeStore.darkMode
-      ? 'bg-onyx-950 border-onyx-800'
-      : 'bg-powder-50 border-powder-200 shadow-sm'"
+      ? 'bg-onyx-950/80 border-onyx-800'
+      : 'bg-powder-50/80 border-powder-200 shadow-sm'"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
