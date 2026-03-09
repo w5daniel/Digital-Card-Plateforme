@@ -86,6 +86,19 @@ export const CARD_TEMPLATES = [
       text: '#ffffff',
     },
   },
+  {
+    id: 7,
+    name: 'Vierge',
+    slug: 'blank',
+    category: 'Libre',
+    isPremium: false,
+    thumbnail: '',
+    colors: {
+      primary: '#ffffff',
+      secondary: '#f9fafb',
+      text: '#1a1a1a',
+    },
+  },
 ]
 
 // ── Admin seeds ─────────────────────────────────────────────────────────────

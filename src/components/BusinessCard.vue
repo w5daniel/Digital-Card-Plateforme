@@ -219,9 +219,21 @@ const template = computed(() => {
 })
 
 const cardStyle = computed(() => {
+  const base = { minHeight: props.cardSize === 'small' ? '240px' : '280px' }
+  if (props.card.data?.backgroundImage) {
+    return {
+      ...base,
+      backgroundImage: `url(${props.card.data.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }
+  }
+  if (template.value?.slug === 'blank') {
+    return { ...base, background: '#ffffff', border: '1px solid #e5e7eb' }
+  }
   return {
+    ...base,
     background: `linear-gradient(135deg, ${template.value.colors.primary} 0%, ${template.value.colors.secondary} 100%)`,
-    minHeight: props.cardSize === 'small' ? '240px' : '280px',
   }
 })
 

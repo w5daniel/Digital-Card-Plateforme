@@ -3,7 +3,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-2 text-onyx-950 dark:text-powder-50">Créer une carte de visite</h1>
+        <h1 class="text-4xl font-bold mb-2 text-onyx-950 dark:text-powder-50">
+          Créer une carte de visite
+        </h1>
         <p class="text-onyx-600 dark:text-powder-400">
           Personnalisez votre carte de visite professionnelle
         </p>
@@ -24,7 +26,10 @@
                   Identifiant visible dans votre tableau de bord (pas sur la carte)
                 </p>
               </div>
-              <span class="text-[10px] font-semibold bg-flame-50 dark:bg-flame-900/30 text-flame-500 px-2 py-0.5 rounded-full shrink-0 mt-1">Requis</span>
+              <span
+                class="text-[10px] font-semibold bg-flame-50 dark:bg-flame-900/30 text-flame-500 px-2 py-0.5 rounded-full shrink-0 mt-1"
+                >Requis</span
+              >
             </div>
             <input
               v-model="cardData.name"
@@ -68,7 +73,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Entreprise</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
+                  >Entreprise</label
+                >
                 <input
                   v-model="cardData.data.company"
                   type="text"
@@ -135,7 +142,9 @@
             </h2>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Email *</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
+                  >Email *</label
+                >
                 <input
                   v-model="cardData.data.email"
                   type="email"
@@ -146,7 +155,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Téléphone</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
+                  >Téléphone</label
+                >
                 <input
                   v-model="cardData.data.phone"
                   type="tel"
@@ -156,7 +167,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Site web</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
+                  >Site web</label
+                >
                 <input
                   v-model="cardData.data.website"
                   type="url"
@@ -166,7 +179,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2">Adresse</label>
+                <label class="block text-sm font-medium text-onyx-700 dark:text-onyx-300 mb-2"
+                  >Adresse</label
+                >
                 <input
                   v-model="cardData.data.address"
                   type="text"
@@ -205,12 +220,26 @@
                     :style="{ backgroundColor: template.colors.secondary }"
                   ></div>
                 </div>
-                <p class="text-sm font-semibold text-onyx-900 dark:text-white">{{ template.name }}</p>
+                <p class="text-sm font-semibold text-onyx-900 dark:text-white">
+                  {{ template.name }}
+                </p>
               </button>
             </div>
+            <!-- Carte vierge -->
+            <button
+              @click="cardData.template = 'blank'; isCardFlipped = false"
+              class="w-full mt-3 p-3 rounded-xl border-2 transition-all duration-200 flex items-center gap-3"
+              :class="
+                cardData.template === 'blank'
+                  ? 'border-flame-500 bg-flame-50 dark:bg-flame-900/20'
+                  : 'border-dashed border-powder-300 dark:border-onyx-600 hover:border-flame-300'"
+            >
+              <div class="w-6 h-6 rounded-full border-2 border-onyx-300 dark:border-onyx-500 bg-white flex-shrink-0"></div>
+              <span class="text-sm font-semibold text-onyx-700 dark:text-powder-300">Carte vierge (édition libre)</span>
+            </button>
             <router-link
               to="/gallery"
-              class="block mt-4 text-center text-sm text-flame-600 hover:text-flame-700 font-medium"
+              class="block mt-3 text-center text-sm text-flame-600 hover:text-flame-700 font-medium"
             >
               Voir tous les modèles →
             </router-link>
@@ -250,6 +279,40 @@
             </div>
           </div>
 
+          <!-- Background Image -->
+          <div class="card p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
+              <ImageIcon class="w-5 h-5 mr-2 text-flame-500" />
+              Image de fond
+            </h2>
+            <div class="space-y-3">
+              <p class="text-xs text-onyx-500 dark:text-onyx-400">Utilisez une image comme arrière-plan de votre carte.</p>
+              <!-- Preview -->
+              <div v-if="cardData.data.backgroundImage" class="relative w-full h-24 rounded-xl overflow-hidden">
+                <img
+                  :src="cardData.data.backgroundImage"
+                  alt="Fond de carte"
+                  class="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  @click="removeBgImage"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                >
+                  <X class="w-3 h-3" />
+                </button>
+              </div>
+              <!-- Upload -->
+              <label
+                class="block px-4 py-3 bg-flame-50 dark:bg-flame-900/20 text-flame-700 dark:text-flame-300 rounded-lg hover:bg-flame-100 transition-colors font-medium cursor-pointer text-center"
+              >
+                <Upload class="w-4 h-4 mr-2 inline" />
+                Choisir une image de fond
+                <input type="file" accept="image/*" @change="handleBgImageUpload" class="hidden" />
+              </label>
+            </div>
+          </div>
+
           <!-- Font Selection -->
           <div class="card p-6">
             <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
@@ -257,12 +320,68 @@
               Police d'écriture
             </h2>
             <select v-model="cardData.data.fontFamily" class="input-field">
-              <option value="Poppins">Poppins (Moderne)</option>
-              <option value="Inter">Inter (Professionnel)</option>
-              <option value="Montserrat">Montserrat (Élégant)</option>
-              <option value="Playfair Display">Playfair Display (Sophistiqué)</option>
-              <option value="Roboto">Roboto (Classique)</option>
-              <option value="Georgia">Georgia (Traditionnel)</option>
+              <optgroup label="— Sans-Serif Modernes —">
+                <option value="Poppins">Poppins</option>
+                <option value="Inter">Inter</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Raleway">Raleway</option>
+                <option value="Nunito">Nunito</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Lato">Lato</option>
+                <option value="Rubik">Rubik</option>
+                <option value="DM Sans">DM Sans</option>
+                <option value="Outfit">Outfit</option>
+                <option value="Figtree">Figtree</option>
+                <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                <option value="Lexend">Lexend</option>
+                <option value="Urbanist">Urbanist</option>
+                <option value="Space Grotesk">Space Grotesk</option>
+                <option value="Barlow">Barlow</option>
+                <option value="Mulish">Mulish</option>
+                <option value="Karla">Karla</option>
+                <option value="Questrial">Questrial</option>
+                <option value="Josefin Sans">Josefin Sans</option>
+              </optgroup>
+              <optgroup label="— Serif / Élégant —">
+                <option value="Playfair Display">Playfair Display</option>
+                <option value="Merriweather">Merriweather</option>
+                <option value="Lora">Lora</option>
+                <option value="Cormorant Garamond">Cormorant Garamond</option>
+                <option value="EB Garamond">EB Garamond</option>
+                <option value="Libre Baskerville">Libre Baskerville</option>
+                <option value="Crimson Text">Crimson Text</option>
+                <option value="PT Serif">PT Serif</option>
+                <option value="Philosopher">Philosopher</option>
+                <option value="Cinzel">Cinzel</option>
+              </optgroup>
+              <optgroup label="— Slab Serif —">
+                <option value="Roboto Slab">Roboto Slab</option>
+                <option value="Arvo">Arvo</option>
+                <option value="Zilla Slab">Zilla Slab</option>
+              </optgroup>
+              <optgroup label="— Display / Décoration —">
+                <option value="Oswald">Oswald</option>
+                <option value="Bebas Neue">Bebas Neue</option>
+                <option value="Abril Fatface">Abril Fatface</option>
+                <option value="Righteous">Righteous</option>
+                <option value="Exo 2">Exo 2</option>
+                <option value="Orbitron">Orbitron</option>
+                <option value="Lobster">Lobster</option>
+              </optgroup>
+              <optgroup label="— Monospace / Tech —">
+                <option value="Roboto Mono">Roboto Mono</option>
+                <option value="Source Code Pro">Source Code Pro</option>
+                <option value="Space Mono">Space Mono</option>
+                <option value="Courier Prime">Courier Prime</option>
+              </optgroup>
+              <optgroup label="— Script / Manuscrit —">
+                <option value="Dancing Script">Dancing Script</option>
+                <option value="Pacifico">Pacifico</option>
+                <option value="Sacramento">Sacramento</option>
+                <option value="Great Vibes">Great Vibes</option>
+                <option value="Satisfy">Satisfy</option>
+                <option value="Kalam">Kalam</option>
+              </optgroup>
             </select>
           </div>
 
@@ -279,7 +398,9 @@
                   v-model="cardData.backSide.enabled"
                   class="w-4 h-4 rounded border-powder-300 text-flame-600 focus:ring-2 focus:ring-flame-500"
                 />
-                <span class="text-sm font-medium text-onyx-900 dark:text-white">Activer le verso</span>
+                <span class="text-sm font-medium text-onyx-900 dark:text-white"
+                  >Activer le verso</span
+                >
               </label>
             </div>
 
@@ -322,26 +443,31 @@
                   v-model="cardData.data.showQR"
                   class="w-4 h-4 rounded border-powder-300 text-flame-600 focus:ring-2 focus:ring-flame-500"
                 />
-                <span class="text-sm font-medium text-onyx-900 dark:text-white">Activer le QR code</span>
+                <span class="text-sm font-medium text-onyx-900 dark:text-white"
+                  >Activer le QR code</span
+                >
               </label>
             </div>
 
             <div v-if="cardData.data.showQR" class="space-y-3">
-              <div class="p-4 bg-flame-50 dark:bg-flame-900/20 rounded-xl border border-flame-200 dark:border-flame-800">
+              <div
+                class="p-4 bg-flame-50 dark:bg-flame-900/20 rounded-xl border border-flame-200 dark:border-flame-800"
+              >
                 <p class="text-sm text-flame-700 dark:text-flame-300 font-medium mb-1">
                   QR code généré automatiquement
                 </p>
                 <p class="text-xs text-flame-700 dark:text-flame-300">
                   Le QR code encode vos coordonnées au format vCard et sera placé automatiquement :
-                  <br />• <strong>Sans photo</strong> : centré à droite de la carte
-                  <br />• <strong>Avec photo</strong> : en bas à droite de la carte
+                  <br />• <strong>Sans photo</strong> : centré à droite de la carte <br />•
+                  <strong>Avec photo</strong> : en bas à droite de la carte
                 </p>
               </div>
             </div>
 
             <div v-else class="p-4 bg-powder-50 dark:bg-onyx-700 rounded-xl">
               <p class="text-sm text-onyx-500 dark:text-onyx-400">
-                Activez le QR code pour permettre à vos contacts de scanner et enregistrer vos coordonnées instantanément.
+                Activez le QR code pour permettre à vos contacts de scanner et enregistrer vos
+                coordonnées instantanément.
               </p>
             </div>
           </div>
@@ -356,14 +482,18 @@
             </div>
 
             <!-- Toggle pill selector -->
-            <div class="flex rounded-xl overflow-hidden border border-powder-200 dark:border-onyx-600 mb-4">
+            <div
+              class="flex rounded-xl overflow-hidden border border-powder-200 dark:border-onyx-600 mb-4"
+            >
               <button
                 type="button"
                 @click="cardData.isPublic = false"
                 class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
-                :class="!cardData.isPublic
-                  ? 'bg-onyx-700 dark:bg-onyx-600 text-white'
-                  : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'"
+                :class="
+                  !cardData.isPublic
+                    ? 'bg-onyx-700 dark:bg-onyx-600 text-white'
+                    : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'
+                "
               >
                 <Lock class="w-4 h-4" />
                 Privée
@@ -372,9 +502,11 @@
                 type="button"
                 @click="cardData.isPublic = true"
                 class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all duration-200"
-                :class="cardData.isPublic
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'"
+                :class="
+                  cardData.isPublic
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-white dark:bg-onyx-800 text-onyx-500 dark:text-onyx-400 hover:bg-powder-50 dark:hover:bg-onyx-700'
+                "
               >
                 <Globe class="w-4 h-4" />
                 Publique
@@ -384,24 +516,43 @@
             <!-- Description -->
             <div
               class="p-4 rounded-xl border transition-all duration-200"
-              :class="cardData.isPublic
-                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
-                : 'bg-powder-50 dark:bg-onyx-700 border-powder-200 dark:border-onyx-600'"
+              :class="
+                cardData.isPublic
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-powder-50 dark:bg-onyx-700 border-powder-200 dark:border-onyx-600'
+              "
             >
               <div class="flex items-start gap-3">
                 <component
                   :is="cardData.isPublic ? Globe : Lock"
                   class="w-5 h-5 shrink-0 mt-0.5"
-                  :class="cardData.isPublic ? 'text-emerald-500' : 'text-onyx-400 dark:text-onyx-500'"
+                  :class="
+                    cardData.isPublic ? 'text-emerald-500' : 'text-onyx-400 dark:text-onyx-500'
+                  "
                 />
                 <div>
-                  <p class="text-sm font-semibold" :class="cardData.isPublic ? 'text-emerald-700 dark:text-emerald-400' : 'text-onyx-700 dark:text-onyx-300'">
+                  <p
+                    class="text-sm font-semibold"
+                    :class="
+                      cardData.isPublic
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : 'text-onyx-700 dark:text-onyx-300'
+                    "
+                  >
                     {{ cardData.isPublic ? 'Carte publique' : 'Carte privée' }}
                   </p>
-                  <p class="text-xs mt-0.5" :class="cardData.isPublic ? 'text-emerald-600 dark:text-emerald-500' : 'text-onyx-500 dark:text-onyx-400'">
-                    {{ cardData.isPublic
-                      ? 'Accessible à tous via le lien de partage — idéale pour le réseautage.'
-                      : 'Visible uniquement par vous — personne d\'autre ne peut y accéder.'
+                  <p
+                    class="text-xs mt-0.5"
+                    :class="
+                      cardData.isPublic
+                        ? 'text-emerald-600 dark:text-emerald-500'
+                        : 'text-onyx-500 dark:text-onyx-400'
+                    "
+                  >
+                    {{
+                      cardData.isPublic
+                        ? 'Accessible à tous via le lien de partage — idéale pour le réseautage.'
+                        : "Visible uniquement par vous — personne d'autre ne peut y accéder."
                     }}
                   </p>
                 </div>
@@ -418,11 +569,28 @@
                 <Eye class="w-5 h-5 mr-2 text-flame-500" />
                 Aperçu en direct
               </h2>
+              <button
+                v-if="cardData.backSide.enabled"
+                @click="isCardFlipped = !isCardFlipped"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                :class="
+                  isCardFlipped
+                    ? 'bg-flame-500 text-white'
+                    : 'bg-powder-100 dark:bg-onyx-800 text-onyx-700 dark:text-powder-300 hover:bg-powder-200 dark:hover:bg-onyx-700'
+                "
+              >
+                <RotateCcw class="w-4 h-4" />
+                {{ isCardFlipped ? 'Recto' : 'Verso' }}
+              </button>
             </div>
 
             <!-- Card Preview -->
             <div ref="cardPreviewRef" class="mb-6">
-              <BusinessCard :card="cardData" :showQR="cardData.data.showQR" />
+              <BusinessCard
+                :card="cardData"
+                :showQR="cardData.data.showQR"
+                :isFlipped="isCardFlipped"
+              />
             </div>
 
             <!-- Info Box -->
@@ -482,8 +650,13 @@
                     :disabled="exportLoading"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors disabled:opacity-50"
                   >
-                    <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
-                      <Loader2 v-if="exportLoading === 'pdf'" class="w-4 h-4 text-red-500 animate-spin" />
+                    <div
+                      class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0"
+                    >
+                      <Loader2
+                        v-if="exportLoading === 'pdf'"
+                        class="w-4 h-4 text-red-500 animate-spin"
+                      />
                       <FileText v-else class="w-4 h-4 text-red-500" />
                     </div>
                     <div class="text-left">
@@ -496,8 +669,13 @@
                     :disabled="exportLoading"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
                   >
-                    <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
-                      <Loader2 v-if="exportLoading === 'png'" class="w-4 h-4 text-violet-500 animate-spin" />
+                    <div
+                      class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0"
+                    >
+                      <Loader2
+                        v-if="exportLoading === 'png'"
+                        class="w-4 h-4 text-violet-500 animate-spin"
+                      />
                       <ImageIcon v-else class="w-4 h-4 text-violet-500" />
                     </div>
                     <div class="text-left">
@@ -528,15 +706,22 @@
     <Transition name="modal-fade">
       <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showShareModal = false" />
+        <div
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          @click="showShareModal = false"
+        />
 
         <!-- Panel -->
-        <div class="relative w-full max-w-sm bg-white dark:bg-onyx-800 rounded-2xl shadow-2xl p-6 animate-modal-in">
+        <div
+          class="relative w-full max-w-sm bg-white dark:bg-onyx-800 rounded-2xl shadow-2xl p-6 animate-modal-in"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between mb-5">
             <div>
               <h3 class="font-bold text-onyx-900 dark:text-white text-lg">Partager la carte</h3>
-              <p class="text-xs text-onyx-400 mt-0.5">{{ cardData.data.fullName || 'Votre carte' }}</p>
+              <p class="text-xs text-onyx-400 mt-0.5">
+                {{ cardData.data.fullName || 'Votre carte' }}
+              </p>
             </div>
             <button
               @click="showShareModal = false"
@@ -548,7 +733,9 @@
 
           <!-- Share link -->
           <div class="mb-5">
-            <label class="block text-xs font-medium text-onyx-500 dark:text-onyx-400 mb-2">Lien de partage</label>
+            <label class="block text-xs font-medium text-onyx-500 dark:text-onyx-400 mb-2"
+              >Lien de partage</label
+            >
             <div class="flex gap-2">
               <input
                 :value="currentShareLink"
@@ -558,7 +745,11 @@
               <button
                 @click="copyShareLink"
                 class="px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 shrink-0 flex items-center justify-center w-10"
-                :class="linkCopied ? 'bg-emerald-500 text-white' : 'bg-flame-500 hover:bg-flame-600 text-white'"
+                :class="
+                  linkCopied
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-flame-500 hover:bg-flame-600 text-white'
+                "
               >
                 <Check v-if="linkCopied" class="w-4 h-4" />
                 <Copy v-else class="w-4 h-4" />
@@ -567,7 +758,11 @@
           </div>
 
           <!-- Social share options -->
-          <p class="text-xs font-medium text-onyx-400 dark:text-onyx-500 uppercase tracking-wider mb-3">Via</p>
+          <p
+            class="text-xs font-medium text-onyx-400 dark:text-onyx-500 uppercase tracking-wider mb-3"
+          >
+            Via
+          </p>
           <div class="grid grid-cols-3 gap-3">
             <!-- WhatsApp -->
             <button
@@ -576,10 +771,14 @@
             >
               <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center">
                 <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                  />
                 </svg>
               </div>
-              <span class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">WhatsApp</span>
+              <span class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400"
+                >WhatsApp</span
+              >
             </button>
 
             <!-- Email -->
@@ -610,7 +809,11 @@
   </Teleport>
 
   <!-- Confetti canvas -->
-  <canvas ref="confettiCanvas" class="fixed inset-0 z-[60] pointer-events-none" style="width:100%;height:100%;" />
+  <canvas
+    ref="confettiCanvas"
+    class="fixed inset-0 z-[60] pointer-events-none"
+    style="width: 100%; height: 100%"
+  />
 </template>
 
 <script setup>
@@ -643,6 +846,7 @@ import {
   Image as ImageIcon,
   Mail,
   Loader2,
+  RotateCcw,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -653,15 +857,16 @@ const notificationStore = useNotificationStore()
 
 const isEditing = ref(false)
 const photoUrl = ref('')
+const isCardFlipped = ref(false)
 
 // ── New UI state ──────────────────────────────────────────────
 const showDownloadMenu = ref(false)
-const showShareModal   = ref(false)
-const exportLoading    = ref('')      // 'pdf' | 'png' | ''
-const linkCopied       = ref(false)
-const cardPreviewRef   = ref(null)
-const confettiCanvas   = ref(null)
-let   confettiFrame    = null
+const showShareModal = ref(false)
+const exportLoading = ref('') // 'pdf' | 'png' | ''
+const linkCopied = ref(false)
+const cardPreviewRef = ref(null)
+const confettiCanvas = ref(null)
+let confettiFrame = null
 
 const cardData = ref({
   name: 'Ma nouvelle carte',
@@ -678,6 +883,7 @@ const cardData = ref({
     logo: '',
     fontFamily: 'Poppins',
     showQR: false,
+    backgroundImage: '',
   },
   backSide: {
     enabled: false,
@@ -732,6 +938,26 @@ const removePhoto = () => {
 
 const removeLogo = () => {
   cardData.value.data.logo = ''
+}
+
+const handleBgImageUpload = (event) => {
+  const file = event.target.files?.[0]
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      notificationStore.error('Image trop volumineuse (max 5MB)')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      cardData.value.data.backgroundImage = e.target?.result || ''
+      notificationStore.success('Image de fond chargée')
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeBgImage = () => {
+  cardData.value.data.backgroundImage = ''
 }
 
 const setPhotoFromUrl = () => {
@@ -892,7 +1118,9 @@ const copyShareLink = async () => {
   await navigator.clipboard.writeText(currentShareLink.value)
   linkCopied.value = true
   notificationStore.success('Lien copié !')
-  setTimeout(() => { linkCopied.value = false }, 2000)
+  setTimeout(() => {
+    linkCopied.value = false
+  }, 2000)
 }
 
 const shareViaWhatsApp = () => {
@@ -903,16 +1131,20 @@ const shareViaWhatsApp = () => {
 const shareViaEmail = () => {
   const name = cardData.value.data.fullName || 'Ma carte'
   const subject = encodeURIComponent(`Carte de visite — ${name}`)
-  const body = encodeURIComponent(`Bonjour,\n\nDécouvrez ma carte de visite digitale :\n${currentShareLink.value}`)
+  const body = encodeURIComponent(
+    `Bonjour,\n\nDécouvrez ma carte de visite digitale :\n${currentShareLink.value}`,
+  )
   window.location.href = `mailto:?subject=${subject}&body=${body}`
 }
 
 const shareNative = async () => {
   if (navigator.share) {
-    await navigator.share({
-      title: cardData.value.data.fullName || 'Ma carte de visite',
-      url: currentShareLink.value,
-    }).catch(() => {})
+    await navigator
+      .share({
+        title: cardData.value.data.fullName || 'Ma carte de visite',
+        url: currentShareLink.value,
+      })
+      .catch(() => {})
   } else {
     copyShareLink()
   }
@@ -922,11 +1154,11 @@ const shareNative = async () => {
 const launchConfetti = () => {
   const canvas = confettiCanvas.value
   if (!canvas) return
-  canvas.width  = window.innerWidth
+  canvas.width = window.innerWidth
   canvas.height = window.innerHeight
   const ctx = canvas.getContext('2d')
 
-  const cx = canvas.width  / 2
+  const cx = canvas.width / 2
   const cy = canvas.height / 2
   const DURATION = 850
 
@@ -944,13 +1176,13 @@ const launchConfetti = () => {
     for (const ring of rings) {
       const rt = Math.max(0, Math.min((elapsed - ring.delay) / (DURATION - ring.delay), 1))
       if (rt <= 0) continue
-      const eased  = 1 - Math.pow(1 - rt, 2)
+      const eased = 1 - Math.pow(1 - rt, 2)
       const radius = ring.maxR * eased
-      const alpha  = rt < 0.4 ? rt / 0.4 : 1 - (rt - 0.4) / 0.6
+      const alpha = rt < 0.4 ? rt / 0.4 : 1 - (rt - 0.4) / 0.6
       ctx.save()
       ctx.globalAlpha = alpha * 0.3
       ctx.strokeStyle = '#e63950'
-      ctx.lineWidth   = 1.5
+      ctx.lineWidth = 1.5
       ctx.beginPath()
       ctx.arc(cx, cy, radius, 0, Math.PI * 2)
       ctx.stroke()
@@ -981,7 +1213,9 @@ onUnmounted(() => {
 }
 .modal-fade-enter-active .relative,
 .modal-fade-leave-active .relative {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 .modal-fade-enter-from,
 .modal-fade-leave-to {
@@ -994,7 +1228,9 @@ onUnmounted(() => {
 
 /* Loader spin */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .animate-spin {
   animation: spin 1s linear infinite;
