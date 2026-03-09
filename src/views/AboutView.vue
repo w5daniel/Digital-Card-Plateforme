@@ -5,7 +5,7 @@
       <div class="absolute inset-0 bg-flame-500/5"></div>
       <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 class="text-5xl sm:text-6xl font-bold text-onyx-950 dark:text-powder-50 mb-6">
-          À propos de nous
+          <span>{{ typedText }}</span><span class="typed-cursor" :class="{ 'opacity-0': !cursorVisible }">|</span>
         </h1>
         <p class="text-xl text-onyx-600 dark:text-powder-400 mb-8 max-w-2xl mx-auto">
           Créez des cartes de visite numériques professionnelles avec style et élégance. Notre
@@ -244,7 +244,8 @@
           to="/editor"
           class="inline-block bg-flame-500 hover:bg-flame-600 text-white font-bold rounded-xl px-8 py-4 transition-colors shadow-sm"
         >
-          Créer Ma Carte Maintenant
+          Créer ma carte maintenant
+          <Zap class="w-5 h-5 inline ml-2" />
         </router-link>
       </div>
     </div>
@@ -252,11 +253,60 @@
 </template>
 
 <script setup>
+import { Zap } from 'lucide-vue-next';
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+// --- Typewriter ---
+const fullText = 'À propos de nous'
+const typedText = ref('')
+const cursorVisible = ref(true)
+let timeoutId = null
+let cursorIntervalId = null
+let index = 0
+let isDeleting = false
+
+function typeWriter() {
+  if (isDeleting) {
+    typedText.value = fullText.substring(0, index)
+    index--
+    if (index < 0) {
+      isDeleting = false
+      timeoutId = setTimeout(typeWriter, 500)
+    } else {
+      timeoutId = setTimeout(typeWriter, 50)
+    }
+  } else {
+    typedText.value = fullText.substring(0, index)
+    index++
+    if (index > fullText.length) {
+      isDeleting = true
+      timeoutId = setTimeout(typeWriter, 3000)
+    } else {
+      timeoutId = setTimeout(typeWriter, 100)
+    }
+  }
+}
+
+onMounted(() => {
+  timeoutId = setTimeout(typeWriter, 500)
+  cursorIntervalId = setInterval(() => {
+    cursorVisible.value = !cursorVisible.value
+  }, 500)
+})
+
+onUnmounted(() => {
+  clearTimeout(timeoutId)
+  clearInterval(cursorIntervalId)
+})
 </script>
 
 <style scoped>
-/* Component-specific styles */
+.typed-cursor {
+  color: #e83800;
+  font-weight: 300;
+  transition: opacity 0.1s;
+}
 </style>
