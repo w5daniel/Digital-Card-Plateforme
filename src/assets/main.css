@@ -70,6 +70,7 @@
   /* Texte accent — flame au lieu de dégradé coloré */
   .gradient-text {
     @apply text-flame-500;
+    @apply bg-gradient-to-br from-flame-500 via-flame-500 to-orange-300 bg-clip-text text-transparent;
   }
 
   /* Titre de section */

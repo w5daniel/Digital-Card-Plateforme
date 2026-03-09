@@ -12,7 +12,7 @@
               ✨ Nouvelle génération de cartes de visite
             </div>
 
-            <h1 class="text-5xl md:text-6xl font-bold leading-tight text-onyx-950 dark:text-powder-50">
+            <h1 class="text-5xl md:text-6xl font-bold leading-tight text-onyx-950 dark:text-powder-100">
               Créez des cartes de visite
               <span class="gradient-text">numériques</span>
               qui impressionnent
@@ -54,7 +54,7 @@
           <div class="relative h-[600px] hidden lg:block">
             <div class="absolute top-0 right-0 w-full animate-bounce-slow">
               <div
-                class="rounded-2xl shadow-2xl overflow-hidden transform rotate-6 hover:rotate-0 transition-transform duration-300 bg-onyx-900"
+                class="rounded-2xl shadow-2xl overflow-hidden transform rotate-6 hover:rotate-0 transition-transform duration-300 bg-onyx-700"
                 style="
                   width: 480px;
                   aspect-ratio: 16/9;
@@ -88,7 +88,7 @@
               style="animation-delay: 0.2s"
             >
               <div
-                class="rounded-2xl shadow-2xl overflow-hidden transform -rotate-6 hover:rotate-0 transition-transform duration-300 bg-onyx-800"
+                class="rounded-2xl shadow-2xl overflow-hidden transform -rotate-6 hover:rotate-0 transition-transform duration-300 bg-onyx-900"
                 style="
                   width: 480px;
                   aspect-ratio: 16/9;
@@ -122,7 +122,7 @@
               style="animation-delay: 0.4s"
             >
               <div
-                class="rounded-2xl shadow-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-300 bg-flame-700"
+                class="rounded-2xl shadow-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-300 bg-flame-600"
                 style="
                   width: 480px;
                   aspect-ratio: 16/9;

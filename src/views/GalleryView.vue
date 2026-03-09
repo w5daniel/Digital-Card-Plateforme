@@ -20,7 +20,7 @@
 
           <h1 class="text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5">
             Trouvez votre<br />
-            <span class="text-flame-400">
+            <span class="gradient-text">
               style professionnel
             </span>
           </h1>
