@@ -313,7 +313,7 @@
             </div>
           </div>
 
-          <!-- Font Selection -->
+          <!-- Police d'écriture -->
           <div class="card p-6">
             <h2 class="text-xl font-bold mb-4 flex items-center text-onyx-900 dark:text-white">
               <FileText class="w-5 h-5 mr-2 text-flame-500" />
@@ -457,9 +457,7 @@
                   QR code généré automatiquement
                 </p>
                 <p class="text-xs text-flame-700 dark:text-flame-300">
-                  Le QR code encode vos coordonnées au format vCard et sera placé automatiquement :
-                  <br />• <strong>Sans photo</strong> : centré à droite de la carte <br />•
-                  <strong>Avec photo</strong> : en bas à droite de la carte
+                  Le QR code encode vos coordonnées au format vCard. Glissez-le directement sur la carte pour le repositionner à votre guise.
                 </p>
               </div>
             </div>
@@ -584,13 +582,28 @@
               </button>
             </div>
 
-            <!-- Card Preview -->
-            <div ref="cardPreviewRef" class="mb-6">
+            <!-- Card Preview — éditeur glisser-déposer -->
+            <div ref="cardPreviewRef" class="mb-3">
               <BusinessCard
                 :card="cardData"
                 :showQR="cardData.data.showQR"
                 :isFlipped="isCardFlipped"
+                :editMode="true"
+                @update:elementPositions="onElementPositionsUpdate"
               />
+            </div>
+
+            <!-- Reset positions -->
+            <div class="flex justify-end mb-4">
+              <button
+                v-if="cardData.data.elementPositions"
+                type="button"
+                @click="resetElementPositions"
+                class="text-xs text-onyx-400 dark:text-onyx-500 hover:text-flame-500 transition-colors flex items-center gap-1"
+              >
+                <RotateCcw class="w-3 h-3" />
+                Réinitialiser la disposition
+              </button>
             </div>
 
             <!-- Info Box -->
@@ -600,8 +613,8 @@
               <div class="flex items-start space-x-3">
                 <Info class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                  <p class="font-semibold mb-1">Aperçu en temps réel</p>
-                  <p>Les modifications sont affichées instantanément dans l'aperçu ci-dessus.</p>
+                  <p class="font-semibold mb-1">Éditeur interactif</p>
+                  <p>Survolez un élément pour faire apparaître ses poignées. Glissez-le pour le déplacer, glissez un coin pour le redimensionner.</p>
                 </div>
               </div>
             </div>
@@ -884,6 +897,7 @@ const cardData = ref({
     fontFamily: 'Poppins',
     showQR: false,
     backgroundImage: '',
+    elementPositions: null,
   },
   backSide: {
     enabled: false,
@@ -960,6 +974,15 @@ const removeBgImage = () => {
   cardData.value.data.backgroundImage = ''
 }
 
+// ── Mise à jour des positions depuis le drag sur la carte ─────
+const onElementPositionsUpdate = (positions) => {
+  cardData.value.data.elementPositions = positions
+}
+
+const resetElementPositions = () => {
+  cardData.value.data.elementPositions = null
+}
+
 const setPhotoFromUrl = () => {
   if (photoUrl.value) {
     cardData.value.data.photo = photoUrl.value
@@ -973,7 +996,11 @@ onMounted(() => {
     const cardId = Number(route.params.id)
     const existingCard = store.getCardById(cardId)
     if (existingCard) {
-      cardData.value = JSON.parse(JSON.stringify(existingCard))
+      const loaded = JSON.parse(JSON.stringify(existingCard))
+      loaded.data = loaded.data || {}
+      loaded.data.backgroundImage = loaded.data.backgroundImage || ''
+      loaded.data.elementPositions = loaded.data.elementPositions || null
+      cardData.value = loaded
       isEditing.value = true
     }
   }
