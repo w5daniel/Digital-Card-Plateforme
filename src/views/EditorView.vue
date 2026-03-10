@@ -567,19 +567,42 @@
                 <Eye class="w-5 h-5 mr-2 text-flame-500" />
                 Aperçu en direct
               </h2>
-              <button
-                v-if="cardData.backSide.enabled"
-                @click="isCardFlipped = !isCardFlipped"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                :class="
-                  isCardFlipped
-                    ? 'bg-flame-500 text-white'
-                    : 'bg-powder-100 dark:bg-onyx-800 text-onyx-700 dark:text-powder-300 hover:bg-powder-200 dark:hover:bg-onyx-700'
-                "
-              >
-                <RotateCcw class="w-4 h-4" />
-                {{ isCardFlipped ? 'Recto' : 'Verso' }}
-              </button>
+              <div class="flex items-center gap-1.5">
+                <!-- Undo / Redo -->
+                <button
+                  @click="undo"
+                  :disabled="historyIndex <= 0"
+                  title="Annuler (Ctrl+Z)"
+                  class="p-1.5 rounded-lg transition-colors disabled:opacity-30"
+                  :class="historyIndex > 0 ? 'hover:bg-powder-100 dark:hover:bg-onyx-700 text-onyx-600 dark:text-onyx-300' : 'text-onyx-300 dark:text-onyx-600'"
+                >
+                  <Undo2 class="w-4 h-4" />
+                </button>
+                <button
+                  @click="redo"
+                  :disabled="historyIndex >= history.length - 1"
+                  title="Rétablir (Ctrl+Y)"
+                  class="p-1.5 rounded-lg transition-colors disabled:opacity-30"
+                  :class="historyIndex < history.length - 1 ? 'hover:bg-powder-100 dark:hover:bg-onyx-700 text-onyx-600 dark:text-onyx-300' : 'text-onyx-300 dark:text-onyx-600'"
+                >
+                  <Redo2 class="w-4 h-4" />
+                </button>
+
+                <!-- Flip recto/verso -->
+                <button
+                  v-if="cardData.backSide.enabled"
+                  @click="isCardFlipped = !isCardFlipped"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                  :class="
+                    isCardFlipped
+                      ? 'bg-flame-500 text-white'
+                      : 'bg-powder-100 dark:bg-onyx-800 text-onyx-700 dark:text-powder-300 hover:bg-powder-200 dark:hover:bg-onyx-700'
+                  "
+                >
+                  <RotateCcw class="w-4 h-4" />
+                  {{ isCardFlipped ? 'Recto' : 'Verso' }}
+                </button>
+              </div>
             </div>
 
             <!-- Card Preview — éditeur glisser-déposer -->
@@ -589,7 +612,10 @@
                 :showQR="cardData.data.showQR"
                 :isFlipped="isCardFlipped"
                 :editMode="true"
+                :selectedElement="selectedElement"
                 @update:elementPositions="onElementPositionsUpdate"
+                @update:selectedElement="selectedElement = $event"
+                @commit:elementPositions="onCommitPositions"
               />
             </div>
 
@@ -605,6 +631,99 @@
                 Réinitialiser la disposition
               </button>
             </div>
+
+            <!-- ── Panel propriétés de l'élément sélectionné ── -->
+            <Transition name="prop-panel">
+              <div
+                v-if="selectedElement"
+                class="mb-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 overflow-hidden"
+              >
+                <!-- En-tête du panel -->
+                <div class="flex items-center justify-between px-4 py-2.5 bg-blue-100 dark:bg-blue-900/40 border-b border-blue-200 dark:border-blue-800">
+                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-1.5">
+                    <SlidersHorizontal class="w-3.5 h-3.5" />
+                    {{ ELEMENT_LABELS[selectedElement] || selectedElement }}
+                  </span>
+                  <button
+                    @click="selectedElement = null"
+                    class="text-blue-400 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
+                  >
+                    <X class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div class="p-3 space-y-3">
+                  <!-- Visibilité (tous les éléments) -->
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Visibilité</span>
+                    <button
+                      @click="toggleVisible"
+                      class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
+                      :class="selVisible
+                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-onyx-100 dark:bg-onyx-700 text-onyx-500 dark:text-onyx-400'"
+                    >
+                      <EyeOff v-if="!selVisible" class="w-3.5 h-3.5" />
+                      <Eye v-else class="w-3.5 h-3.5" />
+                      {{ selVisible ? 'Visible' : 'Masqué' }}
+                    </button>
+                  </div>
+
+                  <!-- Contrôles texte (non disponibles pour logo / photo) -->
+                  <template v-if="isTextEl(selectedElement)">
+                    <!-- Taille de police -->
+                    <div>
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Taille police</span>
+                        <span class="text-xs font-bold text-blue-700 dark:text-blue-300">{{ selFontSize }}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="7"
+                        max="36"
+                        :value="selFontSize"
+                        @input="(e) => updateElemProp(selectedElement, 'fontSize', +e.target.value, true)"
+                        class="w-full h-1.5 rounded-full accent-blue-500 cursor-pointer"
+                      />
+                    </div>
+
+                    <!-- Couleur du texte -->
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Couleur</span>
+                      <input
+                        type="color"
+                        :value="selColor"
+                        @input="(e) => updateElemProp(selectedElement, 'color', e.target.value)"
+                        class="h-7 w-10 rounded cursor-pointer border border-powder-200 dark:border-onyx-600 bg-transparent p-0.5"
+                      />
+                      <button
+                        @click="updateElemProp(selectedElement, 'color', null)"
+                        class="text-xs text-onyx-400 hover:text-flame-500 transition-colors border border-powder-200 dark:border-onyx-600 px-2 py-1 rounded-lg"
+                      >Défaut</button>
+                    </div>
+
+                    <!-- Gras / Italique -->
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Style</span>
+                      <button
+                        @click="toggleBold"
+                        class="w-8 h-8 rounded-lg text-sm font-black border transition-colors"
+                        :class="selBold
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400'"
+                      >B</button>
+                      <button
+                        @click="toggleItalic"
+                        class="w-8 h-8 rounded-lg text-sm italic border transition-colors"
+                        :class="selItalic
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400'"
+                      >I</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </Transition>
 
             <!-- Info Box -->
             <div
@@ -860,6 +979,10 @@ import {
   Mail,
   Loader2,
   RotateCcw,
+  Undo2,
+  Redo2,
+  SlidersHorizontal,
+  EyeOff,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -880,6 +1003,111 @@ const linkCopied = ref(false)
 const cardPreviewRef = ref(null)
 const confettiCanvas = ref(null)
 let confettiFrame = null
+
+// ── Sélection d'élément ───────────────────────────────────────
+const selectedElement = ref(null)
+
+// ── Undo / Redo ───────────────────────────────────────────────
+const history = ref([])
+const historyIndex = ref(-1)
+
+const pushHistory = (positions) => {
+  history.value = history.value.slice(0, historyIndex.value + 1)
+  history.value.push(JSON.parse(JSON.stringify(positions || null)))
+  if (history.value.length > 30) {
+    history.value.shift()
+  } else {
+    historyIndex.value++
+  }
+}
+
+const undo = () => {
+  if (historyIndex.value > 0) {
+    historyIndex.value--
+    cardData.value.data.elementPositions = history.value[historyIndex.value]
+      ? JSON.parse(JSON.stringify(history.value[historyIndex.value]))
+      : null
+  }
+}
+
+const redo = () => {
+  if (historyIndex.value < history.value.length - 1) {
+    historyIndex.value++
+    cardData.value.data.elementPositions = history.value[historyIndex.value]
+      ? JSON.parse(JSON.stringify(history.value[historyIndex.value]))
+      : null
+  }
+}
+
+const handleKeydown = (e) => {
+  if (e.ctrlKey && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo() }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo() }
+  if (e.ctrlKey && e.shiftKey && e.key === 'Z') { e.preventDefault(); redo() }
+  if (e.key === 'Escape') selectedElement.value = null
+}
+
+// ── Panel propriétés ─────────────────────────────────────────
+const ELEMENT_LABELS = {
+  logo: 'Logo', fullName: 'Nom complet', title: 'Titre', company: 'Entreprise',
+  email: 'Email', phone: 'Téléphone', website: 'Site web', address: 'Adresse',
+  photo: 'Photo', qr: 'QR Code',
+}
+
+const ELEM_DEFAULTS = {
+  fullName: { fontSize: 18, bold: true,  italic: false },
+  title:    { fontSize: 11, bold: false, italic: false },
+  company:  { fontSize: 11, bold: true,  italic: false },
+  email:    { fontSize: 10, bold: false, italic: false },
+  phone:    { fontSize: 10, bold: false, italic: false },
+  website:  { fontSize: 10, bold: false, italic: false },
+  address:  { fontSize: 10, bold: false, italic: false },
+}
+
+const isTextEl = (key) => !['logo', 'photo', 'qr'].includes(key)
+
+const selectedElemProps = computed(() => {
+  if (!selectedElement.value) return {}
+  return cardData.value.data.elementPositions?.[selectedElement.value] || {}
+})
+
+const selFontSize = computed(() => {
+  const d = ELEM_DEFAULTS[selectedElement.value] || {}
+  return selectedElemProps.value?.fontSize ?? d.fontSize ?? 11
+})
+
+const selColor = computed(() => selectedElemProps.value?.color || '#ffffff')
+
+const selBold = computed(() => {
+  const d = ELEM_DEFAULTS[selectedElement.value] || {}
+  return selectedElemProps.value?.bold ?? d.bold ?? false
+})
+
+const selItalic = computed(() => {
+  const d = ELEM_DEFAULTS[selectedElement.value] || {}
+  return selectedElemProps.value?.italic ?? d.italic ?? false
+})
+
+const selVisible = computed(() => selectedElemProps.value?.visible !== false)
+
+let styleTimer = null
+const updateElemProp = (key, prop, value, debounce = false) => {
+  if (!key) return
+  const positions = {
+    ...(cardData.value.data.elementPositions || {}),
+    [key]: { ...(cardData.value.data.elementPositions?.[key] || {}), [prop]: value },
+  }
+  cardData.value.data.elementPositions = positions
+  if (debounce) {
+    clearTimeout(styleTimer)
+    styleTimer = setTimeout(() => pushHistory(positions), 400)
+  } else {
+    pushHistory(positions)
+  }
+}
+
+const toggleBold    = () => updateElemProp(selectedElement.value, 'bold',    !selBold.value)
+const toggleItalic  = () => updateElemProp(selectedElement.value, 'italic',  !selItalic.value)
+const toggleVisible = () => updateElemProp(selectedElement.value, 'visible', !selVisible.value)
 
 const cardData = ref({
   name: 'Ma nouvelle carte',
@@ -979,8 +1207,14 @@ const onElementPositionsUpdate = (positions) => {
   cardData.value.data.elementPositions = positions
 }
 
+const onCommitPositions = () => {
+  pushHistory(cardData.value.data.elementPositions)
+}
+
 const resetElementPositions = () => {
   cardData.value.data.elementPositions = null
+  selectedElement.value = null
+  pushHistory(null)
 }
 
 const setPhotoFromUrl = () => {
@@ -991,6 +1225,8 @@ const setPhotoFromUrl = () => {
 }
 
 onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+
   // Si on a une ID dans l'URL, on charge la carte
   if (route.params.id) {
     const cardId = Number(route.params.id)
@@ -1228,6 +1464,7 @@ const launchConfetti = () => {
 }
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
   if (confettiFrame) cancelAnimationFrame(confettiFrame)
 })
 </script>
@@ -1261,5 +1498,16 @@ onUnmounted(() => {
 }
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* Property panel transition */
+.prop-panel-enter-active,
+.prop-panel-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.prop-panel-enter-from,
+.prop-panel-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

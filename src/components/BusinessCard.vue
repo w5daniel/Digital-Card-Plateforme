@@ -11,6 +11,7 @@
         @mousemove.prevent="onCardMouseMove"
         @mouseup="stopAction"
         @mouseleave="stopAction"
+        @mousedown.self="editMode ? $emit('update:selectedElement', null) : undefined"
       >
         <!-- ── Mode absolu : éléments indépendants ── -->
         <template v-if="useAbsoluteLayout">
@@ -19,7 +20,7 @@
           <div
             v-if="card.data.logo"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('logo')"
             :style="elemStyle('logo')"
             @mousedown.prevent="editMode ? startDrag('logo', $event) : undefined"
           >
@@ -35,11 +36,11 @@
           <!-- Nom complet -->
           <div
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('fullName')"
             :style="elemStyle('fullName')"
             @mousedown.prevent="editMode ? startDrag('fullName', $event) : undefined"
           >
-            <h2 class="text-xl font-bold leading-tight select-none pointer-events-none" :style="{ color: textColor }">
+            <h2 class="leading-tight select-none pointer-events-none" :style="textStyle('fullName')">
               {{ card.data.fullName || 'Nom Complet' }}
             </h2>
             <template v-if="editMode">
@@ -53,11 +54,11 @@
           <!-- Titre professionnel -->
           <div
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('title')"
             :style="elemStyle('title')"
             @mousedown.prevent="editMode ? startDrag('title', $event) : undefined"
           >
-            <p class="text-xs opacity-80 select-none pointer-events-none" :style="{ color: textColor }">
+            <p class="opacity-80 select-none pointer-events-none" :style="textStyle('title')">
               {{ card.data.title || 'Titre professionnel' }}
             </p>
             <template v-if="editMode">
@@ -72,11 +73,11 @@
           <div
             v-if="card.data.company || editMode"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('company')"
             :style="elemStyle('company')"
             @mousedown.prevent="editMode ? startDrag('company', $event) : undefined"
           >
-            <p class="text-xs font-semibold opacity-90 select-none pointer-events-none" :style="{ color: textColor }">
+            <p class="opacity-90 select-none pointer-events-none" :style="textStyle('company')">
               {{ card.data.company || 'Entreprise' }}
             </p>
             <template v-if="editMode">
@@ -91,13 +92,13 @@
           <div
             v-if="card.data.email"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('email')"
             :style="elemStyle('email')"
             @mousedown.prevent="editMode ? startDrag('email', $event) : undefined"
           >
-            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="{ color: textColor }">
+            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="textStyle('email')">
               <Mail class="w-3 h-3 opacity-70 flex-shrink-0" />
-              <span class="text-xs truncate">{{ card.data.email }}</span>
+              <span class="truncate">{{ card.data.email }}</span>
             </div>
             <template v-if="editMode">
               <div class="rh rh-nw" @mousedown.stop.prevent="startResize('email','nw',$event)" />
@@ -111,13 +112,13 @@
           <div
             v-if="card.data.phone"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('phone')"
             :style="elemStyle('phone')"
             @mousedown.prevent="editMode ? startDrag('phone', $event) : undefined"
           >
-            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="{ color: textColor }">
+            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="textStyle('phone')">
               <Phone class="w-3 h-3 opacity-70 flex-shrink-0" />
-              <span class="text-xs truncate">{{ card.data.phone }}</span>
+              <span class="truncate">{{ card.data.phone }}</span>
             </div>
             <template v-if="editMode">
               <div class="rh rh-nw" @mousedown.stop.prevent="startResize('phone','nw',$event)" />
@@ -131,13 +132,13 @@
           <div
             v-if="card.data.website"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('website')"
             :style="elemStyle('website')"
             @mousedown.prevent="editMode ? startDrag('website', $event) : undefined"
           >
-            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="{ color: textColor }">
+            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="textStyle('website')">
               <Globe class="w-3 h-3 opacity-70 flex-shrink-0" />
-              <span class="text-xs truncate">{{ card.data.website }}</span>
+              <span class="truncate">{{ card.data.website }}</span>
             </div>
             <template v-if="editMode">
               <div class="rh rh-nw" @mousedown.stop.prevent="startResize('website','nw',$event)" />
@@ -151,13 +152,13 @@
           <div
             v-if="card.data.address"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('address')"
             :style="elemStyle('address')"
             @mousedown.prevent="editMode ? startDrag('address', $event) : undefined"
           >
-            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="{ color: textColor }">
+            <div class="flex items-center space-x-1.5 h-full pointer-events-none select-none" :style="textStyle('address')">
               <MapPin class="w-3 h-3 opacity-70 flex-shrink-0" />
-              <span class="text-xs truncate">{{ card.data.address }}</span>
+              <span class="truncate">{{ card.data.address }}</span>
             </div>
             <template v-if="editMode">
               <div class="rh rh-nw" @mousedown.stop.prevent="startResize('address','nw',$event)" />
@@ -171,7 +172,7 @@
           <div
             v-if="card.data.photo"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('photo')"
             :style="elemStyle('photo')"
             @mousedown.prevent="editMode ? startDrag('photo', $event) : undefined"
           >
@@ -190,7 +191,7 @@
           <div
             v-if="shouldShowQR"
             class="absolute overflow-hidden"
-            :class="editMode ? 'edit-el' : ''"
+            :class="elClass('qr')"
             :style="elemStyle('qr')"
             @mousedown.prevent="editMode ? startDrag('qr', $event) : undefined"
           >
@@ -326,9 +327,10 @@ const props = defineProps({
   isFlipped: { type: Boolean, default: false },
   cardSize: { type: String, default: 'normal' },
   editMode: { type: Boolean, default: false },
+  selectedElement: { type: String, default: null },
 })
 
-const emit = defineEmits(['update:elementPositions'])
+const emit = defineEmits(['update:elementPositions', 'update:selectedElement', 'commit:elementPositions'])
 
 const store = useCardsStore()
 const cardEl = ref(null)
@@ -360,18 +362,18 @@ const textColor = computed(() => template.value.colors.text)
 const shouldShowQR = computed(() => props.showQR || props.card.data?.showQR)
 const qrSize = computed(() => props.cardSize === 'small' ? 80 : 110)
 
-// ── Positions par défaut (x, y, w, h — en % de la carte) ─────
+// ── Positions + styles par défaut (x, y, w, h — en % ; styles typographiques) ──
 const getDefaultPositions = () => ({
-  logo:     { x: 4,  y: 5,  w: 25, h: 12 },
-  fullName: { x: 4,  y: 20, w: 62, h: 14 },
-  title:    { x: 4,  y: 35, w: 62, h: 10 },
-  company:  { x: 4,  y: 46, w: 62, h: 9  },
-  email:    { x: 4,  y: 60, w: 55, h: 8  },
-  phone:    { x: 4,  y: 70, w: 55, h: 8  },
-  website:  { x: 4,  y: 80, w: 55, h: 8  },
-  address:  { x: 4,  y: 88, w: 55, h: 8  },
-  photo:    { x: 72, y: 3,  w: 24, h: 44 },
-  qr:       { x: 68, y: 52, w: 28, h: 44 },
+  logo:     { x: 4,  y: 5,  w: 25, h: 12, visible: true },
+  fullName: { x: 4,  y: 20, w: 62, h: 14, fontSize: 18, bold: true,  italic: false, color: null, visible: true },
+  title:    { x: 4,  y: 35, w: 62, h: 10, fontSize: 11, bold: false, italic: false, color: null, visible: true },
+  company:  { x: 4,  y: 46, w: 62, h: 9,  fontSize: 11, bold: true,  italic: false, color: null, visible: true },
+  email:    { x: 4,  y: 60, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
+  phone:    { x: 4,  y: 70, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
+  website:  { x: 4,  y: 80, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
+  address:  { x: 4,  y: 88, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
+  photo:    { x: 72, y: 3,  w: 24, h: 44, visible: true },
+  qr:       { x: 68, y: 52, w: 28, h: 44, visible: true },
 })
 
 // Positions effectives : defaults mergées avec positions sauvegardées
@@ -389,19 +391,41 @@ const elPos = computed(() => {
 const hasPositions = computed(() => {
   const pos = props.card.data?.elementPositions
   if (!pos) return false
-  // Nouveau format : clés individuelles (fullName, title, email…)
   return !!(pos.fullName || pos.title || pos.email || pos.phone || pos.qr)
 })
 const useAbsoluteLayout = computed(() => props.editMode || hasPositions.value)
 
+// Classe CSS de l'élément (édition + sélection)
+const elClass = (key) => {
+  if (!props.editMode) return ''
+  const selected = props.selectedElement === key
+  return ['edit-el', selected ? 'is-selected' : ''].filter(Boolean).join(' ')
+}
+
 // Style de positionnement pour un élément
 const elemStyle = (key) => {
   const pos = elPos.value[key]
-  return {
+  const style = {
     left: `${pos.x}%`,
     top: `${pos.y}%`,
     width: `${pos.w}%`,
     height: `${pos.h}%`,
+  }
+  if (pos.visible === false) {
+    style.opacity = props.editMode ? '0.2' : '0'
+    style.pointerEvents = props.editMode ? 'auto' : 'none'
+  }
+  return style
+}
+
+// Style typographique d'un élément texte
+const textStyle = (key) => {
+  const pos = elPos.value[key]
+  return {
+    color: pos.color || textColor.value,
+    fontSize: pos.fontSize ? `${pos.fontSize}px` : undefined,
+    fontWeight: pos.bold ? 'bold' : 'normal',
+    fontStyle: pos.italic ? 'italic' : 'normal',
   }
 }
 
@@ -417,6 +441,7 @@ const action = reactive({
 })
 
 const startDrag = (key, e) => {
+  emit('update:selectedElement', key)
   const pos = elPos.value[key]
   action.active = true
   action.type = 'drag'
@@ -428,6 +453,7 @@ const startDrag = (key, e) => {
 }
 
 const startResize = (key, handle, e) => {
+  emit('update:selectedElement', key)
   const pos = elPos.value[key]
   action.active = true
   action.type = 'resize'
@@ -468,7 +494,12 @@ const onCardMouseMove = (e) => {
   emit('update:elementPositions', { ...elPos.value, [action.key]: curr })
 }
 
-const stopAction = () => { action.active = false }
+const stopAction = () => {
+  if (action.active) {
+    emit('commit:elementPositions')
+  }
+  action.active = false
+}
 
 // ── Verso ─────────────────────────────────────────────────────
 const contentLines = computed(() => (props.card.backSide?.content || '').split('\n'))
@@ -529,6 +560,14 @@ const qrCodeValue = computed(() => {
   border-color: rgba(232, 56, 0, 0.6);
   background: rgba(232, 56, 0, 0.06);
 }
+
+/* ── Élément sélectionné ── */
+.edit-el.is-selected {
+  border: 2px solid #3b82f6 !important;
+  border-style: solid !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+.edit-el.is-selected .rh { opacity: 1; }
 
 /* ── Poignées de redimensionnement ── */
 .rh {
