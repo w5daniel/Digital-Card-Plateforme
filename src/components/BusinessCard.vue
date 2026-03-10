@@ -212,45 +212,6 @@
             class="absolute inset-0 rounded-2xl pointer-events-none"
             style="border: 2px dashed rgba(232,56,0,0.35)"
           />
-
-          <!-- ── Éléments libres (icônes / formes) ───────────── -->
-          <template v-for="el in customElementsMeta" :key="el.id">
-            <div
-              v-if="elPos[el.id]"
-              class="absolute"
-              :class="elClass(el.id)"
-              :style="elemStyle(el.id)"
-              @mousedown.prevent="editMode ? startDrag(el.id, $event) : undefined"
-            >
-              <component
-                v-if="el.type === 'icon' && ICON_CATALOG[el.icon]"
-                :is="ICON_CATALOG[el.icon]"
-                class="w-full h-full pointer-events-none"
-                :style="{ color: elPos[el.id]?.color || '#ffffff' }"
-              />
-              <div v-else-if="el.type === 'shape'" class="w-full h-full pointer-events-none" />
-              <template v-if="editMode">
-                <div class="rh rh-nw" @mousedown.stop.prevent="startResize(el.id,'nw',$event)" />
-                <div class="rh rh-ne" @mousedown.stop.prevent="startResize(el.id,'ne',$event)" />
-                <div class="rh rh-sw" @mousedown.stop.prevent="startResize(el.id,'sw',$event)" />
-                <div class="rh rh-se" @mousedown.stop.prevent="startResize(el.id,'se',$event)" />
-              </template>
-            </div>
-          </template>
-
-          <!-- ── Guides d'alignement (snap) ─────────────────── -->
-          <template v-if="editMode">
-            <div
-              v-for="y in snapGuides.h" :key="`h${y}`"
-              class="absolute left-0 right-0 pointer-events-none"
-              :style="{ top: `${y}%`, borderTop: '1.5px dashed #22c55e', zIndex: 100 }"
-            />
-            <div
-              v-for="x in snapGuides.v" :key="`v${x}`"
-              class="absolute top-0 bottom-0 pointer-events-none"
-              :style="{ left: `${x}%`, borderLeft: '1.5px dashed #22c55e', zIndex: 100 }"
-            />
-          </template>
         </template>
 
         <!-- ── Mode flex : affichage normal (sans positions sauvegardées) ── -->
@@ -356,26 +317,9 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import {
-  Mail, Phone, Globe, MapPin,
-  Star, Heart, Sparkles, Award, Crown, Diamond,
-  Zap, Flame, Leaf, Sun, Moon, Snowflake,
-  Plus, Minus,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Home, Building2, Car, Plane, Camera, Music,
-  Coffee, Book, Briefcase, Gift,
-} from 'lucide-vue-next'
+import { Mail, Phone, Globe, MapPin } from 'lucide-vue-next'
 import QrcodeVue from 'qrcode-vue3'
 import { useCardsStore } from '@/stores/cards'
-
-const ICON_CATALOG = {
-  Star, Heart, Sparkles, Award, Crown, Diamond,
-  Zap, Flame, Leaf, Sun, Moon, Snowflake,
-  Plus, Minus,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Home, Building2, Car, Plane, Camera, Music,
-  Coffee, Book, Briefcase, Gift,
-}
 
 const props = defineProps({
   card: { type: Object, required: true },
@@ -384,7 +328,6 @@ const props = defineProps({
   cardSize: { type: String, default: 'normal' },
   editMode: { type: Boolean, default: false },
   selectedElement: { type: String, default: null },
-  customElementsMeta: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['update:elementPositions', 'update:selectedElement', 'commit:elementPositions'])
@@ -399,11 +342,7 @@ const template = computed(() =>
 
 // ── Style global de la carte ──────────────────────────────────
 const cardOuterStyle = computed(() => {
-  const ratio = props.card.data?.cardRatio
-  const base = {
-    minHeight: props.cardSize === 'small' ? '240px' : '280px',
-    ...(ratio ? { aspectRatio: `${ratio}` } : {}),
-  }
+  const base = { minHeight: props.cardSize === 'small' ? '240px' : '280px' }
   const font = { fontFamily: props.card.data?.fontFamily || 'Poppins' }
   if (props.card.data?.backgroundImage) {
     return { ...base, ...font, backgroundImage: `url(${props.card.data.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -444,12 +383,6 @@ const elPos = computed(() => {
   const merged = {}
   for (const key of Object.keys(defaults)) {
     merged[key] = { ...defaults[key], ...(stored[key] && typeof stored[key] === 'object' ? stored[key] : {}) }
-  }
-  // Custom elements : positions stockées directement dans elementPositions par id
-  for (const el of props.customElementsMeta) {
-    if (stored[el.id] && typeof stored[el.id] === 'object') {
-      merged[el.id] = stored[el.id]
-    }
   }
   return merged
 })
@@ -520,8 +453,6 @@ const action = reactive({
   startW: 0, startH: 0,
 })
 
-const snapGuides = ref({ h: [], v: [] })
-
 const startDrag = (key, e) => {
   emit('update:selectedElement', key)
   emit('update:elementPositions', JSON.parse(JSON.stringify(elPos.value)))
@@ -562,21 +493,6 @@ const onCardMouseMove = (e) => {
   if (action.type === 'drag') {
     curr.x = Math.max(0, Math.min(90, action.startX + dx))
     curr.y = Math.max(0, Math.min(90, action.startY + dy))
-    // ── Snap guides ────────────────────────────────────────────
-    const guides = { h: [], v: [] }
-    const snapV = [0, 50, 100], snapH = [0, 50, 100]
-    const cx = curr.x + curr.w / 2, cy = curr.y + curr.h / 2
-    for (const sp of snapV) {
-      if (Math.abs(cx - sp) < 2) { curr.x = sp - curr.w / 2; guides.v.push(sp); break }
-      else if (Math.abs(curr.x - sp) < 2) { curr.x = sp; guides.v.push(sp); break }
-      else if (Math.abs(curr.x + curr.w - sp) < 2) { curr.x = sp - curr.w; guides.v.push(sp); break }
-    }
-    for (const sp of snapH) {
-      if (Math.abs(cy - sp) < 2) { curr.y = sp - curr.h / 2; guides.h.push(sp); break }
-      else if (Math.abs(curr.y - sp) < 2) { curr.y = sp; guides.h.push(sp); break }
-      else if (Math.abs(curr.y + curr.h - sp) < 2) { curr.y = sp - curr.h; guides.h.push(sp); break }
-    }
-    snapGuides.value = guides
   } else if (action.type === 'resize') {
     if (action.handle.includes('e')) curr.w = Math.max(8, action.startW + dx)
     if (action.handle.includes('s')) curr.h = Math.max(4, action.startH + dy)
@@ -598,7 +514,6 @@ const stopAction = () => {
     emit('commit:elementPositions')
   }
   action.active = false
-  snapGuides.value = { h: [], v: [] }
 }
 
 // ── Verso ─────────────────────────────────────────────────────

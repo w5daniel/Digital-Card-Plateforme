@@ -588,90 +588,6 @@
                   <Redo2 class="w-4 h-4" />
                 </button>
 
-                <!-- Format selector -->
-                <div class="flex items-center gap-0.5 border-l border-powder-200 dark:border-onyx-600 pl-1.5 ml-0.5">
-                  <button
-                    v-for="f in FORMAT_PRESETS"
-                    :key="f.label"
-                    @click="cardData.data.cardRatio = f.ratio"
-                    :title="`Format ${f.label}`"
-                    class="px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors"
-                    :class="cardData.data.cardRatio === f.ratio
-                      ? 'bg-blue-500 text-white'
-                      : 'text-onyx-500 dark:text-onyx-400 hover:bg-powder-100 dark:hover:bg-onyx-700'"
-                  >{{ f.label }}</button>
-                </div>
-
-                <!-- Zoom controls -->
-                <div class="flex items-center gap-0.5 border-l border-powder-200 dark:border-onyx-600 pl-1.5 ml-0.5">
-                  <button
-                    @click="editorZoom = Math.max(0.5, +(editorZoom - 0.25).toFixed(2))"
-                    title="Zoom arrière"
-                    class="w-6 h-6 flex items-center justify-center rounded text-onyx-500 dark:text-onyx-400 hover:bg-powder-100 dark:hover:bg-onyx-700 text-sm font-bold leading-none"
-                  >−</button>
-                  <span class="text-[10px] text-onyx-500 dark:text-onyx-400 w-8 text-center select-none">{{ Math.round(editorZoom * 100) }}%</span>
-                  <button
-                    @click="editorZoom = Math.min(2.0, +(editorZoom + 0.25).toFixed(2))"
-                    title="Zoom avant"
-                    class="w-6 h-6 flex items-center justify-center rounded text-onyx-500 dark:text-onyx-400 hover:bg-powder-100 dark:hover:bg-onyx-700 text-sm font-bold leading-none"
-                  >+</button>
-                </div>
-
-                <!-- Ajouter élément -->
-                <div class="relative border-l border-powder-200 dark:border-onyx-600 pl-1.5 ml-0.5">
-                  <button
-                    @click="showAddPanel = !showAddPanel"
-                    title="Ajouter un élément"
-                    class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-flame-500 text-white hover:bg-flame-600 transition-colors"
-                  >
-                    <Plus class="w-3.5 h-3.5" />Ajouter
-                  </button>
-                  <!-- Popover Ajouter -->
-                  <Transition name="fade">
-                    <div
-                      v-if="showAddPanel"
-                      class="absolute right-0 top-full mt-1 w-72 bg-white dark:bg-onyx-800 border border-powder-200 dark:border-onyx-600 rounded-xl shadow-xl z-50 p-3"
-                      @click.stop
-                    >
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold text-onyx-700 dark:text-onyx-200">Ajouter un élément</span>
-                        <button @click="showAddPanel = false" class="text-onyx-400 hover:text-onyx-600 dark:hover:text-onyx-200 transition-colors">
-                          <X class="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <!-- Icônes -->
-                      <p class="text-[10px] font-bold uppercase tracking-wide text-onyx-400 dark:text-onyx-500 mb-1.5">Icônes</p>
-                      <div class="grid grid-cols-6 gap-1 mb-3">
-                        <button
-                          v-for="(comp, name) in ICON_CATALOG_EDITOR"
-                          :key="name"
-                          @click="addCustomElement('icon', name)"
-                          :title="name"
-                          class="flex items-center justify-center w-full aspect-square rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
-                        >
-                          <component :is="comp" class="w-4 h-4 pointer-events-none" />
-                        </button>
-                      </div>
-                      <!-- Formes -->
-                      <p class="text-[10px] font-bold uppercase tracking-wide text-onyx-400 dark:text-onyx-500 mb-1.5">Formes</p>
-                      <div class="flex gap-2">
-                        <button @click="addCustomElement('shape', 'circle')" class="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg border border-powder-200 dark:border-onyx-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
-                          <div class="w-6 h-6 rounded-full bg-onyx-400 dark:bg-onyx-500" />
-                          <span class="text-[10px] text-onyx-500 dark:text-onyx-400">Cercle</span>
-                        </button>
-                        <button @click="addCustomElement('shape', 'rect')" class="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg border border-powder-200 dark:border-onyx-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
-                          <div class="w-7 h-4 rounded bg-onyx-400 dark:bg-onyx-500 my-1" />
-                          <span class="text-[10px] text-onyx-500 dark:text-onyx-400">Rectangle</span>
-                        </button>
-                        <button @click="addCustomElement('shape', 'line')" class="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg border border-powder-200 dark:border-onyx-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
-                          <div class="w-8 h-0.5 bg-onyx-400 dark:bg-onyx-500 my-3" />
-                          <span class="text-[10px] text-onyx-500 dark:text-onyx-400">Ligne</span>
-                        </button>
-                      </div>
-                    </div>
-                  </Transition>
-                </div>
-
                 <!-- Flip recto/verso -->
                 <button
                   v-if="cardData.backSide.enabled"
@@ -690,7 +606,6 @@
             </div>
 
             <!-- Card Preview — éditeur glisser-déposer -->
-            <div :style="{ zoom: editorZoom }">
             <div ref="cardPreviewRef" class="mb-3">
               <BusinessCard
                 :card="cardData"
@@ -701,9 +616,7 @@
                 @update:elementPositions="onElementPositionsUpdate"
                 @update:selectedElement="selectedElement = $event"
                 @commit:elementPositions="onCommitPositions"
-                :customElementsMeta="cardData.data.customElementsMeta"
               />
-            </div>
             </div>
 
             <!-- Reset positions -->
@@ -729,7 +642,7 @@
                 <div class="flex items-center justify-between px-4 py-2.5 bg-blue-100 dark:bg-blue-900/40 border-b border-blue-200 dark:border-blue-800">
                   <span class="text-sm font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-1.5">
                     <SlidersHorizontal class="w-3.5 h-3.5" />
-                    {{ getElementLabel(selectedElement) }}
+                    {{ ELEMENT_LABELS[selectedElement] || selectedElement }}
                   </span>
                   <button
                     @click="selectedElement = null"
@@ -754,17 +667,6 @@
                       <Eye v-else class="w-3.5 h-3.5" />
                       {{ selVisible ? 'Visible' : 'Masqué' }}
                     </button>
-                  </div>
-
-                  <!-- Couleur de l'icône -->
-                  <div v-if="isCustomEl(selectedElement) && cardData.data.customElementsMeta?.find(el => el.id === selectedElement)?.type === 'icon'" class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Couleur</span>
-                    <input
-                      type="color"
-                      :value="cardData.data.elementPositions?.[selectedElement]?.color || '#ffffff'"
-                      @input="(e) => updateElemProp(selectedElement, 'color', e.target.value)"
-                      class="h-7 w-10 rounded cursor-pointer border border-powder-200 dark:border-onyx-600 bg-transparent p-0.5"
-                    />
                   </div>
 
                   <!-- Contrôles texte (non disponibles pour logo / photo) -->
@@ -950,16 +852,6 @@
                         class="w-full h-1.5 rounded-full accent-blue-500 cursor-pointer"
                       />
                     </div>
-                  </div>
-
-                  <!-- Supprimer (custom elements uniquement) -->
-                  <div v-if="isCustomEl(selectedElement)" class="border-t border-blue-200 dark:border-blue-800 pt-3 mt-1">
-                    <button
-                      @click="deleteCustomElement(selectedElement)"
-                      class="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/40 text-xs font-semibold transition-colors"
-                    >
-                      <Trash2 class="w-3.5 h-3.5" />Supprimer l'élément
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1230,13 +1122,6 @@ import {
   AlignCenterVertical,
   AlignEndVertical,
   ChevronUp,
-  Trash2,
-  Star, Heart, Sparkles, Award, Crown, Diamond,
-  Zap, Flame, Leaf, Sun, Moon, Snowflake,
-  Plus, Minus,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Home, Building2, Car, Plane, Camera, Music,
-  Coffee, Book, Briefcase, Gift,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -1258,26 +1143,6 @@ const cardPreviewRef = ref(null)
 const confettiCanvas = ref(null)
 let confettiFrame = null
 
-// ── Éditeur avancé : zoom + panel ajout ───────────────────────
-const editorZoom  = ref(1.0)
-const showAddPanel = ref(false)
-
-const FORMAT_PRESETS = [
-  { label: '16:9',  ratio: null  },
-  { label: 'Carte', ratio: 1.574 },
-  { label: 'Carré', ratio: 1.0   },
-  { label: '2:1',   ratio: 2.0   },
-]
-
-const ICON_CATALOG_EDITOR = {
-  Star, Heart, Sparkles, Award, Crown, Diamond,
-  Zap, Flame, Leaf, Sun, Moon, Snowflake,
-  Plus, Minus,
-  ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Home, Building2, Car, Plane, Camera, Music,
-  Coffee, Book, Briefcase, Gift,
-}
-
 // ── Sélection d'élément ───────────────────────────────────────
 const selectedElement = ref(null)
 
@@ -1287,10 +1152,7 @@ const historyIndex = ref(-1)
 
 const pushHistory = (positions) => {
   history.value = history.value.slice(0, historyIndex.value + 1)
-  history.value.push({
-    positions: JSON.parse(JSON.stringify(positions || null)),
-    meta: JSON.parse(JSON.stringify(cardData.value?.data?.customElementsMeta || [])),
-  })
+  history.value.push(JSON.parse(JSON.stringify(positions || null)))
   if (history.value.length > 30) {
     history.value.shift()
   } else {
@@ -1301,18 +1163,18 @@ const pushHistory = (positions) => {
 const undo = () => {
   if (historyIndex.value > 0) {
     historyIndex.value--
-    const entry = history.value[historyIndex.value]
-    cardData.value.data.elementPositions = entry?.positions ? JSON.parse(JSON.stringify(entry.positions)) : null
-    cardData.value.data.customElementsMeta = entry?.meta ? JSON.parse(JSON.stringify(entry.meta)) : []
+    cardData.value.data.elementPositions = history.value[historyIndex.value]
+      ? JSON.parse(JSON.stringify(history.value[historyIndex.value]))
+      : null
   }
 }
 
 const redo = () => {
   if (historyIndex.value < history.value.length - 1) {
     historyIndex.value++
-    const entry = history.value[historyIndex.value]
-    cardData.value.data.elementPositions = entry?.positions ? JSON.parse(JSON.stringify(entry.positions)) : null
-    cardData.value.data.customElementsMeta = entry?.meta ? JSON.parse(JSON.stringify(entry.meta)) : []
+    cardData.value.data.elementPositions = history.value[historyIndex.value]
+      ? JSON.parse(JSON.stringify(history.value[historyIndex.value]))
+      : null
   }
 }
 
@@ -1327,15 +1189,6 @@ const handleKeydown = (e) => {
     const dMap = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }
     const [dx, dy] = dMap[e.key]
     nudgeElement(dx, dy)
-  }
-  // Supprimer custom element sélectionné avec Delete ou Backspace
-  if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElement.value) {
-    const active = document.activeElement
-    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return
-    if (isCustomEl(selectedElement.value)) {
-      e.preventDefault()
-      deleteCustomElement(selectedElement.value)
-    }
   }
 }
 
@@ -1356,21 +1209,7 @@ const ELEM_DEFAULTS = {
   address:  { fontSize: 10, bold: false, italic: false },
 }
 
-const PREDEFINED_KEYS = ['logo', 'fullName', 'title', 'company', 'email', 'phone', 'website', 'address', 'photo', 'qr']
-const isCustomEl = (key) => !!key && !PREDEFINED_KEYS.includes(key)
-const isTextEl = (key) => {
-  if (!key || isCustomEl(key)) return false
-  return !['logo', 'photo', 'qr'].includes(key)
-}
-
-const getElementLabel = (key) => {
-  if (ELEMENT_LABELS[key]) return ELEMENT_LABELS[key]
-  const meta = cardData.value?.data?.customElementsMeta?.find(el => el.id === key)
-  if (meta?.type === 'icon') return `Icône : ${meta.icon}`
-  const shapeNames = { circle: 'Cercle', rect: 'Rectangle', line: 'Ligne' }
-  if (meta?.type === 'shape') return shapeNames[meta.shape] || 'Forme'
-  return key
-}
+const isTextEl = (key) => !['logo', 'photo', 'qr'].includes(key)
 
 const selectedElemProps = computed(() => {
   if (!selectedElement.value) return {}
@@ -1452,7 +1291,8 @@ const sendBackward = () => {
   updateElemProp(key, 'zIndex', Math.max(1, (pos.zIndex ?? 10) - 1))
 }
 
-const alignElement = (dir) => {  const key = selectedElement.value
+const alignElement = (dir) => {
+  const key = selectedElement.value
   if (!key) return
   const pos = cardData.value.data.elementPositions?.[key]
   if (!pos) return
@@ -1466,32 +1306,6 @@ const alignElement = (dir) => {  const key = selectedElement.value
   const newPositions = { ...cardData.value.data.elementPositions, [key]: { ...pos, ...update } }
   cardData.value.data.elementPositions = newPositions
   pushHistory(newPositions)
-}
-
-const addCustomElement = (type, value) => {
-  const id = `${type}-${Date.now()}`
-  const newMeta = { id, type, ...(type === 'icon' ? { icon: value } : { shape: value }) }
-  const DEFAULTS = {
-    icon:   { x: 40, y: 40, w: 10, h: 10, color: '#ffffff', bgColor: null,      borderRadius: 0,  zIndex: 30, rotate: 0, visible: true },
-    circle: { x: 35, y: 38, w: 18, h: 18, color: null,      bgColor: '#e85800', borderRadius: 50, zIndex: 30, rotate: 0, visible: true },
-    rect:   { x: 33, y: 42, w: 30, h: 10, color: null,      bgColor: '#e85800', borderRadius: 0,  zIndex: 30, rotate: 0, visible: true },
-    line:   { x: 25, y: 50, w: 50, h:  2, color: null,      bgColor: '#ffffff', borderRadius: 2,  zIndex: 30, rotate: 0, visible: true },
-  }
-  const defPos = DEFAULTS[type === 'icon' ? 'icon' : value] || DEFAULTS.rect
-  cardData.value.data.customElementsMeta = [...(cardData.value.data.customElementsMeta || []), newMeta]
-  cardData.value.data.elementPositions = { ...(cardData.value.data.elementPositions || {}), [id]: { ...defPos } }
-  selectedElement.value = id
-  showAddPanel.value = false
-  pushHistory(cardData.value.data.elementPositions)
-}
-
-const deleteCustomElement = (id) => {
-  cardData.value.data.customElementsMeta = (cardData.value.data.customElementsMeta || []).filter(el => el.id !== id)
-  const pos = { ...(cardData.value.data.elementPositions || {}) }
-  delete pos[id]
-  cardData.value.data.elementPositions = Object.keys(pos).length ? pos : null
-  if (selectedElement.value === id) selectedElement.value = null
-  pushHistory(cardData.value.data.elementPositions)
 }
 
 const cardData = ref({
@@ -1511,8 +1325,6 @@ const cardData = ref({
     showQR: false,
     backgroundImage: '',
     elementPositions: null,
-    cardRatio: null,
-    customElementsMeta: [],
   },
   backSide: {
     enabled: false,
@@ -1600,7 +1412,6 @@ const onCommitPositions = () => {
 
 const resetElementPositions = () => {
   cardData.value.data.elementPositions = null
-  cardData.value.data.customElementsMeta = []
   selectedElement.value = null
   pushHistory(null)
 }
@@ -1624,8 +1435,6 @@ onMounted(() => {
       loaded.data = loaded.data || {}
       loaded.data.backgroundImage = loaded.data.backgroundImage || ''
       loaded.data.elementPositions = loaded.data.elementPositions || null
-      loaded.data.customElementsMeta = loaded.data.customElementsMeta || []
-      loaded.data.cardRatio = loaded.data.cardRatio || null
       cardData.value = loaded
       isEditing.value = true
     }
@@ -1704,21 +1513,13 @@ const shareCard = () => {
 const captureCard = async () => {
   const el = cardPreviewRef.value
   if (!el) throw new Error('Preview not found')
-  // Reset zoom for capture then restore
-  const savedZoom = editorZoom.value
-  editorZoom.value = 1
-  await new Promise(resolve => setTimeout(resolve, 50))
-  try {
-    return await html2canvas(el, {
-      scale: 3,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null,
-      logging: false,
-    })
-  } finally {
-    editorZoom.value = savedZoom
-  }
+  return html2canvas(el, {
+    scale: 3,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    logging: false,
+  })
 }
 
 const downloadPDF = async () => {
