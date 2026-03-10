@@ -364,16 +364,16 @@ const qrSize = computed(() => props.cardSize === 'small' ? 80 : 110)
 
 // ── Positions + styles par défaut (x, y, w, h — en % ; styles typographiques) ──
 const getDefaultPositions = () => ({
-  logo:     { x: 4,  y: 5,  w: 25, h: 12, zIndex: 10, visible: true },
-  fullName: { x: 4,  y: 20, w: 62, h: 14, fontSize: 18, bold: true,  italic: false, color: null, zIndex: 20, visible: true },
-  title:    { x: 4,  y: 35, w: 62, h: 10, fontSize: 11, bold: false, italic: false, color: null, zIndex: 20, visible: true },
-  company:  { x: 4,  y: 46, w: 62, h: 9,  fontSize: 11, bold: true,  italic: false, color: null, zIndex: 20, visible: true },
-  email:    { x: 4,  y: 60, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
-  phone:    { x: 4,  y: 70, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
-  website:  { x: 4,  y: 80, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
-  address:  { x: 4,  y: 88, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
-  photo:    { x: 72, y: 3,  w: 24, h: 44, zIndex: 5, visible: true },
-  qr:       { x: 68, y: 52, w: 28, h: 44, zIndex: 5, visible: true },
+  logo:     { x: 4,  y: 5,  w: 25, h: 12, zIndex: 10, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  fullName: { x: 4,  y: 20, w: 62, h: 14, fontSize: 18, bold: true,  italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  title:    { x: 4,  y: 35, w: 62, h: 10, fontSize: 11, bold: false, italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  company:  { x: 4,  y: 46, w: 62, h: 9,  fontSize: 11, bold: true,  italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  email:    { x: 4,  y: 60, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  phone:    { x: 4,  y: 70, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  website:  { x: 4,  y: 80, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  address:  { x: 4,  y: 88, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, textAlign: 'left', letterSpacing: 0, zIndex: 20, bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  photo:    { x: 72, y: 3,  w: 24, h: 44, zIndex: 5,  bgColor: null, borderRadius: 0, rotate: 0, visible: true },
+  qr:       { x: 68, y: 52, w: 28, h: 44, zIndex: 5,  bgColor: null, borderRadius: 0, rotate: 0, visible: true },
 })
 
 // Positions effectives : defaults mergées avec positions sauvegardées
@@ -416,6 +416,16 @@ const elemStyle = (key) => {
     style.opacity = props.editMode ? '0.2' : '0'
     style.pointerEvents = props.editMode ? 'auto' : 'none'
   }
+  if (pos.bgColor) {
+    style.backgroundColor = pos.bgColor
+  }
+  if (pos.borderRadius) {
+    style.borderRadius = `${pos.borderRadius}%`
+    if (!props.editMode) style.overflow = 'hidden'
+  }
+  if (pos.rotate) {
+    style.transform = `rotate(${pos.rotate}deg)`
+  }
   return style
 }
 
@@ -427,6 +437,8 @@ const textStyle = (key) => {
     fontSize: pos.fontSize ? `${pos.fontSize}px` : undefined,
     fontWeight: pos.bold ? 'bold' : 'normal',
     fontStyle: pos.italic ? 'italic' : 'normal',
+    textAlign: pos.textAlign || 'left',
+    letterSpacing: pos.letterSpacing ? `${pos.letterSpacing}px` : undefined,
   }
 }
 

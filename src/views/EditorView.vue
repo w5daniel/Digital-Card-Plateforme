@@ -671,6 +671,27 @@
 
                   <!-- Contrôles texte (non disponibles pour logo / photo) -->
                   <template v-if="isTextEl(selectedElement)">
+                    <!-- Alignement du texte -->
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Texte</span>
+                      <div class="flex gap-1">
+                        <button
+                          v-for="align in ['left', 'center', 'right']"
+                          :key="align"
+                          @click="updateElemProp(selectedElement, 'textAlign', align)"
+                          :title="`Aligner ${align === 'left' ? 'à gauche' : align === 'center' ? 'au centre' : 'à droite'}`"
+                          class="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors"
+                          :class="selTextAlign === align
+                            ? 'bg-blue-500 text-white border-blue-500'
+                            : 'border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400'"
+                        >
+                          <AlignLeft v-if="align === 'left'" class="w-3.5 h-3.5" />
+                          <AlignCenter v-else-if="align === 'center'" class="w-3.5 h-3.5" />
+                          <AlignRight v-else class="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
                     <!-- Taille de police -->
                     <div>
                       <div class="flex items-center justify-between mb-1">
@@ -720,6 +741,23 @@
                           : 'border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400'"
                       >I</button>
                     </div>
+
+                    <!-- Espacement des lettres -->
+                    <div>
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Espacement</span>
+                        <span class="text-xs font-bold text-blue-700 dark:text-blue-300">{{ selLetterSpacing }}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="0.5"
+                        :value="selLetterSpacing"
+                        @input="(e) => updateElemProp(selectedElement, 'letterSpacing', +e.target.value, true)"
+                        class="w-full h-1.5 rounded-full accent-blue-500 cursor-pointer"
+                      />
+                    </div>
                   </template>
 
                   <!-- Alignement sur la carte -->
@@ -765,6 +803,55 @@
                     >
                       <ChevronUp class="w-3.5 h-3.5" />Avancer
                     </button>
+                  </div>
+
+                  <!-- Design de l'élément -->
+                  <div class="border-t border-blue-200 dark:border-blue-800 pt-3">
+                    <span class="text-xs font-semibold text-onyx-600 dark:text-onyx-400 block mb-2">Design</span>
+                    <!-- Fond -->
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400 w-14 shrink-0">Fond</span>
+                      <input
+                        type="color"
+                        :value="selBgColor"
+                        @input="(e) => updateElemProp(selectedElement, 'bgColor', e.target.value)"
+                        class="h-7 w-10 rounded cursor-pointer border border-powder-200 dark:border-onyx-600 bg-transparent p-0.5"
+                      />
+                      <button
+                        @click="updateElemProp(selectedElement, 'bgColor', null)"
+                        class="text-xs text-onyx-400 hover:text-flame-500 transition-colors border border-powder-200 dark:border-onyx-600 px-2 py-1 rounded-lg"
+                      >Effacer</button>
+                    </div>
+                    <!-- Arrondi -->
+                    <div class="mb-2">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Arrondi</span>
+                        <span class="text-xs font-bold text-blue-700 dark:text-blue-300">{{ selBorderRadius }}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="50"
+                        :value="selBorderRadius"
+                        @input="(e) => updateElemProp(selectedElement, 'borderRadius', +e.target.value, true)"
+                        class="w-full h-1.5 rounded-full accent-blue-500 cursor-pointer"
+                      />
+                    </div>
+                    <!-- Rotation -->
+                    <div>
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Rotation</span>
+                        <span class="text-xs font-bold text-blue-700 dark:text-blue-300">{{ selRotate }}°</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-45"
+                        max="45"
+                        :value="selRotate"
+                        @input="(e) => updateElemProp(selectedElement, 'rotate', +e.target.value, true)"
+                        class="w-full h-1.5 rounded-full accent-blue-500 cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1147,6 +1234,12 @@ const selItalic = computed(() => {
 })
 
 const selVisible = computed(() => selectedElemProps.value?.visible !== false)
+
+const selTextAlign     = computed(() => selectedElemProps.value?.textAlign || 'left')
+const selLetterSpacing = computed(() => selectedElemProps.value?.letterSpacing ?? 0)
+const selBgColor       = computed(() => selectedElemProps.value?.bgColor || '#000000')
+const selBorderRadius  = computed(() => selectedElemProps.value?.borderRadius ?? 0)
+const selRotate        = computed(() => selectedElemProps.value?.rotate ?? 0)
 
 let styleTimer = null
 const updateElemProp = (key, prop, value, debounce = false) => {
