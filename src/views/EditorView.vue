@@ -721,6 +721,51 @@
                       >I</button>
                     </div>
                   </template>
+
+                  <!-- Alignement sur la carte -->
+                  <div>
+                    <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400 block mb-1.5">Aligner sur la carte</span>
+                    <div class="flex gap-1">
+                      <button @click="alignElement('left')" title="Aligner à gauche" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignLeft class="w-3.5 h-3.5" />
+                      </button>
+                      <button @click="alignElement('cH')" title="Centrer horizontalement" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignCenter class="w-3.5 h-3.5" />
+                      </button>
+                      <button @click="alignElement('right')" title="Aligner à droite" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignRight class="w-3.5 h-3.5" />
+                      </button>
+                      <div class="w-px bg-powder-200 dark:bg-onyx-600 mx-0.5" />
+                      <button @click="alignElement('top')" title="Aligner en haut" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignStartVertical class="w-3.5 h-3.5" />
+                      </button>
+                      <button @click="alignElement('cV')" title="Centrer verticalement" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignCenterVertical class="w-3.5 h-3.5" />
+                      </button>
+                      <button @click="alignElement('bottom')" title="Aligner en bas" class="flex-1 flex items-center justify-center h-7 rounded-lg border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition-colors">
+                        <AlignEndVertical class="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Ordre des calques -->
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-onyx-600 dark:text-onyx-400">Calque</span>
+                    <button
+                      @click="sendBackward"
+                      title="Reculer d'un calque"
+                      class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                    >
+                      <ChevronDown class="w-3.5 h-3.5" />Reculer
+                    </button>
+                    <button
+                      @click="bringForward"
+                      title="Avancer d'un calque"
+                      class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs border border-powder-200 dark:border-onyx-600 text-onyx-600 dark:text-onyx-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                    >
+                      <ChevronUp class="w-3.5 h-3.5" />Avancer
+                    </button>
+                  </div>
                 </div>
               </div>
             </Transition>
@@ -983,6 +1028,13 @@ import {
   Redo2,
   SlidersHorizontal,
   EyeOff,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignStartVertical,
+  AlignCenterVertical,
+  AlignEndVertical,
+  ChevronUp,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -1044,6 +1096,13 @@ const handleKeydown = (e) => {
   if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo() }
   if (e.ctrlKey && e.shiftKey && e.key === 'Z') { e.preventDefault(); redo() }
   if (e.key === 'Escape') selectedElement.value = null
+  if (selectedElement.value && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    e.preventDefault()
+    const step = e.shiftKey ? 5 : 1
+    const dMap = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }
+    const [dx, dy] = dMap[e.key]
+    nudgeElement(dx, dy)
+  }
 }
 
 // ── Panel propriétés ─────────────────────────────────────────
@@ -1108,6 +1167,53 @@ const updateElemProp = (key, prop, value, debounce = false) => {
 const toggleBold    = () => updateElemProp(selectedElement.value, 'bold',    !selBold.value)
 const toggleItalic  = () => updateElemProp(selectedElement.value, 'italic',  !selItalic.value)
 const toggleVisible = () => updateElemProp(selectedElement.value, 'visible', !selVisible.value)
+
+const nudgeElement = (dx, dy) => {
+  const key = selectedElement.value
+  if (!key) return
+  const positions = cardData.value.data.elementPositions
+  if (!positions?.[key]) return
+  const pos = positions[key]
+  const newPositions = {
+    ...positions,
+    [key]: { ...pos, x: Math.max(0, Math.min(90, (pos.x ?? 0) + dx)), y: Math.max(0, Math.min(90, (pos.y ?? 0) + dy)) },
+  }
+  cardData.value.data.elementPositions = newPositions
+  pushHistory(newPositions)
+}
+
+const bringForward = () => {
+  const key = selectedElement.value
+  if (!key) return
+  const pos = cardData.value.data.elementPositions?.[key]
+  if (!pos) return
+  updateElemProp(key, 'zIndex', (pos.zIndex ?? 10) + 1)
+}
+
+const sendBackward = () => {
+  const key = selectedElement.value
+  if (!key) return
+  const pos = cardData.value.data.elementPositions?.[key]
+  if (!pos) return
+  updateElemProp(key, 'zIndex', Math.max(1, (pos.zIndex ?? 10) - 1))
+}
+
+const alignElement = (dir) => {
+  const key = selectedElement.value
+  if (!key) return
+  const pos = cardData.value.data.elementPositions?.[key]
+  if (!pos) return
+  let update = {}
+  if (dir === 'left')    update = { x: 0 }
+  else if (dir === 'cH') update = { x: Math.round((100 - pos.w) / 2) }
+  else if (dir === 'right')  update = { x: Math.max(0, Math.round(100 - pos.w)) }
+  else if (dir === 'top')    update = { y: 0 }
+  else if (dir === 'cV')     update = { y: Math.round((100 - pos.h) / 2) }
+  else if (dir === 'bottom') update = { y: Math.max(0, Math.round(100 - pos.h)) }
+  const newPositions = { ...cardData.value.data.elementPositions, [key]: { ...pos, ...update } }
+  cardData.value.data.elementPositions = newPositions
+  pushHistory(newPositions)
+}
 
 const cardData = ref({
   name: 'Ma nouvelle carte',

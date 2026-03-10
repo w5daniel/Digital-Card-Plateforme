@@ -364,16 +364,16 @@ const qrSize = computed(() => props.cardSize === 'small' ? 80 : 110)
 
 // ── Positions + styles par défaut (x, y, w, h — en % ; styles typographiques) ──
 const getDefaultPositions = () => ({
-  logo:     { x: 4,  y: 5,  w: 25, h: 12, visible: true },
-  fullName: { x: 4,  y: 20, w: 62, h: 14, fontSize: 18, bold: true,  italic: false, color: null, visible: true },
-  title:    { x: 4,  y: 35, w: 62, h: 10, fontSize: 11, bold: false, italic: false, color: null, visible: true },
-  company:  { x: 4,  y: 46, w: 62, h: 9,  fontSize: 11, bold: true,  italic: false, color: null, visible: true },
-  email:    { x: 4,  y: 60, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
-  phone:    { x: 4,  y: 70, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
-  website:  { x: 4,  y: 80, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
-  address:  { x: 4,  y: 88, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, visible: true },
-  photo:    { x: 72, y: 3,  w: 24, h: 44, visible: true },
-  qr:       { x: 68, y: 52, w: 28, h: 44, visible: true },
+  logo:     { x: 4,  y: 5,  w: 25, h: 12, zIndex: 10, visible: true },
+  fullName: { x: 4,  y: 20, w: 62, h: 14, fontSize: 18, bold: true,  italic: false, color: null, zIndex: 20, visible: true },
+  title:    { x: 4,  y: 35, w: 62, h: 10, fontSize: 11, bold: false, italic: false, color: null, zIndex: 20, visible: true },
+  company:  { x: 4,  y: 46, w: 62, h: 9,  fontSize: 11, bold: true,  italic: false, color: null, zIndex: 20, visible: true },
+  email:    { x: 4,  y: 60, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
+  phone:    { x: 4,  y: 70, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
+  website:  { x: 4,  y: 80, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
+  address:  { x: 4,  y: 88, w: 55, h: 8,  fontSize: 10, bold: false, italic: false, color: null, zIndex: 20, visible: true },
+  photo:    { x: 72, y: 3,  w: 24, h: 44, zIndex: 5, visible: true },
+  qr:       { x: 68, y: 52, w: 28, h: 44, zIndex: 5, visible: true },
 })
 
 // Positions effectives : defaults mergées avec positions sauvegardées
@@ -410,6 +410,7 @@ const elemStyle = (key) => {
     top: `${pos.y}%`,
     width: `${pos.w}%`,
     height: `${pos.h}%`,
+    zIndex: pos.zIndex ?? 1,
   }
   if (pos.visible === false) {
     style.opacity = props.editMode ? '0.2' : '0'
@@ -442,6 +443,7 @@ const action = reactive({
 
 const startDrag = (key, e) => {
   emit('update:selectedElement', key)
+  emit('update:elementPositions', JSON.parse(JSON.stringify(elPos.value)))
   const pos = elPos.value[key]
   action.active = true
   action.type = 'drag'
@@ -454,6 +456,7 @@ const startDrag = (key, e) => {
 
 const startResize = (key, handle, e) => {
   emit('update:selectedElement', key)
+  emit('update:elementPositions', JSON.parse(JSON.stringify(elPos.value)))
   const pos = elPos.value[key]
   action.active = true
   action.type = 'resize'
