@@ -31,13 +31,13 @@ const router = createRouter({
       path: '/editor',
       name: 'editor',
       component: () => import('../views/EditorView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, hideLayout: true },
     },
     {
       path: '/editor/:id',
       name: 'editor-edit',
       component: () => import('../views/EditorView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, hideLayout: true },
     },
     {
       path: '/dashboard',
@@ -133,7 +133,7 @@ router.beforeEach((to, from, next) => {
 
   // Vérifie si une des routes matchées exige l'admin (parent ou enfant)
   const requiresAdmin = to.matched.some((r) => r.meta.requiresAdmin)
-  const requiresAuth  = to.meta.requiresAuth
+  const requiresAuth = to.meta.requiresAuth
 
   if (requiresAdmin) {
     // Accès admin : doit être connecté ET avoir le rôle admin
