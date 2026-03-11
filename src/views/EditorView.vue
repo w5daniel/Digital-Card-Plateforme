@@ -47,14 +47,14 @@
         <div class="vdiv" />
 
         <!-- Indicateur sélection -->
-        <Transition name="sel-fade">
-          <div v-if="selectedElement" class="sel-indicator">
+        <Transition name="sel-fade" mode="out-in">
+          <div v-if="selectedElement" key="sel" class="sel-indicator">
             <div class="sel-dot" />
             <span>{{ ELEMENT_LABELS[selectedElement] }}</span>
             <span class="sel-coords">{{ selCoords }}</span>
             <button @click="selectedElement = null" class="sel-close">×</button>
           </div>
-          <span v-else class="no-sel-hint">Cliquez un élément pour le sélectionner</span>
+          <span v-else key="no-sel" class="no-sel-hint">Cliquez un élément pour le sélectionner</span>
         </Transition>
       </div>
 
@@ -581,46 +581,10 @@
 </template>
 
 <!-- ════════════════════════════════════════════════════════════════
-     COMPOSANTS LOCAUX LÉGERS
-════════════════════════════════════════════════════════════════════ -->
-<script>
-// ── LabelField ────────────────────────────────────────────────
-const LabelField = {
-  props: { label: String, modelValue: String, placeholder: String },
-  emits: ['update:modelValue'],
-  template: `
-    <div>
-      <div style="font-size:9.5px;font-weight:700;color:#3d5045;letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;font-family:'Inter',sans-serif">{{ label }}</div>
-      <input
-        :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
-        :placeholder="placeholder"
-        style="width:100%;background:#0e1710;border:1px solid #243028;border-radius:8px;padding:7px 9px;font-size:12px;color:#dce8dc;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s"
-        @focus="$event.target.style.borderColor='#e83800'"
-        @blur="$event.target.style.borderColor='#243028'"
-      />
-    </div>
-  `,
-}
-
-// ── EditorToggle ─────────────────────────────────────────────
-const EditorToggle = {
-  props: { modelValue: Boolean },
-  emits: ['update:modelValue'],
-  template: `
-    <div @click="$emit('update:modelValue', !modelValue)"
-      :style="\`width:30px;height:16px;background:\${modelValue ? '#e83800' : '#243028'};border-radius:8px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0\`">
-      <div :style="\`position:absolute;top:2px;left:\${modelValue ? '14px' : '2px'};width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)\`" />
-    </div>
-  `,
-}
-</script>
-
-<!-- ════════════════════════════════════════════════════════════════
      SCRIPT PRINCIPAL
 ════════════════════════════════════════════════════════════════════ -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import { useAuthStore } from '@/stores/authStore'
@@ -642,6 +606,39 @@ import {
   Loader2, X,
   Layers, PenLine, LayoutTemplate, SlidersHorizontal, Palette,
 } from 'lucide-vue-next'
+
+// ── Composants locaux (render functions — pas de template compiler requis) ──
+const LabelField = {
+  props: ['label', 'modelValue', 'placeholder'],
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () => h('div', [
+      props.label && h('div', { class: 'field-label' }, props.label),
+      h('input', {
+        class: 'form-input',
+        value: props.modelValue,
+        placeholder: props.placeholder,
+        onInput: (e) => emit('update:modelValue', e.target.value),
+        onFocus: (e) => { e.target.style.borderColor = '#e83800' },
+        onBlur:  (e) => { e.target.style.borderColor = 'var(--input-bd)' },
+      })
+    ])
+  }
+}
+
+const EditorToggle = {
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () => h('div', {
+      class: 'ed-toggle',
+      style: `background:${props.modelValue ? '#e83800' : 'var(--border)'}`,
+      onClick: () => emit('update:modelValue', !props.modelValue),
+    }, [
+      h('div', { class: 'ed-toggle-thumb', style: `left:${props.modelValue ? '14px' : '2px'}` })
+    ])
+  }
+}
 
 // ── Stores ───────────────────────────────────────────────────
 const router   = useRouter()
@@ -1526,6 +1523,10 @@ onUnmounted(() => {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .animate-spin { animation: spin 1s linear infinite; }
+
+/* Toggle */
+.ed-toggle { width:30px; height:16px; border-radius:8px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
+.ed-toggle-thumb { position:absolute; top:2px; width:12px; height:12px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.4); }
 
 /* Misc */
 .w-full { width: 100%; }
