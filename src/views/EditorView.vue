@@ -260,14 +260,46 @@
           <template v-if="leftTab === 'elements'">
             <div class="acc">
               <button class="acc-head" @click="openSections.elOptions = !openSections.elOptions">
-                <span :class="openSections.elOptions && 'active-label'">Options</span>
+                <span :class="openSections.elOptions && 'active-label'">Visibilité</span>
                 <ChevronDown class="acc-arrow" :class="openSections.elOptions && 'open'" />
               </button>
               <div v-if="openSections.elOptions" class="acc-body">
-                <div class="toggle-row">
-                  <span>QR Code au verso</span>
+                <!-- QR master switch -->
+                <div class="toggle-row" style="border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:2px">
+                  <div class="flex items-center gap-2">
+                    <span class="layer-icon-sm">▦</span>
+                    <span style="font-weight:600">QR Code (activer)</span>
+                  </div>
                   <EditorToggle v-model="cardData.data.showQR" />
                 </div>
+                <!-- Per-element visibility -->
+                <div v-for="layer in LAYERS" :key="layer.key" class="toggle-row">
+                  <div class="flex items-center gap-2">
+                    <span class="layer-icon-sm">{{ layer.icon }}</span>
+                    <span :style="!layerVisible(layer.key) ? 'opacity:.4;text-decoration:line-through' : ''">{{ layer.label }}</span>
+                  </div>
+                  <EditorToggle :modelValue="layerVisible(layer.key)" @update:modelValue="toggleLayerVisible(layer.key)" />
+                </div>
+              </div>
+            </div>
+            <div class="acc">
+              <button class="acc-head" @click="openSections.elBackSide = !openSections.elBackSide">
+                <span :class="openSections.elBackSide && 'active-label'">Verso de la carte</span>
+                <ChevronDown class="acc-arrow" :class="openSections.elBackSide && 'open'" />
+              </button>
+              <div v-if="openSections.elBackSide" class="acc-body">
+                <div class="toggle-row">
+                  <span>Activer le verso</span>
+                  <EditorToggle v-model="cardData.backSide.enabled" />
+                </div>
+                <template v-if="cardData.backSide.enabled">
+                  <LabelField label="Titre du verso" v-model="cardData.backSide.title" placeholder="En savoir plus…" />
+                  <div>
+                    <div class="field-label">Contenu</div>
+                    <textarea v-model="cardData.backSide.content" class="form-input" rows="4"
+                      placeholder="Texte libre, description, réseaux…" style="resize:none" />
+                  </div>
+                </template>
               </div>
             </div>
             <div class="p-3">
@@ -313,11 +345,21 @@
       <!-- ── ZONE CANVAS ────────────────────────────────────────── -->
       <div class="canvas-wrap">
 
+        <!-- Barre Recto / Verso -->
+        <div class="flip-bar">
+          <button class="flip-btn" :class="!isCardFlipped && 'active'" @click="isCardFlipped = false">
+            Recto
+          </button>
+          <button class="flip-btn" :class="isCardFlipped && 'active'" @click="isCardFlipped = true">
+            Verso
+          </button>
+        </div>
+
         <!-- Canvas avec fond configurable -->
         <div class="canvas-bg" :class="`bg-${bgMode}`" @click="selectedElement = null">
 
           <!-- Indice d'utilisation -->
-          <div v-if="showHint" class="hint-pill">
+          <div v-if="showHint && !isCardFlipped" class="hint-pill">
             🖱 Cliquez sur un élément · Glissez pour déplacer · Poignées pour redimensionner
           </div>
 
@@ -327,7 +369,8 @@
             <BusinessCard
               ref="cardPreviewRef"
               :card="cardData"
-              :editMode="true"
+              :editMode="!isCardFlipped"
+              :isFlipped="isCardFlipped"
               :selectedElement="selectedElement"
               @update:selectedElement="onSelectElement"
               @update:elementPositions="onElementPositionsUpdate"
@@ -339,7 +382,7 @@
         <!-- Barre de statut -->
         <div class="status-bar">
           <div class="flex items-center gap-4">
-            <span>900 × 506 px · Recto</span>
+            <span>900 × 506 px · {{ isCardFlipped ? 'Verso' : 'Recto' }}</span>
             <span>{{ visibleLayerCount }}/{{ LAYERS.length }} éléments visibles</span>
             <span v-if="selectedElement" style="color:var(--sel)">✦ {{ ELEMENT_LABELS[selectedElement] }}</span>
           </div>
@@ -430,6 +473,18 @@
               <div class="flex gap-1">
                 <button class="prop-chip flex-1" :class="selItalic && 'active-chip'"
                   @click="toggleItalic" style="font-style:italic">I — Italique</button>
+              </div>
+
+              <!-- Espacement lettres -->
+              <div class="mt-3">
+                <div class="num-label mb-1">Espacement lettres</div>
+                <div class="flex items-center gap-2">
+                  <input type="range" min="0" max="10" step="0.5"
+                    :value="selLetterSpacing"
+                    @input="updateElemProp(selectedElement, 'letterSpacing', Number($event.target.value), true)"
+                    class="flex-1" style="accent-color:var(--accent)" />
+                  <span style="font-size:10px; color:var(--text-sub); min-width:24px; text-align:right">{{ selLetterSpacing }}</span>
+                </div>
               </div>
             </section>
 
@@ -706,6 +761,7 @@ const alignActions = [
 const isEditing     = ref(false)
 const justSaved     = ref(false)
 const showHint      = ref(true)
+const isCardFlipped = ref(false)
 const zoomIdx       = ref(3)          // 1.0×
 const bgMode        = ref('dark')
 const leftTab       = ref('contenu')
@@ -723,7 +779,7 @@ let confettiFrame = null
 const openSections = ref({
   identity: true, company: true, coords: true, media: false,
   typo: true, background: false,
-  elOptions: true,
+  elOptions: true, elBackSide: false,
 })
 
 // ── Undo / Redo ───────────────────────────────────────────────
@@ -790,7 +846,8 @@ const selColor   = computed(() => selPos.value?.color  || '#ffffff')
 const selBold    = computed(() => { const d = ELEM_DEFAULTS[selectedElement.value] || {}; return selPos.value?.bold   ?? d.bold   ?? false })
 const selItalic  = computed(() => { const d = ELEM_DEFAULTS[selectedElement.value] || {}; return selPos.value?.italic ?? d.italic ?? false })
 const selVisible = computed(() => selPos.value?.visible !== false)
-const selTextAlign = computed(() => selPos.value?.textAlign || 'left')
+const selTextAlign     = computed(() => selPos.value?.textAlign     || 'left')
+const selLetterSpacing = computed(() => selPos.value?.letterSpacing ?? 0)
 
 // ── Calques / visibilité ──────────────────────────────────────
 const layerVisible = (key) => {
@@ -1523,6 +1580,27 @@ onUnmounted(() => {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .animate-spin { animation: spin 1s linear infinite; }
+
+/* Barre Recto / Verso */
+.flip-bar {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 6px; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.flip-btn {
+  height: 26px; padding: 0 14px; font-size: 11px; font-weight: 600;
+  border-radius: 6px; border: 1px solid transparent; background: transparent;
+  cursor: pointer; color: var(--muted); transition: all .15s;
+}
+.flip-btn.active {
+  background: rgba(232,56,0,.09); border-color: rgba(232,56,0,.3); color: var(--accent);
+}
+.flip-btn:hover:not(.active) { color: var(--text-sub); border-color: var(--border); }
+
+/* Icône mini calque */
+.layer-icon-sm {
+  width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: var(--muted); flex-shrink: 0;
+}
 
 /* Toggle */
 .ed-toggle { width:30px; height:16px; border-radius:8px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
