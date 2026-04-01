@@ -12,7 +12,9 @@
               ✨ Nouvelle génération de cartes de visite
             </div>
 
-            <h1 class="text-5xl md:text-6xl font-bold leading-tight text-onyx-950 dark:text-powder-100">
+            <h1
+              class="text-5xl md:text-6xl font-bold leading-tight text-onyx-950 dark:text-powder-100"
+            >
               Créez des cartes de visite
               <span class="gradient-text">numériques</span>
               qui impressionnent
@@ -34,7 +36,9 @@
             </div>
 
             <!-- Stats clés pour renforcer la crédibilité et montrer l'ampleur de la plateforme -->
-            <div class="grid grid-cols-3 gap-6 pt-8 border-t border-powder-200 dark:border-onyx-800">
+            <div
+              class="grid grid-cols-3 gap-6 pt-8 border-t border-powder-200 dark:border-onyx-800"
+            >
               <div>
                 <div class="text-3xl font-bold gradient-text">500+</div>
                 <div class="text-sm text-onyx-500 dark:text-powder-400">Modèles</div>
@@ -172,11 +176,13 @@
             class="card card-hover p-8 text-center !bg-powder-100 dark:!bg-onyx-800"
           >
             <div
-              class="w-16 h-16 mx-auto mb-6 bg-flame-500  rounded-2xl flex items-center justify-center shadow-lg"
+              class="w-16 h-16 mx-auto mb-6 bg-flame-500 rounded-2xl flex items-center justify-center shadow-lg"
             >
               <component :is="feature.icon" class="w-8 h-8 text-white" />
             </div>
-            <h3 class="text-xl font-bold mb-3 text-onyx-950 dark:text-powder-50">{{ feature.title }}</h3>
+            <h3 class="text-xl font-bold mb-3 text-onyx-950 dark:text-powder-50">
+              {{ feature.title }}
+            </h3>
             <p class="text-onyx-600 dark:text-powder-400">{{ feature.description }}</p>
           </div>
         </div>
@@ -186,7 +192,9 @@
     <!-- CTA Section -->
     <section class="py-20 bg-powder-200 dark:bg-onyx-950 transition-colors duration-200">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-onyx-950 dark:text-white">Prêt à créer votre carte de visite ?</h2>
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-onyx-950 dark:text-white">
+          Prêt à créer votre carte de visite ?
+        </h2>
         <p class="text-xl mb-8 text-onyx-600 dark:text-powder-300">
           Rejoignez des milliers de professionnels qui font confiance à ECODEV CARD PRO
         </p>

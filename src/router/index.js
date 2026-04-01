@@ -120,6 +120,9 @@ const router = createRouter({
 })
 
 // ── Navigation guard ──────────────────────────────────────────────────────────
+// TODO backend : la vérification du statut bloqué sera faite par le serveur
+//   (middleware auth → GET /auth/me → 403 si blocked → front déconnecte)
+//   Le guard front reste un best-effort pour l'UX (message immédiat).
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
@@ -130,6 +133,18 @@ router.beforeEach((to, from, next) => {
 
   const isAuthenticated = authStore.isAuthenticated
   const isAdmin = authStore.isAdmin
+
+  // Vérifier le statut bloqué sur chaque navigation protégée
+  // (couvre le cas où l'admin banne l'utilisateur pendant sa session)
+  if (isAuthenticated && authStore.user) {
+    const entry = authStore.getAllUsersWithStats.find(
+      (u) => u.email?.toLowerCase() === authStore.user.email?.toLowerCase(),
+    )
+    if (entry?.status === 'blocked') {
+      authStore.logout()
+      return next('/login')
+    }
+  }
 
   // Vérifie si une des routes matchées exige l'admin (parent ou enfant)
   const requiresAdmin = to.matched.some((r) => r.meta.requiresAdmin)

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Screen frame -->
+  <rect x="20" y="25" width="160" height="120" rx="8" fill="#1E293B"/>
+  <!-- Screen -->
+  <rect x="28" y="33" width="144" height="100" rx="4" fill="#F5F3FF"/>
+  <!-- Stand -->
+  <rect x="88" y="145" width="24" height="15" fill="#334155"/>
+  <rect x="70" y="158" width="60" height="6" rx="3" fill="#475569"/>
+  <!-- Pie chart -->
+  <circle cx="70" cy="83" r="30" fill="#DDD6FE"/>
+  <path d="M70 53a30 30 0 0 1 26 15L70 83z" fill="#8B5CF6"/>
+  <path d="M96 68a30 30 0 0 1-10 40L70 83z" fill="#A78BFA"/>
+  <path d="M86 108a30 30 0 0 1-40-10L70 83z" fill="#C4B5FD"/>
+  <!-- Line chart area -->
+  <rect x="110" y="45" width="54" height="40" rx="3" fill="white" stroke="#E9D5FF" stroke-width="1"/>
+  <path d="M116 75l10-8 10 5 10-15 10 8" stroke="#8B5CF6" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 75l10-8 10 5 10-15 10 8v10H116z" fill="#EDE9FE" opacity="0.5"/>
+  <!-- Metrics -->
+  <rect x="110" y="92" width="24" height="18" rx="3" fill="#8B5CF6"/>
+  <text x="122" y="104" text-anchor="middle" font-family="sans-serif" font-size="8" fill="white" font-weight="700">89%</text>
+  <rect x="140" y="92" width="24" height="18" rx="3" fill="#A78BFA"/>
+  <text x="152" y="104" text-anchor="middle" font-family="sans-serif" font-size="8" fill="white" font-weight="700">+24</text>
+  <!-- Small bar chart -->
+  <rect x="110" y="115" width="6" height="12" rx="1" fill="#C4B5FD"/>
+  <rect x="120" y="111" width="6" height="16" rx="1" fill="#A78BFA"/>
+  <rect x="130" y="108" width="6" height="19" rx="1" fill="#8B5CF6"/>
+  <rect x="140" y="113" width="6" height="14" rx="1" fill="#A78BFA"/>
+  <rect x="150" y="106" width="6" height="21" rx="1" fill="#7C3AED"/>
+</svg>

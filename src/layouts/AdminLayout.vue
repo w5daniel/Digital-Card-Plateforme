@@ -211,11 +211,11 @@
         <!-- Droite : badge + status -->
         <div class="flex items-center space-x-3">
           <span
-            v-if="adminStore.stats.flaggedCards > 0"
-            class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20"
+            v-if="blockedUsersCount > 0"
+            class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500 border border-orange-500/20"
           >
             <AlertTriangle class="w-3.5 h-3.5" />
-            <span>{{ adminStore.stats.flaggedCards }} signalement(s)</span>
+            <span>{{ blockedUsersCount }} compte(s) bloqué(s)</span>
           </span>
           <span
             class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
@@ -259,20 +259,24 @@ import {
 } from 'lucide-vue-next'
 import { useThemeStore } from '../stores/themeStore'
 import { useAuthStore } from '../stores/authStore'
-import { useAdminStore } from '../stores/adminStore'
 
 const route = useRoute()
 const router = useRouter()
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
-const adminStore = useAdminStore()
 const sidebarOpen = ref(false)
+
+// Nombre de comptes bloqués (données réelles depuis authStore)
+// TODO backend : vient du champ `blockedUsers` de GET /api/admin/overview
+const blockedUsersCount = computed(
+  () => authStore.getAllUsersWithStats.filter((u) => u.status === 'blocked').length,
+)
 
 const navItems = computed(() => [
   { to: '/admin', label: "Vue d'ensemble", icon: LayoutDashboard, badge: 0 },
-  { to: '/admin/users', label: 'Utilisateurs', icon: Users, badge: adminStore.stats.blockedUsers },
+  { to: '/admin/users', label: 'Utilisateurs', icon: Users, badge: blockedUsersCount.value },
   { to: '/admin/templates', label: 'Modèles', icon: Layers, badge: 0 },
-  { to: '/admin/cards', label: 'Cartes', icon: CreditCard, badge: adminStore.stats.flaggedCards },
+  { to: '/admin/cards', label: 'Cartes', icon: CreditCard, badge: 0 },
   { to: '/admin/settings', label: 'Paramètres', icon: Settings, badge: 0 },
 ])
 

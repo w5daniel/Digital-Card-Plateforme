@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Glow circle -->
+  <circle cx="100" cy="90" r="52" fill="#FEF3C7" opacity="0.5"/>
+  <!-- Bulb body -->
+  <path d="M100 38 C72 38 52 60 52 85 C52 102 62 116 78 124 L78 140 L122 140 L122 124 C138 116 148 102 148 85 C148 60 128 38 100 38Z" fill="#FBBF24"/>
+  <!-- Bulb glass highlight -->
+  <path d="M100 46 C78 46 62 64 62 85 C62 98 68 108 78 116" stroke="#FEF3C7" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- Bulb base -->
+  <rect x="82" y="140" width="36" height="6" rx="2" fill="#F59E0B"/>
+  <rect x="85" y="148" width="30" height="5" rx="2" fill="#F59E0B"/>
+  <rect x="88" y="155" width="24" height="5" rx="2" fill="#D97706"/>
+  <!-- Filament -->
+  <path d="M92 120 L92 105 Q100 92 108 105 L108 120" stroke="#D97706" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Sparkle rays -->
+  <line x1="100" y1="18" x2="100" y2="8" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="30" x2="148" y2="22" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="60" y1="30" x2="52" y2="22" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="155" y1="62" x2="165" y2="58" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+  <line x1="45" y1="62" x2="35" y2="58" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+  <!-- Small sparkles -->
+  <circle cx="160" cy="40" r="3" fill="#FBBF24"/>
+  <circle cx="38" cy="42" r="2.5" fill="#FBBF24"/>
+  <circle cx="100" cy="3" r="2" fill="#F59E0B"/>
+  <!-- Ground -->
+  <line x1="30" y1="178" x2="170" y2="178" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+</svg>

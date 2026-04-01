@@ -1,0 +1,434 @@
+Guide de référence — Architecture d’un éditeur de carte de visite (Vue 3 + Fabric.js)
+1. Contexte du projet
+
+Tu développes une application web de conception et gestion de cartes de visite.
+Toutes les pages de l’application sont terminées sauf la page éditeur, qui permet de concevoir visuellement les cartes.
+
+L’éditeur doit être similaire à celui de Canva, avec :
+
+un canvas de conception
+
+une barre d’outils
+
+un panneau de propriétés
+
+une bibliothèque d’éléments
+
+Ton stack technique :
+
+Vue 3
+
+Composition API
+
+TailwindCSS
+
+DaisyUI
+
+Fabric.js
+
+JSON pour stocker les cartes
+
+Ton projet est déjà bien structuré, mais le blocage vient de l’architecture interne de l’éditeur.
+
+2. Architecture actuelle de ton éditeur
+
+Ton projet possède déjà les composants principaux :
+
+EditorView
+ ├ TopBar
+ ├ LeftSidebar
+ ├ FabricCanvas
+ └ RightPanel
+Rôle de chaque composant
+
+EditorView.vue
+
+layout principal de la page
+
+organise les composants
+
+TopBar.vue
+
+boutons globaux
+
+export
+
+undo / redo
+
+zoom
+
+LeftSidebar.vue
+
+bibliothèque d’éléments
+
+texte
+
+formes
+
+images
+
+icônes
+
+templates
+
+FabricCanvas.vue
+
+zone principale de conception
+
+canvas Fabric.js
+
+RightPanel.vue
+
+propriétés de l’élément sélectionné
+
+couleur
+
+taille
+
+typographie
+
+Cette structure est similaire à celle utilisée par les éditeurs professionnels comme
+Figma et Canva.
+
+3. Le problème principal de ton éditeur
+
+Ton blocage ne vient pas du design ni des composants.
+
+Le problème est que EditorView gère trop de responsabilités.
+
+Il gère actuellement :
+
+logique du canvas
+
+logique des éléments
+
+historique undo/redo
+
+sélection d’objets
+
+synchronisation UI
+
+état global
+
+Cela crée :
+
+un code difficile à maintenir
+
+une logique difficile à terminer
+
+un éditeur difficile à faire évoluer
+
+La solution est de séparer les responsabilités.
+
+4. Architecture recommandée
+
+Un éditeur moderne est organisé en trois couches principales :
+
+1️⃣ Interface utilisateur (UI)
+2️⃣ Store (gestion de l’état)
+3️⃣ Moteur canvas (Fabric Engine)
+
+5. Couche 1 — Interface utilisateur (UI)
+
+Cette couche contient uniquement les composants visuels.
+
+Structure :
+
+components/editor
+
+TopBar.vue
+LeftSidebar.vue
+RightPanel.vue
+FabricCanvas.vue
+
+Ces composants :
+
+affichent l’interface
+
+déclenchent des actions
+
+Ils ne doivent pas contenir la logique métier.
+
+Exemples d’actions :
+
+cliquer sur "Ajouter texte"
+
+sélectionner une forme
+
+modifier la couleur
+
+6. Couche 2 — Store (le cerveau de l’éditeur)
+
+Il faut créer un store global avec Pinia.
+
+Fichier :
+
+src/stores/editorStore.js
+
+Le store contient :
+
+State
+
+liste des éléments
+
+élément sélectionné
+
+historique
+
+index historique
+
+Exemple :
+
+state: () => ({
+  elements: [],
+  selectedIds: [],
+  history: [],
+  historyIndex: -1
+})
+Actions principales
+
+ajouter un élément
+
+supprimer un élément
+
+sélectionner un élément
+
+sauvegarder l’historique
+
+Exemple :
+
+addElement(el){
+  this.elements.push(el)
+  this.saveHistory()
+}
+
+Le store devient la source de vérité de l’éditeur.
+
+7. Couche 3 — Fabric Engine (moteur canvas)
+
+Fabric.js doit être isolé dans un service dédié.
+
+Fichier recommandé :
+
+src/editor/fabricEngine.js
+
+Ce fichier :
+
+initialise le canvas
+
+ajoute les objets
+
+gère les interactions
+
+Exemple :
+
+import { fabric } from "fabric"
+
+export class FabricEngine {
+
+  constructor(canvasId){
+    this.canvas = new fabric.Canvas(canvasId)
+  }
+
+  addText(text){
+    const obj = new fabric.Textbox(text,{
+      left:100,
+      top:100,
+      fontSize:30
+    })
+
+    this.canvas.add(obj)
+  }
+
+}
+
+Ainsi :
+
+les composants UI ne connaissent pas Fabric.js
+
+toute la logique canvas est centralisée
+
+8. Flux de fonctionnement de l’éditeur
+
+Le fonctionnement d’un éditeur graphique suit toujours ce flux :
+
+UI → Store → Canvas
+Canvas → Store → UI
+
+Exemple : ajout d’un texte
+
+1️⃣ utilisateur clique dans LeftSidebar
+2️⃣ le composant appelle une action du store
+3️⃣ le store appelle le Fabric Engine
+4️⃣ le canvas ajoute l’objet
+
+Flux simplifié :
+
+LeftSidebar
+     ↓
+editorStore
+     ↓
+FabricCanvas
+9. Structure finale recommandée
+
+Organisation idéale du projet :
+
+src
+
+components
+ └ editor
+     TopBar.vue
+     LeftSidebar.vue
+     RightPanel.vue
+     FabricCanvas.vue
+
+editor
+ ├ fabricEngine.js
+ ├ elementFactory.js
+ ├ historyManager.js
+
+stores
+ └ editorStore.js
+
+views
+ └ EditorView.vue
+10. Système de création d’éléments (Element Factory)
+
+Créer un système pour générer les objets.
+
+Fichier :
+
+elementFactory.js
+
+Fonctions possibles :
+
+createText()
+createImage()
+createShape()
+createIcon()
+createEmoji()
+
+Chaque fonction crée un objet Fabric configuré.
+
+11. Système d’historique (Undo / Redo)
+
+Créer un history manager.
+
+Fonctionnalités :
+
+undo
+redo
+saveState
+
+Il stocke l’état des éléments en JSON.
+
+12. Synchronisation canvas / store
+
+Le canvas doit écouter les événements Fabric :
+
+object:moving
+object:scaling
+object:rotating
+selection:created
+selection:updated
+selection:cleared
+
+Ces événements permettent :
+
+mettre à jour le store
+
+synchroniser les panneaux UI
+
+13. Fonctionnalités que ton éditeur peut supporter
+
+Avec cette architecture, tu peux facilement ajouter :
+
+éléments
+
+texte
+
+image
+
+icône
+
+emoji
+
+formes
+
+lignes
+
+QR code
+
+outils
+
+alignement
+
+group / ungroup
+
+gestion des layers
+
+verrouillage d’éléments
+
+snap grid
+
+fonctionnalités avancées
+
+templates prédéfinis
+
+undo / redo
+
+zoom
+
+export PNG / PDF
+
+14. Performance des éditeurs modernes
+
+Les éditeurs comme Canva utilisent :
+
+virtual canvas
+
+object caching
+
+lazy rendering
+
+Cependant Fabric.js est largement suffisant pour un éditeur de cartes de visite, car les documents contiennent peu d’objets.
+
+15. Les trois systèmes clés à implémenter
+
+Pour terminer ton éditeur, tu dois créer trois systèmes :
+
+1️⃣ Element Factory
+
+création standardisée des éléments.
+
+2️⃣ History Manager
+
+gestion undo / redo.
+
+3️⃣ Canvas Synchronization
+
+synchronisation store ↔ canvas.
+
+16. Évaluation de ton projet
+
+Après analyse :
+
+Points très positifs :
+
+bonne structure Vue
+
+séparation des composants
+
+utilisation de Fabric.js
+
+architecture SPA correcte
+
+Ton niveau correspond déjà à :
+
+développement frontend structuré
+
+architecture d’application
+
+gestion de canvas graphique
+
+Le blocage vient uniquement de l’organisation du moteur d’édition.

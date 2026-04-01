@@ -1,11 +1,19 @@
 <template>
   <div
     id="app"
-    class="min-h-screen flex flex-col bg-powder-50 dark:bg-onyx-950 text-onyx-900 dark:text-powder-100 transition-colors duration-200"
+    :class="
+      hideLayout
+        ? 'h-screen overflow-hidden'
+        : 'min-h-screen flex flex-col bg-powder-50 dark:bg-onyx-950 text-onyx-900 dark:text-powder-100 transition-colors duration-200'
+    "
   >
     <NavBar v-if="!hideLayout" />
-    <main class="flex-grow">
-      <RouterView />
+    <main :class="hideLayout ? 'h-full' : 'flex-grow'">
+      <RouterView v-slot="{ Component, route: r }">
+        <Transition :name="r.meta?.hideLayout ? '' : 'page-fade'" mode="out-in">
+          <component :is="Component" :key="r.path" />
+        </Transition>
+      </RouterView>
     </main>
     <FooterBar v-if="!hideLayout" />
     <ToastNotification />
@@ -26,11 +34,28 @@ const route = useRoute()
 const hideLayout = computed(() => !!route.meta?.hideLayout)
 
 onMounted(() => {
-  // S'assurer que le thème est appliqué au montage
   themeStore.applyTheme()
 })
 </script>
 
 <style>
-/* Styles globaux déjà définis dans main.css */
+/* ── Page fade transition ──────────────────────────────────── */
+.page-fade-enter-active {
+  transition:
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out;
+}
+.page-fade-leave-active {
+  transition:
+    opacity 0.18s ease-in,
+    transform 0.18s ease-in;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
 </style>

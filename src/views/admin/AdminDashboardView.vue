@@ -1,12 +1,29 @@
 <template>
   <div class="space-y-6">
-    <!-- KPI Grid -->
+    <!--
+      TODO backend : toutes les métriques de cette vue viennent d'un seul endpoint agrégé :
+        GET /api/admin/overview
+        → réponse :
+          {
+            users:     { total, active, blocked, premium },
+            cards:     { total, public, totalViews },
+            templates: { total, premium },
+            recentUsers: User[],      -- 5 derniers inscrits
+            recentCards: Card[],      -- 5 dernières cartes créées
+          }
+        → calculé avec des requêtes SQL agrégées (COUNT, SUM) — très rapide
+        → mettre en cache Redis 60 secondes (éviter recalcul à chaque page load admin)
+    -->
+
+    <!-- ── KPI Grid ── -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div
         v-for="kpi in kpis"
         :key="kpi.label"
         class="rounded-xl p-4 border transition-all hover:shadow-md"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+        :class="
+          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+        "
       >
         <div class="flex items-start justify-between">
           <div>
@@ -31,12 +48,19 @@
       </div>
     </div>
 
-    <!-- Ligne du bas : activité récente + top stats -->
+    <!-- ── Ligne du bas : activité récente + stats ── -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Activité récente -->
+      <!--
+        TODO backend : GET /api/admin/overview → champs recentUsers + recentCards
+          Fusionner côté front en triant par created_at DESC.
+          Alternative : endpoint dédié GET /api/admin/activity?limit=8
+      -->
       <div
         class="lg:col-span-2 rounded-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+        :class="
+          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+        "
       >
         <div
           class="flex items-center justify-between px-5 py-4 border-b"
@@ -54,13 +78,12 @@
         </div>
         <ul class="divide-y" :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'">
           <li
-            v-for="(item, i) in adminStore.recentActivity"
+            v-for="(item, i) in recentActivity"
             :key="i"
             class="flex items-start space-x-3 px-5 py-3"
           >
             <div class="mt-0.5 flex-shrink-0">
               <Users v-if="item.type === 'user'" class="w-4 h-4 text-blue-500" />
-              <Flag v-else-if="item.type === 'flag'" class="w-4 h-4 text-red-500" />
               <CreditCard v-else class="w-4 h-4 text-green-500" />
             </div>
             <div class="flex-1 min-w-0">
@@ -76,18 +99,26 @@
             </div>
           </li>
           <li
-            v-if="adminStore.recentActivity.length === 0"
+            v-if="recentActivity.length === 0"
             class="px-5 py-8 text-center text-sm"
             :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
           >
-            Aucune activité récente
+            Aucune activité — aucun utilisateur inscrit pour le moment.
           </li>
         </ul>
       </div>
 
-      <!-- Stats rapides -->
+      <!-- Colonne droite -->
       <div class="space-y-4">
-        <!-- Users par plan -->
+        <!-- Répartition utilisateurs -->
+        <!--
+          TODO backend : les compteurs totalUsers et premiumUsers viennent du GET /api/admin/overview
+            SELECT
+              COUNT(*) AS total,
+              SUM(CASE WHEN is_premium THEN 1 ELSE 0 END) AS premium,
+              SUM(CASE WHEN status='blocked' THEN 1 ELSE 0 END) AS blocked
+            FROM users WHERE deleted_at IS NULL
+        -->
         <div
           class="rounded-xl border p-4"
           :class="
@@ -109,7 +140,7 @@
                 class="font-medium"
                 :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
               >
-                {{ adminStore.stats.totalUsers - adminStore.stats.premiumUsers }}
+                {{ stats.freeUsers }}
               </span>
             </div>
             <div
@@ -119,7 +150,7 @@
               <div
                 class="h-1.5 rounded-full bg-onyx-400"
                 :style="{
-                  width: `${((adminStore.stats.totalUsers - adminStore.stats.premiumUsers) / adminStore.stats.totalUsers) * 100}%`,
+                  width: stats.totalUsers ? `${(stats.freeUsers / stats.totalUsers) * 100}%` : '0%',
                 }"
               />
             </div>
@@ -127,7 +158,7 @@
               <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'"
                 >Plan premium</span
               >
-              <span class="font-medium text-flame-500">{{ adminStore.stats.premiumUsers }}</span>
+              <span class="font-medium text-flame-500">{{ stats.premiumUsers }}</span>
             </div>
             <div
               class="w-full h-1.5 rounded-full"
@@ -136,7 +167,9 @@
               <div
                 class="h-1.5 rounded-full bg-flame-500"
                 :style="{
-                  width: `${(adminStore.stats.premiumUsers / adminStore.stats.totalUsers) * 100}%`,
+                  width: stats.totalUsers
+                    ? `${(stats.premiumUsers / stats.totalUsers) * 100}%`
+                    : '0%',
                 }"
               />
             </div>
@@ -144,6 +177,12 @@
         </div>
 
         <!-- Alertes -->
+        <!--
+          TODO backend : les alertes viennent du GET /api/admin/overview
+            → blockedUsers : COUNT users WHERE status='blocked'
+            → ajouter d'autres alertes : cartes signalées, paiements échoués Stripe,
+              erreurs serveur récentes, quota localStorage dépassé (si quota monitoring)
+        -->
         <div
           class="rounded-xl border p-4"
           :class="
@@ -158,23 +197,29 @@
           </h3>
           <div class="space-y-2">
             <router-link
-              v-if="adminStore.stats.flaggedCards > 0"
-              to="/admin/cards"
-              class="flex items-center space-x-2 text-xs p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-            >
-              <AlertTriangle class="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{{ adminStore.stats.flaggedCards }} carte(s) signalée(s)</span>
-            </router-link>
-            <router-link
-              v-if="adminStore.stats.blockedUsers > 0"
+              v-if="stats.blockedUsers > 0"
               to="/admin/users"
               class="flex items-center space-x-2 text-xs p-2 rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 transition-colors"
             >
               <UserX class="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{{ adminStore.stats.blockedUsers }} compte(s) bloqué(s)</span>
+              <span>{{ stats.blockedUsers }} compte(s) bloqué(s)</span>
             </router-link>
+            <div
+              v-if="stats.publicCards > 0"
+              class="flex items-center space-x-2 text-xs p-2 rounded-lg"
+              :class="
+                themeStore.darkMode ? 'bg-onyx-700 text-onyx-400' : 'bg-powder-100 text-onyx-500'
+              "
+            >
+              <Globe class="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{{ stats.publicCards }} carte(s) publique(s) dans la galerie</span>
+            </div>
+            <!--
+              "Aucune alerte" ne s'affiche que si TOUS les indicateurs d'alerte sont à 0.
+              TODO backend : ajouter d'autres conditions (ex : paiements échoués, erreurs serveur)
+            -->
             <p
-              v-if="adminStore.stats.flaggedCards === 0 && adminStore.stats.blockedUsers === 0"
+              v-if="stats.blockedUsers === 0 && stats.publicCards === 0"
               class="text-xs"
               :class="themeStore.darkMode ? 'text-green-400' : 'text-green-600'"
             >
@@ -220,28 +265,70 @@
 
 <script setup>
 import { computed } from 'vue'
-import {
-  Users,
-  CreditCard,
-  Layers,
-  Eye,
-  Flag,
-  AlertTriangle,
-  UserX,
-  Settings,
-  Plus,
-} from 'lucide-vue-next'
+import { Users, CreditCard, Layers, Eye, Globe, UserX, Settings, Plus } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
-import { useAdminStore } from '../../stores/adminStore'
+import { useAuthStore } from '../../stores/authStore'
+import { useCardsStore } from '../../stores/cards'
 
 const themeStore = useThemeStore()
-const adminStore = useAdminStore()
 
+/*
+ * Sources de données réelles :
+ *   - Utilisateurs : authStore.getAllUsersWithStats (computed sur digitalcard_allUsers)
+ *   - Cartes       : cardsStore.getAllCardsAdmin()  (scan digitalcard_userCards_{email})
+ *   - Templates    : cardsStore.getAllTemplates     (computed sur templates[])
+ *
+ * TODO backend : remplacer par GET /api/admin/overview (un seul appel, données agrégées SQL)
+ */
+const authStore = useAuthStore()
+const cardsStore = useCardsStore()
+
+// ── Données admin (cache unique) ────────────────────────────────────────
+// getAllCardsAdmin() scanne TOUS les localStorage → on le met dans un computed séparé
+// pour éviter un double scan (stats + recentActivity lisaient chacun le résultat).
+// TODO backend : un seul appel GET /api/admin/overview remplace tout cela
+const adminCards = computed(() => cardsStore.getAllCardsAdmin())
+
+// ── Métriques agrégées ────────────────────────────────────────────────────
+// TODO backend : ces valeurs viennent directement des champs de la réponse /api/admin/overview
+const stats = computed(() => {
+  const users = authStore.getAllUsersWithStats
+  const cards = adminCards.value
+  const templates = cardsStore.getAllTemplates
+
+  const totalUsers = users.length
+  const activeUsers = users.filter((u) => u.status === 'active').length
+  const blockedUsers = users.filter((u) => u.status === 'blocked').length
+  const premiumUsers = users.filter((u) => u.isPremium).length
+  const freeUsers = totalUsers - premiumUsers
+
+  const totalCards = cards.length
+  const publicCards = cards.filter((c) => c.isPublic).length
+  const totalViews = cards.reduce((s, c) => s + (c.views || 0), 0)
+
+  const totalTemplates = templates.length
+  const premiumTemplates = templates.filter((t) => t.isPremium).length
+
+  return {
+    totalUsers,
+    activeUsers,
+    blockedUsers,
+    premiumUsers,
+    freeUsers,
+    totalCards,
+    publicCards,
+    totalViews,
+    totalTemplates,
+    premiumTemplates,
+  }
+})
+
+// ── KPI tiles ─────────────────────────────────────────────────────────────
 const kpis = computed(() => [
   {
     label: 'Utilisateurs',
-    value: adminStore.stats.totalUsers,
-    sub: `${adminStore.stats.activeUsers} actifs`,
+    value: stats.value.totalUsers,
+    sub: `${stats.value.activeUsers} actifs`,
     subColor: 'text-green-500',
     icon: Users,
     iconBg: 'bg-blue-500/10',
@@ -249,8 +336,8 @@ const kpis = computed(() => [
   },
   {
     label: 'Cartes créées',
-    value: adminStore.stats.totalCards,
-    sub: `${adminStore.stats.publicCards} publiques`,
+    value: stats.value.totalCards,
+    sub: `${stats.value.publicCards} publiques`,
     subColor: themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
     icon: CreditCard,
     iconBg: 'bg-flame-500/10',
@@ -258,8 +345,8 @@ const kpis = computed(() => [
   },
   {
     label: 'Modèles',
-    value: adminStore.stats.totalTemplates,
-    sub: `${adminStore.stats.premiumTemplates} premium`,
+    value: stats.value.totalTemplates,
+    sub: `${stats.value.premiumTemplates} premium`,
     subColor: 'text-yellow-500',
     icon: Layers,
     iconBg: 'bg-yellow-500/10',
@@ -267,8 +354,9 @@ const kpis = computed(() => [
   },
   {
     label: 'Vues totales',
-    value: adminStore.stats.totalViews.toLocaleString('fr-FR'),
-    sub: `sur toutes les cartes`,
+    // TODO backend : SUM(views) sur la table cards (ou table card_views si event-based)
+    value: stats.value.totalViews.toLocaleString('fr-FR'),
+    sub: 'sur toutes les cartes',
     subColor: themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
     icon: Eye,
     iconBg: 'bg-green-500/10',
@@ -276,6 +364,33 @@ const kpis = computed(() => [
   },
 ])
 
+// ── Activité récente ─────────────────────────────────────────────────────
+// Fusionne les 5 derniers utilisateurs inscrits + les 5 dernières cartes créées,
+// trie par date décroissante, affiche les 8 premiers.
+// TODO backend : GET /api/admin/overview → recentUsers + recentCards (déjà triés et limités)
+const recentActivity = computed(() => {
+  const users = authStore.getAllUsersWithStats
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5)
+    .map((u) => ({
+      type: 'user',
+      label: `Nouvel utilisateur : ${u.name} (${u.email})`,
+      time: u.createdAt,
+    }))
+
+  const cards = adminCards.value
+    .slice(0, 5)
+    .map((c) => ({
+      type: 'card',
+      label: `Nouvelle carte "${c.name || 'Sans titre'}" par ${c.ownerName}`,
+      time: c.createdAt,
+    }))
+
+  return [...users, ...cards].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 8)
+})
+
+// ── Liens rapides ─────────────────────────────────────────────────────────
 const quickLinks = [
   { to: '/admin/users', label: 'Gérer les utilisateurs', icon: Users },
   { to: '/admin/cards', label: 'Modérer les cartes', icon: CreditCard },
@@ -283,11 +398,8 @@ const quickLinks = [
   { to: '/admin/settings', label: 'Paramètres système', icon: Settings },
 ]
 
-const formatDate = (iso) => {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+const formatDate = (iso) =>
+  iso
+    ? new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—'
 </script>
