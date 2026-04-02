@@ -232,7 +232,6 @@ export function konvaToCardEl(el, cw, ch, index) {
       italic: el.fontStyle?.includes('italic') || false,
       textAlign: el.align || 'left',
       lineHeight: el.lineHeight,
-      textSpans: el.textSpans?.length ? el.textSpans : undefined,
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,

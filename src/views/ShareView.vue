@@ -154,44 +154,44 @@
         </router-link>
       </div>
     </div>
-  </div>
 
-  <!-- QR Zoom Modal -->
-  <Teleport to="body">
-    <div
-      v-if="qrModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      @click.self="qrModalOpen = false"
-    >
+    <!-- QR Zoom Modal -->
+    <Teleport to="body">
       <div
-        class="relative bg-white dark:bg-onyx-900 rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 max-w-xs w-full mx-4"
+        v-if="qrModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        @click.self="qrModalOpen = false"
       >
-        <button
-          @click="qrModalOpen = false"
-          class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-powder-100 dark:bg-onyx-700 hover:bg-powder-200 dark:hover:bg-onyx-600 transition-colors"
+        <div
+          class="relative bg-white dark:bg-onyx-900 rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 max-w-xs w-full mx-4"
         >
-          <svg
-            class="w-4 h-4 text-onyx-600 dark:text-onyx-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <button
+            @click="qrModalOpen = false"
+            class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-powder-100 dark:bg-onyx-700 hover:bg-powder-200 dark:hover:bg-onyx-600 transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <h3 class="text-base font-semibold text-onyx-800 dark:text-white">Scanner le QR code</h3>
-        <div :ref="(c) => mountModalQR(c)" class="w-64 h-64" style="line-height: 0" />
-        <p class="text-xs text-center text-onyx-400 dark:text-onyx-500">
-          Scannez ce code pour ajouter le contact à votre téléphone
-        </p>
+            <svg
+              class="w-4 h-4 text-onyx-600 dark:text-onyx-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <h3 class="text-base font-semibold text-onyx-800 dark:text-white">Scanner le QR code</h3>
+          <div :ref="(c) => mountModalQR(c)" class="w-64 h-64" style="line-height: 0" />
+          <p class="text-xs text-center text-onyx-400 dark:text-onyx-500">
+            Scannez ce code pour ajouter le contact à votre téléphone
+          </p>
+        </div>
       </div>
-    </div>
-  </Teleport>
+    </Teleport>
+  </div>
 </template>
 
 <script setup>
@@ -203,8 +203,11 @@ import { getFullName, getElemText } from '@/utils/cardElements'
 import { Mail, Phone, Globe, MapPin, Eye, Download, Home, AlertCircle } from 'lucide-vue-next'
 import QRCodeStyling from 'qr-code-styling'
 import {
-  buildVCardFromFields, buildQRStylingOptions,
-  DEFAULT_QR_FIELDS, getContactFromCard, applyQRCanvasStyle,
+  buildVCardFromFields,
+  buildQRStylingOptions,
+  DEFAULT_QR_FIELDS,
+  getContactFromCard,
+  applyQRCanvasStyle,
 } from '@/utils/qrCodeHelper'
 
 const route = useRoute()
@@ -241,7 +244,9 @@ function mountModalQR(containerEl) {
   nextTick(() => applyQRCanvasStyle(containerEl))
 }
 
-watch(qrModalOpen, (v) => { if (!v) modalMounted = false })
+watch(qrModalOpen, (v) => {
+  if (!v) modalMounted = false
+})
 
 onMounted(() => {
   const cardId = Number(route.params.cardId)

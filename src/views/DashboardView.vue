@@ -44,7 +44,7 @@
             <button
               v-else
               @click="router.push('/pricing')"
-              class="px-6 py-3 bg-powder-200/60 dark:bg-onyx-700/60 text-onyx-500 dark:text-onyx-400 font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-onyx-500 dark:text-onyx-400 font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
               title="L'import est réservé au plan Premium"
             >
               <Plus class="w-5 h-5" />
@@ -62,7 +62,7 @@
             <button
               v-else
               @click="router.push('/pricing')"
-              class="px-6 py-3 bg-flame-500/60 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-flame-500/60 hover:bg-flame-500/80 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
               :title="`Limite de ${MAX_FREE_CARDS} cartes atteinte — passez au Premium`"
             >
               <Plus class="w-5 h-5" />
@@ -286,18 +286,31 @@
       </div>
 
       <!-- Tab Switch: Modèles / Cartes -->
-      <div class="flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-8 max-w-md">
+      <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-8 max-w-md">
+        <!-- Sliding pill -->
+        <div
+          class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
+          :style="{ left: dashboardTab === 'templates' ? '4px' : 'calc(50% + 0px)' }"
+        ></div>
         <button
           @click="dashboardTab = 'templates'"
-          class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-          :class="dashboardTab === 'templates' ? 'bg-white dark:bg-onyx-700 shadow-sm text-onyx-900 dark:text-powder-50' : 'text-onyx-500 dark:text-onyx-400 hover:text-onyx-700 dark:hover:text-onyx-200'"
+          class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+          :class="
+            dashboardTab === 'templates'
+              ? 'text-onyx-900 dark:text-powder-50'
+              : 'text-onyx-500 dark:text-onyx-400 hover:text-onyx-700 dark:hover:text-onyx-200'
+          "
         >
           Modèles ({{ displayedTemplates.length }})
         </button>
         <button
           @click="dashboardTab = 'cards'"
-          class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-          :class="dashboardTab === 'cards' ? 'bg-white dark:bg-onyx-700 shadow-sm text-onyx-900 dark:text-powder-50' : 'text-onyx-500 dark:text-onyx-400 hover:text-onyx-700 dark:hover:text-onyx-200'"
+          class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+          :class="
+            dashboardTab === 'cards'
+              ? 'text-onyx-900 dark:text-powder-50'
+              : 'text-onyx-500 dark:text-onyx-400 hover:text-onyx-700 dark:hover:text-onyx-200'
+          "
         >
           Cartes ({{ store.userCards.length }})
         </button>
@@ -305,577 +318,616 @@
 
       <!-- My Templates Section -->
       <Transition name="tab-fade" mode="out-in">
-      <div v-if="dashboardTab === 'templates'" class="mb-12" key="templates">
-        <div class="mb-6 flex items-center justify-between">
-          <h2 class="text-2xl md:text-3xl font-bold text-onyx-950 dark:text-powder-50">
-            Mes Modèles
-          </h2>
-          <div class="flex items-center space-x-3">
-            <button
-              @click="toggleTemplateSort"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-600 dark:text-onyx-400"
-              :title="templateSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'"
-            >
-              <ArrowUpDown class="w-3.5 h-3.5" />
-              <span>{{ templateSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
-            </button>
-            <label
-              class="flex items-center space-x-2 text-sm text-onyx-600 dark:text-onyx-400 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                v-model="showAutoTemplates"
-                class="rounded border-gray-300 text-flame-500 shadow-sm focus:border-flame-300 focus:ring focus:ring-flame-200 focus:ring-opacity-50"
-              />
-              <span>Afficher l'historique auto.</span>
-            </label>
-            <button
-              v-if="sortedTemplates.length > 0"
-              @click="toggleSelectAllTemplates"
-              class="px-4 py-2 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
-              :class="selectedTemplateIds.size > 0 ? 'bg-flame-50 dark:bg-flame-900/20 border-flame-300 dark:border-flame-700' : ''"
-            >
-              <Check class="w-4 h-4" :class="selectedTemplateIds.size > 0 ? 'text-flame-600' : 'text-onyx-400'" />
-              <span>{{ selectedTemplateIds.size > 0 ? `${selectedTemplateIds.size} sélectionné(s)` : 'Sélectionner tout' }}</span>
-            </button>
-            <button
-              v-if="selectedTemplateIds.size > 0"
-              @click="deleteSelectedTemplates"
-              class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center space-x-2 text-sm font-medium"
-            >
-              <Trash2 class="w-4 h-4" />
-              <span>Supprimer ({{ selectedTemplateIds.size }})</span>
-            </button>
-            <router-link
-              v-if="templatesStore.canCreateTemplate"
-              to="/editor"
-              class="px-4 py-2 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
-            >
-              <Plus class="w-4 h-4" />
-              <span>Nouveau modèle</span>
-            </router-link>
-            <button
-              v-else
-              @click="router.push('/pricing')"
-              class="px-4 py-2 bg-powder-200/60 dark:bg-onyx-700/60 text-onyx-500 dark:text-onyx-400 font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
-              :title="`Limite de ${MAX_FREE_TEMPLATES} modèles atteinte`"
-            >
-              <Plus class="w-4 h-4" />
-              <span>Nouveau modèle</span>
-              <span class="text-[10px] font-bold text-amber-500 ml-1">PRO</span>
-            </button>
-          </div>
-        </div>
-
-        <div
-          v-if="sortedTemplates.length > 0"
-          class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"
-        >
-          <div
-            v-for="tpl in sortedTemplates"
-            :key="tpl.id"
-            class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow hover:shadow-lg transition-all overflow-hidden flex flex-col group"
-            :class="selectedTemplateIds.has(tpl.id) ? 'ring-2 ring-flame-400' : ''"
-          >
-            <!-- Preview using BusinessCard (pass the editorData transformed to a fake card) -->
-            <div
-              class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-44 flex items-center justify-center p-2"
-            >
-              <!-- Checkbox -->
+        <div v-if="dashboardTab === 'templates'" class="mb-12" key="templates">
+          <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-2xl md:text-3xl font-bold text-onyx-950 dark:text-powder-50">
+              Mes Modèles
+            </h2>
+            <div class="flex items-center space-x-3">
               <button
-                @click.stop="toggleTemplateSelection(tpl.id)"
-                class="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
-                :class="selectedTemplateIds.has(tpl.id)
-                  ? 'bg-flame-500 border-flame-500 text-white opacity-100'
-                  : 'border-powder-300 dark:border-onyx-600 bg-white/70 dark:bg-onyx-800/70 text-transparent opacity-0 group-hover:opacity-100'"
+                @click="toggleTemplateSort"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-600 dark:text-onyx-400"
+                :title="
+                  templateSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'
+                "
               >
-                <Check class="w-3 h-3" />
+                <ArrowUpDown class="w-3.5 h-3.5" />
+                <span>{{ templateSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
               </button>
-              <div
-                class="pointer-events-none"
-                :style="{ width: cardPreviewWidth(templateToFakeCard(tpl), 160) + 'px' }"
+              <label
+                class="flex items-center space-x-2 text-sm text-onyx-600 dark:text-onyx-400 cursor-pointer"
               >
-                <BusinessCard :card="templateToFakeCard(tpl)" :isFlipped="flippedTemplates.has(tpl.id)" />
-              </div>
-              <!-- AUTO badge -->
-              <div
-                v-if="tpl.isAuto"
-                class="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                <input
+                  type="checkbox"
+                  v-model="showAutoTemplates"
+                  class="rounded border-gray-300 text-flame-500 shadow-sm focus:border-flame-300 focus:ring focus:ring-flame-200 focus:ring-opacity-50"
+                />
+                <span>Afficher l'historique auto.</span>
+              </label>
+              <button
+                v-if="sortedTemplates.length > 0"
+                @click="toggleSelectAllTemplates"
+                class="px-4 py-2 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
+                :class="
+                  selectedTemplateIds.size > 0
+                    ? 'bg-flame-50 dark:bg-flame-900/20 border-flame-300 dark:border-flame-700'
+                    : ''
+                "
               >
-                AUTO
-              </div>
-              <!-- Public/Privé badge -->
-              <div
+                <Check
+                  class="w-4 h-4"
+                  :class="selectedTemplateIds.size > 0 ? 'text-flame-600' : 'text-onyx-400'"
+                />
+                <span>{{
+                  selectedTemplateIds.size > 0
+                    ? `${selectedTemplateIds.size} sélectionné(s)`
+                    : 'Sélectionner tout'
+                }}</span>
+              </button>
+              <button
+                v-if="selectedTemplateIds.size > 0"
+                @click="deleteSelectedTemplates"
+                class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center space-x-2 text-sm font-medium"
+              >
+                <Trash2 class="w-4 h-4" />
+                <span>Supprimer ({{ selectedTemplateIds.size }})</span>
+              </button>
+              <router-link
+                v-if="templatesStore.canCreateTemplate"
+                to="/editor"
+                class="px-4 py-2 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
+              >
+                <Plus class="w-4 h-4" />
+                <span>Nouveau modèle</span>
+              </router-link>
+              <button
                 v-else
-                class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold"
-                :class="tpl.isPublic
-                  ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
+                @click="router.push('/pricing')"
+                class="px-4 py-2 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-onyx-500 dark:text-onyx-400 font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
+                :title="`Limite de ${MAX_FREE_TEMPLATES} modèles atteinte`"
               >
-                {{ tpl.isPublic ? '✓ Public' : '○ Privé' }}
-              </div>
-              <!-- Flip verso button -->
-              <button
-                v-if="templateHasVerso(tpl)"
-                @click.stop="toggleTemplateFlip(tpl.id)"
-                class="absolute bottom-2 right-2 px-2 py-0.5 text-[10px] font-semibold rounded bg-black/40 text-white hover:bg-black/60 transition-colors z-10"
-              >
-                {{ flippedTemplates.has(tpl.id) ? 'Recto ↩' : 'Verso →' }}
+                <Plus class="w-4 h-4" />
+                <span>Nouveau modèle</span>
+                <span class="text-[10px] font-bold text-amber-500 ml-1">PRO</span>
               </button>
             </div>
+          </div>
 
-            <div class="p-4 flex flex-col flex-1">
-              <h3 class="font-bold text-base text-onyx-900 dark:text-white mb-1 truncate">
-                {{ tpl.name }}
-              </h3>
-              <p class="text-[10px] text-onyx-500 dark:text-onyx-400 mb-3">
-                Modifié le {{ formatDate(tpl.updatedAt) }}
-              </p>
-
-              <div class="mb-4">
-                <span
-                  class="text-xs bg-powder-200 dark:bg-onyx-700 px-2 py-1 rounded text-onyx-700 dark:text-onyx-300 font-medium whitespace-nowrap overflow-hidden text-ellipsis block"
+          <div
+            v-if="sortedTemplates.length > 0"
+            class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
+            <div
+              v-for="tpl in sortedTemplates"
+              :key="tpl.id"
+              class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow hover:shadow-lg transition-all overflow-hidden flex flex-col group"
+              :class="selectedTemplateIds.has(tpl.id) ? 'ring-2 ring-flame-400' : ''"
+            >
+              <!-- Preview using BusinessCard (pass the editorData transformed to a fake card) -->
+              <div
+                class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-44 flex items-center justify-center p-2"
+              >
+                <!-- Checkbox -->
+                <button
+                  @click.stop="toggleTemplateSelection(tpl.id)"
+                  class="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
+                  :class="
+                    selectedTemplateIds.has(tpl.id)
+                      ? 'bg-flame-500 border-flame-500 text-white opacity-100'
+                      : 'border-powder-300 dark:border-onyx-600 bg-white/70 dark:bg-onyx-800/70 text-transparent opacity-0 group-hover:opacity-100'
+                  "
                 >
-                  {{ templatesStore.getCardsCountForTemplate(tpl.id) }} carte(s) liée(s)
-                </span>
+                  <Check class="w-3 h-3" />
+                </button>
+                <div
+                  class="pointer-events-none"
+                  :style="{ width: cardPreviewWidth(templateToFakeCard(tpl), 160) + 'px' }"
+                >
+                  <BusinessCard
+                    :card="templateToFakeCard(tpl)"
+                    :isFlipped="flippedTemplates.has(tpl.id)"
+                  />
+                </div>
+                <!-- AUTO badge -->
+                <div
+                  v-if="tpl.isAuto"
+                  class="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                >
+                  AUTO
+                </div>
+                <!-- Public/Privé badge -->
+                <div
+                  v-else
+                  class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                  :class="
+                    tpl.isPublic
+                      ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                  "
+                >
+                  {{ tpl.isPublic ? '✓ Public' : '○ Privé' }}
+                </div>
+                <!-- Flip verso button -->
+                <button
+                  v-if="templateHasVerso(tpl)"
+                  @click.stop="toggleTemplateFlip(tpl.id)"
+                  class="absolute bottom-2 right-2 px-2 py-0.5 text-[10px] font-semibold rounded bg-black/40 text-white hover:bg-black/60 transition-colors z-10"
+                >
+                  {{ flippedTemplates.has(tpl.id) ? 'Recto ↩' : 'Verso →' }}
+                </button>
               </div>
 
-              <div class="mt-auto grid grid-cols-2 gap-2">
-                <router-link
-                  :to="`/editor/${tpl.id}?mode=edit-template`"
-                  class="flex items-center justify-center gap-1.5 px-3 py-1 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 rounded-lg text-[11px] font-semibold text-onyx-800 dark:text-onyx-200 transition-colors"
-                >
-                  <Edit class="w-3.5 h-3.5" />
-                  <span>Modifier</span>
-                </router-link>
-                <button
-                  @click="openCreateCardModal(tpl)"
-                  class="flex items-center justify-center gap-1.5 px-3 py-1 bg-flame-50 dark:bg-flame-900/20 hover:bg-flame-100 dark:hover:bg-flame-900/40 text-flame-600 dark:text-flame-400 border border-flame-200 dark:border-flame-800 rounded-lg text-[11px] font-semibold transition-colors"
-                >
-                  <Plus class="w-3.5 h-3.5 shrink-0" />
-                  <span class="truncate">Créer carte</span>
-                </button>
-                <button
-                  @click="openBatchModal(tpl)"
-                  class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg text-[11px] font-semibold transition-colors mt-1"
-                >
-                  <Users class="w-3.5 h-3.5 shrink-0" />
-                  <span>Génération en lot (Excel)</span>
+              <div class="p-4 flex flex-col flex-1">
+                <h3 class="font-bold text-base text-onyx-900 dark:text-white mb-1 truncate">
+                  {{ tpl.name }}
+                </h3>
+                <p class="text-[10px] text-onyx-500 dark:text-onyx-400 mb-3">
+                  Modifié le {{ formatDate(tpl.updatedAt) }}
+                </p>
+
+                <div class="mb-4">
                   <span
-                    v-if="!authStore.isPremium && !authStore.isAdmin"
-                    class="text-[9px] font-bold text-amber-500 ml-auto"
-                    >PRO</span
+                    class="text-xs bg-powder-200 dark:bg-onyx-700 px-2 py-1 rounded text-onyx-700 dark:text-onyx-300 font-medium whitespace-nowrap overflow-hidden text-ellipsis block"
                   >
-                </button>
-                <button
-                  @click="deleteTemplate(tpl.id)"
-                  class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg text-[11px] font-semibold transition-colors mt-1"
-                >
-                  <Trash2 class="w-3.5 h-3.5 shrink-0" />
-                  <span>Supprimer le modèle</span>
-                </button>
+                    {{ templatesStore.getCardsCountForTemplate(tpl.id) }} carte(s) liée(s)
+                  </span>
+                </div>
+
+                <div class="mt-auto grid grid-cols-2 gap-2">
+                  <router-link
+                    :to="`/editor/${tpl.id}?mode=edit-template`"
+                    class="flex items-center justify-center gap-1.5 px-3 py-1 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 rounded-lg text-[11px] font-semibold text-onyx-800 dark:text-onyx-200 transition-colors"
+                  >
+                    <Edit class="w-3.5 h-3.5" />
+                    <span>Modifier</span>
+                  </router-link>
+                  <button
+                    @click="openCreateCardModal(tpl)"
+                    class="flex items-center justify-center gap-1.5 px-3 py-1 bg-flame-50 dark:bg-flame-900/20 hover:bg-flame-100 dark:hover:bg-flame-900/40 text-flame-600 dark:text-flame-400 border border-flame-200 dark:border-flame-800 rounded-lg text-[11px] font-semibold transition-colors"
+                  >
+                    <Plus class="w-3.5 h-3.5 shrink-0" />
+                    <span class="truncate">Créer carte</span>
+                  </button>
+                  <button
+                    @click="openBatchModal(tpl)"
+                    class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg text-[11px] font-semibold transition-colors mt-1"
+                  >
+                    <Users class="w-3.5 h-3.5 shrink-0" />
+                    <span>Génération en lot (Excel)</span>
+                    <span
+                      v-if="!authStore.isPremium && !authStore.isAdmin"
+                      class="text-[9px] font-bold text-amber-500 ml-auto"
+                      >PRO</span
+                    >
+                  </button>
+                  <button
+                    @click="deleteTemplate(tpl.id)"
+                    class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg text-[11px] font-semibold transition-colors mt-1"
+                  >
+                    <Trash2 class="w-3.5 h-3.5 shrink-0" />
+                    <span>Supprimer le modèle</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div
-          v-else
-          class="py-12 bg-powder-50/50 dark:bg-onyx-900/50 rounded-2xl border border-dashed border-powder-300 dark:border-onyx-700 flex flex-col items-center justify-center text-center px-4"
-        >
           <div
-            class="w-16 h-16 bg-powder-200 dark:bg-onyx-800 rounded-full flex items-center justify-center mb-4"
+            v-else
+            class="py-12 bg-powder-50/50 dark:bg-onyx-900/50 rounded-2xl border border-dashed border-powder-300 dark:border-onyx-700 flex flex-col items-center justify-center text-center px-4"
           >
-            <Copy class="w-8 h-8 text-onyx-400" />
+            <div
+              class="w-16 h-16 bg-powder-200 dark:bg-onyx-800 rounded-full flex items-center justify-center mb-4"
+            >
+              <Copy class="w-8 h-8 text-onyx-400" />
+            </div>
+            <p class="text-onyx-600 dark:text-onyx-400 font-medium max-w-sm">
+              Aucun modèle créé. Les modèles vous permettent de centraliser le design de plusieurs
+              cartes.
+            </p>
           </div>
-          <p class="text-onyx-600 dark:text-onyx-400 font-medium max-w-sm">
-            Aucun modèle créé. Les modèles vous permettent de centraliser le design de plusieurs
-            cartes.
-          </p>
         </div>
-      </div>
       </Transition>
 
       <!-- My Cards Section -->
       <Transition name="tab-fade" mode="out-in">
-      <div v-if="dashboardTab === 'cards'" key="cards">
-      <div class="mb-8 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <h2 class="text-2xl md:text-3xl font-bold text-onyx-950 dark:text-powder-50">
-            Mes cartes de visite
-          </h2>
-          <button
-            @click="toggleCardSort"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-600 dark:text-onyx-400"
-            :title="cardSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'"
-          >
-            <ArrowUpDown class="w-3.5 h-3.5" />
-            <span>{{ cardSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
-          </button>
-        </div>
-        <div v-if="store.userCards.length > 0" class="flex items-center space-x-3">
-          <button
-            @click="toggleSelectAll"
-            class="px-4 py-2 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
-            :class="
-              selectedCardIds.size > 0
-                ? 'bg-flame-50 dark:bg-flame-900/20 border-flame-300 dark:border-flame-700'
-                : ''
-            "
-          >
-            <Check
-              class="w-4 h-4"
-              :class="selectedCardIds.size > 0 ? 'text-flame-600' : 'text-onyx-400'"
-            />
-            <span>{{
-              selectedCardIds.size > 0
-                ? `${selectedCardIds.size} sélectionnée(s)`
-                : 'Sélectionner tout'
-            }}</span>
-          </button>
-          <button
-            v-if="selectedCardIds.size > 0"
-            @click="deleteSelectedCards"
-            class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center space-x-2 text-sm font-medium"
-          >
-            <Trash2 class="w-4 h-4" />
-            <span>Supprimer ({{ selectedCardIds.size }})</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Recent Cards Carousel - SUPPRIMÉ -->
-
-      <!-- Cards Grid -->
-      <div v-if="store.userCards.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div
-          v-for="card in sortedCards"
-          :key="card.id"
-          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
-        >
-          <!-- Checkbox de sélection (top-left, discret) -->
-          <div class="absolute top-3 left-3 z-20">
-            <button
-              @click="toggleCardSelection(card.id)"
-              class="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 shadow-sm"
-              :class="
-                selectedCardIds.has(card.id)
-                  ? 'bg-flame-600 border-flame-600 text-white'
-                  : 'bg-white/90 dark:bg-onyx-700/90 border-powder-300 dark:border-onyx-500 text-transparent hover:border-flame-400'
-              "
-              :title="selectedCardIds.has(card.id) ? 'Désélectionner' : 'Sélectionner'"
-            >
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Card Preview Section -->
-          <div
-            class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-64 flex items-center justify-center"
-          >
-            <div :style="{ width: cardPreviewWidth(card, 220) + 'px' }">
-              <BusinessCard :card="card" :isFlipped="flippedCards.has(card.id)" />
-            </div>
-            <!-- Status Badge -->
-            <div class="absolute top-3 right-3">
-              <span
-                class="px-3 py-1 text-xs font-bold rounded-full border"
-                :class="
-                  card.isPublic
-                    ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                    : 'bg-gray-100 dark:bg-onyx-700 text-gray-500 dark:text-onyx-400 border-gray-200 dark:border-onyx-600'
+        <div v-if="dashboardTab === 'cards'" key="cards">
+          <div class="mb-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <h2 class="text-2xl md:text-3xl font-bold text-onyx-950 dark:text-powder-50">
+                Mes cartes de visite
+              </h2>
+              <button
+                @click="toggleCardSort"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-600 dark:text-onyx-400"
+                :title="
+                  cardSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'
                 "
               >
-                {{ card.isPublic ? '✓ Publique' : '○ Privée' }}
-              </span>
-            </div>
-            <!-- Flip button overlay (bottom-right of card preview) -->
-            <button
-              v-if="card.data?.versoElements?.length"
-              @click.stop="toggleCardFlip(card.id)"
-              class="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm backdrop-blur-sm"
-              :class="
-                flippedCards.has(card.id)
-                  ? 'bg-onyx-800/90 text-white'
-                  : 'bg-white/90 dark:bg-onyx-900/90 text-onyx-700 dark:text-onyx-200'
-              "
-            >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              {{ flippedCards.has(card.id) ? 'Recto' : 'Verso' }}
-            </button>
-          </div>
-
-          <!-- Card Details -->
-          <div class="p-8">
-            <div class="mb-6">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <!-- Card label (name given by user) -->
-                  <p
-                    class="text-[10px] font-semibold uppercase tracking-widest text-violet-500 dark:text-violet-400 mb-1"
-                  >
-                    {{ card.name }}
-                  </p>
-                  <h3 class="text-xl md:text-2xl font-bold text-onyx-900 dark:text-white">
-                    {{ getFullName(card) }}
-                  </h3>
-                  <p class="text-sm text-onyx-500 dark:text-onyx-400 mt-1">
-                    {{ cardSubtitle(card) }}
-                  </p>
-                </div>
-              </div>
-              <p class="text-xs text-onyx-500 dark:text-onyx-400">
-                Créée le {{ formatDate(card.createdAt) }}
-              </p>
-            </div>
-
-            <!-- Contact Info Grid -->
-            <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-powder-50 dark:bg-onyx-800 rounded-xl">
-              <div>
-                <p class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1">
-                  Email
-                </p>
-                <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
-                  {{ getElemText(card, 'email') || '-' }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1">
-                  Téléphone
-                </p>
-                <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
-                  {{ getElemText(card, 'phone') || '-' }}
-                </p>
-              </div>
-              <div v-if="getElemText(card, 'website')" class="col-span-2">
-                <p class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1">
-                  Site web
-                </p>
-                <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
-                  {{ getElemText(card, 'website') }}
-                </p>
-              </div>
-              <div class="col-span-2">
-                <p class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1">
-                  Adresse
-                </p>
-                <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
-                  {{ getElemText(card, 'address') || '-' }}
-                </p>
-              </div>
-              <!-- Custom fields (contactExtra) -->
-              <template v-if="card.data?.contactExtra?.length">
-                <div
-                  v-for="cf in card.data.contactExtra"
-                  :key="cf.id"
-                  :class="cf.value && cf.value.length > 30 ? 'col-span-2' : ''"
-                >
-                  <p class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1">
-                    {{ cf.label }}
-                  </p>
-                  <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
-                    {{ cf.value || '-' }}
-                  </p>
-                </div>
-              </template>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-2">
-              <router-link
-                :to="`/editor/${card.id}`"
-                class="flex-1 min-w-fit px-4 py-2 bg-flame-50 dark:bg-flame-900/30 text-flame-700 dark:text-flame-300 hover:bg-flame-100 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
-              >
-                <Edit class="w-4 h-4" />
-                <span>Modifier</span>
-              </router-link>
-              <button
-                @click="openShareModal(card)"
-                class="flex-1 min-w-fit px-4 py-2 bg-onyx-100 dark:bg-onyx-800/40 text-onyx-700 dark:text-onyx-300 hover:bg-onyx-200 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
-              >
-                <Share2 class="w-4 h-4" />
-                <span>Partager</span>
+                <ArrowUpDown class="w-3.5 h-3.5" />
+                <span>{{ cardSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
               </button>
-
-              <!-- Download dropdown -->
-              <div class="relative flex-1 min-w-fit">
-                <button
-                  @click="activeDownloadCardId = activeDownloadCardId === card.id ? null : card.id"
-                  class="w-full px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-all duration-200 font-semibold flex items-center justify-center gap-1.5 text-sm"
-                >
-                  <Download class="w-4 h-4 shrink-0" />
-                  <span>Télécharger</span>
-                  <ChevronDown
-                    class="w-3.5 h-3.5 shrink-0 transition-transform duration-200"
-                    :class="activeDownloadCardId === card.id ? 'rotate-180' : ''"
-                  />
-                </button>
-
-                <!-- Backdrop -->
-                <div
-                  v-if="activeDownloadCardId === card.id"
-                  class="fixed inset-0 z-10"
-                  @click="activeDownloadCardId = null"
-                />
-
-                <!-- Dropdown panel -->
-                <div
-                  v-if="activeDownloadCardId === card.id"
-                  class="absolute bottom-full mb-2 left-0 right-0 bg-powder-50 dark:bg-onyx-800 rounded-xl shadow-xl border border-powder-100 dark:border-onyx-700 overflow-hidden z-20 min-w-[160px]"
-                >
-                  <button
-                    @click="downloadVCard(card); activeDownloadCardId = null"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center shrink-0"
-                    >
-                      <UserIcon class="w-3.5 h-3.5 text-sky-500" />
-                    </div>
-                    <div class="text-left">
-                      <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
-                        vCard (.vcf)
-                      </div>
-                    </div>
-                  </button>
-                  <button
-                    @click="downloadPDF(card); activeDownloadCardId = null"
-                    :disabled="exportLoading === card.id + '-pdf'"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
-                    :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0"
-                    >
-                      <Loader2
-                        v-if="exportLoading === card.id + '-pdf'"
-                        class="w-3.5 h-3.5 text-red-500 animate-spin"
-                      />
-                      <FileText v-else class="w-3.5 h-3.5 text-red-500" />
-                    </div>
-                    <div class="text-left">
-                      <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">PDF</div>
-                    </div>
-                    <span
-                      v-if="!authStore.isPremium && !authStore.isAdmin"
-                      class="ml-auto text-[10px] font-bold text-amber-500"
-                      >PRO</span
-                    >
-                  </button>
-                  <button
-                    @click="downloadPNG(card); activeDownloadCardId = null"
-                    :disabled="exportLoading === card.id + '-png'"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
-                    :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0"
-                    >
-                      <Loader2
-                        v-if="exportLoading === card.id + '-png'"
-                        class="w-3.5 h-3.5 text-violet-500 animate-spin"
-                      />
-                      <ImageIcon v-else class="w-3.5 h-3.5 text-violet-500" />
-                    </div>
-                    <div class="text-left">
-                      <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
-                        Image PNG
-                      </div>
-                    </div>
-                    <span
-                      v-if="!authStore.isPremium && !authStore.isAdmin"
-                      class="ml-auto text-[10px] font-bold text-amber-500"
-                      >PRO</span
-                    >
-                  </button>
-                  <button
-                    @click="downloadJPG(card); activeDownloadCardId = null"
-                    :disabled="exportLoading === card.id + '-jpg'"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0"
-                    >
-                      <Loader2
-                        v-if="exportLoading === card.id + '-jpg'"
-                        class="w-3.5 h-3.5 text-amber-500 animate-spin"
-                      />
-                      <ImageIcon v-else class="w-3.5 h-3.5 text-amber-500" />
-                    </div>
-                    <div class="text-left">
-                      <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
-                        Image JPG
-                      </div>
-                    </div>
-                  </button>
-                  <button
-                    @click="downloadJSON(card); activeDownloadCardId = null"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700"
-                    :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0"
-                    >
-                      <Braces class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div class="text-left">
-                      <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">JSON</div>
-                    </div>
-                    <span
-                      v-if="!authStore.isPremium && !authStore.isAdmin"
-                      class="ml-auto text-[10px] font-bold text-amber-500"
-                      >PRO</span
-                    >
-                  </button>
-                </div>
-              </div>
+            </div>
+            <div v-if="store.userCards.length > 0" class="flex items-center space-x-3">
               <button
-                @click="deleteCard(card.id)"
-                class="flex-1 min-w-fit px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+                @click="toggleSelectAll"
+                class="px-4 py-2 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors flex items-center space-x-2 text-sm font-medium"
+                :class="
+                  selectedCardIds.size > 0
+                    ? 'bg-flame-50 dark:bg-flame-900/20 border-flame-300 dark:border-flame-700'
+                    : ''
+                "
+              >
+                <Check
+                  class="w-4 h-4"
+                  :class="selectedCardIds.size > 0 ? 'text-flame-600' : 'text-onyx-400'"
+                />
+                <span>{{
+                  selectedCardIds.size > 0
+                    ? `${selectedCardIds.size} sélectionnée(s)`
+                    : 'Sélectionner tout'
+                }}</span>
+              </button>
+              <button
+                v-if="selectedCardIds.size > 0"
+                @click="deleteSelectedCards"
+                class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center space-x-2 text-sm font-medium"
               >
                 <Trash2 class="w-4 h-4" />
-                <span>Supprimer</span>
+                <span>Supprimer ({{ selectedCardIds.size }})</span>
               </button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Empty State -->
-      <div v-else class="text-center py-24">
-        <div
-          class="w-32 h-32 mx-auto mb-8 bg-powder-100 dark:bg-onyx-800 rounded-3xl flex items-center justify-center"
-        >
-          <CreditCard class="w-16 h-16 text-onyx-400 dark:text-onyx-500" />
+          <!-- Recent Cards Carousel - SUPPRIMÉ -->
+
+          <!-- Cards Grid -->
+          <div v-if="store.userCards.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div
+              v-for="card in sortedCards"
+              :key="card.id"
+              class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
+            >
+              <!-- Checkbox de sélection (top-left, discret) -->
+              <div class="absolute top-3 left-3 z-20">
+                <button
+                  @click="toggleCardSelection(card.id)"
+                  class="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 shadow-sm"
+                  :class="
+                    selectedCardIds.has(card.id)
+                      ? 'bg-flame-600 border-flame-600 text-white'
+                      : 'bg-white/90 dark:bg-onyx-700/90 border-powder-300 dark:border-onyx-500 text-transparent hover:border-flame-400'
+                  "
+                  :title="selectedCardIds.has(card.id) ? 'Désélectionner' : 'Sélectionner'"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Card Preview Section -->
+              <div
+                class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-64 flex items-center justify-center"
+              >
+                <div :style="{ width: cardPreviewWidth(card, 220) + 'px' }">
+                  <BusinessCard :card="card" :isFlipped="flippedCards.has(card.id)" />
+                </div>
+                <!-- Status Badge -->
+                <div class="absolute top-3 right-3">
+                  <span
+                    class="px-3 py-1 text-xs font-bold rounded-full border"
+                    :class="
+                      card.isPublic
+                        ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                        : 'bg-gray-100 dark:bg-onyx-700 text-gray-500 dark:text-onyx-400 border-gray-200 dark:border-onyx-600'
+                    "
+                  >
+                    {{ card.isPublic ? '✓ Publique' : '○ Privée' }}
+                  </span>
+                </div>
+                <!-- Flip button overlay (bottom-right of card preview) -->
+                <button
+                  v-if="card.data?.versoElements?.length"
+                  @click.stop="toggleCardFlip(card.id)"
+                  class="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm backdrop-blur-sm"
+                  :class="
+                    flippedCards.has(card.id)
+                      ? 'bg-onyx-800/90 text-white'
+                      : 'bg-white/90 dark:bg-onyx-900/90 text-onyx-700 dark:text-onyx-200'
+                  "
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  {{ flippedCards.has(card.id) ? 'Recto' : 'Verso' }}
+                </button>
+              </div>
+
+              <!-- Card Details -->
+              <div class="p-8">
+                <div class="mb-6">
+                  <div class="flex items-start justify-between mb-3">
+                    <div>
+                      <!-- Card label (name given by user) -->
+                      <p
+                        class="text-[10px] font-semibold uppercase tracking-widest text-violet-500 dark:text-violet-400 mb-1"
+                      >
+                        {{ card.name }}
+                      </p>
+                      <h3 class="text-xl md:text-2xl font-bold text-onyx-900 dark:text-white">
+                        {{ getFullName(card) }}
+                      </h3>
+                      <p class="text-sm text-onyx-500 dark:text-onyx-400 mt-1">
+                        {{ cardSubtitle(card) }}
+                      </p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-onyx-500 dark:text-onyx-400">
+                    Créée le {{ formatDate(card.createdAt) }}
+                  </p>
+                </div>
+
+                <!-- Contact Info Grid -->
+                <div
+                  class="grid grid-cols-2 gap-4 mb-6 p-4 bg-powder-50 dark:bg-onyx-800 rounded-xl"
+                >
+                  <div>
+                    <p
+                      class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
+                    >
+                      Email
+                    </p>
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
+                      {{ getElemText(card, 'email') || '-' }}
+                    </p>
+                  </div>
+                  <div>
+                    <p
+                      class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
+                    >
+                      Téléphone
+                    </p>
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
+                      {{ getElemText(card, 'phone') || '-' }}
+                    </p>
+                  </div>
+                  <div v-if="getElemText(card, 'website')" class="col-span-2">
+                    <p
+                      class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
+                    >
+                      Site web
+                    </p>
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
+                      {{ getElemText(card, 'website') }}
+                    </p>
+                  </div>
+                  <div class="col-span-2">
+                    <p
+                      class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
+                    >
+                      Adresse
+                    </p>
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
+                      {{ getElemText(card, 'address') || '-' }}
+                    </p>
+                  </div>
+                  <!-- Custom fields (contactExtra) -->
+                  <template v-if="card.data?.contactExtra?.length">
+                    <div
+                      v-for="cf in card.data.contactExtra"
+                      :key="cf.id"
+                      :class="cf.value && cf.value.length > 30 ? 'col-span-2' : ''"
+                    >
+                      <p
+                        class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
+                      >
+                        {{ cf.label }}
+                      </p>
+                      <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
+                        {{ cf.value || '-' }}
+                      </p>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2">
+                  <router-link
+                    :to="`/editor/${card.id}`"
+                    class="flex-1 min-w-fit px-4 py-2 bg-flame-50 dark:bg-flame-900/30 text-flame-700 dark:text-flame-300 hover:bg-flame-100 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+                  >
+                    <Edit class="w-4 h-4" />
+                    <span>Modifier</span>
+                  </router-link>
+                  <button
+                    @click="openShareModal(card)"
+                    class="flex-1 min-w-fit px-4 py-2 bg-onyx-100 dark:bg-onyx-800/40 text-onyx-700 dark:text-onyx-300 hover:bg-onyx-200 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+                  >
+                    <Share2 class="w-4 h-4" />
+                    <span>Partager</span>
+                  </button>
+
+                  <!-- Download dropdown -->
+                  <div class="relative flex-1 min-w-fit">
+                    <button
+                      @click="activeDownloadCardId = activeDownloadCardId === card.id ? null : card.id"
+                      class="w-full px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-all duration-200 font-semibold flex items-center justify-center gap-1.5 text-sm"
+                    >
+                      <Download class="w-4 h-4 shrink-0" />
+                      <span>Télécharger</span>
+                      <ChevronDown
+                        class="w-3.5 h-3.5 shrink-0 transition-transform duration-200"
+                        :class="activeDownloadCardId === card.id ? 'rotate-180' : ''"
+                      />
+                    </button>
+
+                    <!-- Backdrop -->
+                    <div
+                      v-if="activeDownloadCardId === card.id"
+                      class="fixed inset-0 z-10"
+                      @click="activeDownloadCardId = null"
+                    />
+
+                    <!-- Dropdown panel -->
+                    <div
+                      v-if="activeDownloadCardId === card.id"
+                      class="absolute bottom-full mb-2 left-0 right-0 bg-powder-50 dark:bg-onyx-800 rounded-xl shadow-xl border border-powder-100 dark:border-onyx-700 overflow-hidden z-20 min-w-[160px]"
+                    >
+                      <button
+                        @click="downloadVCard(card); activeDownloadCardId = null"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors"
+                      >
+                        <div
+                          class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center shrink-0"
+                        >
+                          <UserIcon class="w-3.5 h-3.5 text-sky-500" />
+                        </div>
+                        <div class="text-left">
+                          <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
+                            vCard (.vcf)
+                          </div>
+                        </div>
+                      </button>
+                      <button
+                        @click="downloadPDF(card); activeDownloadCardId = null"
+                        :disabled="exportLoading === card.id + '-pdf'"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
+                        :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
+                      >
+                        <div
+                          class="w-7 h-7 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0"
+                        >
+                          <Loader2
+                            v-if="exportLoading === card.id + '-pdf'"
+                            class="w-3.5 h-3.5 text-red-500 animate-spin"
+                          />
+                          <FileText v-else class="w-3.5 h-3.5 text-red-500" />
+                        </div>
+                        <div class="text-left">
+                          <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
+                            PDF
+                          </div>
+                        </div>
+                        <span
+                          v-if="!authStore.isPremium && !authStore.isAdmin"
+                          class="ml-auto text-[10px] font-bold text-amber-500"
+                          >PRO</span
+                        >
+                      </button>
+                      <button
+                        @click="downloadPNG(card); activeDownloadCardId = null"
+                        :disabled="exportLoading === card.id + '-png'"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
+                        :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
+                      >
+                        <div
+                          class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0"
+                        >
+                          <Loader2
+                            v-if="exportLoading === card.id + '-png'"
+                            class="w-3.5 h-3.5 text-violet-500 animate-spin"
+                          />
+                          <ImageIcon v-else class="w-3.5 h-3.5 text-violet-500" />
+                        </div>
+                        <div class="text-left">
+                          <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
+                            Image PNG
+                          </div>
+                        </div>
+                        <span
+                          v-if="!authStore.isPremium && !authStore.isAdmin"
+                          class="ml-auto text-[10px] font-bold text-amber-500"
+                          >PRO</span
+                        >
+                      </button>
+                      <button
+                        @click="downloadJPG(card); activeDownloadCardId = null"
+                        :disabled="exportLoading === card.id + '-jpg'"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700 disabled:opacity-50"
+                      >
+                        <div
+                          class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0"
+                        >
+                          <Loader2
+                            v-if="exportLoading === card.id + '-jpg'"
+                            class="w-3.5 h-3.5 text-amber-500 animate-spin"
+                          />
+                          <ImageIcon v-else class="w-3.5 h-3.5 text-amber-500" />
+                        </div>
+                        <div class="text-left">
+                          <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
+                            Image JPG
+                          </div>
+                        </div>
+                      </button>
+                      <button
+                        @click="downloadJSON(card); activeDownloadCardId = null"
+                        class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-powder-50 dark:hover:bg-onyx-700 transition-colors border-t border-powder-100 dark:border-onyx-700"
+                        :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''"
+                      >
+                        <div
+                          class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0"
+                        >
+                          <Braces class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div class="text-left">
+                          <div class="font-semibold text-onyx-800 dark:text-onyx-200 text-xs">
+                            JSON
+                          </div>
+                        </div>
+                        <span
+                          v-if="!authStore.isPremium && !authStore.isAdmin"
+                          class="ml-auto text-[10px] font-bold text-amber-500"
+                          >PRO</span
+                        >
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    @click="deleteCard(card.id)"
+                    class="flex-1 min-w-fit px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/60 transition-all duration-200 font-semibold flex items-center justify-center space-x-1 text-sm"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                    <span>Supprimer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="text-center py-24">
+            <div
+              class="w-32 h-32 mx-auto mb-8 bg-powder-100 dark:bg-onyx-800 rounded-3xl flex items-center justify-center"
+            >
+              <CreditCard class="w-16 h-16 text-onyx-400 dark:text-onyx-500" />
+            </div>
+            <h3 class="text-3xl font-bold text-onyx-900 dark:text-white mb-3">
+              Aucune carte créée
+            </h3>
+            <p class="text-onyx-600 dark:text-onyx-400 mb-8 text-lg max-w-md mx-auto">
+              Commencez par créer votre première carte de visite professionnelle
+            </p>
+            <router-link
+              to="/editor"
+              class="inline-flex items-center space-x-2 px-8 py-4 bg-flame-500 hover:bg-flame-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus class="w-6 h-6" />
+              <span>Créer ma première carte</span>
+            </router-link>
+          </div>
         </div>
-        <h3 class="text-3xl font-bold text-onyx-900 dark:text-white mb-3">Aucune carte créée</h3>
-        <p class="text-onyx-600 dark:text-onyx-400 mb-8 text-lg max-w-md mx-auto">
-          Commencez par créer votre première carte de visite professionnelle
-        </p>
-        <router-link
-          to="/editor"
-          class="inline-flex items-center space-x-2 px-8 py-4 bg-flame-500 hover:bg-flame-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          <Plus class="w-6 h-6" />
-          <span>Créer ma première carte</span>
-        </router-link>
-      </div>
-      </div>
       </Transition>
-
     </div>
 
     <!-- Share Modal -->

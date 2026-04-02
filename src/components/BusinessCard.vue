@@ -58,9 +58,7 @@
                 v-else
                 class="leading-tight select-none pointer-events-none"
                 :style="textStyle(el)"
-              >
-                {{ el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '') }}
-              </component>
+              >{{ el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '') }}</component>
             </template>
             <!-- Poignées (masquées pendant l'édition) -->
             <template v-if="editMode && editingEl?.id !== el.id">

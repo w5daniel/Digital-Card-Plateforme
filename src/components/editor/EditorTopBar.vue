@@ -469,7 +469,6 @@ function editorToCardEl(el, index) {
       italic: el.fontStyle?.includes('italic') || false,
       textAlign: el.align || 'left',
       lineHeight: el.lineHeight != null ? el.lineHeight : undefined,
-      textSpans: el.textSpans?.length ? el.textSpans : undefined,
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,

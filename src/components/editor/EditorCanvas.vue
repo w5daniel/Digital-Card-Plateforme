@@ -283,7 +283,7 @@
       :style="safeZoneStyle"
     />
 
-    <!-- ── HTML Textarea overlay for inline text editing ─────────────── -->
+    <!-- ── Textarea overlay for inline text editing ─────────────────── -->
     <textarea
       v-if="editingEl"
       ref="textareaRef"
@@ -394,7 +394,7 @@ const elementsLayerRef = ref(null)
 const transformerRef = ref(null)
 const textareaRef = ref(null)
 
-// Redraw Konva layer when new fonts finish loading (text elements need re-render)
+// Redraw Konva layer when new fonts finish loading
 watch(
   () => fontStore.loadedCount,
   () => {
@@ -1786,12 +1786,12 @@ function onTransformEndCenter(e, el) {
 }
 
 // ── Inline text editing ───────────────────────────────────────────────────
+
 function startTextEdit(el) {
   editingEl.value = el
   editingText.value = el.text || ''
-  // Keep selection so context bar stays visible — just hide transformer handles
   nextTick(() => {
-    updateTransformer() // re-run so the "editingEl" guard below hides handles
+    updateTransformer()
     textareaRef.value?.focus()
     textareaRef.value?.select()
   })
@@ -1801,7 +1801,6 @@ function finishTextEdit() {
   if (!editingEl.value) return
   const trimmed = editingText.value.trim()
   if (!trimmed) {
-    // Empty text — remove the element from canvas
     const page = editorStore.activePage
     editorStore.elements[page] = editorStore.elements[page].filter(
       (e) => e.id !== editingEl.value.id,
@@ -1812,7 +1811,6 @@ function finishTextEdit() {
     return
   }
   editorStore.updateElementCommit(editingEl.value.id, { text: editingText.value })
-  // Sync back to contactExtra if this is a custom field (role = "custom_{id}")
   const role = editingEl.value.role || ''
   if (role.startsWith('custom_')) {
     const cfId = role.replace('custom_', '')
@@ -1821,7 +1819,7 @@ function finishTextEdit() {
   }
   editingEl.value = null
   editingText.value = ''
-  nextTick(updateTransformer) // restore transformer handles after editing
+  nextTick(updateTransformer)
 }
 
 // Finish any ongoing text edit when the user switches page
@@ -1833,7 +1831,6 @@ watch(
     const idx = pageEls?.findIndex((e) => e.id === editingEl.value.id) ?? -1
     if (idx !== -1) {
       if (!editingText.value.trim()) {
-        // Empty text — remove element
         pageEls.splice(idx, 1)
       } else {
         pageEls[idx] = { ...pageEls[idx], text: editingText.value }
@@ -1912,7 +1909,6 @@ const textareaStyle = computed(() => {
   }
 })
 
-// ── Wheel zoom ────────────────────────────────────────────────────────────
 function onWheel(e) {
   const delta = e.deltaY > 0 ? -0.05 : 0.05
   editorStore.setZoom(editorStore.zoom + delta)

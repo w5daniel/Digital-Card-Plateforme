@@ -90,7 +90,11 @@
           <div v-if="activeTab === 'info'" class="pb-4">
             <!-- Standard contact fields -->
             <div class="px-3 pt-3 flex flex-col gap-3">
-              <div v-for="field in editorStore.fieldConfig.activeStandardFields" :key="field.role" class="group/field relative">
+              <div
+                v-for="field in editorStore.fieldConfig.activeStandardFields"
+                :key="field.role"
+                class="group/field relative"
+              >
                 <!-- Label / Edit state -->
                 <div class="flex items-center justify-between mb-1">
                   <div class="flex-1 min-w-0 pr-2">
@@ -100,7 +104,11 @@
                       @blur="editingStandardLabel = null; editorStore.isDirty = true"
                       @keyup.enter="editingStandardLabel = null; $event.target.blur()"
                       class="text-[11px] font-medium px-1 rounded outline-none border transition-colors w-full"
-                      :class="themeStore.darkMode ? 'bg-gray-800 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-800'"
+                      :class="
+                        themeStore.darkMode
+                          ? 'bg-gray-800 border-gray-600 text-gray-200'
+                          : 'bg-white border-gray-300 text-gray-800'
+                      "
                       autofocus
                     />
                     <label
@@ -111,7 +119,9 @@
                       title="Double-cliquez pour renommer"
                     >
                       {{ field.label }}
-                      <Edit2Icon class="w-3 h-3 ml-1.5 opacity-0 group-hover/field:opacity-50 inline" />
+                      <Edit2Icon
+                        class="w-3 h-3 ml-1.5 opacity-0 group-hover/field:opacity-50 inline"
+                      />
                     </label>
                   </div>
                   <button
@@ -128,9 +138,10 @@
                   :value="infoValues[field.role] || ''"
                   @input="handleInfoInput(field.role, $event.target.value)"
                   class="w-full text-xs px-2.5 py-1.5 rounded-lg border outline-none transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600 focus:border-violet-500'
-                    : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
+                  :class="
+                    themeStore.darkMode
+                      ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600 focus:border-violet-500'
+                      : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
                   "
                 />
               </div>
@@ -166,7 +177,11 @@
                   <PlusIcon class="w-3 h-3" />
                   Ajouter
                 </button>
-                <span v-else class="flex items-center gap-1 text-[10px] opacity-60 cursor-default" title="Réservé au plan Premium">
+                <span
+                  v-else
+                  class="flex items-center gap-1 text-[10px] opacity-60 cursor-default"
+                  title="Réservé au plan Premium"
+                >
                   <PlusIcon class="w-3 h-3" />
                   Ajouter
                   <span class="text-[8px] font-bold text-amber-500">PRO</span>
@@ -174,7 +189,11 @@
               </div>
 
               <!-- Existing custom fields -->
-              <div v-for="cf in editorStore.fieldConfig.customFields" :key="cf.id" class="mb-2 group/custom relative">
+              <div
+                v-for="cf in editorStore.fieldConfig.customFields"
+                :key="cf.id"
+                class="mb-2 group/custom relative"
+              >
                 <div class="flex items-center justify-between mb-0.5">
                   <div class="flex-1 min-w-0 pr-2">
                     <input
@@ -183,7 +202,11 @@
                       @blur="editingCustomLabel = null; syncCustomLabelToExtra(cf.id, cf.label)"
                       @keyup.enter="editingCustomLabel = null; $event.target.blur()"
                       class="text-[10px] font-medium px-1 rounded outline-none border transition-colors w-full"
-                      :class="themeStore.darkMode ? 'bg-gray-800 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-800'"
+                      :class="
+                        themeStore.darkMode
+                          ? 'bg-gray-800 border-gray-600 text-gray-200'
+                          : 'bg-white border-gray-300 text-gray-800'
+                      "
                       autofocus
                     />
                     <span
@@ -290,16 +313,28 @@
               </div>
 
               <!-- Available standard fields to restore -->
-              <div v-if="availableStandardFields.length > 0 && !showAddCustom" class="mt-4 border-t pt-3" :class="themeStore.darkMode ? 'border-gray-800' : 'border-gray-100'">
-                <p class="text-[10px] uppercase font-semibold mb-2" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <div
+                v-if="availableStandardFields.length > 0 && !showAddCustom"
+                class="mt-4 border-t pt-3"
+                :class="themeStore.darkMode ? 'border-gray-800' : 'border-gray-100'"
+              >
+                <p
+                  class="text-[10px] uppercase font-semibold mb-2"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Réajouter un champ standard
                 </p>
                 <div class="flex flex-wrap gap-1">
-                  <button 
-                    v-for="sf in availableStandardFields" :key="sf.role"
+                  <button
+                    v-for="sf in availableStandardFields"
+                    :key="sf.role"
                     @click="addStandardField(sf)"
                     class="text-[10px] px-2 py-1 border rounded-lg transition-colors hover:text-violet-500 hover:border-violet-500"
-                    :class="themeStore.darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'border-gray-700 text-gray-400'
+                        : 'border-gray-200 text-gray-500'
+                    "
                   >
                     + {{ sf.label }}
                   </button>
@@ -375,6 +410,47 @@
               </div>
             </div>
 
+            <!-- Canvas color palette -->
+            <div class="px-3 mt-1 mb-3">
+              <p
+                class="text-xs font-medium mb-2"
+                :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+              >
+                Couleurs du document
+              </p>
+              <div class="flex flex-wrap gap-1 items-center">
+                <button
+                  v-for="color in allDocColors"
+                  :key="color"
+                  @click="applyDocumentColor(color)"
+                  class="w-6 h-6 rounded border-2 transition-all duration-150 hover:scale-110 hover:shadow-sm"
+                  :style="{ backgroundColor: color }"
+                  :class="[
+                    themeStore.darkMode ? 'border-gray-700 hover:border-gray-500' : 'border-gray-200 hover:border-gray-400',
+                    editorStore.selectedIds.length === 0 ? 'opacity-50 cursor-default' : 'cursor-pointer',
+                  ]"
+                  :title="editorStore.selectedIds.length > 0 ? `Appliquer aux éléments sélectionnés : ${color}` : color"
+                />
+                <!-- Add color button -->
+                <label
+                  class="w-6 h-6 rounded border-2 border-dashed flex items-center justify-center cursor-pointer transition-all duration-150 hover:scale-110"
+                  :class="themeStore.darkMode ? 'border-gray-600 text-gray-500 hover:border-violet-500 hover:text-violet-400' : 'border-gray-300 text-gray-400 hover:border-violet-400 hover:text-violet-500'"
+                  title="Ajouter une couleur"
+                >
+                  <Plus class="w-3 h-3" />
+                  <input type="color" class="hidden" @change="addDocColor($event.target.value)" />
+                </label>
+              </div>
+              <!-- Hint when nothing is selected -->
+              <p
+                v-if="editorStore.selectedIds.length === 0 && allDocColors.length > 0"
+                class="text-[10px] mt-1.5"
+                :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'"
+              >
+                Sélectionnez un élément pour appliquer
+              </p>
+            </div>
+
             <!-- Divider -->
             <div
               class="mx-3 h-px mb-3"
@@ -411,7 +487,11 @@
                   v-if="designQuery"
                   @click="designQuery = ''"
                   class="absolute right-2 top-1/2 -translate-y-1/2"
-                  :class="themeStore.darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-500 hover:text-gray-300'
+                      : 'text-gray-400 hover:text-gray-600'
+                  "
                 >
                   <X class="w-3.5 h-3.5" />
                 </button>
@@ -433,7 +513,9 @@
                         ? 'border-gray-700 text-gray-400 hover:bg-gray-800'
                         : 'border-gray-200 text-gray-500 hover:bg-gray-50',
                   ]"
-                >{{ f.label }} ({{ f.count }})</button>
+                >
+                  {{ f.label }} ({{ f.count }})
+                </button>
               </div>
 
               <!-- Blank canvas button -->
@@ -494,7 +576,7 @@
                     themeStore.darkMode
                       ? 'border-gray-700 hover:border-violet-500'
                       : 'border-gray-200 hover:border-violet-400',
-                    tpl.isPremium && !authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : ''
+                    tpl.isPremium && !authStore.isPremium && !authStore.isAdmin ? 'opacity-60' : '',
                   ]"
                   :title="tpl.name"
                   style="aspect-ratio: 85.6/54"
@@ -511,10 +593,7 @@
                       pointer-events: none;
                     "
                   >
-                    <BusinessCard
-                      :card="buildPreviewCard(tpl)"
-                      :isFlipped="false"
-                    />
+                    <BusinessCard :card="buildPreviewCard(tpl)" :isFlipped="false" />
                   </div>
                   <!-- Hover overlay with name -->
                   <div
@@ -673,9 +752,17 @@
                     type="text"
                     placeholder="Rechercher une illustration…"
                     class="flex-1 bg-transparent text-xs outline-none"
-                    :class="themeStore.darkMode ? 'text-gray-200 placeholder-gray-500' : 'text-gray-700 placeholder-gray-400'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'text-gray-200 placeholder-gray-500'
+                        : 'text-gray-700 placeholder-gray-400'
+                    "
                   />
-                  <button v-if="illustrationQuery" @click="illustrationQuery = ''" class="text-gray-400 hover:text-gray-600">
+                  <button
+                    v-if="illustrationQuery"
+                    @click="illustrationQuery = ''"
+                    class="text-gray-400 hover:text-gray-600"
+                  >
                     <X class="w-3 h-3" />
                   </button>
                 </div>
@@ -730,7 +817,13 @@
                     </template>
                     <!-- Iconify icon (CDN on-demand, logo ou sticker) -->
                     <template v-else>
-                      <IconifyIcon :icon="item.id" width="22" height="22" class="shrink-0" :style="item.color ? { color: item.color } : undefined" />
+                      <IconifyIcon
+                        :icon="item.id"
+                        width="22"
+                        height="22"
+                        class="shrink-0"
+                        :style="item.color ? { color: item.color } : undefined"
+                      />
                     </template>
                     <span
                       class="text-[7px] leading-none truncate w-full text-center px-0.5"
@@ -778,20 +871,20 @@
                       <IconifyIcon :icon="element.iconId" class="w-7 h-7" />
                     </template>
                     <template v-else>
-                    <svg
-                      :viewBox="element.shapeType === 'path' ? '0 0 24 24' : '0 0 32 20'"
-                      width="28"
-                      height="18"
-                      class="overflow-visible"
-                      fill="none"
-                    >
-                      <g
-                        :fill="themeStore.darkMode ? '#A78BFA' : '#7C3AED'"
-                        :stroke="themeStore.darkMode ? '#A78BFA' : '#7C3AED'"
+                      <svg
+                        :viewBox="element.shapeType === 'path' ? '0 0 24 24' : '0 0 32 20'"
+                        width="28"
+                        height="18"
+                        class="overflow-visible"
+                        fill="none"
                       >
-                        <component :is="element.svgEl" v-bind="element.svgProps" />
-                      </g>
-                    </svg>
+                        <g
+                          :fill="themeStore.darkMode ? '#A78BFA' : '#7C3AED'"
+                          :stroke="themeStore.darkMode ? '#A78BFA' : '#7C3AED'"
+                        >
+                          <component :is="element.svgEl" v-bind="element.svgProps" />
+                        </g>
+                      </svg>
                     </template>
                   </button>
                 </div>
@@ -806,9 +899,7 @@
               <div
                 class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border"
                 :class="
-                  themeStore.darkMode
-                    ? 'bg-gray-800 border-gray-700'
-                    : 'bg-gray-50 border-gray-200'
+                  themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
                 "
               >
                 <Search class="w-3.5 h-3.5 shrink-0 text-gray-400" />
@@ -817,9 +908,17 @@
                   type="text"
                   placeholder="Rechercher une icône…"
                   class="flex-1 bg-transparent text-xs outline-none"
-                  :class="themeStore.darkMode ? 'text-gray-200 placeholder-gray-500' : 'text-gray-700 placeholder-gray-400'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-200 placeholder-gray-500'
+                      : 'text-gray-700 placeholder-gray-400'
+                  "
                 />
-                <button v-if="iconQuery" @click="iconQuery = ''" class="text-gray-400 hover:text-gray-600">
+                <button
+                  v-if="iconQuery"
+                  @click="iconQuery = ''"
+                  class="text-gray-400 hover:text-gray-600"
+                >
                   <X class="w-3 h-3" />
                 </button>
               </div>
@@ -853,8 +952,19 @@
                   v-for="icon in filteredIcons"
                   :key="icon.id"
                   draggable="true"
-                  @dragstart="onIconDragStart($event, icon, icon.id.startsWith('mdi:') ? {} : { colorful: true })"
-                  @click="editorStore.addIconElement(icon, icon.id.startsWith('mdi:') ? {} : { colorful: true })"
+                  @dragstart="
+                    onIconDragStart(
+                      $event,
+                      icon,
+                      icon.id.startsWith('mdi:') ? {} : { colorful: true },
+                    )
+                  "
+                  @click="
+                    editorStore.addIconElement(
+                      icon,
+                      icon.id.startsWith('mdi:') ? {} : { colorful: true },
+                    )
+                  "
                   class="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border transition-all cursor-pointer group overflow-hidden"
                   :class="
                     themeStore.darkMode
@@ -933,12 +1043,21 @@
               <div
                 v-if="selectedTextEl || selectedTextEls.length > 1"
                 class="mb-2 px-2 py-1.5 rounded-lg text-xs flex items-center gap-1.5"
-                :class="themeStore.darkMode
-                  ? 'bg-violet-900/30 text-violet-300 border border-violet-700/50'
-                  : 'bg-violet-50 text-violet-700 border border-violet-200'"
+                :class="
+                  themeStore.darkMode
+                    ? 'bg-violet-900/30 text-violet-300 border border-violet-700/50'
+                    : 'bg-violet-50 text-violet-700 border border-violet-200'
+                "
               >
                 <Type class="w-3 h-3 shrink-0" />
-                <span>Cliquez sur une police pour modifier {{ selectedTextEls.length > 1 ? 'les éléments sélectionnés' : 'l\'élément sélectionné' }}</span>
+                <span
+                  >Cliquez sur une police pour modifier
+                  {{
+                    selectedTextEls.length > 1
+                      ? 'les éléments sélectionnés'
+                      : "l'élément sélectionné"
+                  }}</span
+                >
               </div>
               <div class="flex items-center justify-between mb-2">
                 <p
@@ -962,8 +1081,14 @@
                   <Upload class="w-2.5 h-2.5" />
                   Importer
                 </button>
-                <span v-else class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border opacity-50 cursor-default"
-                  :class="themeStore.darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'"
+                <span
+                  v-else
+                  class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border opacity-50 cursor-default"
+                  :class="
+                    themeStore.darkMode
+                      ? 'border-gray-700 text-gray-500'
+                      : 'border-gray-300 text-gray-400'
+                  "
                   title="Réservé au plan Premium"
                 >
                   <Upload class="w-2.5 h-2.5" />
@@ -1016,18 +1141,47 @@
                     <button
                       @click.stop="fontStore.toggleFavorite(cf.name)"
                       class="p-1 rounded shrink-0 transition-opacity"
-                      :class="fontStore.isFavorite(cf.name) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
-                      :title="fontStore.isFavorite(cf.name) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                      :class="
+                        fontStore.isFavorite(cf.name)
+                          ? 'text-yellow-400 opacity-100'
+                          : 'opacity-0 group-hover:opacity-60 ' +
+                            (themeStore.darkMode
+                              ? 'text-gray-500 hover:text-yellow-400'
+                              : 'text-gray-400 hover:text-yellow-400')
+                      "
+                      :title="
+                        fontStore.isFavorite(cf.name)
+                          ? 'Retirer des favoris'
+                          : 'Ajouter aux favoris'
+                      "
                     >
-                      <Star class="w-3 h-3" :fill="fontStore.isFavorite(cf.name) ? 'currentColor' : 'none'" />
+                      <Star
+                        class="w-3 h-3"
+                        :fill="fontStore.isFavorite(cf.name) ? 'currentColor' : 'none'"
+                      />
                     </button>
                   </div>
                 </div>
-                <div class="h-px my-2" :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'" />
+                <div
+                  class="h-px my-2"
+                  :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'"
+                />
               </div>
 
               <!-- Upload error/warning message -->
-              <p v-if="fontUploadMsg" class="text-[10px] mb-2 px-1 py-1 rounded" :class="fontUploadMsg.type === 'error' ? (themeStore.darkMode ? 'text-red-400 bg-red-900/20' : 'text-red-600 bg-red-50') : (themeStore.darkMode ? 'text-yellow-400 bg-yellow-900/20' : 'text-yellow-700 bg-yellow-50')">
+              <p
+                v-if="fontUploadMsg"
+                class="text-[10px] mb-2 px-1 py-1 rounded"
+                :class="
+                  fontUploadMsg.type === 'error'
+                    ? themeStore.darkMode
+                      ? 'text-red-400 bg-red-900/20'
+                      : 'text-red-600 bg-red-50'
+                    : themeStore.darkMode
+                      ? 'text-yellow-400 bg-yellow-900/20'
+                      : 'text-yellow-700 bg-yellow-50'
+                "
+              >
                 {{ fontUploadMsg.text }}
               </p>
               <div class="relative mb-2">
@@ -1048,11 +1202,7 @@
                 />
               </div>
               <div class="flex flex-col gap-1 max-h-64 overflow-y-auto">
-                <div
-                  v-for="font in filteredFonts"
-                  :key="font"
-                  class="flex items-center group"
-                >
+                <div v-for="font in filteredFonts" :key="font" class="flex items-center group">
                   <button
                     @mouseenter="fontStore.loadFont(font)"
                     @click="handleFontClick(font)"
@@ -1069,14 +1219,29 @@
                   <button
                     @click.stop="fontStore.toggleFavorite(font)"
                     class="p-1 rounded shrink-0 transition-opacity"
-                    :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
-                    :title="fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                    :class="
+                      fontStore.isFavorite(font)
+                        ? 'text-yellow-400 opacity-100'
+                        : 'opacity-0 group-hover:opacity-60 ' +
+                          (themeStore.darkMode
+                            ? 'text-gray-500 hover:text-yellow-400'
+                            : 'text-gray-400 hover:text-yellow-400')
+                    "
+                    :title="
+                      fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'
+                    "
                   >
-                    <Star class="w-3 h-3" :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'" />
+                    <Star
+                      class="w-3 h-3"
+                      :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'"
+                    />
                   </button>
                 </div>
               </div>
-              <p v-if="!authStore.isPremium && !authStore.isAdmin" class="text-[9px] mt-1 px-1 text-amber-500">
+              <p
+                v-if="!authStore.isPremium && !authStore.isAdmin"
+                class="text-[9px] mt-1 px-1 text-amber-500"
+              >
                 Limité à {{ MAX_FREE_FONTS }} polices — passez au Premium pour 300+
               </p>
             </div>
@@ -1094,9 +1259,18 @@
               >
                 Combinaisons de polices
                 <span class="font-normal opacity-60 ml-1">(appliqué à tout le texte)</span>
-                <span v-if="!authStore.isPremium && !authStore.isAdmin" class="text-[8px] font-bold text-amber-500 ml-auto">PRO</span>
+                <span
+                  v-if="!authStore.isPremium && !authStore.isAdmin"
+                  class="text-[8px] font-bold text-amber-500 ml-auto"
+                  >PRO</span
+                >
               </p>
-              <div class="flex flex-col gap-1.5" :class="!authStore.isPremium && !authStore.isAdmin ? 'opacity-50 pointer-events-none' : ''">
+              <div
+                class="flex flex-col gap-1.5"
+                :class="
+                  !authStore.isPremium && !authStore.isAdmin ? 'opacity-50 pointer-events-none' : ''
+                "
+              >
                 <button
                   v-for="combo in fontCombos"
                   :key="combo.name"
@@ -1113,12 +1287,15 @@
                   <div class="flex items-baseline gap-2 mb-0.5">
                     <span
                       :style="{
-                        fontFamily: fontStore.loadedFonts.has(combo.heading) ? combo.heading : 'inherit',
+                        fontFamily: fontStore.loadedFonts.has(combo.heading)
+                          ? combo.heading
+                          : 'inherit',
                         fontWeight: combo.hw,
                         fontSize: '15px',
                       }"
                       :class="themeStore.darkMode ? 'text-gray-100' : 'text-gray-800'"
-                    >Aa</span>
+                      >Aa</span
+                    >
                     <span
                       :style="{
                         fontFamily: fontStore.loadedFonts.has(combo.body) ? combo.body : 'inherit',
@@ -1126,11 +1303,13 @@
                         fontSize: '12px',
                       }"
                       :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-                    >Aa</span>
+                      >Aa</span
+                    >
                     <span
                       class="ml-auto text-xs font-medium"
                       :class="themeStore.darkMode ? 'text-gray-200' : 'text-gray-700'"
-                    >{{ combo.name }}</span>
+                      >{{ combo.name }}</span
+                    >
                   </div>
                   <!-- Font names row -->
                   <div
@@ -1172,10 +1351,22 @@
                   <button
                     @click.stop="fontStore.toggleFavorite(font)"
                     class="p-1 rounded shrink-0 transition-opacity"
-                    :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
-                    :title="fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                    :class="
+                      fontStore.isFavorite(font)
+                        ? 'text-yellow-400 opacity-100'
+                        : 'opacity-0 group-hover:opacity-60 ' +
+                          (themeStore.darkMode
+                            ? 'text-gray-500 hover:text-yellow-400'
+                            : 'text-gray-400 hover:text-yellow-400')
+                    "
+                    :title="
+                      fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'
+                    "
                   >
-                    <Star class="w-3 h-3" :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'" />
+                    <Star
+                      class="w-3 h-3"
+                      :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'"
+                    />
                   </button>
                 </div>
               </div>
@@ -1315,25 +1506,32 @@
 
           <!-- ══ QR CODE ═══════════════════════════════════════════════════════ -->
           <div v-else-if="activeTab === 'qr'" class="p-3 flex flex-col gap-4 overflow-y-auto">
-
             <!-- Mode indicator: édition vs création -->
             <div
               class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium"
-              :class="selectedQRElement
-                ? (themeStore.darkMode ? 'bg-violet-900/40 text-violet-300' : 'bg-violet-50 text-violet-600')
-                : (themeStore.darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-50 text-gray-500')"
+              :class="
+                selectedQRElement
+                  ? themeStore.darkMode
+                    ? 'bg-violet-900/40 text-violet-300'
+                    : 'bg-violet-50 text-violet-600'
+                  : themeStore.darkMode
+                    ? 'bg-gray-800 text-gray-400'
+                    : 'bg-gray-50 text-gray-500'
+              "
             >
               <span
                 class="w-1.5 h-1.5 rounded-full shrink-0"
                 :class="selectedQRElement ? 'bg-violet-400 animate-pulse' : 'bg-gray-400'"
               />
-              {{ selectedQRElement ? 'Édition du QR sélectionné' : 'Création d\'un nouveau QR' }}
+              {{ selectedQRElement ? 'Édition du QR sélectionné' : "Création d'un nouveau QR" }}
             </div>
 
             <!-- Section: Champs inclus -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Champs inclus dans le QR
               </p>
               <div class="flex flex-col gap-1">
@@ -1349,7 +1547,11 @@
                     type="button"
                     :class="[
                       'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200',
-                      qrConfig.qrFields[key] ? 'bg-violet-500' : (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-300'),
+                      qrConfig.qrFields[key]
+                        ? 'bg-violet-500'
+                        : themeStore.darkMode
+                          ? 'bg-gray-700'
+                          : 'bg-gray-300',
                     ]"
                   >
                     <span
@@ -1359,14 +1561,24 @@
                       ]"
                     />
                   </button>
-                  <span class="text-xs font-medium w-20 shrink-0"
+                  <span
+                    class="text-xs font-medium w-20 shrink-0"
                     :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
-                  >{{ ROLE_LABELS[key] }}</span>
-                  <span class="text-[10px] truncate flex-1"
-                    :class="editorStore.contactData[key]
-                      ? (themeStore.darkMode ? 'text-gray-400' : 'text-gray-500')
-                      : (themeStore.darkMode ? 'text-gray-600' : 'text-gray-300')"
-                  >{{ editorStore.contactData[key] || '—' }}</span>
+                    >{{ ROLE_LABELS[key] }}</span
+                  >
+                  <span
+                    class="text-[10px] truncate flex-1"
+                    :class="
+                      editorStore.contactData[key]
+                        ? themeStore.darkMode
+                          ? 'text-gray-400'
+                          : 'text-gray-500'
+                        : themeStore.darkMode
+                          ? 'text-gray-600'
+                          : 'text-gray-300'
+                    "
+                    >{{ editorStore.contactData[key] || '—' }}</span
+                  >
                 </label>
               </div>
 
@@ -1393,7 +1605,11 @@
                       type="button"
                       :class="[
                         'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200',
-                        qrConfig.qrFields[item.id] ? 'bg-violet-500' : (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-300'),
+                        qrConfig.qrFields[item.id]
+                          ? 'bg-violet-500'
+                          : themeStore.darkMode
+                            ? 'bg-gray-700'
+                            : 'bg-gray-300',
                       ]"
                     >
                       <span
@@ -1406,13 +1622,21 @@
                     <span
                       class="text-xs font-medium w-20 shrink-0 truncate"
                       :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
-                    >{{ item.label }}</span>
+                      >{{ item.label }}</span
+                    >
                     <span
                       class="text-[10px] truncate flex-1"
-                      :class="item.value
-                        ? (themeStore.darkMode ? 'text-gray-400' : 'text-gray-500')
-                        : (themeStore.darkMode ? 'text-gray-600' : 'text-gray-300')"
-                    >{{ item.value || '—' }}</span>
+                      :class="
+                        item.value
+                          ? themeStore.darkMode
+                            ? 'text-gray-400'
+                            : 'text-gray-500'
+                          : themeStore.darkMode
+                            ? 'text-gray-600'
+                            : 'text-gray-300'
+                      "
+                      >{{ item.value || '—' }}</span
+                    >
                   </label>
                 </div>
               </template>
@@ -1420,15 +1644,24 @@
 
             <!-- Section: Mode -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Apparence
               </p>
               <div class="grid grid-cols-2 gap-2">
                 <button
-                  v-for="mode in [{ value: 'standard', label: 'Standard', desc: 'Classique' }, { value: 'styled', label: 'Stylé', desc: 'Personnalisé' }]"
+                  v-for="mode in [
+                    { value: 'standard', label: 'Standard', desc: 'Classique' },
+                    { value: 'styled', label: 'Stylé', desc: 'Personnalisé' },
+                  ]"
                   :key="mode.value"
-                  @click="mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin ? null : (qrConfig.qrMode = mode.value)"
+                  @click="
+                    mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin
+                      ? null
+                      : (qrConfig.qrMode = mode.value)
+                  "
                   class="flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center relative"
                   :class="[
                     qrConfig.qrMode === mode.value
@@ -1436,38 +1669,68 @@
                       : themeStore.darkMode
                         ? 'border-gray-700 text-gray-400 hover:border-gray-600'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300',
-                    mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin ? 'opacity-60 cursor-not-allowed' : ''
+                    mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin
+                      ? 'opacity-60 cursor-not-allowed'
+                      : '',
                   ]"
                 >
                   <QrCode class="w-5 h-5" />
                   <span class="text-xs font-semibold">{{ mode.label }}</span>
                   <span class="text-[9px] opacity-70">{{ mode.desc }}</span>
-                  <span v-if="mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin" class="absolute -top-1.5 -right-1.5 text-[8px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">PRO</span>
+                  <span
+                    v-if="mode.value === 'styled' && !authStore.isPremium && !authStore.isAdmin"
+                    class="absolute -top-1.5 -right-1.5 text-[8px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full"
+                    >PRO</span
+                  >
                 </button>
               </div>
             </div>
 
             <!-- Section: Couleurs -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Couleurs
               </p>
               <div class="flex flex-col gap-2">
                 <label class="flex items-center justify-between gap-2">
-                  <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'">Avant-plan</span>
+                  <span
+                    class="text-xs"
+                    :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'"
+                    >Avant-plan</span
+                  >
                   <div class="flex items-center gap-2">
-                    <input type="color" v-model="qrConfig.qrForeground"
-                      class="w-8 h-7 rounded cursor-pointer border-0 bg-transparent" />
-                    <span class="text-[10px] font-mono" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">{{ qrConfig.qrForeground }}</span>
+                    <input
+                      type="color"
+                      v-model="qrConfig.qrForeground"
+                      class="w-8 h-7 rounded cursor-pointer border-0 bg-transparent"
+                    />
+                    <span
+                      class="text-[10px] font-mono"
+                      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                      >{{ qrConfig.qrForeground }}</span
+                    >
                   </div>
                 </label>
                 <label class="flex items-center justify-between gap-2">
-                  <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'">Arrière-plan</span>
+                  <span
+                    class="text-xs"
+                    :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'"
+                    >Arrière-plan</span
+                  >
                   <div class="flex items-center gap-2">
-                    <input type="color" v-model="qrConfig.qrBackground"
-                      class="w-8 h-7 rounded cursor-pointer border-0 bg-transparent" />
-                    <span class="text-[10px] font-mono" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">{{ qrConfig.qrBackground }}</span>
+                    <input
+                      type="color"
+                      v-model="qrConfig.qrBackground"
+                      class="w-8 h-7 rounded cursor-pointer border-0 bg-transparent"
+                    />
+                    <span
+                      class="text-[10px] font-mono"
+                      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                      >{{ qrConfig.qrBackground }}</span
+                    >
                   </div>
                 </label>
               </div>
@@ -1476,81 +1739,119 @@
             <!-- Section: Style des points (styled only) -->
             <template v-if="qrConfig.qrMode === 'styled'">
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Style des points
                 </p>
                 <div class="grid grid-cols-3 gap-1">
                   <button
-                    v-for="s in QR_DOT_STYLES" :key="s.value"
+                    v-for="s in QR_DOT_STYLES"
+                    :key="s.value"
                     @click="qrConfig.qrDotStyle = s.value"
                     class="text-[10px] px-1 py-1.5 rounded-lg border transition-colors text-center"
-                    :class="qrConfig.qrDotStyle === s.value
-                      ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
-                      : themeStore.darkMode
-                        ? 'border-gray-700 text-gray-400 hover:border-gray-500'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                  >{{ s.label }}</button>
+                    :class="
+                      qrConfig.qrDotStyle === s.value
+                        ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
+                        : themeStore.darkMode
+                          ? 'border-gray-700 text-gray-400 hover:border-gray-500'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    "
+                  >
+                    {{ s.label }}
+                  </button>
                 </div>
               </div>
 
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Coin externe
                 </p>
                 <div class="grid grid-cols-3 gap-1">
                   <button
-                    v-for="s in QR_CORNER_SQ_STYLES" :key="s.value"
+                    v-for="s in QR_CORNER_SQ_STYLES"
+                    :key="s.value"
                     @click="qrConfig.qrCornerSquareStyle = s.value"
                     class="text-[10px] px-1 py-1.5 rounded-lg border transition-colors text-center"
-                    :class="qrConfig.qrCornerSquareStyle === s.value
-                      ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
-                      : themeStore.darkMode
-                        ? 'border-gray-700 text-gray-400 hover:border-gray-500'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                  >{{ s.label }}</button>
+                    :class="
+                      qrConfig.qrCornerSquareStyle === s.value
+                        ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
+                        : themeStore.darkMode
+                          ? 'border-gray-700 text-gray-400 hover:border-gray-500'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    "
+                  >
+                    {{ s.label }}
+                  </button>
                 </div>
               </div>
 
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Coin interne
                 </p>
                 <div class="grid grid-cols-3 gap-1">
                   <button
-                    v-for="s in QR_CORNER_DOT_STYLES" :key="s.value"
+                    v-for="s in QR_CORNER_DOT_STYLES"
+                    :key="s.value"
                     @click="qrConfig.qrCornerDotStyle = s.value"
                     class="text-[10px] px-1 py-1.5 rounded-lg border transition-colors text-center"
-                    :class="qrConfig.qrCornerDotStyle === s.value
-                      ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
-                      : themeStore.darkMode
-                        ? 'border-gray-700 text-gray-400 hover:border-gray-500'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                  >{{ s.label }}</button>
+                    :class="
+                      qrConfig.qrCornerDotStyle === s.value
+                        ? 'border-violet-500 bg-violet-500/10 text-violet-500 font-semibold'
+                        : themeStore.darkMode
+                          ? 'border-gray-700 text-gray-400 hover:border-gray-500'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    "
+                  >
+                    {{ s.label }}
+                  </button>
                 </div>
               </div>
 
               <!-- Logo -->
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Logo (optionnel)
                 </p>
-                <input type="file" ref="qrLogoInputRef" class="hidden" accept="image/*" @change="handleQRLogoUpload" />
+                <input
+                  type="file"
+                  ref="qrLogoInputRef"
+                  class="hidden"
+                  accept="image/*"
+                  @change="handleQRLogoUpload"
+                />
                 <div v-if="qrConfig.qrLogoSrc" class="flex items-center gap-2 mb-2">
-                  <img :src="qrConfig.qrLogoSrc" class="w-10 h-10 object-contain rounded border"
-                    :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-200'" />
-                  <button @click="qrConfig.qrLogoSrc = ''"
-                    class="text-[10px] text-red-400 hover:text-red-300 underline">Retirer</button>
+                  <img
+                    :src="qrConfig.qrLogoSrc"
+                    class="w-10 h-10 object-contain rounded border"
+                    :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-200'"
+                  />
+                  <button
+                    @click="qrConfig.qrLogoSrc = ''"
+                    class="text-[10px] text-red-400 hover:text-red-300 underline"
+                  >
+                    Retirer
+                  </button>
                 </div>
                 <button
                   @click="qrLogoInputRef?.click()"
                   class="w-full text-xs py-2 rounded-lg border border-dashed transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'border-gray-600 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                    : 'border-gray-300 text-gray-500 hover:border-violet-400 hover:text-violet-500'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'border-gray-600 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                      : 'border-gray-300 text-gray-500 hover:border-violet-400 hover:text-violet-500'
+                  "
                 >
                   {{ qrConfig.qrLogoSrc ? 'Changer le logo' : '+ Ajouter un logo' }}
                 </button>
@@ -1559,30 +1860,47 @@
               <!-- Margin -->
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <p class="text-[10px] font-semibold uppercase tracking-wider"
-                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                  <p
+                    class="text-[10px] font-semibold uppercase tracking-wider"
+                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                  >
                     Marge
                   </p>
-                  <span class="text-[10px]" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                  <span
+                    class="text-[10px]"
+                    :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  >
                     {{ qrConfig.qrMargin }}px
                   </span>
                 </div>
-                <input type="range" min="0" max="30" step="1"
+                <input
+                  type="range"
+                  min="0"
+                  max="30"
+                  step="1"
                   v-model.number="qrConfig.qrMargin"
-                  class="range range-xs range-primary w-full" />
+                  class="range range-xs range-primary w-full"
+                />
               </div>
             </template>
 
             <!-- Section: Correction d'erreur -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Correction d'erreur
               </p>
               <div class="grid grid-cols-4 gap-1">
                 <button
-                  v-for="lvl in QR_ERROR_LEVELS" :key="lvl.value"
-                  @click="(lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin) ? null : (qrConfig.qrErrorCorrection = lvl.value)"
+                  v-for="lvl in QR_ERROR_LEVELS"
+                  :key="lvl.value"
+                  @click="
+                    lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin
+                      ? null
+                      : (qrConfig.qrErrorCorrection = lvl.value)
+                  "
                   class="flex flex-col items-center py-1.5 rounded-lg border transition-colors relative"
                   :class="[
                     qrConfig.qrErrorCorrection === lvl.value
@@ -1590,25 +1908,37 @@
                       : themeStore.darkMode
                         ? 'border-gray-700 text-gray-400 hover:border-gray-500'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300',
-                    lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin ? 'opacity-50 cursor-not-allowed' : ''
+                    lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin
+                      ? 'opacity-50 cursor-not-allowed'
+                      : '',
                   ]"
                 >
                   <span class="text-xs font-bold">{{ lvl.label }}</span>
                   <span class="text-[9px] opacity-70">{{ lvl.desc }}</span>
-                  <span v-if="lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin" class="absolute -top-1 -right-1 text-[7px] font-bold bg-amber-500 text-white px-1 rounded-full">PRO</span>
+                  <span
+                    v-if="lvl.value !== 'L' && !authStore.isPremium && !authStore.isAdmin"
+                    class="absolute -top-1 -right-1 text-[7px] font-bold bg-amber-500 text-white px-1 rounded-full"
+                    >PRO</span
+                  >
                 </button>
               </div>
-              <p class="text-[9px] mt-1" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">
+              <p
+                class="text-[9px] mt-1"
+                :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'"
+              >
                 Niveau H recommandé si vous ajoutez un logo.
               </p>
             </div>
 
             <!-- Bouton insertion (création) ou badge édition -->
-            <div v-if="selectedQRElement"
+            <div
+              v-if="selectedQRElement"
               class="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-sm font-medium border"
-              :class="themeStore.darkMode
-                ? 'border-violet-700 bg-violet-900/30 text-violet-300'
-                : 'border-violet-200 bg-violet-50 text-violet-600'"
+              :class="
+                themeStore.darkMode
+                  ? 'border-violet-700 bg-violet-900/30 text-violet-300'
+                  : 'border-violet-200 bg-violet-50 text-violet-600'
+              "
             >
               <QrCode class="w-4 h-4 animate-pulse" />
               Modification en cours
@@ -1625,11 +1955,12 @@
 
           <!-- ══ OUTILS ════════════════════════════════════════════════════════ -->
           <div v-else-if="activeTab === 'tools'" class="p-3 flex flex-col gap-4 overflow-y-auto">
-
             <!-- ── Section: Affichage ────────────────────────────────────── -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Affichage
               </p>
               <div class="flex flex-col gap-0.5">
@@ -1639,32 +1970,48 @@
                   class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors"
                   :class="[
                     themeStore.darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50',
-                    PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'cursor-pointer',
                   ]"
                 >
                   <input
                     type="checkbox"
                     :checked="editorStore[opt.key]"
-                    @change="PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin ? $event.target.checked = editorStore[opt.key] : (editorStore[opt.key] = $event.target.checked)"
+                    @change="
+                      PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin
+                        ? ($event.target.checked = editorStore[opt.key])
+                        : (editorStore[opt.key] = $event.target.checked)
+                    "
                     class="rounded accent-violet-600 w-3.5 h-3.5"
-                    :disabled="PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin"
+                    :disabled="
+                      PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin
+                    "
                   />
                   <component
                     :is="opt.icon"
                     class="w-3.5 h-3.5 shrink-0"
                     :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
                   />
-                  <span class="text-xs"
+                  <span
+                    class="text-xs"
                     :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'"
-                  >{{ opt.label }}</span>
-                  <span v-if="PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin" class="ml-auto text-[8px] font-bold text-amber-500">PRO</span>
+                    >{{ opt.label }}</span
+                  >
+                  <span
+                    v-if="PRO_TOOL_KEYS.has(opt.key) && !authStore.isPremium && !authStore.isAdmin"
+                    class="ml-auto text-[8px] font-bold text-amber-500"
+                    >PRO</span
+                  >
                 </label>
               </div>
 
               <!-- Grid size selector (visible when grid is on) -->
               <div v-if="editorStore.showGrid" class="mt-2 px-2">
-                <p class="text-[10px] mb-1.5"
-                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] mb-1.5"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Taille de la grille
                 </p>
                 <div class="flex gap-1">
@@ -1673,9 +2020,15 @@
                     :key="size"
                     @click="editorStore.gridSize = size"
                     class="flex-1 text-xs py-1 rounded-md border transition-colors"
-                    :class="editorStore.gridSize === size
-                      ? (themeStore.darkMode ? 'bg-violet-600 border-violet-500 text-white' : 'bg-violet-500 border-violet-400 text-white')
-                      : (themeStore.darkMode ? 'border-gray-700 text-gray-400 hover:border-gray-600' : 'border-gray-200 text-gray-600 hover:border-gray-300')"
+                    :class="
+                      editorStore.gridSize === size
+                        ? themeStore.darkMode
+                          ? 'bg-violet-600 border-violet-500 text-white'
+                          : 'bg-violet-500 border-violet-400 text-white'
+                        : themeStore.darkMode
+                          ? 'border-gray-700 text-gray-400 hover:border-gray-600'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    "
                   >
                     {{ size }}px
                   </button>
@@ -1687,10 +2040,16 @@
 
             <!-- ── Section: Alignement & Distribution ────────────────────── -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Alignement
-                <span v-if="editorStore.selectedIds.length < 1" class="font-normal normal-case ml-1 opacity-60">(sélectionnez un élément)</span>
+                <span
+                  v-if="editorStore.selectedIds.length < 1"
+                  class="font-normal normal-case ml-1 opacity-60"
+                  >(sélectionnez un élément)</span
+                >
               </p>
               <!-- 6 alignment buttons in 2 rows -->
               <div class="grid grid-cols-6 gap-1 mb-2">
@@ -1700,9 +2059,11 @@
                   @click="onAlignClick(al.type)"
                   :disabled="editorStore.selectedIds.length < 1"
                   class="flex items-center justify-center p-1.5 rounded-md border transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  :class="themeStore.darkMode
-                    ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400 hover:bg-gray-800'
-                    : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400 hover:bg-gray-800'
+                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50'
+                  "
                   :title="al.title"
                 >
                   <component :is="al.icon" class="w-3.5 h-3.5" />
@@ -1710,19 +2071,27 @@
               </div>
 
               <!-- Distribution (3+ required) -->
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5 mt-3"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-1.5 mt-3"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Distribution
-                <span v-if="editorStore.selectedIds.length < 3" class="font-normal normal-case ml-1 opacity-60">(3+ éléments)</span>
+                <span
+                  v-if="editorStore.selectedIds.length < 3"
+                  class="font-normal normal-case ml-1 opacity-60"
+                  >(3+ éléments)</span
+                >
               </p>
               <div class="grid grid-cols-2 gap-1">
                 <button
                   @click="editorStore.distributeElements(editorStore.selectedIds, 'horizontal')"
                   :disabled="editorStore.selectedIds.length < 3"
                   class="flex items-center gap-2 px-2 py-1.5 rounded-md border text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  :class="themeStore.darkMode
-                    ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                    : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'
+                  "
                   title="Distribuer horizontalement"
                 >
                   <AlignHorizontalDistributeCenter class="w-3.5 h-3.5 shrink-0" />
@@ -1732,9 +2101,11 @@
                   @click="editorStore.distributeElements(editorStore.selectedIds, 'vertical')"
                   :disabled="editorStore.selectedIds.length < 3"
                   class="flex items-center gap-2 px-2 py-1.5 rounded-md border text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  :class="themeStore.darkMode
-                    ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                    : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'
+                  "
                   title="Distribuer verticalement"
                 >
                   <AlignVerticalDistributeCenter class="w-3.5 h-3.5 shrink-0" />
@@ -1747,36 +2118,62 @@
 
             <!-- ── Section: Taille & Position ────────────────────────────── -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Taille & Position
-                <span v-if="!editorStore.singleSelected && editorStore.selectedIds.length < 2" class="font-normal normal-case ml-1 opacity-60">(sélectionnez un élément)</span>
+                <span
+                  v-if="!editorStore.singleSelected && editorStore.selectedIds.length < 2"
+                  class="font-normal normal-case ml-1 opacity-60"
+                  >(sélectionnez un élément)</span
+                >
               </p>
 
               <!-- Position X/Y (single element only) -->
               <div v-if="editorStore.singleSelected" class="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <label class="text-[10px] mb-0.5 block" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">X</label>
+                  <label
+                    class="text-[10px] mb-0.5 block"
+                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                    >X</label
+                  >
                   <input
                     type="number"
                     :value="Math.round(editorStore.singleSelected.x || 0)"
-                    @change="editorStore.updateElementCommit(editorStore.singleSelected.id, { x: +$event.target.value })"
+                    @change="
+                      editorStore.updateElementCommit(editorStore.singleSelected.id, {
+                        x: +$event.target.value,
+                      })
+                    "
                     class="w-full text-xs px-2 py-1 rounded border outline-none"
-                    :class="themeStore.darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200'
-                      : 'bg-gray-50 border-gray-200 text-gray-800'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'bg-gray-800 border-gray-700 text-gray-200'
+                        : 'bg-gray-50 border-gray-200 text-gray-800'
+                    "
                   />
                 </div>
                 <div>
-                  <label class="text-[10px] mb-0.5 block" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Y</label>
+                  <label
+                    class="text-[10px] mb-0.5 block"
+                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                    >Y</label
+                  >
                   <input
                     type="number"
                     :value="Math.round(editorStore.singleSelected.y || 0)"
-                    @change="editorStore.updateElementCommit(editorStore.singleSelected.id, { y: +$event.target.value })"
+                    @change="
+                      editorStore.updateElementCommit(editorStore.singleSelected.id, {
+                        y: +$event.target.value,
+                      })
+                    "
                     class="w-full text-xs px-2 py-1 rounded border outline-none"
-                    :class="themeStore.darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200'
-                      : 'bg-gray-50 border-gray-200 text-gray-800'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'bg-gray-800 border-gray-700 text-gray-200'
+                        : 'bg-gray-50 border-gray-200 text-gray-800'
+                    "
                   />
                 </div>
               </div>
@@ -1784,28 +2181,48 @@
               <!-- Width/Height (single element only) -->
               <div v-if="editorStore.singleSelected" class="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <label class="text-[10px] mb-0.5 block" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">L</label>
+                  <label
+                    class="text-[10px] mb-0.5 block"
+                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                    >L</label
+                  >
                   <input
                     type="number"
                     :value="Math.round(editorStore.singleSelected.width || 0)"
-                    @change="editorStore.updateElementCommit(editorStore.singleSelected.id, { width: Math.max(1, +$event.target.value) })"
+                    @change="
+                      editorStore.updateElementCommit(editorStore.singleSelected.id, {
+                        width: Math.max(1, +$event.target.value),
+                      })
+                    "
                     class="w-full text-xs px-2 py-1 rounded border outline-none"
-                    :class="themeStore.darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200'
-                      : 'bg-gray-50 border-gray-200 text-gray-800'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'bg-gray-800 border-gray-700 text-gray-200'
+                        : 'bg-gray-50 border-gray-200 text-gray-800'
+                    "
                     min="1"
                   />
                 </div>
                 <div>
-                  <label class="text-[10px] mb-0.5 block" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">H</label>
+                  <label
+                    class="text-[10px] mb-0.5 block"
+                    :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                    >H</label
+                  >
                   <input
                     type="number"
                     :value="Math.round(editorStore.singleSelected.height || 0)"
-                    @change="editorStore.updateElementCommit(editorStore.singleSelected.id, { height: Math.max(1, +$event.target.value) })"
+                    @change="
+                      editorStore.updateElementCommit(editorStore.singleSelected.id, {
+                        height: Math.max(1, +$event.target.value),
+                      })
+                    "
                     class="w-full text-xs px-2 py-1 rounded border outline-none"
-                    :class="themeStore.darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200'
-                      : 'bg-gray-50 border-gray-200 text-gray-800'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'bg-gray-800 border-gray-700 text-gray-200'
+                        : 'bg-gray-50 border-gray-200 text-gray-800'
+                    "
                     min="1"
                   />
                 </div>
@@ -1813,16 +2230,21 @@
 
               <!-- Match size (2+ elements) -->
               <div v-if="editorStore.selectedIds.length >= 2" class="flex flex-col gap-1">
-                <p class="text-[10px] mb-1" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+                <p
+                  class="text-[10px] mb-1"
+                  :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+                >
                   Uniformiser (basé sur le 1er sélectionné)
                 </p>
                 <div class="grid grid-cols-3 gap-1">
                   <button
                     @click="editorStore.matchSizeElements(editorStore.selectedIds, 'width')"
                     class="text-[10px] py-1.5 rounded-md border transition-colors"
-                    :class="themeStore.darkMode
-                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                        : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'
+                    "
                     title="Même largeur"
                   >
                     Largeur
@@ -1830,9 +2252,11 @@
                   <button
                     @click="editorStore.matchSizeElements(editorStore.selectedIds, 'height')"
                     class="text-[10px] py-1.5 rounded-md border transition-colors"
-                    :class="themeStore.darkMode
-                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                        : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'
+                    "
                     title="Même hauteur"
                   >
                     Hauteur
@@ -1840,9 +2264,11 @@
                   <button
                     @click="editorStore.matchSizeElements(editorStore.selectedIds, 'both')"
                     class="text-[10px] py-1.5 rounded-md border transition-colors"
-                    :class="themeStore.darkMode
-                      ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
-                      : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                    :class="
+                      themeStore.darkMode
+                        ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400'
+                        : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600'
+                    "
                     title="Même taille"
                   >
                     Les deux
@@ -1855,49 +2281,71 @@
 
             <!-- ── Section: Actions rapides ───────────────────────────────── -->
             <div>
-              <p class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-wider mb-2"
+                :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              >
                 Actions rapides
               </p>
               <div class="flex flex-col gap-1">
                 <button
                   @click="editorStore.selectAll()"
                   class="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-xs transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'text-gray-300 hover:bg-gray-800'
-                    : 'text-gray-700 hover:bg-gray-50'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-300 hover:bg-gray-800'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  "
                 >
-                  <MousePointer2 class="w-3.5 h-3.5 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+                  <MousePointer2
+                    class="w-3.5 h-3.5 shrink-0"
+                    :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  />
                   Tout sélectionner
                 </button>
                 <button
                   @click="editorStore.lockAll()"
                   class="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-xs transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'text-gray-300 hover:bg-gray-800'
-                    : 'text-gray-700 hover:bg-gray-50'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-300 hover:bg-gray-800'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  "
                 >
-                  <Lock class="w-3.5 h-3.5 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+                  <Lock
+                    class="w-3.5 h-3.5 shrink-0"
+                    :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  />
                   Tout verrouiller
                 </button>
                 <button
                   @click="editorStore.unlockAll()"
                   class="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-xs transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'text-gray-300 hover:bg-gray-800'
-                    : 'text-gray-700 hover:bg-gray-50'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-300 hover:bg-gray-800'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  "
                 >
-                  <Unlock class="w-3.5 h-3.5 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+                  <Unlock
+                    class="w-3.5 h-3.5 shrink-0"
+                    :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  />
                   Tout déverrouiller
                 </button>
                 <button
                   @click="editorStore.zoomFit()"
                   class="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-xs transition-colors"
-                  :class="themeStore.darkMode
-                    ? 'text-gray-300 hover:bg-gray-800'
-                    : 'text-gray-700 hover:bg-gray-50'"
+                  :class="
+                    themeStore.darkMode
+                      ? 'text-gray-300 hover:bg-gray-800'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  "
                 >
-                  <ZoomIn class="w-3.5 h-3.5 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+                  <ZoomIn
+                    class="w-3.5 h-3.5 shrink-0"
+                    :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                  />
                   Réinitialiser le zoom
                 </button>
               </div>
@@ -2103,6 +2551,7 @@ import {
   RectangleHorizontal,
   Unlock,
   ZoomIn,
+  Plus,
 } from 'lucide-vue-next'
 import { useEditorStore, CARD_W, CARD_H } from '@/stores/useEditorStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -2157,7 +2606,10 @@ const activeIconCategoryId = ref('contact')
 
 const filteredIcons = computed(() => {
   const q = iconQuery.value.trim().toLowerCase()
-  if (q) return ALL_ICONS.filter((ic) => ic.label.toLowerCase().includes(q) || ic.id.toLowerCase().includes(q))
+  if (q)
+    return ALL_ICONS.filter(
+      (ic) => ic.label.toLowerCase().includes(q) || ic.id.toLowerCase().includes(q),
+    )
   const cat = ICON_CATEGORIES.find((c) => c.id === activeIconCategoryId.value)
   return cat ? cat.icons : ALL_ICONS
 })
@@ -2168,7 +2620,10 @@ const activeIllustrationCategoryId = ref('social')
 
 const filteredIllustrations = computed(() => {
   const q = illustrationQuery.value.trim().toLowerCase()
-  if (q) return ALL_ILLUSTRATIONS.filter((ic) => ic.label.toLowerCase().includes(q) || ic.id.toLowerCase().includes(q))
+  if (q)
+    return ALL_ILLUSTRATIONS.filter(
+      (ic) => ic.label.toLowerCase().includes(q) || ic.id.toLowerCase().includes(q),
+    )
   const cat = ILLUSTRATION_CATEGORIES.find((c) => c.id === activeIllustrationCategoryId.value)
   return cat ? cat.icons : ALL_ILLUSTRATIONS
 })
@@ -2221,8 +2676,14 @@ function onIllustrationDragStart(event, item) {
 // ── QR Code configuration ────────────────────────────────────────────────
 const qrConfig = reactive({
   qrFields: {
-    firstName: true, lastName: true, title: true, company: true,
-    phone: true, email: true, website: false, address: false,
+    firstName: true,
+    lastName: true,
+    title: true,
+    company: true,
+    phone: true,
+    email: true,
+    website: false,
+    address: false,
   },
   qrMode: 'standard',
   qrForeground: '#000000',
@@ -2235,7 +2696,16 @@ const qrConfig = reactive({
   qrMargin: 10,
 })
 
-const QR_FIELD_KEYS = ['firstName', 'lastName', 'title', 'company', 'phone', 'email', 'website', 'address']
+const QR_FIELD_KEYS = [
+  'firstName',
+  'lastName',
+  'title',
+  'company',
+  'phone',
+  'email',
+  'website',
+  'address',
+]
 
 // ── QR element sélectionné (édition dynamique) ──────────────────────────
 // Quand un seul élément QR est sélectionné → panneau passe en mode édition.
@@ -2254,8 +2724,11 @@ let _editingQRId = null
 // NB : on ne recharge QUE si l'ID a changé (sélection d'un nouveau QR),
 //      PAS si c'est le même élément qui a été mis à jour via qrConfig (évite la boucle).
 watch(selectedQRElement, (el) => {
-  if (!el) { _editingQRId = null; return }
-  if (el.id === _editingQRId) return   // même élément mis à jour → ne pas recharger
+  if (!el) {
+    _editingQRId = null
+    return
+  }
+  if (el.id === _editingQRId) return // même élément mis à jour → ne pas recharger
   _editingQRId = el.id
   // Charger les props de l'élément dans le panneau
   qrConfig.qrFields = { ...el.qrFields }
@@ -2269,7 +2742,7 @@ watch(selectedQRElement, (el) => {
   qrConfig.qrLogoSrc = el.qrLogoSrc || ''
   qrConfig.qrMargin = el.qrMargin ?? 10
   // Init des custom fields non encore présents dans qrFields de l'élément
-  for (const item of (editorStore.contactExtra || [])) {
+  for (const item of editorStore.contactExtra || []) {
     if (qrConfig.qrFields[item.id] === undefined) qrConfig.qrFields[item.id] = true
   }
   // Auto-ouvrir le panneau QR
@@ -2348,7 +2821,9 @@ function handleQRLogoUpload(e) {
   const file = e.target.files?.[0]
   if (!file) return
   const reader = new FileReader()
-  reader.onload = (ev) => { qrConfig.qrLogoSrc = ev.target.result }
+  reader.onload = (ev) => {
+    qrConfig.qrLogoSrc = ev.target.result
+  }
   reader.readAsDataURL(file)
   e.target.value = ''
 }
@@ -2416,7 +2891,7 @@ function layerThumbnailStyle(el) {
   if (el.type === 'text') return { background: '#e2e8f0' }
   if (el.type === 'image') return { background: '#f0f0f0' }
   if (el.type === 'qr') return { background: '#111' }
-  if (el.type === 'icon') return { background: el.colorful ? '#f8f8f8' : (el.fill || '#888') }
+  if (el.type === 'icon') return { background: el.colorful ? '#f8f8f8' : el.fill || '#888' }
   return { background: el.fill || '#888', border: el.stroke ? `1.5px solid ${el.stroke}` : 'none' }
 }
 
@@ -2431,8 +2906,8 @@ const editingCustomLabel = ref(null)
 
 const availableStandardFields = computed(() => {
   if (!editorStore.fieldConfig?.activeStandardFields) return []
-  return editorStore.ALL_STANDARD_FIELDS.filter(sf => 
-    !editorStore.fieldConfig.activeStandardFields.some(af => af.role === sf.role)
+  return editorStore.ALL_STANDARD_FIELDS.filter(
+    (sf) => !editorStore.fieldConfig.activeStandardFields.some((af) => af.role === sf.role),
   )
 })
 
@@ -2445,13 +2920,14 @@ function addStandardField(field) {
 
 function removeStandardField(role) {
   if (!editorStore.fieldConfig?.activeStandardFields) return
-  editorStore.fieldConfig.activeStandardFields = editorStore.fieldConfig.activeStandardFields.filter(f => f.role !== role)
+  editorStore.fieldConfig.activeStandardFields =
+    editorStore.fieldConfig.activeStandardFields.filter((f) => f.role !== role)
   // Remove canvas elements
-  editorStore.elements.recto = editorStore.elements.recto.filter(e => e.role !== role)
-  editorStore.elements.verso = editorStore.elements.verso.filter(e => e.role !== role)
+  editorStore.elements.recto = editorStore.elements.recto.filter((e) => e.role !== role)
+  editorStore.elements.verso = editorStore.elements.verso.filter((e) => e.role !== role)
   // Turn off in QR config if active
   const allEls = [...editorStore.elements.recto, ...editorStore.elements.verso]
-  allEls.forEach(el => {
+  allEls.forEach((el) => {
     if (el.type === 'qr' && el.qrFields) el.qrFields[role] = false
   })
   delete infoValues.value[role]
@@ -2459,7 +2935,7 @@ function removeStandardField(role) {
 }
 
 function syncCustomLabelToExtra(id, newLabel) {
-  const cf = editorStore.contactExtra.find(c => c.id === id)
+  const cf = editorStore.contactExtra.find((c) => c.id === id)
   if (cf) cf.label = newLabel
   editorStore.isDirty = true
 }
@@ -2543,7 +3019,9 @@ function updateCustomField(id, value) {
 
 function removeCustomField(id) {
   if (editorStore.fieldConfig?.customFields) {
-    editorStore.fieldConfig.customFields = editorStore.fieldConfig.customFields.filter(c => c.id !== id)
+    editorStore.fieldConfig.customFields = editorStore.fieldConfig.customFields.filter(
+      (c) => c.id !== id,
+    )
   }
   if (editorStore.contactExtra) {
     editorStore.contactExtra = editorStore.contactExtra.filter((c) => c.id !== id)
@@ -2555,7 +3033,7 @@ function removeCustomField(id) {
 
   // Update QR fields
   const allEls = [...editorStore.elements.recto, ...editorStore.elements.verso]
-  allEls.forEach(el => {
+  allEls.forEach((el) => {
     if (el.type === 'qr' && el.qrFields) el.qrFields[id] = false
   })
 
@@ -2638,12 +3116,15 @@ const activeCategoryFiltered = computed(() => {
 
 function addLibraryElement(el) {
   if (el.type === 'icon') {
-    editorStore.addIconElement({ id: el.iconId }, {
-      width: el.defaultWidth || 64,
-      height: el.defaultHeight || 64,
-      colorful: el.colorful ?? false,
-      ...el.preset,
-    })
+    editorStore.addIconElement(
+      { id: el.iconId },
+      {
+        width: el.defaultWidth || 64,
+        height: el.defaultHeight || 64,
+        colorful: el.colorful ?? false,
+        ...el.preset,
+      },
+    )
   } else if (el.shapeType === 'path') {
     const pathPreset = {
       width: el.defaultWidth || 60,
@@ -2822,6 +3303,61 @@ const bgPresets = [
   '#06B6D4',
 ]
 
+// ── Canvas color palette (couleurs du document) ──────────────────────────────
+const customDocColors = ref([])
+
+const canvasColors = computed(() => {
+  const allEls = [...(editorStore.elements.recto || []), ...(editorStore.elements.verso || [])]
+  const seen = new Map()
+  const add = (c) => {
+    if (
+      c &&
+      typeof c === 'string' &&
+      c !== 'transparent' &&
+      c !== 'none' &&
+      !c.startsWith('rgba(0,0,0,0)')
+    ) {
+      seen.set(c.toLowerCase(), c)
+    }
+  }
+  // Only element colors — not backgrounds
+  for (const el of allEls) {
+    add(el.fill)
+    add(el.stroke)
+    add(el.qrForeground)
+    add(el.qrBackground)
+  }
+  return [...seen.values()].slice(0, 24)
+})
+
+// Merged list: auto-detected + manually added (deduped)
+const allDocColors = computed(() => {
+  const seen = new Set(canvasColors.value.map((c) => c.toLowerCase()))
+  const result = [...canvasColors.value]
+  for (const c of customDocColors.value) {
+    if (!seen.has(c.toLowerCase())) {
+      seen.add(c.toLowerCase())
+      result.push(c)
+    }
+  }
+  return result
+})
+
+function addDocColor(color) {
+  if (!color) return
+  const lo = color.toLowerCase()
+  if (!allDocColors.value.some((c) => c.toLowerCase() === lo)) {
+    customDocColors.value = [...customDocColors.value, color]
+  }
+}
+
+// Apply only to selected elements — do nothing if nothing is selected
+function applyDocumentColor(color) {
+  for (const id of editorStore.selectedIds) {
+    editorStore.updateElementCommit(id, { fill: color })
+  }
+}
+
 // ── Design templates ───────────────────────────────────────────────────────
 const showApplyTemplateConfirm = ref(false)
 const showBlankConfirm = ref(false)
@@ -2914,20 +3450,20 @@ const HEADING_ROLES = ['firstName', 'lastName', 'title', 'company', 'logo']
 
 const fontCombos = [
   // Professionnel
-  { name: 'Moderne',   heading: 'Poppins',           body: 'Inter',              hw: 700, bw: 400 },
-  { name: 'Corporate', heading: 'Montserrat',         body: 'Open Sans',          hw: 800, bw: 400 },
-  { name: 'Minimal',   heading: 'Inter',              body: 'DM Sans',            hw: 600, bw: 400 },
-  { name: 'Clean',     heading: 'Plus Jakarta Sans',  body: 'Nunito',             hw: 700, bw: 400 },
+  { name: 'Moderne', heading: 'Poppins', body: 'Inter', hw: 700, bw: 400 },
+  { name: 'Corporate', heading: 'Montserrat', body: 'Open Sans', hw: 800, bw: 400 },
+  { name: 'Minimal', heading: 'Inter', body: 'DM Sans', hw: 600, bw: 400 },
+  { name: 'Clean', heading: 'Plus Jakarta Sans', body: 'Nunito', hw: 700, bw: 400 },
   // Élégant
-  { name: 'Élégant',   heading: 'Playfair Display',   body: 'Lato',               hw: 700, bw: 400 },
-  { name: 'Luxe',      heading: 'Cormorant Garamond', body: 'Raleway',            hw: 600, bw: 400 },
-  { name: 'Éditorial', heading: 'DM Serif Display',   body: 'Source Serif 4',     hw: 400, bw: 400 },
-  { name: 'Classique', heading: 'EB Garamond',        body: 'Libre Baskerville',  hw: 700, bw: 400 },
+  { name: 'Élégant', heading: 'Playfair Display', body: 'Lato', hw: 700, bw: 400 },
+  { name: 'Luxe', heading: 'Cormorant Garamond', body: 'Raleway', hw: 600, bw: 400 },
+  { name: 'Éditorial', heading: 'DM Serif Display', body: 'Source Serif 4', hw: 400, bw: 400 },
+  { name: 'Classique', heading: 'EB Garamond', body: 'Libre Baskerville', hw: 700, bw: 400 },
   // Tech / Grotesk
-  { name: 'Tech',      heading: 'Space Grotesk',      body: 'Fira Code',          hw: 700, bw: 400 },
-  { name: 'Grotesk',   heading: 'Syne',               body: 'Barlow',             hw: 700, bw: 400 },
-  { name: 'Future',    heading: 'Orbitron',           body: 'Exo 2',              hw: 700, bw: 400 },
-  { name: 'Créatif',   heading: 'Abril Fatface',      body: 'Outfit',             hw: 400, bw: 400 },
+  { name: 'Tech', heading: 'Space Grotesk', body: 'Fira Code', hw: 700, bw: 400 },
+  { name: 'Grotesk', heading: 'Syne', body: 'Barlow', hw: 700, bw: 400 },
+  { name: 'Future', heading: 'Orbitron', body: 'Exo 2', hw: 700, bw: 400 },
+  { name: 'Créatif', heading: 'Abril Fatface', body: 'Outfit', hw: 400, bw: 400 },
 ]
 
 function preloadCombo(combo) {
@@ -2956,7 +3492,9 @@ async function onFontFileSelected(e) {
   }
   // Auto-clear message after 5 seconds
   if (fontUploadMsg.value) {
-    setTimeout(() => { fontUploadMsg.value = null }, 5000)
+    setTimeout(() => {
+      fontUploadMsg.value = null
+    }, 5000)
   }
 }
 

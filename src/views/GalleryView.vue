@@ -96,15 +96,23 @@
         </div>
 
         <!-- Category pills -->
-        <div class="flex bg-powder-100 dark:bg-onyx-800 rounded-xl p-1 gap-1 flex-shrink-0">
+        <div
+          ref="tabGroupRef"
+          class="relative flex bg-powder-100 dark:bg-onyx-800 rounded-xl p-1 gap-1 flex-shrink-0"
+        >
+          <!-- Sliding pill indicator -->
+          <div
+            class="absolute top-1 bottom-1 bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none"
+            :style="filterPillStyle"
+          ></div>
           <button
             v-for="tab in filterTabs"
             :key="tab.value"
             @click="activeFilter = tab.value"
-            class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap"
+            class="relative z-10 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 whitespace-nowrap"
             :class="
               activeFilter === tab.value
-                ? 'bg-white dark:bg-onyx-700 text-onyx-900 dark:text-white shadow-sm'
+                ? 'text-onyx-900 dark:text-white filter-tab-active'
                 : 'text-onyx-500 dark:text-powder-400 hover:text-onyx-700 dark:hover:text-powder-200'
             "
           >
@@ -321,9 +329,15 @@
             </div>
 
             <!-- Permanent bottom gradient overlay -->
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-10 pb-3.5 px-4 pointer-events-none">
+            <div
+              class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-10 pb-3.5 px-4 pointer-events-none"
+            >
               <p class="text-white/55 text-[10px] font-medium mb-0.5 truncate">
-                {{ card._isOwn ? '✦ Votre création' : `par ${card.ownerId?.split('@')[0] || 'Anonyme'}` }}
+                {{
+                  card._isOwn
+                    ? '✦ Votre création'
+                    : `par ${card.ownerId?.split('@')[0] || 'Anonyme'}`
+                }}
               </p>
               <p class="text-white font-bold text-sm leading-tight truncate">{{ card.name }}</p>
             </div>
@@ -408,7 +422,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import { useAuthStore } from '@/stores/authStore'
@@ -435,6 +449,19 @@ const templatesStore = useUserTemplatesStore()
 
 // ── UI state ──────────────────────────────────────────────────────────
 const activeFilter = ref('all')
+const tabGroupRef = ref(null)
+const filterPillStyle = ref({ left: '0px', width: '0px', opacity: 0 })
+
+function updateFilterPill() {
+  if (!tabGroupRef.value) return
+  const active = tabGroupRef.value.querySelector('.filter-tab-active')
+  if (!active) { filterPillStyle.value = { ...filterPillStyle.value, opacity: 0 }; return }
+  const cRect = tabGroupRef.value.getBoundingClientRect()
+  const aRect = active.getBoundingClientRect()
+  filterPillStyle.value = { left: `${aRect.left - cRect.left}px`, width: `${aRect.width}px`, opacity: 1 }
+}
+
+watch(activeFilter, () => nextTick(updateFilterPill))
 const searchQuery = ref('')
 const sortBy = ref('popular')
 const hoveredId = ref(null)
@@ -643,11 +670,11 @@ const commInnerStyle = (card) => {
   const cw = card.data?.cardWidth || 680
   const ch = card.data?.cardHeight || 429
   const isPortrait = ch > cw
-  const innerW = isPortrait ? 300 : 500          // BusinessCard maxWidth
-  const innerH = innerW * (ch / cw)              // BusinessCard natural height
+  const innerW = isPortrait ? 300 : 500 // BusinessCard maxWidth
+  const innerH = innerW * (ch / cw) // BusinessCard natural height
 
   const containerW = cardColW.value
-  const containerH = containerW * (3 / 4)        // 4/3 container
+  const containerH = containerW * (3 / 4) // 4/3 container
 
   // Scale to fit inside container with 8% padding (looks more polished)
   const scale = Math.min(containerW / innerW, containerH / innerH) * 0.92
@@ -673,6 +700,7 @@ onMounted(() => {
   computeScale()
   ro = new ResizeObserver(computeScale)
   if (cardsGridRef.value) ro.observe(cardsGridRef.value)
+  nextTick(updateFilterPill)
 })
 
 onBeforeUnmount(() => ro?.disconnect())

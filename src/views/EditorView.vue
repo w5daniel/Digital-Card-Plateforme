@@ -2,7 +2,6 @@
   <div
     class="editor-shell flex flex-col h-full overflow-hidden select-none"
     :class="themeStore.darkMode ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'"
-    @keydown="onKeyDown"
     tabindex="0"
     ref="shellRef"
   >
@@ -255,6 +254,7 @@ onMounted(() => {
   if (usedFonts.length) fontStore.loadFonts(usedFonts)
 
   shellRef.value?.focus()
+  document.addEventListener('keydown', onKeyDown)
 })
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────
@@ -319,6 +319,7 @@ function onKeyDown(e) {
 
 onBeforeUnmount(() => {
   editorStore.clearSelection()
+  document.removeEventListener('keydown', onKeyDown)
 })
 
 // ── Leave guard ───────────────────────────────────────────────────────────
