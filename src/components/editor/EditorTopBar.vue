@@ -10,12 +10,7 @@
       <!-- Back to dashboard -->
       <button
         @click="goBack"
-        class="p-2 rounded-lg transition-colors flex-shrink-0"
-        :class="
-          themeStore.darkMode
-            ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-        "
+        class="btn-icon-light flex-shrink-0"
         title="Retour au tableau de bord"
       >
         <ChevronLeft class="w-5 h-5" />
@@ -64,12 +59,7 @@
         <button
           @click="editorStore.undo()"
           :disabled="!editorStore.canUndo"
-          class="p-1.5 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          :class="
-            themeStore.darkMode
-              ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-          "
+          class="btn-icon-light disabled:opacity-30 disabled:cursor-not-allowed"
           title="Annuler (Ctrl+Z)"
         >
           <Undo2 class="w-4 h-4" />
@@ -77,12 +67,7 @@
         <button
           @click="editorStore.redo()"
           :disabled="!editorStore.canRedo"
-          class="p-1.5 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          :class="
-            themeStore.darkMode
-              ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-          "
+          class="btn-icon-light disabled:opacity-30 disabled:cursor-not-allowed"
           title="Rétablir (Ctrl+Y)"
         >
           <Redo2 class="w-4 h-4" />
@@ -132,7 +117,7 @@
       <!-- Dark/Light toggle -->
       <button
         @click="themeStore.toggleDarkMode()"
-        class="p-2 rounded-lg transition-colors"
+        class="btn-icon"
         :class="
           themeStore.darkMode
             ? 'text-amber-400 hover:bg-gray-800'
@@ -149,12 +134,7 @@
       <!-- Share -->
       <button
         @click="shareCard"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-        :class="
-          themeStore.darkMode
-            ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-        "
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium btn-ghost-neutral"
         title="Partager la carte"
       >
         <Share2 class="w-4 h-4" />
@@ -166,7 +146,7 @@
         <button
           @click="exportOpen = !exportOpen"
           :disabled="isCardBlank"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium btn-outline disabled:opacity-40 disabled:cursor-not-allowed"
           :class="
             themeStore.darkMode
               ? 'border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700'
@@ -188,11 +168,11 @@
             v-for="fmt in exportFormats"
             :key="fmt.label"
             @click="exportCard(fmt.type)"
-            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm btn-ghost-neutral"
             :class="
               themeStore.darkMode
-                ? 'text-gray-200 hover:bg-gray-800'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'text-gray-200'
+                : 'text-gray-700'
             "
           >
             <component :is="fmt.icon" class="w-4 h-4 opacity-60" />
@@ -244,6 +224,127 @@
     @cancel="showSaveModal = false"
     @save="onSaveAs"
   />
+
+  <!-- Gallery Template Metadata Modal (admin — category, description, premium) -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div
+        v-if="showGalleryMetaModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style="background: rgba(0,0,0,0.55); backdrop-filter: blur(4px)"
+        @click.self="showGalleryMetaModal = false"
+      >
+        <div
+          class="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+          :class="themeStore.darkMode ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'"
+        >
+          <!-- Header -->
+          <div
+            class="flex items-center justify-between px-5 py-4 border-b"
+            :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-100'"
+          >
+            <div>
+              <h2
+                class="font-bold text-base"
+                :class="themeStore.darkMode ? 'text-white' : 'text-gray-900'"
+              >Informations du modèle</h2>
+              <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                Ces infos apparaissent dans la galerie
+              </p>
+            </div>
+            <button
+              @click="showGalleryMetaModal = false"
+              class="p-1.5 rounded-lg transition-colors"
+              :class="themeStore.darkMode ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-400 hover:bg-gray-100'"
+            ><X class="w-4 h-4" /></button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-5 py-4 space-y-4">
+            <!-- Nom (éditable) -->
+            <div>
+              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">
+                Nom du modèle
+              </label>
+              <input
+                v-model="galleryMetaName"
+                type="text"
+                placeholder="Nom du modèle…"
+                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'"
+              />
+            </div>
+
+            <!-- Catégorie (combobox libre) -->
+            <div>
+              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">
+                Catégorie
+              </label>
+              <input
+                v-model="galleryMetaCategory"
+                list="gallery-categories"
+                type="text"
+                placeholder="Choisir ou saisir une catégorie…"
+                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'"
+              />
+              <datalist id="gallery-categories">
+                <option v-for="cat in TEMPLATE_CATEGORIES" :key="cat" :value="cat" />
+              </datalist>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">
+                Description
+                <span class="font-normal opacity-60">(optionnelle)</span>
+              </label>
+              <textarea
+                v-model="galleryMetaDescription"
+                rows="3"
+                placeholder="Décrivez ce modèle en quelques mots…"
+                class="w-full px-3 py-2 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500"
+                :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'"
+              />
+            </div>
+
+            <!-- Premium toggle -->
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium" :class="themeStore.darkMode ? 'text-gray-200' : 'text-gray-800'">Modèle Premium</p>
+                <p class="text-xs" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Réservé aux abonnés premium</p>
+              </div>
+              <button
+                @click="galleryMetaIsPremium = !galleryMetaIsPremium"
+                class="relative inline-flex h-6 w-11 rounded-full transition-colors duration-200"
+                :class="galleryMetaIsPremium ? 'bg-yellow-500' : (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-300')"
+              >
+                <span
+                  class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
+                  :style="{ transform: galleryMetaIsPremium ? 'translateX(20px)' : 'translateX(0)' }"
+                />
+              </button>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div
+            class="flex gap-2 px-5 pb-5"
+          >
+            <button
+              @click="showGalleryMetaModal = false"
+              class="flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors"
+              :class="themeStore.darkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-200 text-gray-700 hover:bg-gray-50'"
+            >Annuler</button>
+            <button
+              @click="confirmGalleryMeta"
+              class="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors bg-violet-600 hover:bg-violet-700"
+            >Enregistrer le modèle</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
@@ -264,6 +365,7 @@ import {
   Sun,
   Moon,
   Share2,
+  X,
 } from 'lucide-vue-next'
 import { useEditorStore } from '@/stores/useEditorStore'
 import { useCardsStore } from '@/stores/cards'
@@ -286,6 +388,16 @@ const exportOpen = ref(false)
 const exportRef = ref(null)
 const savedRecently = ref(false)
 const showSaveModal = ref(false)
+
+// ── Gallery Template Metadata Modal (admin only) ────────────────────────
+const TEMPLATE_CATEGORIES = [
+  'Professionnel', 'Créatif', 'Minimaliste', 'Tech', 'Luxe', 'Moderne', 'Sans catégorie',
+]
+const showGalleryMetaModal = ref(false)
+const galleryMetaName = ref('')
+const galleryMetaCategory = ref('Professionnel')
+const galleryMetaDescription = ref('')
+const galleryMetaIsPremium = ref(false)
 let saveSuccessTimer = null
 
 const isCardBlank = computed(() => (editorStore.elements?.recto ?? []).length === 0)
@@ -323,14 +435,13 @@ function editorToCardEl(el, index) {
       w: (el.width / cw) * 100,
       h: (el.height / ch) * 100,
       zIndex: el.zIndex ?? index + 1,
-      bgColor: el.fill || '#000000',
+      bgColor: el.fillGradient ? undefined : el.fill || '#000000',
     }
+    if (el.fillGradient?.from) block.fillGradient = el.fillGradient
     if ((el.opacity ?? 1) < 1) block.opacity = el.opacity
     if (el.rotation) block.rotation = el.rotation
-    // cornerRadius for rects (px → approximate % based on smallest dimension)
     if (el.shapeType === 'rect' && el.cornerRadius > 0) {
-      const minDim = Math.min(el.width || 1, el.height || 1)
-      block.borderRadius = Math.round((el.cornerRadius / minDim) * 100)
+      block.cornerRadiusPx = el.cornerRadius
     }
     if (el.shapeType === 'circle') block.borderRadius = 50
     if (el.shapeType === 'custom-poly' && el.polygonPoints) {
@@ -450,7 +561,7 @@ function editorToCardEl(el, index) {
   // ── Text → BusinessCard element ───────────────────────────────────────
   if (el.type === 'text' || el.type === 'contact') {
     const role = el.role || el.id
-    return {
+    const out = {
       id: el.id,
       type: el.showContactIcon ? 'contact' : 'text',
       role,
@@ -460,7 +571,7 @@ function editorToCardEl(el, index) {
       w: (el.width / cw) * 100,
       h: el.height ? (el.height / ch) * 100 : undefined,
       zIndex: el.zIndex ?? index + 1,
-      color: el.fill || undefined,
+      color: el.fillGradient ? undefined : (el.fill || undefined),
       fontSize: el.fontSize || undefined,
       fontFamily: el.fontFamily || undefined,
       letterSpacing: el.letterSpacing != null ? el.letterSpacing : undefined,
@@ -473,6 +584,8 @@ function editorToCardEl(el, index) {
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,
     }
+    if (el.fillGradient?.from) out.fillGradient = el.fillGradient
+    return out
   }
 
   // ── Icon (icons, illustrations, stickers) ──────────────────────────
@@ -508,6 +621,8 @@ function editorToCardEl(el, index) {
       zIndex: el.zIndex ?? index + 1,
       visible: el.visible !== false,
       borderRadius: el.borderRadius || undefined,
+      shape: el.shape || undefined,
+      cover: el.role === 'background' || el.cover || undefined,
       opacity: el.opacity !== undefined ? el.opacity : undefined,
       rotation: el.rotation || undefined,
     }
@@ -578,14 +693,52 @@ function extractContact(els, extras = []) {
  * - If new design → show SaveAsModal to choose template or card
  */
 function handleSave() {
-  if (editorStore.editMode === 'edit-template') {
+  if (editorStore.editMode === 'edit-gallery-template') {
+    // Pre-fill modal from existing template if editing, else use defaults
+    const existing = editorStore.editingGallerySlug
+      ? cardsStore.getTemplateBySlug(editorStore.editingGallerySlug)
+      : null
+    galleryMetaName.value = editorStore.cardName
+    galleryMetaCategory.value = existing?.category || 'Professionnel'
+    galleryMetaDescription.value = existing?.description || ''
+    galleryMetaIsPremium.value = existing?.isPremium || false
+    showGalleryMetaModal.value = true
+  } else if (editorStore.editMode === 'edit-template' && authStore.isAdmin) {
+    // Admin editing a template → toujours sauvegarder comme modèle officiel
+    const existing = editorStore.editingGallerySlug
+      ? cardsStore.getTemplateBySlug(editorStore.editingGallerySlug)
+      : null
+    galleryMetaName.value = editorStore.cardName
+    galleryMetaCategory.value = existing?.category || 'Professionnel'
+    galleryMetaDescription.value = existing?.description || ''
+    galleryMetaIsPremium.value = existing?.isPremium || false
+    showGalleryMetaModal.value = true
+  } else if (editorStore.editMode === 'edit-template') {
     saveAsTemplate(editorStore.cardName)
   } else if (editorStore.editMode === 'edit-card') {
     saveAsCard(editorStore.cardName)
+  } else if (authStore.isAdmin) {
+    // Nouveau design admin → directement modal modèle officiel
+    galleryMetaName.value = editorStore.cardName
+    galleryMetaCategory.value = 'Professionnel'
+    galleryMetaDescription.value = ''
+    galleryMetaIsPremium.value = false
+    showGalleryMetaModal.value = true
   } else {
-    // New design → show modal to choose
+    // New design utilisateur → show modal to choose
     showSaveModal.value = true
   }
+}
+
+/**
+ * Called when admin confirms the gallery template metadata modal.
+ */
+function confirmGalleryMeta() {
+  saveAsGalleryTemplate(galleryMetaName.value || editorStore.cardName, {
+    category: galleryMetaCategory.value,
+    description: galleryMetaDescription.value,
+    isPremium: galleryMetaIsPremium.value,
+  })
 }
 
 /**
@@ -636,6 +789,74 @@ async function saveAsTemplate(name) {
   } catch (err) {
     console.error('[saveAsTemplate]', err)
     notif.error(err.message || 'Erreur lors de la sauvegarde du modèle.')
+  } finally {
+    editorStore.isSaving = false
+  }
+}
+
+/**
+ * Save the current design as an official gallery template (admin only).
+ * Stores both editorData (for re-editing) and previewElements (for gallery rendering).
+ */
+async function saveAsGalleryTemplate(name, meta = {}) {
+  editorStore.isSaving = true
+  showGalleryMetaModal.value = false
+  // Sync name back to editor top-bar (user may have changed it in the modal)
+  if (name && name !== editorStore.cardName) editorStore.cardName = name
+  try {
+    const cardData = editorStore.getCardData()
+    // Extract dominant colors from backgrounds for the template colors
+    const bgRecto = cardData.backgrounds?.recto || '#6366F1'
+    const bgVerso = cardData.backgrounds?.verso || '#1E293B'
+    const primaryColor = typeof bgRecto === 'string' && bgRecto.startsWith('#') ? bgRecto : '#6366F1'
+    const secondaryColor = typeof bgVerso === 'string' && bgVerso.startsWith('#') ? bgVerso : '#1E293B'
+
+    // Convert Konva px elements → BusinessCard % elements for gallery preview
+    const rectoEls = (cardData.elements?.recto || []).map((el, i) => editorToCardEl(el, i)).filter(Boolean)
+    const versoEls = (cardData.elements?.verso || []).map((el, i) => editorToCardEl(el, i)).filter(Boolean)
+
+    // Extract dominant fontFamily (same approach as saveAsCard)
+    const fontCounts = {}
+    rectoEls.filter((e) => (e.type === 'text' || e.type === 'contact') && e.fontFamily).forEach((e) => {
+      fontCounts[e.fontFamily] = (fontCounts[e.fontFamily] || 0) + 1
+    })
+    const dominantFont = Object.entries(fontCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || undefined
+
+    const data = {
+      name,
+      category: meta.category || 'Personnalisé',
+      description: meta.description || '',
+      isPremium: meta.isPremium || false,
+      colors: { primary: primaryColor, secondary: secondaryColor, text: '#ffffff' },
+      editorData: JSON.parse(JSON.stringify(cardData)),
+      previewElements: rectoEls,
+      previewVersoElements: versoEls,
+      previewBackgrounds: cardData.backgrounds || { recto: primaryColor, verso: secondaryColor },
+      previewCardWidth: editorStore.cardWidth,
+      previewCardHeight: editorStore.cardHeight,
+      previewCardBorderRadius: editorStore.cardBorderRadius,
+      previewOrientation: editorStore.orientation,
+      previewFontFamily: dominantFont,
+    }
+
+    const slug = editorStore.editingGallerySlug
+    if (slug) {
+      cardsStore.updateOfficialTemplate(slug, data)
+      editorStore.editMode = 'edit-gallery-template'
+    } else {
+      const newTmpl = cardsStore.addOfficialTemplate(data)
+      if (newTmpl) {
+        editorStore.editingGallerySlug = newTmpl.slug
+        editorStore.editingTemplateId = null
+        editorStore.editMode = 'edit-gallery-template'
+      }
+    }
+
+    editorStore.isDirty = false
+    showSaveSuccess()
+  } catch (err) {
+    console.error('[saveAsGalleryTemplate]', err)
+    notif.error(err.message || 'Erreur lors de la sauvegarde du modèle officiel.')
   } finally {
     editorStore.isSaving = false
   }
@@ -695,6 +916,7 @@ async function saveAsCard(name) {
         backgrounds: cardData.backgrounds,
         contact,
         contactExtra: JSON.parse(JSON.stringify(editorStore.contactExtra)),
+        fieldConfig: JSON.parse(JSON.stringify(editorStore.fieldConfig)),
         editorData: cardData,
         showQR: [...rectoEls, ...versoEls].some((e) => e.type === 'qr'),
         fontFamily: dominantFont,
@@ -727,14 +949,15 @@ async function saveAsCard(name) {
 function showSaveSuccess() {
   savedRecently.value = true
   clearTimeout(saveSuccessTimer)
+  const redirectTo = editorStore.editMode === 'edit-gallery-template' ? '/admin/templates' : '/dashboard'
   saveSuccessTimer = setTimeout(() => {
     savedRecently.value = false
-    router.push('/dashboard')
+    router.push(redirectTo)
   }, 800)
 }
 
 function goBack() {
-  router.push('/dashboard')
+  router.push(editorStore.editMode === 'edit-gallery-template' ? '/admin/templates' : '/dashboard')
 }
 
 const exportFormats = [
@@ -836,3 +1059,14 @@ onBeforeUnmount(() => {
   clearTimeout(saveSuccessTimer)
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

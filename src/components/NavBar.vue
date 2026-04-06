@@ -47,7 +47,7 @@
           <!-- Theme toggle -->
           <button
             @click="themeStore.toggleDarkMode()"
-            class="p-2 rounded-lg transition-colors"
+            class="btn-icon"
             :class="
               themeStore.darkMode
                 ? 'text-yellow-400 hover:bg-onyx-800'
@@ -63,7 +63,7 @@
           <div v-if="authStore.isAuthenticated" class="relative">
             <button
               @click.stop="toggleNotifPanel"
-              class="relative p-2 rounded-lg transition-colors"
+              class="btn-icon"
               :class="
                 themeStore.darkMode
                   ? 'text-powder-400 hover:bg-onyx-800'
@@ -121,12 +121,7 @@
                   <button
                     v-if="notifStore.unreadCount > 0"
                     @click="notifStore.markAllAsRead()"
-                    class="text-xs px-2 py-1 rounded transition-colors"
-                    :class="
-                      themeStore.darkMode
-                        ? 'text-flame-400 hover:bg-onyx-800'
-                        : 'text-flame-600 hover:bg-powder-100'
-                    "
+                    class="text-xs px-2 py-1 rounded btn-ghost-primary"
                     title="Tout marquer comme lu"
                   >
                     Tout lire
@@ -134,12 +129,7 @@
                   <button
                     v-if="notifStore.inbox.length > 0"
                     @click="notifStore.clearInbox()"
-                    class="text-xs px-2 py-1 rounded transition-colors"
-                    :class="
-                      themeStore.darkMode
-                        ? 'text-powder-400 hover:bg-onyx-800'
-                        : 'text-onyx-500 hover:bg-powder-100'
-                    "
+                    class="text-xs px-2 py-1 rounded btn-ghost-neutral"
                     title="Effacer tout"
                   >
                     Effacer
@@ -192,7 +182,7 @@
                   <!-- Content -->
                   <div class="flex-1 min-w-0">
                     <p
-                      class="text-sm leading-snug truncate"
+                      class="text-sm leading-snug"
                       :class="[
                         themeStore.darkMode ? 'text-powder-200' : 'text-onyx-800',
                         !notif.read ? 'font-medium' : '',
@@ -222,7 +212,7 @@
             <!-- Avatar Button -->
             <button
               @click="dropdownOpen = !dropdownOpen; notifPanelOpen = false"
-              class="flex items-center rounded-full ring-2 transition-all duration-200"
+              class="flex items-center rounded-full ring-2 transition-all duration-200 hover:scale-105 active:scale-95"
               :class="dropdownOpen ? 'ring-flame-500' : 'ring-transparent hover:ring-flame-400'"
             >
               <div v-if="authStore.profilePhoto" class="w-10 h-10 rounded-full overflow-hidden">
@@ -302,7 +292,7 @@
                 <button
                   v-if="authStore.profilePhoto"
                   @click="handleRemoveProfilePhoto"
-                  class="w-full flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  class="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <X class="w-4 h-4" />
                   <span>Supprimer la photo</span>
@@ -359,7 +349,7 @@
 
                 <button
                   @click="handleLogout"
-                  class="w-full flex items-center space-x-3 px-4 py-2.5 transition-colors text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  class="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <LogOut class="w-4 h-4" />
                   <span>Déconnexion</span>
@@ -401,12 +391,7 @@
         <!-- Mobile Menu Button -->
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
-          class="md:hidden p-2 rounded-lg transition-colors"
-          :class="
-            themeStore.darkMode
-              ? 'text-powder-300 hover:bg-onyx-800'
-              : 'text-onyx-600 hover:bg-powder-100'
-          "
+          class="md:hidden btn-icon-light"
         >
           <Menu v-if="!mobileMenuOpen" class="w-6 h-6" />
           <X v-else class="w-6 h-6" />
@@ -438,11 +423,11 @@
         <!-- Theme toggle mobile -->
         <button
           @click="themeStore.toggleDarkMode()"
-          class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
+          class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium btn-ghost-neutral"
           :class="
             themeStore.darkMode
-              ? 'text-yellow-400 hover:bg-onyx-800'
-              : 'text-onyx-600 hover:bg-powder-100'
+              ? 'text-yellow-400'
+              : 'text-onyx-600'
           "
         >
           <Sun v-if="themeStore.darkMode" class="w-5 h-5" />

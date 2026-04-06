@@ -21,10 +21,10 @@
                   ? 'Sélectionnez au moins une carte'
                   : `Exporter ${selectedCardIds.size} carte(s)`
               "
-              class="px-6 py-3 font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              class="px-6 py-3 font-semibold rounded-xl shadow-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
               :class="
                 selectedCardIds.size > 0
-                  ? 'bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white'
+                  ? 'bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white transition-all duration-200 hover:scale-105 active:scale-95'
                   : 'bg-powder-200 dark:bg-onyx-700 text-onyx-800 dark:text-white'
               "
             >
@@ -35,7 +35,7 @@
             </button>
             <label
               v-if="authStore.isPremium || authStore.isAdmin"
-              class="px-6 py-3 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-powder-200 hover:bg-powder-300 dark:bg-onyx-700 dark:hover:bg-onyx-600 text-onyx-800 dark:text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer hover:scale-105 active:scale-95"
             >
               <Plus class="w-5 h-5" />
               <span>Importer</span>
@@ -44,7 +44,7 @@
             <button
               v-else
               @click="router.push('/pricing')"
-              class="px-6 py-3 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-onyx-500 dark:text-onyx-400 font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-onyx-500 dark:text-onyx-400 font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer hover:scale-105 active:scale-95"
               title="L'import est réservé au plan Premium"
             >
               <Plus class="w-5 h-5" />
@@ -54,7 +54,7 @@
             <router-link
               v-if="store.canCreateCard"
               to="/editor"
-              class="px-6 py-3 bg-flame-500 hover:bg-flame-600 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2"
+              class="px-6 py-3 bg-flame-500 hover:bg-flame-600 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 hover:scale-105 active:scale-95"
             >
               <Plus class="w-5 h-5" />
               <span>Créer une carte</span>
@@ -62,7 +62,7 @@
             <button
               v-else
               @click="router.push('/pricing')"
-              class="px-6 py-3 bg-flame-500/60 hover:bg-flame-500/80 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+              class="px-6 py-3 bg-flame-500/60 hover:bg-flame-500/80 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 flex items-center space-x-2 cursor-pointer hover:scale-105 active:scale-95"
               :title="`Limite de ${MAX_FREE_CARDS} cartes atteinte — passez au Premium`"
             >
               <Plus class="w-5 h-5" />
@@ -172,118 +172,6 @@
         </div>
       </div>
 
-      <!-- Glassmorphism 3D Carousel -->
-      <div v-if="store.userCards.length > 0" class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-onyx-950 dark:text-powder-50 mb-6">
-          Aperçu de vos cartes
-        </h2>
-        <div class="relative rounded-3xl overflow-hidden py-10 px-4 carousel-animated-bg">
-          <!-- Decorative glow blobs -->
-          <div
-            class="absolute top-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"
-          ></div>
-          <div
-            class="absolute bottom-0 right-1/4 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/2 pointer-events-none"
-          ></div>
-
-          <!-- 3D Scene -->
-          <div
-            class="relative flex items-center justify-center"
-            style="height: 270px; perspective: 1200px; perspective-origin: 50% 50%"
-          >
-            <div
-              v-for="(card, idx) in store.userCards"
-              :key="card.id"
-              class="absolute cursor-pointer"
-              :style="getCarouselCardStyle(idx)"
-              @click="carouselIndex = idx"
-              @mouseenter="hoveredCarouselIdx = idx"
-              @mouseleave="hoveredCarouselIdx = null"
-            >
-              <div class="select-none" :style="{ width: cardPreviewWidth(card, 180) + 'px' }">
-                <BusinessCard
-                  :card="card"
-                  cardSize="small"
-                  :isFlipped="hoveredCarouselIdx === idx"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Navigation Controls -->
-          <div class="flex justify-center items-center space-x-6 mt-6 relative z-10">
-            <!-- Prev Button -->
-            <button
-              @click="prevCarousel"
-              :disabled="store.userCards.length <= 1"
-              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-              style="
-                background: rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-              "
-            >
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-
-            <!-- Dot Indicators -->
-            <div class="flex items-center space-x-2">
-              <button
-                v-for="(card, idx) in store.userCards"
-                :key="idx"
-                @click="carouselIndex = idx"
-                class="rounded-full transition-all duration-300"
-                :style="
-                  carouselIndex === idx
-                    ? 'width: 24px; height: 8px; background: rgba(255,255,255,0.95);'
-                    : 'width: 8px; height: 8px; background: rgba(255,255,255,0.45);'
-                "
-              ></button>
-            </div>
-
-            <!-- Next Button -->
-            <button
-              @click="nextCarousel"
-              :disabled="store.userCards.length <= 1"
-              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-              style="
-                background: rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-              "
-            >
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Active card label -->
-          <div v-if="store.userCards[carouselIndex]" class="text-center mt-3 relative z-10">
-            <p class="text-white/50 text-[10px] uppercase tracking-widest mb-0.5">
-              {{ store.userCards[carouselIndex].name }}
-            </p>
-            <p class="text-white font-semibold text-sm drop-shadow">
-              {{ getFullName(store.userCards[carouselIndex]) }}
-            </p>
-            <p class="text-white/70 text-xs">
-              {{ cardSubtitle(store.userCards[carouselIndex]) }}
-            </p>
-          </div>
-        </div>
-      </div>
 
       <!-- Tab Switch: Modèles / Cartes -->
       <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-8 max-w-md">
@@ -501,6 +389,21 @@
                     >
                   </button>
                   <button
+                    v-if="!tpl.isAuto"
+                    @click="toggleTemplateVisibility(tpl.id)"
+                    class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-colors mt-1"
+                    :class="
+                      tpl.isPublic
+                        ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20'
+                        : 'text-onyx-500 hover:bg-powder-100 dark:text-onyx-400 dark:hover:bg-onyx-700'
+                    "
+                    :title="tpl.isPublic ? 'Retirer de la communauté (garder le modèle)' : 'Publier dans la galerie communauté'"
+                  >
+                    <Globe v-if="tpl.isPublic" class="w-3.5 h-3.5 shrink-0" />
+                    <Lock v-else class="w-3.5 h-3.5 shrink-0" />
+                    <span>{{ tpl.isPublic ? 'Rendre privé' : 'Publier' }}</span>
+                  </button>
+                  <button
                     @click="deleteTemplate(tpl.id)"
                     class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg text-[11px] font-semibold transition-colors mt-1"
                   >
@@ -586,7 +489,7 @@
             <div
               v-for="card in sortedCards"
               :key="card.id"
-              class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
+              class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative hover-reveal"
             >
               <!-- Checkbox de sélection (top-left, discret) -->
               <div class="absolute top-3 left-3 z-20">
@@ -653,7 +556,9 @@
                 </button>
               </div>
 
-              <!-- Card Details -->
+              <!-- Card Details (hidden by default, shown on hover) -->
+              <div class="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-in-out">
+              <div class="overflow-hidden">
               <div class="p-8">
                 <div class="mb-6">
                   <div class="flex items-start justify-between mb-3">
@@ -685,7 +590,7 @@
                     <p
                       class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
                     >
-                      Email
+                      {{ getFieldLabel(card, 'email') }}
                     </p>
                     <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
                       {{ getElemText(card, 'email') || '-' }}
@@ -695,7 +600,7 @@
                     <p
                       class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
                     >
-                      Téléphone
+                      {{ getFieldLabel(card, 'phone') }}
                     </p>
                     <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
                       {{ getElemText(card, 'phone') || '-' }}
@@ -705,7 +610,7 @@
                     <p
                       class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
                     >
-                      Site web
+                      {{ getFieldLabel(card, 'website') }}
                     </p>
                     <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
                       {{ getElemText(card, 'website') }}
@@ -715,7 +620,7 @@
                     <p
                       class="text-xs text-onyx-500 dark:text-onyx-400 uppercase tracking-wide mb-1"
                     >
-                      Adresse
+                      {{ getFieldLabel(card, 'address') }}
                     </p>
                     <p class="text-sm font-semibold text-onyx-900 dark:text-white truncate">
                       {{ getElemText(card, 'address') || '-' }}
@@ -902,6 +807,8 @@
                   </button>
                 </div>
               </div>
+              </div>
+              </div>
             </div>
           </div>
 
@@ -1083,7 +990,9 @@
     <ConfirmModal
       v-if="showDeleteTemplateConfirm"
       title="Supprimer ce modèle ?"
-      message="Les cartes créées à partir de celui-ci ne seront pas affectées."
+      :message="pendingDeleteTemplateIsPublic
+        ? 'Ce modèle est public — il sera également retiré de la galerie communauté. Les cartes créées à partir de celui-ci ne seront pas affectées.'
+        : 'Les cartes créées à partir de celui-ci ne seront pas affectées.'"
       confirm-label="Supprimer"
       variant="danger"
       @confirm="onDeleteTemplateConfirmed"
@@ -1125,7 +1034,15 @@ import BusinessCard from '@/components/BusinessCard.vue'
 import BatchCreateModal from '@/components/BatchCreateModal.vue'
 import CreateCardFromTemplateModal from '@/components/CreateCardFromTemplateModal.vue'
 import { useThemeStore } from '@/stores/themeStore'
-import { getFullName, getElemText, konvaToCardEl } from '@/utils/cardElements'
+import { getFullName, getElemText, konvaToCardEl, ROLE_LABELS } from '@/utils/cardElements'
+
+function getFieldLabel(card, role) {
+  return (
+    card.data?.fieldConfig?.activeStandardFields?.find((sf) => sf.role === role)?.label ||
+    ROLE_LABELS[role] ||
+    role
+  )
+}
 
 // Compute the wrapper width so the card fills a given max height exactly,
 // works for any format (landscape, portrait, square, custom).
@@ -1158,6 +1075,8 @@ import {
   Braces,
   Users,
   ArrowUpDown,
+  Globe,
+  Lock,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -1234,10 +1153,26 @@ const templateToFakeCard = (tpl) => {
   }
 }
 
+// ── Toggle template visibility ───────────────────────────────
+const toggleTemplateVisibility = async (id) => {
+  try {
+    const tpl = await templatesStore.toggleTemplateVisibility(id)
+    notificationStore.success(tpl.isPublic ? 'Modèle publié dans la communauté' : 'Modèle rendu privé')
+  } catch {
+    notificationStore.error('Erreur lors du changement de visibilité')
+  }
+}
+
 // ── Delete template confirm ─────────────────────────────────
 const showDeleteTemplateConfirm = ref(false)
 const pendingDeleteTemplateId = ref(null)
 const showDeleteSelectedTemplatesConfirm = ref(false)
+
+const pendingDeleteTemplateIsPublic = computed(() => {
+  if (!pendingDeleteTemplateId.value) return false
+  const tpl = templatesStore.userTemplates.find((t) => t.id === pendingDeleteTemplateId.value)
+  return tpl?.isPublic ?? false
+})
 
 const deleteTemplate = (id) => {
   pendingDeleteTemplateId.value = id
@@ -1263,7 +1198,8 @@ const selectedTemplateIds = ref(new Set())
 
 const toggleTemplateSelection = (id) => {
   const next = new Set(selectedTemplateIds.value)
-  next.has(id) ? next.delete(id) : next.add(id)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
   selectedTemplateIds.value = next
 }
 
@@ -1329,8 +1265,6 @@ const onBatchGenerated = () => {
 const selectedCardIds = ref(new Set())
 const flippedCards = ref(new Set())
 const flippedTemplates = ref(new Set())
-const carouselIndex = ref(0)
-const hoveredCarouselIdx = ref(null)
 
 // ── New state ─────────────────────────────────────────────────
 const activeDownloadCardId = ref(null)
@@ -1350,47 +1284,6 @@ const currentShareLink = computed(() => {
   return ''
 })
 
-// ── Carousel ──────────────────────────────────────────────────
-const prevCarousel = () => {
-  carouselIndex.value =
-    carouselIndex.value > 0 ? carouselIndex.value - 1 : store.userCards.length - 1
-}
-
-const nextCarousel = () => {
-  carouselIndex.value =
-    carouselIndex.value < store.userCards.length - 1 ? carouselIndex.value + 1 : 0
-}
-
-const getCarouselCardStyle = (idx) => {
-  const offset = idx - carouselIndex.value
-  const absOffset = Math.abs(offset)
-  if (absOffset > 2) return { display: 'none' }
-  const translateXPx = offset * 265
-  const rotateYDeg = offset * -32
-  const translateZPx = absOffset === 0 ? 0 : absOffset === 1 ? -60 : -130
-  const scale = 1 - absOffset * 0.18
-  const blurPx = absOffset * 1.5
-  const opacity = 1 - absOffset * 0.2
-  const zIndex = 10 - absOffset
-  const transform = [
-    'translate(-50%, -50%)',
-    `translateX(${translateXPx}px)`,
-    `rotateY(${rotateYDeg}deg)`,
-    `translateZ(${translateZPx}px)`,
-    `scale(${scale})`,
-  ].join(' ')
-  return {
-    top: '50%',
-    left: '50%',
-    transform,
-    filter: blurPx > 0 ? `blur(${blurPx}px)` : 'none',
-    opacity,
-    zIndex,
-    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-    transformStyle: 'preserve-3d',
-  }
-}
-
 // ── Card actions ──────────────────────────────────────────────
 const toggleCardFlip = (cardId) => {
   const next = new Set(flippedCards.value)
@@ -1404,7 +1297,8 @@ const toggleCardFlip = (cardId) => {
 
 const toggleTemplateFlip = (id) => {
   const next = new Set(flippedTemplates.value)
-  next.has(id) ? next.delete(id) : next.add(id)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
   flippedTemplates.value = next
 }
 
@@ -1443,7 +1337,6 @@ const onDeleteCardConfirmed = () => {
   const cardId = pendingDeleteCardId.value
   if (!cardId) return
   store.deleteCard(cardId)
-  carouselIndex.value = Math.min(carouselIndex.value, Math.max(0, store.userCards.length - 1))
   selectedCardIds.value = new Set([...selectedCardIds.value].filter((id) => id !== cardId))
   notificationStore.success('Carte supprimée avec succès')
   pendingDeleteCardId.value = null
@@ -1463,7 +1356,6 @@ const onDeleteSelectedConfirmed = () => {
   const idsToDelete = [...selectedCardIds.value]
   idsToDelete.forEach((id) => store.deleteCard(id))
   selectedCardIds.value = new Set()
-  carouselIndex.value = Math.min(carouselIndex.value, Math.max(0, store.userCards.length - 1))
   notificationStore.success(`${count} carte(s) supprimée(s)`)
 }
 
@@ -1573,8 +1465,9 @@ const downloadPDF = async (card) => {
     const cw = card.data?.cardWidth || 680
     const ch = card.data?.cardHeight || 429
     const PX_PER_MM = 680 / 85.6
-    const mmW = cw / PX_PER_MM
-    const mmH = ch / PX_PER_MM
+    const PDF_SCALE = 3 // même ratio que le rendu PNG → page visible comparable
+    const mmW = (cw / PX_PER_MM) * PDF_SCALE
+    const mmH = (ch / PX_PER_MM) * PDF_SCALE
     const orientation = mmW >= mmH ? 'landscape' : 'portrait'
     const pdf = new jsPDF({ orientation, unit: 'mm', format: [mmW, mmH] })
     const firstUrl = pages.recto || pages[Object.keys(pages)[0]]
