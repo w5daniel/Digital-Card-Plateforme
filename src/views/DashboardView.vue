@@ -388,21 +388,32 @@
                       >PRO</span
                     >
                   </button>
-                  <button
-                    v-if="!tpl.isAuto"
-                    @click="toggleTemplateVisibility(tpl.id)"
-                    class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-colors mt-1"
-                    :class="
-                      tpl.isPublic
-                        ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20'
-                        : 'text-onyx-500 hover:bg-powder-100 dark:text-onyx-400 dark:hover:bg-onyx-700'
-                    "
-                    :title="tpl.isPublic ? 'Retirer de la communauté (garder le modèle)' : 'Publier dans la galerie communauté'"
-                  >
-                    <Globe v-if="tpl.isPublic" class="w-3.5 h-3.5 shrink-0" />
-                    <Lock v-else class="w-3.5 h-3.5 shrink-0" />
-                    <span>{{ tpl.isPublic ? 'Rendre privé' : 'Publier' }}</span>
-                  </button>
+                  <template v-if="!tpl.isAuto">
+                    <button
+                      v-if="authStore.isPremium || authStore.isAdmin"
+                      @click="toggleTemplateVisibility(tpl.id)"
+                      class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-colors mt-1"
+                      :class="
+                        tpl.isPublic
+                          ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20'
+                          : 'text-onyx-500 hover:bg-powder-100 dark:text-onyx-400 dark:hover:bg-onyx-700'
+                      "
+                      :title="tpl.isPublic ? 'Retirer de la communauté (garder le modèle)' : 'Publier dans la galerie communauté'"
+                    >
+                      <Globe v-if="tpl.isPublic" class="w-3.5 h-3.5 shrink-0" />
+                      <Lock v-else class="w-3.5 h-3.5 shrink-0" />
+                      <span>{{ tpl.isPublic ? 'Rendre privé' : 'Publier' }}</span>
+                    </button>
+                    <div
+                      v-else
+                      class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-onyx-400 dark:text-onyx-500 cursor-not-allowed mt-1"
+                      title="Réservé aux membres Premium"
+                    >
+                      <Lock class="w-3.5 h-3.5 shrink-0" />
+                      <span>Publier</span>
+                      <span class="ml-1 px-1 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[9px] font-bold">PRO</span>
+                    </div>
+                  </template>
                   <button
                     @click="deleteTemplate(tpl.id)"
                     class="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg text-[11px] font-semibold transition-colors mt-1"
@@ -1158,8 +1169,8 @@ const toggleTemplateVisibility = async (id) => {
   try {
     const tpl = await templatesStore.toggleTemplateVisibility(id)
     notificationStore.success(tpl.isPublic ? 'Modèle publié dans la communauté' : 'Modèle rendu privé')
-  } catch {
-    notificationStore.error('Erreur lors du changement de visibilité')
+  } catch (err) {
+    notificationStore.error(err?.message || 'Erreur lors du changement de visibilité')
   }
 }
 

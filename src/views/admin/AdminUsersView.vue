@@ -225,7 +225,12 @@
                       → logguer dans admin_audit_log
                   -->
                   <button
-                    @click="pendingAction = { type: u.isPremium ? 'remove-premium' : 'add-premium', user: u }"
+                    @click="
+                      pendingAction = {
+                        type: u.isPremium ? 'remove-premium' : 'add-premium',
+                        user: u,
+                      }
+                    "
                     :disabled="u.role === 'admin'"
                     class="p-1.5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     :class="
@@ -296,7 +301,7 @@
                 {{
                   authStore.getAllUsersWithStats.length === 0
                     ? 'Aucun utilisateur inscrit pour le moment.'
-                    : 'Aucun utilisateur correspond aux filtres.'
+                    : 'Aucun utilisateur ne correspond aux filtres.'
                 }}
               </td>
             </tr>
@@ -311,7 +316,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       @click.self="userToDelete = null"
       @keydown.escape="userToDelete = null"
-      tabindex="0"
+      tabindex="-1"
       ref="deleteModalRef"
     >
       <div
@@ -364,11 +369,14 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       @click.self="pendingAction = null"
       @keydown.escape="pendingAction = null"
-      tabindex="0"
+      tabindex="-1"
+      ref="actionModalRef"
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+        :class="
+          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+        "
       >
         <h3
           class="font-semibold mb-2"
@@ -402,12 +410,23 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast notification -->
+    <Transition name="toast">
+      <div
+        v-if="toast"
+        class="fixed bottom-6 right-6 z-50 flex items-center space-x-2 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium bg-green-500 text-white"
+      >
+        <CheckCircle class="w-4 h-4 flex-shrink-0" />
+        <span>{{ toast }}</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Search, Star, UserX, UserCheck, Trash2 } from 'lucide-vue-next'
+import { ref, computed, watch, nextTick } from 'vue'
+import { Search, Star, UserX, UserCheck, Trash2, CheckCircle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useAuthStore } from '../../stores/authStore'
 
@@ -435,12 +454,52 @@ const filterStatus = ref('')
 const filterPlan = ref('')
 const userToDelete = ref(null)
 const pendingAction = ref(null)
+const deleteModalRef = ref(null)
+const actionModalRef = ref(null)
+const toast = ref(null)
+let toastTimer = null
+
+function showToast(msg) {
+  if (toastTimer) clearTimeout(toastTimer)
+  toast.value = msg
+  toastTimer = setTimeout(() => {
+    toast.value = null
+  }, 2500)
+}
+
+// Auto-focus modals for Escape key
+watch(userToDelete, (v) => {
+  if (v) nextTick(() => deleteModalRef.value?.focus())
+})
+watch(pendingAction, (v) => {
+  if (v) nextTick(() => actionModalRef.value?.focus())
+})
 
 const actionLabels = {
-  ban:              { title: 'Bloquer l\'utilisateur',   message: 'Bloquer le compte de',                btn: 'Bloquer',         btnClass: 'bg-orange-500 hover:bg-orange-600' },
-  unban:            { title: 'Débloquer l\'utilisateur', message: 'Réactiver le compte de',               btn: 'Débloquer',       btnClass: 'bg-green-500 hover:bg-green-600'   },
-  'add-premium':    { title: 'Attribuer Premium',        message: 'Passer au plan Premium pour',          btn: 'Confirmer',       btnClass: 'bg-yellow-500 hover:bg-yellow-600' },
-  'remove-premium': { title: 'Retirer Premium',          message: 'Retirer le plan Premium de',           btn: 'Retirer',         btnClass: 'bg-yellow-500 hover:bg-yellow-600' },
+  ban: {
+    title: "Bloquer l'utilisateur",
+    message: 'Bloquer le compte de',
+    btn: 'Bloquer',
+    btnClass: 'bg-orange-500 hover:bg-orange-600',
+  },
+  unban: {
+    title: "Débloquer l'utilisateur",
+    message: 'Réactiver le compte de',
+    btn: 'Débloquer',
+    btnClass: 'bg-green-500 hover:bg-green-600',
+  },
+  'add-premium': {
+    title: 'Attribuer Premium',
+    message: 'Passer au plan Premium pour',
+    btn: 'Confirmer',
+    btnClass: 'bg-yellow-500 hover:bg-yellow-600',
+  },
+  'remove-premium': {
+    title: 'Retirer Premium',
+    message: 'Retirer le plan Premium de',
+    btn: 'Retirer',
+    btnClass: 'bg-yellow-500 hover:bg-yellow-600',
+  },
 }
 
 // ── Liste filtrée ─────────────────────────────────────────────────────────
@@ -465,17 +524,22 @@ function confirmDelete(u) {
 
 function doDelete() {
   if (!userToDelete.value) return
+  const name = userToDelete.value.name
   authStore.adminDeleteUser(userToDelete.value.id)
   userToDelete.value = null
+  showToast(`${name} a été supprimé`)
 }
 
 function executeAction() {
   if (!pendingAction.value) return
   const { type, user } = pendingAction.value
-  if (type === 'ban')            authStore.adminBanUser(user.id)
-  else if (type === 'unban')     authStore.adminUnbanUser(user.id)
-  else if (type === 'add-premium' || type === 'remove-premium') authStore.adminTogglePremium(user.id)
+  const toastMessages = { ban: `${user.name} a été bloqué`, unban: `${user.name} a été débloqué`, 'add-premium': `${user.name} est maintenant Premium`, 'remove-premium': `Premium retiré pour ${user.name}` }
+  if (type === 'ban') authStore.adminBanUser(user.id)
+  else if (type === 'unban') authStore.adminUnbanUser(user.id)
+  else if (type === 'add-premium' || type === 'remove-premium')
+    authStore.adminTogglePremium(user.id)
   pendingAction.value = null
+  showToast(toastMessages[type])
 }
 
 // ── Formatage date ────────────────────────────────────────────────────────

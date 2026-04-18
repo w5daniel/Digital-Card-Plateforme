@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useAdminStore } from '@/stores/adminStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,7 +20,7 @@ const router = createRouter({
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/AuthView.vue'),
+      redirect: { name: 'login', query: { mode: 'register' } },
       meta: { requiresAuth: false, hideLayout: true, guestOnly: true },
     },
     {
@@ -43,7 +44,7 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, hideFooter: true },
     },
     {
       path: '/share/:cardId',
@@ -61,19 +62,25 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: () => import('../views/UserProfileView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, hideFooter: true },
     },
     {
       path: '/settings',
       name: 'settings',
       component: () => import('../views/UserProfileView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, hideFooter: true },
     },
     {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),
       meta: { requiresAuth: false },
+    },
+    {
+      path: '/maintenance',
+      name: 'maintenance',
+      component: () => import('../views/MaintenanceView.vue'),
+      meta: { requiresAuth: false, hideLayout: true },
     },
 
     // ── Administration ────────────────────────────────────────────────────
@@ -107,6 +114,11 @@ const router = createRouter({
           name: 'admin-settings',
           component: () => import('../views/admin/AdminSettingsView.vue'),
         },
+        {
+          path: 'gallery',
+          name: 'admin-gallery',
+          component: () => import('../views/admin/AdminGalleryView.vue'),
+        },
       ],
     },
   ],
@@ -133,6 +145,17 @@ router.beforeEach((to, from, next) => {
 
   const isAuthenticated = authStore.isAuthenticated
   const isAdmin = authStore.isAdmin
+  const adminSettings = useAdminStore().settings
+
+  // Mode maintenance : seuls les admins peuvent naviguer
+  if (adminSettings?.maintenanceMode && !isAdmin && to.name !== 'maintenance' && to.name !== 'login') {
+    return next('/maintenance')
+  }
+
+  // Galerie fermée par l'admin
+  if (to.name === 'gallery' && adminSettings?.allowGallery === false && !isAdmin) {
+    return next('/')
+  }
 
   // Vérifier le statut bloqué sur chaque navigation protégée
   // (couvre le cas où l'admin banne l'utilisateur pendant sa session)

@@ -57,14 +57,17 @@
               <input
                 v-model="cardName"
                 type="text"
-                class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors"
-                :class="
-                  dark
-                    ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-flame-500 outline-none'
-                    : 'bg-white border-gray-200 text-gray-900 focus:border-flame-500 outline-none'
-                "
+                class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors outline-none"
+                :class="[
+                  formErrors._cardName
+                    ? 'border-red-400 dark:border-red-500'
+                    : dark ? 'border-gray-700 focus:border-flame-500' : 'border-gray-200 focus:border-flame-500',
+                  dark ? 'bg-gray-800 text-white placeholder-gray-500' : 'bg-white text-gray-900',
+                ]"
                 placeholder="Ex. Carte de Jean"
+                @blur="formErrors._cardName = validateField('cardName', cardName)"
               />
+              <p v-if="formErrors._cardName" class="text-[11px] text-red-500 mt-1">{{ formErrors._cardName }}</p>
             </div>
 
             <!-- Diviseur -->
@@ -87,13 +90,16 @@
                   v-model="formData[f.role]"
                   type="text"
                   required
-                  class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors"
-                  :class="
-                    dark
-                      ? 'bg-gray-800 border-gray-700 text-white focus:border-flame-500 outline-none'
-                      : 'bg-white border-gray-200 text-gray-900 focus:border-flame-500 outline-none'
-                  "
+                  class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors outline-none"
+                  :class="[
+                    formErrors[f.role]
+                      ? 'border-red-400 dark:border-red-500'
+                      : dark ? 'border-gray-700 focus:border-flame-500' : 'border-gray-200 focus:border-flame-500',
+                    dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900',
+                  ]"
+                  @blur="validateFormField(f.role, formData[f.role])"
                 />
+                <p v-if="formErrors[f.role]" class="text-[11px] text-red-500 mt-1">{{ formErrors[f.role] }}</p>
               </div>
             </div>
           </div>
@@ -136,11 +142,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Plus, X, Loader2, Check } from 'lucide-vue-next'
 import { useCardsStore } from '@/stores/cards'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { konvaToCardEl, ROLE_LABELS } from '@/utils/cardElements'
+import { validateField, roleToValidationType } from '@/utils/validators'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -156,6 +163,8 @@ const notificationStore = useNotificationStore()
 const isGenerating = ref(false)
 const cardName = ref('Nouvelle carte')
 const formData = ref({})
+// TODO backend : valider les champs de contact côté serveur (POST /api/cards)
+const formErrors = reactive({})
 
 // Scan editorData elements for text/contact elements with roles, merge with custom fields
 const fieldsFromTemplate = computed(() => {
@@ -164,20 +173,38 @@ const fieldsFromTemplate = computed(() => {
     ...(editorData?.elements?.recto || []),
     ...(editorData?.elements?.verso || []),
   ]
+  // seen tracks raw ids (without "custom_" prefix) for custom fields, roles for standard fields
   const seen = new Set()
   const result = []
+
   for (const el of allEls) {
-    if ((el.type === 'text' || el.type === 'contact') && el.role && !seen.has(el.role)) {
+    if (!((el.type === 'text' || el.type === 'contact') && el.role)) continue
+
+    if (el.role.startsWith('custom_')) {
+      // Custom field element — use raw id as form key, look up label from fieldConfig.customFields
+      const cfId = el.role.replace('custom_', '')
+      if (seen.has(cfId)) continue
+      seen.add(cfId)
+      const cf = props.templateModel.fieldConfig?.customFields?.find((c) => c.id === cfId)
+      if (cf) result.push({ role: cfId, label: cf.label })
+    } else {
+      if (seen.has(el.role)) continue
       seen.add(el.role)
-      result.push({ role: el.role, label: ROLE_LABELS[el.role] || el.role })
+      const customLabel = props.templateModel.fieldConfig?.activeStandardFields?.find(
+        (sf) => sf.role === el.role,
+      )?.label
+      result.push({ role: el.role, label: customLabel || ROLE_LABELS[el.role] || el.role })
     }
   }
+
+  // Add custom fields from fieldConfig that have no canvas element (e.g. value was empty at save)
   for (const cf of props.templateModel.fieldConfig?.customFields || []) {
     if (!seen.has(cf.id)) {
       seen.add(cf.id)
       result.push({ role: cf.id, label: cf.label })
     }
   }
+
   return result
 })
 
@@ -188,6 +215,23 @@ const allFieldsFilled = computed(() =>
 onMounted(() => {
   fieldsFromTemplate.value.forEach((f) => (formData.value[f.role] = ''))
 })
+
+function validateFormField(role, value) {
+  formErrors[role] = validateField(roleToValidationType(role), value)
+}
+
+function validateAllFields() {
+  let valid = true
+  const nameErr = validateField('cardName', cardName.value)
+  formErrors._cardName = nameErr
+  if (nameErr || !cardName.value.trim()) valid = false
+  for (const f of fieldsFromTemplate.value) {
+    const err = validateField(roleToValidationType(f.role), formData.value[f.role])
+    formErrors[f.role] = err
+    if (err) valid = false
+  }
+  return valid
+}
 
 function replaceTextVariables(elements, rowData) {
   return (elements || []).map((el) => {
@@ -202,6 +246,10 @@ function replaceTextVariables(elements, rowData) {
 }
 
 async function handleGenerate() {
+  if (!validateAllFields()) {
+    notificationStore.error('Veuillez corriger les erreurs dans le formulaire')
+    return
+  }
   isGenerating.value = true
 
   try {
@@ -213,6 +261,11 @@ async function handleGenerate() {
 
     // Flatten form data (all fields unified)
     const rowData = { ...formData.value }
+    // Canvas elements store custom field roles as "custom_{id}" but formData keys are raw ids.
+    // Add prefixed versions so replaceTextVariables can match them.
+    for (const cf of props.templateModel.fieldConfig?.customFields || []) {
+      if (rowData[cf.id] !== undefined) rowData[`custom_${cf.id}`] = rowData[cf.id]
+    }
 
     // Replace text variables in Konva elements
     const newRecto = replaceTextVariables(editorData.elements?.recto, rowData)
@@ -259,6 +312,9 @@ async function handleGenerate() {
             label: cf.label,
             value: rowData[cf.id] || '',
           })) || [],
+        fieldConfig: props.templateModel.fieldConfig
+          ? JSON.parse(JSON.stringify(props.templateModel.fieldConfig))
+          : undefined,
         editorData: {
           ...JSON.parse(JSON.stringify(editorData)),
           elements: { recto: newRecto, verso: newVerso },

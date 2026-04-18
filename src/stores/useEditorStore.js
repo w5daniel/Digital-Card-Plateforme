@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
 // Business card dimensions: 85.6mm × 54mm (ratio 1.585)
@@ -9,6 +9,11 @@ export const CARD_H = 429
 const MAX_HISTORY = 50
 
 export const useEditorStore = defineStore('editor', () => {
+  // ── Live drag/transform position tracking (shared with context bar) ─────
+  // Updated every frame during drag/transform; cleared at dragend/transformend.
+  // Using reactive (not ref) avoids Pinia's auto-unwrapping of refs.
+  const livePosState = reactive({})
+
   // ── Core state ──────────────────────────────────────────────────────────
   const cardName = ref('Ma carte de visite')
   const isDirty = ref(false)
@@ -16,10 +21,12 @@ export const useEditorStore = defineStore('editor', () => {
   const activePage = ref('recto') // 'recto' | 'verso'
 
   // ── Models / Cards architecture ─────────────────────────────────────────
-  // 'new' = fresh design, 'edit-template' = editing a user template, 'edit-card' = editing a card
+  // 'new' = fresh design, 'edit-template' = editing a user template, 'edit-card' = editing a card, 'edit-gallery-template' = admin editing official gallery template
   const editMode = ref('new')
   // ID of the user template being edited (null if new or editing a card)
   const editingTemplateId = ref(null)
+  // Slug of the gallery template being edited by admin (null if not admin editing)
+  const editingGallerySlug = ref(null)
 
   // Default standard fields
   const ALL_STANDARD_FIELDS = [
@@ -75,6 +82,7 @@ export const useEditorStore = defineStore('editor', () => {
   // Validation state (used by EditorTopBar → EditorLeftSidebar)
   const validationErrors = ref([]) // array of role keys with missing required data
   const openInfoTab = ref(false) // flag: sidebar should switch to 'info' tab
+  const importedImages = ref([]) // images imported in the Import sidebar tab — persisted across tab switches
   // Reactive card canvas dimensions (default = standard business card)
   const cardWidth = ref(CARD_W)
   const cardHeight = ref(CARD_H)
@@ -166,20 +174,35 @@ export const useEditorStore = defineStore('editor', () => {
 
   function deleteSelected() {
     if (!selectedIds.value.length) return
-    elements.value[activePage.value] = elements.value[activePage.value].filter(
-      (el) => !selectedIds.value.includes(el.id),
+    const page = activePage.value
+    const deletable = selectedIds.value.filter(
+      (id) => !elements.value[page].find((el) => el.id === id)?.locked,
     )
-    selectedIds.value = []
+    if (!deletable.length) return
+    elements.value[page] = elements.value[page].filter((el) => !deletable.includes(el.id))
+    selectedIds.value = selectedIds.value.filter((id) => !deletable.includes(id))
     saveHistory()
   }
 
   function duplicateSelected() {
     if (!selectedIds.value.length) return
+    // Remap group IDs so duplicated groups are independent of the originals
+    const groupIdMap = {}
+    selectedIds.value.forEach((id) => {
+      const el = elements.value[activePage.value].find((e) => e.id === id)
+      if (el?.groupId && !groupIdMap[el.groupId]) groupIdMap[el.groupId] = uuidv4()
+    })
     const newIds = []
     selectedIds.value.forEach((id) => {
       const el = elements.value[activePage.value].find((e) => e.id === id)
       if (!el) return
-      const copy = { ...JSON.parse(JSON.stringify(el)), id: uuidv4(), x: el.x + 16, y: el.y + 16 }
+      const copy = {
+        ...JSON.parse(JSON.stringify(el)),
+        id: uuidv4(),
+        x: el.x + 16,
+        y: el.y + 16,
+        groupId: el.groupId ? groupIdMap[el.groupId] : undefined,
+      }
       elements.value[activePage.value].push(copy)
       newIds.push(copy.id)
     })
@@ -188,40 +211,70 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   // ── Clipboard (copy / paste) ──────────────────────────────────────────────
-  const clipboardEl = ref(null)
+  // Clipboard stores an array so multi-selection copy/paste works correctly
+  const clipboardEl = ref([])
 
   function copySelected() {
-    const el = singleSelected.value
-    if (!el) return
-    clipboardEl.value = JSON.parse(JSON.stringify(el))
+    const els = selectedElements.value
+    if (!els.length) return
+    clipboardEl.value = JSON.parse(JSON.stringify(els))
   }
 
   function cutSelected() {
     copySelected()
-    if (clipboardEl.value) deleteSelected()
+    if (clipboardEl.value.length) deleteSelected()
   }
 
   function pasteClipboard() {
-    if (!clipboardEl.value) return
-    const pasted = {
-      ...JSON.parse(JSON.stringify(clipboardEl.value)),
-      id: uuidv4(),
-      x: (clipboardEl.value.x || 0) + 16,
-      y: (clipboardEl.value.y || 0) + 16,
+    if (!clipboardEl.value.length) return
+    // Remap group IDs so pasted groups are independent of the originals
+    const groupIdMap = {}
+    for (const src of clipboardEl.value) {
+      if (src.groupId && !groupIdMap[src.groupId]) groupIdMap[src.groupId] = uuidv4()
     }
-    elements.value[activePage.value].push(pasted)
-    selectedIds.value = [pasted.id]
+    const newIds = []
+    for (const src of clipboardEl.value) {
+      const pasted = {
+        ...JSON.parse(JSON.stringify(src)),
+        id: uuidv4(),
+        x: (src.x || 0) + 16,
+        y: (src.y || 0) + 16,
+        groupId: src.groupId ? groupIdMap[src.groupId] : undefined,
+      }
+      elements.value[activePage.value].push(pasted)
+      newIds.push(pasted.id)
+    }
+    selectedIds.value = newIds
     saveHistory()
   }
 
   // ── Lock / unlock ─────────────────────────────────────────────────────────
-  function toggleLock(id) {
+  function toggleLock(ids) {
     const page = elements.value[activePage.value]
-    const idx = page.findIndex((el) => el.id === id)
-    if (idx === -1) return
-    const locked = !page[idx].locked
-    page[idx] = { ...page[idx], locked }
-    if (locked) selectedIds.value = selectedIds.value.filter((sid) => sid !== id)
+    const idList = Array.isArray(ids) ? ids : [ids]
+    if (!idList.length) return
+    // Determine locked state from the first element found
+    const firstEl = page.find((el) => idList.includes(el.id))
+    if (!firstEl) return
+    const locked = !firstEl.locked
+    // Collect all targets (expand groups)
+    const targetIds = new Set()
+    idList.forEach((id) => {
+      const el = page.find((e) => e.id === id)
+      if (!el) return
+      if (el.groupId) {
+        page.filter((e) => e.groupId === el.groupId).forEach((e) => targetIds.add(e.id))
+      } else {
+        targetIds.add(id)
+      }
+    })
+    targetIds.forEach((tid) => {
+      const i = page.findIndex((e) => e.id === tid)
+      if (i !== -1) page[i] = { ...page[i], locked }
+    })
+    if (locked) {
+      selectedIds.value = selectedIds.value.filter((sid) => !targetIds.has(sid))
+    }
     saveHistory()
   }
 
@@ -388,8 +441,10 @@ export const useEditorStore = defineStore('editor', () => {
   const canUngroup = computed(() => {
     if (!selectedIds.value.length) return false
     const page = elements.value[activePage.value]
-    const first = page.find((el) => el.id === selectedIds.value[0])
-    return !!first?.groupId
+    return selectedIds.value.some((id) => {
+      const el = page.find((e) => e.id === id)
+      return !!el?.groupId
+    })
   })
 
   // ── Layer order ───────────────────────────────────────────────────────────
@@ -476,7 +531,10 @@ export const useEditorStore = defineStore('editor', () => {
         const u = { ...el }
 
         if (el.type === 'image' && el.role === 'background') {
-          u.x = 0; u.y = 0; u.width = newW; u.height = newH
+          u.x = 0
+          u.y = 0
+          u.width = newW
+          u.height = newH
           return u
         }
 
@@ -623,12 +681,19 @@ export const useEditorStore = defineStore('editor', () => {
       fontStyle: 'normal',
       fontVariant: 'normal',
       textDecoration: '',
+      underlineColor: '',
       fill: '#000000',
       align: 'left',
-      width: 220,
-      height: 36,
+      width: null,
+      height: null,
       letterSpacing: 0,
       lineHeight: 1.25,
+      shadowEnabled: false,
+      shadowColor: '#000000',
+      shadowBlur: 8,
+      shadowOffsetX: 3,
+      shadowOffsetY: 3,
+      shadowOpacity: 0.35,
       ...preset,
     })
   }
@@ -659,6 +724,12 @@ export const useEditorStore = defineStore('editor', () => {
       stroke: '',
       strokeWidth: 0,
       cornerRadius: 0,
+      shadowEnabled: false,
+      shadowColor: '#000000',
+      shadowBlur: 8,
+      shadowOffsetX: 3,
+      shadowOffsetY: 3,
+      shadowOpacity: 0.35,
       ...defaults,
       ...preset,
     })
@@ -674,8 +745,16 @@ export const useEditorStore = defineStore('editor', () => {
       type: 'icon',
       iconId: icon.id,
       fill: '#1a1a1a',
+      stroke: '',
+      strokeWidth: 0,
       width: 64,
       height: 64,
+      shadowEnabled: false,
+      shadowColor: '#000000',
+      shadowBlur: 8,
+      shadowOffsetX: 3,
+      shadowOffsetY: 3,
+      shadowOpacity: 0.35,
       ...preset,
     })
   }
@@ -746,12 +825,10 @@ export const useEditorStore = defineStore('editor', () => {
     zoom.value = 0.9
     editingCardId.value = null
     editingTemplateId.value = null
+    editingGallerySlug.value = null
     editMode.value = 'new'
     templateSlug.value = null
     templatePrimaryColor.value = cardData?.templatePrimaryColor || '#6366F1'
-    contactExtra.value = Array.isArray(cardData?.contactExtra)
-      ? JSON.parse(JSON.stringify(cardData.contactExtra))
-      : []
     isPublic.value = cardData?.isPublic ?? false
     cardWidth.value = cardData?.cardWidth || CARD_W
     cardHeight.value = cardData?.cardHeight || CARD_H
@@ -768,6 +845,14 @@ export const useEditorStore = defineStore('editor', () => {
         customFields: [],
       }
     }
+    // Sync contactExtra from fieldConfig.customFields (source of truth),
+    // preserving any values already present in cardData.contactExtra
+    const savedExtra = Array.isArray(cardData?.contactExtra) ? cardData.contactExtra : []
+    const extraMap = new Map(savedExtra.map((c) => [c.id, c]))
+    contactExtra.value = (fieldConfig.value.customFields || []).map(
+      (cf) => extraMap.get(cf.id) || { id: cf.id, label: cf.label, value: cf.value || '' },
+    )
+    importedImages.value = []
     history.value = [_snapshot()]
     historyIndex.value = 0
   }
@@ -816,6 +901,7 @@ export const useEditorStore = defineStore('editor', () => {
     editingTextId,
     editingCardId,
     editingTemplateId,
+    editingGallerySlug,
     editMode,
     fieldConfig,
     templateSlug,
@@ -824,6 +910,7 @@ export const useEditorStore = defineStore('editor', () => {
     isPublic,
     validationErrors,
     openInfoTab,
+    importedImages,
     cardWidth,
     cardHeight,
     orientation,
@@ -834,6 +921,7 @@ export const useEditorStore = defineStore('editor', () => {
     gridSize,
     showCenterGuides,
     showSafeZone,
+    livePosState,
     // computed
     currentElements,
     currentBackground,

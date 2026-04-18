@@ -52,7 +52,7 @@
         </div>
 
         <!-- Right — Floating cards fan -->
-        <div class="hidden lg:block flex-shrink-0 relative" style="width: 520px; height: 260px">
+        <div class="hidden lg:block flex-shrink-0 relative" style="width: 620px; height: 360px">
           <div
             v-for="(hCard, i) in heroCards"
             :key="hCard.id"
@@ -128,6 +128,7 @@
         >
           <option value="popular">Populaires</option>
           <option value="newest">Plus récents</option>
+          <option value="oldest">Plus anciens</option>
           <option value="name">Nom A–Z</option>
           <option value="rating">Mieux notés</option>
         </select>
@@ -196,22 +197,9 @@
           @mouseleave="hoveredId = null"
           @click="selectTemplate(template)"
         >
-          <!-- Live card preview (scaled) -->
-          <div
-            class="relative bg-powder-100 dark:bg-onyx-800"
-            style="aspect-ratio: 16/9; overflow: hidden"
-          >
-            <div
-              :style="{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '500px',
-                transformOrigin: 'top left',
-                transform: `scale(${cardScale})`,
-                pointerEvents: 'none',
-              }"
-            >
+          <!-- Live card preview — adaptive aspect ratio, centred with padding, dot-grid backdrop -->
+          <div :style="previewContainerStyle(template)">
+            <div :style="previewInnerStyle(template)">
               <BusinessCard
                 :card="buildPreviewCard(template)"
                 :isFlipped="hoveredId === template.id"
@@ -423,9 +411,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import { useAuthStore } from '@/stores/authStore'
+import { useThemeStore } from '@/stores/themeStore'
 import { useUserTemplatesStore } from '@/stores/userTemplatesStore'
 import { konvaToCardEl } from '@/utils/cardElements'
 import BusinessCard from '@/components/BusinessCard.vue'
@@ -443,12 +432,15 @@ import {
 import { LAYOUT_MAP, buildElements } from '@/utils/templateLayouts'
 
 const router = useRouter()
+const route = useRoute()
 const store = useCardsStore()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const templatesStore = useUserTemplatesStore()
 
 // ── UI state ──────────────────────────────────────────────────────────
-const activeFilter = ref('all')
+const VALID_TABS = ['all', 'free', 'premium', 'community']
+const activeFilter = ref(VALID_TABS.includes(route.query.tab) ? route.query.tab : 'all')
 const tabGroupRef = ref(null)
 const filterPillStyle = ref({ left: '0px', width: '0px', opacity: 0 })
 
@@ -466,7 +458,7 @@ const searchQuery = ref('')
 const sortBy = ref('popular')
 const hoveredId = ref(null)
 const cardsGridRef = ref(null)
-const cardScale = ref(0.72) // fallback until ResizeObserver kicks in
+const cardScale = ref(0.72) // kept for potential future use — not directly referenced in template
 const communityRefreshKey = ref(0) // incremented on mount to force communityCards recompute
 
 // ── Sample persons for live previews ──────────────────────────────────
@@ -522,6 +514,25 @@ const samplePersons = [
 ]
 
 const buildPreviewCard = (template, idx = null) => {
+  // Admin custom templates with saved preview elements → use them directly
+  if (template.previewElements) {
+    return {
+      id: `preview-${template.slug}`,
+      template: template.slug,
+      data: {
+        elements: template.previewElements,
+        versoElements: template.previewVersoElements || [],
+        backgrounds: template.previewBackgrounds || { recto: template.colors?.primary, verso: template.colors?.secondary },
+        cardWidth: template.previewCardWidth || 680,
+        cardHeight: template.previewCardHeight || 429,
+        cardBorderRadius: template.previewCardBorderRadius ?? 8,
+        orientation: template.previewOrientation || 'landscape',
+        fontFamily: template.previewFontFamily || undefined,
+        showQR: false,
+      },
+    }
+  }
+  // Layout-based templates → generate from layout + colors
   const i = idx !== null ? idx : store.getAllTemplates.findIndex((t) => t.id === template.id)
   const person = samplePersons[i % samplePersons.length]
   const layout = LAYOUT_MAP[template.slug] || 'center'
@@ -529,6 +540,54 @@ const buildPreviewCard = (template, idx = null) => {
     id: `preview-${template.slug}`,
     template: template.slug,
     data: { elements: buildElements(layout, person, template.colors), showQR: false },
+  }
+}
+
+// ── Template preview styles — adaptive container + centred card ──────
+const PREVIEW_PAD = 0.08 // 8% padding on all 4 sides
+
+// Container: ratio fixe 16/9 pour uniformité de la grille (portrait et paysage alignés)
+const previewContainerStyle = (template) => {
+  const dark = themeStore.darkMode
+  return {
+    aspectRatio: '16 / 9',
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: dark ? '#0d1520' : '#f0f4f8',
+    backgroundImage: dark
+      ? 'radial-gradient(circle, #1a2640 1.5px, transparent 1.5px)'
+      : 'radial-gradient(circle, #c6cfd9 1px, transparent 1px)',
+    backgroundSize: '18px 18px',
+  }
+}
+
+// Inner wrapper: fit-inside 16/9 container, centré — gère portrait et paysage
+const previewInnerStyle = (template) => {
+  const cw = template.previewCardWidth || 680
+  const ch = template.previewCardHeight || 429
+  const isPortrait = ch > cw
+  const naturalW = isPortrait ? 300 : 500 // BusinessCard maxWidth
+  const naturalH = naturalW * (ch / cw)
+
+  const col = cardColW.value
+  const containerH = col * (9 / 16)
+
+  const P = PREVIEW_PAD
+  const scale = Math.min((col * (1 - 2 * P)) / naturalW, (containerH * (1 - 2 * P)) / naturalH)
+
+  const renderedW = naturalW * scale
+  const renderedH = naturalH * scale
+  const offsetX = (col - renderedW) / 2
+  const offsetY = (containerH - renderedH) / 2
+
+  return {
+    position: 'absolute',
+    top: `${offsetY}px`,
+    left: `${offsetX}px`,
+    width: `${naturalW}px`,
+    transformOrigin: 'top left',
+    transform: `scale(${scale})`,
+    pointerEvents: 'none',
   }
 }
 
@@ -560,13 +619,10 @@ const DEFAULT_COMMUNITY_TEXT = {
 }
 
 const communityCards = computed(() => {
-  communityRefreshKey.value // dépendance réactive — force recalcul au montage
-  // Cards from other users
-  let cards = store.getAllCommunityCards()
-
-  // Templates from other users (convert to card-like format for preview)
+  void communityRefreshKey.value // dépendance réactive — force recalcul au montage
+  // Modèles publiés en public par les utilisateurs (les cartes sont toujours privées)
   const communityTemplates = templatesStore.getAllCommunityTemplates()
-  const templateAsCards = communityTemplates.map((tpl) => {
+  let cards = communityTemplates.map((tpl) => {
     const cw = tpl.editorData?.cardWidth || 680
     const ch = tpl.editorData?.cardHeight || 429
     return {
@@ -575,6 +631,7 @@ const communityCards = computed(() => {
       ownerName: tpl.ownerName || 'Anonyme',
       ownerId: tpl.ownerEmail || '',
       _isOwn: tpl.ownerEmail === authStore.user?.email,
+      createdAt: tpl.createdAt || null,
       isTemplate: true,
       data: {
         cardWidth: cw,
@@ -593,11 +650,19 @@ const communityCards = computed(() => {
     }
   })
 
-  cards = [...cards, ...templateAsCards]
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     cards = cards.filter((c) => c.name?.toLowerCase().includes(q))
   }
+
+  if (sortBy.value === 'newest') {
+    cards = [...cards].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+  } else if (sortBy.value === 'oldest') {
+    cards = [...cards].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+  } else if (sortBy.value === 'name') {
+    cards = [...cards].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+  }
+
   return cards
 })
 
@@ -645,9 +710,16 @@ const filteredTemplates = computed(() => {
   }
 
   const sorted = [...list]
-  if (sortBy.value === 'newest') sorted.reverse()
-  else if (sortBy.value === 'name') sorted.sort((a, b) => a.name.localeCompare(b.name))
-  else if (sortBy.value === 'rating') sorted.sort((a, b) => (b.rating || 5) - (a.rating || 5))
+  if (sortBy.value === 'newest') {
+    sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    if (!sorted.some((t) => t.createdAt)) sorted.reverse()
+  } else if (sortBy.value === 'oldest') {
+    sorted.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+  } else if (sortBy.value === 'name') {
+    sorted.sort((a, b) => a.name.localeCompare(b.name))
+  } else if (sortBy.value === 'rating') {
+    sorted.sort((a, b) => (b.rating || 5) - (a.rating || 5))
+  }
   return sorted
 })
 
@@ -740,7 +812,7 @@ const scrollToGrid = () => {
   }
 }
 .gallery-hero-bg {
-  background: linear-gradient(270deg, #0a100d, #1c2a24, #141f1b, #0f1a16, #0a100d);
+  background: linear-gradient(270deg, #397256, #1c2a24, #18363d, #0f1a16, #397256);
   background-size: 400% 400%;
   animation: heroBg 20s ease infinite;
 }

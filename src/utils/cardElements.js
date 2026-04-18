@@ -77,6 +77,19 @@ export function getElemText(card = {}, fieldKey = '') {
   return ''
 }
 
+// Serialize shadow properties (shared across all element types)
+function serializeShadow(el) {
+  if (!el.shadowEnabled) return {}
+  return {
+    shadowEnabled: true,
+    shadowColor: el.shadowColor || '#000000',
+    shadowBlur: el.shadowBlur ?? 8,
+    shadowOffsetX: el.shadowOffsetX ?? 3,
+    shadowOffsetY: el.shadowOffsetY ?? 3,
+    shadowOpacity: el.shadowOpacity ?? 0.35,
+  }
+}
+
 /**
  * Convert a Konva-format element (px) to BusinessCard-format element (%).
  * Handles all types: shape, text, contact, icon, image, qr.
@@ -87,9 +100,13 @@ export function getElemText(card = {}, fieldKey = '') {
  * @returns {Object|null} BusinessCard element or null if unknown type
  */
 export function konvaToCardEl(el, cw, ch, index) {
+  // For text elements, Konva auto-sizes when width is null — estimate for CSS preview
+  const effectiveW = el.width ?? (el.type === 'text' || el.type === 'contact'
+    ? Math.min(cw * 0.85, Math.max(150, (el.text || '').length * (el.fontSize || 16) * 1.0))
+    : 200)
   const pctX = (el.x / cw) * 100
   const pctY = (el.y / ch) * 100
-  const pctW = (el.width / cw) * 100
+  const pctW = (effectiveW / cw) * 100
   const pctH = (el.height / ch) * 100
   const zIdx = el.zIndex ?? index + 1
 
@@ -102,13 +119,14 @@ export function konvaToCardEl(el, cw, ch, index) {
       w: pctW,
       h: pctH,
       zIndex: zIdx,
-      bgColor: el.fill || '#000000',
+      bgColor: el.fillGradient?.from ? undefined : el.fill || '#000000',
+      ...serializeShadow(el),
     }
+    if (el.fillGradient?.from) block.fillGradient = el.fillGradient
     if ((el.opacity ?? 1) < 1) block.opacity = el.opacity
     if (el.rotation) block.rotation = el.rotation
     if (el.shapeType === 'rect' && el.cornerRadius > 0) {
-      const minDim = Math.min(el.width || 1, el.height || 1)
-      block.borderRadius = Math.round((el.cornerRadius / minDim) * 100)
+      block.cornerRadiusPx = el.cornerRadius
     }
     if (el.shapeType === 'circle') block.borderRadius = 50
     if (el.shapeType === 'custom-poly' && el.polygonPoints) {
@@ -168,6 +186,7 @@ export function konvaToCardEl(el, cw, ch, index) {
       block.pathViewBox = [w, sw]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash?.length) block.dashPath = el.dash
     }
     if (el.shapeType === 'arrow') {
@@ -180,6 +199,7 @@ export function konvaToCardEl(el, cw, ch, index) {
       block.pathViewBox = [w, h]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash?.length) block.dashPath = el.dash
     }
     if (el.shapeType === 'arrow-double') {
@@ -192,6 +212,7 @@ export function konvaToCardEl(el, cw, ch, index) {
       block.pathViewBox = [w, h]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash?.length) block.dashPath = el.dash
     }
     if (el.shapeType === 'line-bar') {
@@ -200,10 +221,14 @@ export function konvaToCardEl(el, cw, ch, index) {
         barH = Math.max(sw * 5, 16),
         mid = barH / 2
       block.h = (barH / ch) * 100
-      block.pathData = `M0,0 L0,${barH} M0,${mid} L${w},${mid} M${w},0 L${w},${barH}`
+      // Ligne centrale (reçoit le dash pattern)
+      block.pathData = `M0,${mid} L${w},${mid}`
+      // Barres verticales d'extrémité (toujours solides, sans dash)
+      block.pathDataSolid = `M0,0 L0,${barH} M${w},0 L${w},${barH}`
       block.pathViewBox = [w, barH]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash?.length) block.dashPath = el.dash
     }
     if (!block.pathData && el.stroke && el.strokeWidth > 0) {
@@ -214,7 +239,7 @@ export function konvaToCardEl(el, cw, ch, index) {
   }
 
   if (el.type === 'text' || el.type === 'contact') {
-    return {
+    const out = {
       type: el.showContactIcon ? 'contact' : 'text',
       role: el.role || el.id,
       text: el.text || '',
@@ -223,11 +248,12 @@ export function konvaToCardEl(el, cw, ch, index) {
       w: pctW,
       h: el.height ? pctH : undefined,
       zIndex: zIdx,
-      color: el.fill,
+      color: el.fillGradient?.from ? undefined : el.fill,
       fontSize: el.fontSize,
       fontFamily: el.fontFamily,
       letterSpacing: el.letterSpacing,
       textDecoration: el.textDecoration,
+      underlineColor: el.underlineColor || undefined,
       bold: el.fontStyle?.includes('bold') || false,
       italic: el.fontStyle?.includes('italic') || false,
       textAlign: el.align || 'left',
@@ -235,11 +261,14 @@ export function konvaToCardEl(el, cw, ch, index) {
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
+    if (el.fillGradient?.from) out.fillGradient = el.fillGradient
+    return out
   }
 
   if (el.type === 'icon') {
-    return {
+    const iconBlock = {
       type: 'icon',
       iconId: el.iconId,
       fill: el.fill || '#1a1a1a',
@@ -252,11 +281,17 @@ export function konvaToCardEl(el, cw, ch, index) {
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
+    if (el.stroke && el.strokeWidth > 0) {
+      iconBlock.stroke = el.stroke
+      iconBlock.strokeWidth = el.strokeWidth
+    }
+    return iconBlock
   }
 
   if (el.type === 'image') {
-    return {
+    const imgBlock = {
       type: 'image',
       role: el.role || 'logo',
       src: el.src,
@@ -267,9 +302,17 @@ export function konvaToCardEl(el, cw, ch, index) {
       zIndex: zIdx,
       visible: el.visible !== false,
       borderRadius: el.borderRadius,
+      shape: el.shape || ((el.borderRadius || 0) >= 50 ? 'circle' : undefined),
+      cover: el.role === 'background' || el.cover || undefined,
       opacity: el.opacity,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
+    if (el.stroke && el.strokeWidth > 0) {
+      imgBlock.stroke = el.stroke
+      imgBlock.strokeWidth = el.strokeWidth
+    }
+    return imgBlock
   }
 
   if (el.type === 'qr') {
@@ -291,6 +334,7 @@ export function konvaToCardEl(el, cw, ch, index) {
       qrErrorCorrection: el.qrErrorCorrection || 'M',
       qrLogoSrc: el.qrLogoSrc || '',
       qrMargin: el.qrMargin ?? 10,
+      ...serializeShadow(el),
     }
   }
 

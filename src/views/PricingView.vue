@@ -439,13 +439,7 @@
                   />
                 </div>
               </div>
-              <div
-                class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3"
-              >
-                <p class="text-sm text-blue-800 dark:text-blue-300">
-                  Test: 4242 4242 4242 4242 / 12/25 / 123
-                </p>
-              </div>
+
             </div>
           </Transition>
 

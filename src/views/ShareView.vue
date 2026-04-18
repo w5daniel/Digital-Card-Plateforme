@@ -249,7 +249,7 @@ watch(qrModalOpen, (v) => {
 })
 
 onMounted(() => {
-  const cardId = Number(route.params.cardId)
+  const cardId = route.params.cardId
   // getPublicCard lit d'abord les cartes de l'utilisateur courant,
   // puis le snapshot public (accessible cross-user).
   // TODO backend : remplacer par await api.get(`/cards/public/${cardId}`)

@@ -95,15 +95,7 @@
         </div>
       </div>
 
-      <!-- Demo Info -->
-      <div
-        class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
-      >
-        <p class="text-sm text-blue-700 dark:text-blue-400">
-          <strong>Mode démo:</strong> Utilisez n'importe quel email et un mot de passe d'au moins 6
-          caractères
-        </p>
-      </div>
+
     </div>
   </div>
 </template>

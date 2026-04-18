@@ -3,7 +3,9 @@
     <!-- Limites & Quotas -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+      :class="
+        themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+      "
     >
       <div
         class="px-5 py-4 border-b"
@@ -34,6 +36,7 @@
               type="number"
               min="1"
               max="100"
+              step="1"
               class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
@@ -54,6 +57,7 @@
               type="number"
               min="1"
               max="500"
+              step="1"
               class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
               :class="
                 themeStore.darkMode
@@ -69,7 +73,9 @@
     <!-- Informations générales -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+      :class="
+        themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+      "
     >
       <div
         class="px-5 py-4 border-b"
@@ -124,7 +130,9 @@
     <!-- Toggles système -->
     <section
       class="rounded-xl border"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+      :class="
+        themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
+      "
     >
       <div
         class="px-5 py-4 border-b"
@@ -160,7 +168,9 @@
           </div>
           <button
             @click="draft[toggle.key] = !draft[toggle.key]"
-            class="relative inline-flex flex-shrink-0 h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none"
+            role="switch"
+            :aria-checked="draft[toggle.key]"
+            class="relative inline-flex flex-shrink-0 h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none cursor-pointer"
             :class="
               draft[toggle.key]
                 ? 'bg-flame-500'
@@ -219,7 +229,9 @@
           </div>
           <button
             @click="draft.maintenanceMode = !draft.maintenanceMode"
-            class="relative inline-flex flex-shrink-0 h-6 w-11 rounded-full transition-colors duration-200"
+            role="switch"
+            :aria-checked="draft.maintenanceMode"
+            class="relative inline-flex flex-shrink-0 h-6 w-11 rounded-full transition-colors duration-200 cursor-pointer"
             :class="
               draft.maintenanceMode
                 ? 'bg-red-500'
@@ -247,14 +259,17 @@
     <div class="flex items-center justify-between">
       <button
         @click="resetToDefaults"
+        @blur="confirmingReset = false"
         class="px-4 py-2 rounded-lg border text-sm transition-colors"
         :class="
-          themeStore.darkMode
-            ? 'border-onyx-600 text-onyx-400 hover:bg-onyx-800'
-            : 'border-onyx-200 text-onyx-500 hover:bg-powder-50'
+          confirmingReset
+            ? 'border-red-500 text-red-500 bg-red-500/10 hover:bg-red-500/20'
+            : themeStore.darkMode
+              ? 'border-onyx-600 text-onyx-400 hover:bg-onyx-800'
+              : 'border-onyx-200 text-onyx-500 hover:bg-powder-50'
         "
       >
-        Réinitialiser par défaut
+        {{ confirmingReset ? 'Confirmer la réinitialisation ?' : 'Réinitialiser par défaut' }}
       </button>
       <div class="flex items-center space-x-3">
         <span v-if="saved" class="text-xs text-green-500 flex items-center space-x-1">
@@ -285,6 +300,8 @@ const adminStore = useAdminStore()
 // Copie locale jusqu'à sauvegarde explicite
 const draft = ref({ ...adminStore.settings })
 const saved = ref(false)
+const confirmingReset = ref(false)
+let savedTimer = null
 
 const isDirty = computed(() => {
   return JSON.stringify(draft.value) !== JSON.stringify(adminStore.settings)
@@ -295,15 +312,37 @@ const toggleOptions = [
   { key: 'allowGallery', label: 'Galerie publique', desc: 'La galerie est visible par tous' },
 ]
 
+// TODO backend : valider appName, supportEmail, limites côté serveur (PUT /api/admin/settings)
+function validate() {
+  const d = draft.value
+  if (!d.appName || d.appName.trim().length === 0) return "Le nom de l'application est requis"
+  if (!d.maxCardsPerUser || d.maxCardsPerUser < 1)
+    return 'Le nombre de cartes (gratuit) doit être ≥ 1'
+  if (!d.maxCardsPerPremium || d.maxCardsPerPremium < 1)
+    return 'Le nombre de cartes (premium) doit être ≥ 1'
+  return null
+}
+
 const saveSettings = () => {
+  const err = validate()
+  if (err) {
+    alert(err)
+    return
+  }
   adminStore.updateSettings({ ...draft.value })
   saved.value = true
-  setTimeout(() => (saved.value = false), 2500)
+  if (savedTimer) clearTimeout(savedTimer)
+  savedTimer = setTimeout(() => (saved.value = false), 2500)
 }
 
 const resetToDefaults = () => {
+  if (!confirmingReset.value) {
+    confirmingReset.value = true
+    return
+  }
   adminStore.resetSettings()
   draft.value = { ...adminStore.settings }
+  confirmingReset.value = false
 }
 
 // Sync si le store change depuis l'extérieur

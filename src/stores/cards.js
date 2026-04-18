@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { CARD_TEMPLATES } from '../data/mockData'
 import { useAuthStore } from './authStore'
+import { useAdminStore } from './adminStore'
 
 const LS_PREFIX = 'digitalcard_userCards_'
 
@@ -15,6 +16,8 @@ const ADMIN_OVERRIDES_LS_KEY = 'digitalcard_adminTemplateOverrides'
 // Slugs des templates supprimés par l'admin
 // TODO backend : soft-delete dans la table `templates` via DELETE /api/admin/templates/:slug
 const ADMIN_REMOVED_LS_KEY = 'digitalcard_adminRemovedTemplates'
+// Modèles officiels créés/modifiés par l'admin (editorData stocké séparément)
+const ADMIN_CUSTOM_TEMPLATES_KEY = 'digitalcard_adminCustomTemplates'
 
 export const useCardsStore = defineStore('cards', () => {
   const authStore = useAuthStore()
@@ -44,6 +47,25 @@ export const useCardsStore = defineStore('cards', () => {
     } catch {
       /* ignore */
     }
+  })()
+
+  // Charger les modèles officiels créés par l'admin (pas dans CARD_TEMPLATES)
+  ;(function _loadAdminCustomTemplates() {
+    try {
+      const raw = localStorage.getItem(ADMIN_CUSTOM_TEMPLATES_KEY)
+      if (raw) {
+        const customs = JSON.parse(raw)
+        for (const t of customs) {
+          const existingIdx = templates.value.findIndex((x) => x.slug === t.slug)
+          if (existingIdx === -1) {
+            templates.value.push(t)
+          } else {
+            // Template officiel modifié par l'admin — remplacer par la version custom
+            templates.value[existingIdx] = t
+          }
+        }
+      }
+    } catch { /* ignore */ }
   })()
 
   // Cartes de l'utilisateur courant
@@ -113,10 +135,14 @@ export const useCardsStore = defineStore('cards', () => {
 
   const getUserCardsCount = computed(() => userCards.value.length)
 
-  /** Vérifie si l'utilisateur peut créer une nouvelle carte (limite Free) */
+  /** Vérifie si l'utilisateur peut créer une nouvelle carte (limite configurable via admin) */
   const canCreateCard = computed(() => {
-    if (authStore.isPremium || authStore.isAdmin) return true
-    return userCards.value.length < MAX_FREE_CARDS
+    if (authStore.isAdmin) return true
+    const adminStore = useAdminStore()
+    const limit = authStore.isPremium
+      ? (adminStore.settings?.maxCardsPerPremium ?? 50)
+      : (adminStore.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
+    return userCards.value.length < limit
   })
 
   /**
@@ -182,6 +208,7 @@ export const useCardsStore = defineStore('cards', () => {
 
   /**
    * Ajoute une nouvelle carte
+   * TODO backend : valider card.name (min 2 chars), card.data.contact (email, phone, name formats) côt�� serveur
    */
   async function addCard(card) {
     isLoading.value = true
@@ -190,12 +217,14 @@ export const useCardsStore = defineStore('cards', () => {
     try {
       // Vérifier la limite de cartes pour les comptes gratuits
       if (!canCreateCard.value) {
+        const adminS = useAdminStore()
+        const limit = authStore.isPremium ? (adminS.settings?.maxCardsPerPremium ?? 50) : (adminS.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
         throw new Error(
-          `Limite atteinte (${MAX_FREE_CARDS} cartes). Passez au plan Premium pour créer plus de cartes.`,
+          `Limite atteinte (${limit} cartes). ${authStore.isPremium ? '' : 'Passez au plan Premium pour créer plus de cartes.'}`,
         )
       }
       const newCard = {
-        id: Date.now(),
+        id: crypto.randomUUID(),
         ...card,
         templateModelId: card.templateModelId || null,
         ownerId: authStore.user?.email || 'anonymous',
@@ -290,6 +319,7 @@ export const useCardsStore = defineStore('cards', () => {
 
   /**
    * Met à jour une carte existante
+   * TODO backend : valider updates.name, updates.data.contact côté serveur (PUT /api/cards/:id)
    */
   async function updateCard(cardId, updates) {
     isLoading.value = true
@@ -344,15 +374,17 @@ export const useCardsStore = defineStore('cards', () => {
     try {
       // Vérifier la limite de cartes pour les comptes gratuits
       if (!canCreateCard.value) {
+        const adminS = useAdminStore()
+        const limit = authStore.isPremium ? (adminS.settings?.maxCardsPerPremium ?? 50) : (adminS.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
         throw new Error(
-          `Limite atteinte (${MAX_FREE_CARDS} cartes). Passez au plan Premium pour créer plus de cartes.`,
+          `Limite atteinte (${limit} cartes). ${authStore.isPremium ? '' : 'Passez au plan Premium pour créer plus de cartes.'}`,
         )
       }
 
       const original = getCardById(cardId)
       if (original) {
         const duplicate = JSON.parse(JSON.stringify(original))
-        duplicate.id = Date.now()
+        duplicate.id = crypto.randomUUID()
         duplicate.name = `${original.name} (Copie)`
         duplicate.createdAt = new Date().toISOString()
         duplicate.ownerId = authStore.user?.email || 'anonymous'
@@ -510,7 +542,7 @@ export const useCardsStore = defineStore('cards', () => {
       data.cards.forEach((card) => {
         const importedCard = {
           ...card,
-          id: Date.now() + Math.floor(Math.random() * 10000),
+          id: crypto.randomUUID(),
           ownerId: authStore.user?.email || 'anonymous',
           createdAt: card.createdAt || new Date().toISOString(),
         }
@@ -588,6 +620,7 @@ export const useCardsStore = defineStore('cards', () => {
    *   → NE PAS supprimer définitivement sans confirmation (RGPD — historique)
    */
   function adminDeleteCard(cardId, ownerEmail) {
+    if (!authStore.isAdmin) return
     try {
       const raw = localStorage.getItem(LS_PREFIX + ownerEmail)
       if (!raw) return
@@ -616,6 +649,7 @@ export const useCardsStore = defineStore('cards', () => {
    *   → logguer dans admin_audit_log
    */
   function adminToggleCardVisibility(cardId, ownerEmail) {
+    if (!authStore.isAdmin) return
     try {
       const raw = localStorage.getItem(LS_PREFIX + ownerEmail)
       if (!raw) return
@@ -634,6 +668,88 @@ export const useCardsStore = defineStore('cards', () => {
       /* données corrompues — non bloquant */
     }
     adminCardsVersion.value++
+  }
+
+  // ── Admin : templates officiels (CRUD) ────────────────────────────────────
+
+  function _saveCustomTemplates() {
+    try {
+      const customs = templates.value.filter((t) => t._isCustom)
+      localStorage.setItem(ADMIN_CUSTOM_TEMPLATES_KEY, JSON.stringify(customs))
+    } catch { /* quota */ }
+  }
+
+  /**
+   * Crée un nouveau modèle officiel dans la galerie (admin uniquement).
+   * Génère un slug unique — jamais de collision silencieuse.
+   */
+  function addOfficialTemplate(data) {
+    if (!authStore.isAdmin) return null
+    // Generate unique slug — add numeric suffix if collision
+    const base = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'modele'
+    let slug = base
+    let i = 2
+    while (templates.value.find((t) => t.slug === slug)) {
+      slug = `${base}-${i}`
+      i++
+    }
+    const newTmpl = {
+      id: crypto.randomUUID(),
+      slug,
+      name: data.name,
+      category: data.category || 'Personnalisé',
+      isPremium: data.isPremium || false,
+      description: data.description || '',
+      rating: 0,
+      thumbnail: '',
+      colors: data.colors || { primary: '#6366F1', secondary: '#1E293B', text: '#ffffff' },
+      editorData: data.editorData || null,
+      previewElements: data.previewElements || null,
+      previewVersoElements: data.previewVersoElements || null,
+      previewBackgrounds: data.previewBackgrounds || null,
+      previewCardWidth: data.previewCardWidth || null,
+      previewCardHeight: data.previewCardHeight || null,
+      previewCardBorderRadius: data.previewCardBorderRadius ?? null,
+      previewOrientation: data.previewOrientation || null,
+      previewFontFamily: data.previewFontFamily || null,
+      _isCustom: true,
+    }
+    templates.value.push(newTmpl)
+    _saveCustomTemplates()
+    return newTmpl
+  }
+
+  /**
+   * Met à jour un modèle officiel existant (admin uniquement).
+   */
+  function updateOfficialTemplate(slug, updates) {
+    if (!authStore.isAdmin) return null
+    const tmpl = templates.value.find((t) => t.slug === slug)
+    if (!tmpl) return null
+    if (updates.name) tmpl.name = updates.name
+    if (updates.category) tmpl.category = updates.category
+    if (updates.description !== undefined) tmpl.description = updates.description
+    if (updates.colors) tmpl.colors = updates.colors
+    if (updates.editorData) tmpl.editorData = updates.editorData
+    if (updates.isPremium !== undefined) tmpl.isPremium = updates.isPremium
+    // Preview data for gallery rendering
+    if (updates.previewElements) tmpl.previewElements = updates.previewElements
+    if (updates.previewVersoElements) tmpl.previewVersoElements = updates.previewVersoElements
+    if (updates.previewBackgrounds) tmpl.previewBackgrounds = updates.previewBackgrounds
+    if (updates.previewCardWidth) tmpl.previewCardWidth = updates.previewCardWidth
+    if (updates.previewCardHeight) tmpl.previewCardHeight = updates.previewCardHeight
+    if (updates.previewCardBorderRadius != null) tmpl.previewCardBorderRadius = updates.previewCardBorderRadius
+    if (updates.previewOrientation) tmpl.previewOrientation = updates.previewOrientation
+    if (updates.previewFontFamily) tmpl.previewFontFamily = updates.previewFontFamily
+    tmpl._isCustom = true
+    _saveCustomTemplates()
+    try {
+      const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
+      const overrides = raw ? JSON.parse(raw) : {}
+      overrides[slug] = { ...overrides[slug], name: tmpl.name, category: tmpl.category, description: tmpl.description, isPremium: tmpl.isPremium }
+      localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
+    } catch { /* quota */ }
+    return tmpl
   }
 
   // Auto-persist vers la clé localStorage de l'utilisateur courant
@@ -689,5 +805,8 @@ export const useCardsStore = defineStore('cards', () => {
     getAllCardsAdmin,
     adminDeleteCard,
     adminToggleCardVisibility,
+    // Admin — gestion templates officiels
+    addOfficialTemplate,
+    updateOfficialTemplate,
   }
 })

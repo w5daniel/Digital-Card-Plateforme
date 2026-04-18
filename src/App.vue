@@ -15,7 +15,7 @@
         </Transition>
       </RouterView>
     </main>
-    <FooterBar v-if="!hideLayout" />
+    <FooterBar v-if="!hideFooter" />
     <ToastNotification />
   </div>
 </template>
@@ -32,6 +32,7 @@ const themeStore = useThemeStore()
 const route = useRoute()
 
 const hideLayout = computed(() => !!route.meta?.hideLayout)
+const hideFooter = computed(() => !!route.meta?.hideLayout || !!route.meta?.hideFooter)
 
 onMounted(() => {
   themeStore.applyTheme()

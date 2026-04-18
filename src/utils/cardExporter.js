@@ -9,11 +9,26 @@
 import Konva from 'konva'
 import { loadIcon } from '@iconify/vue'
 import {
+  buildKonvaGradient,
+  buildKonvaGradientCentered,
+  parseCSSGradient,
+  gradientProps,
+  gradientPropsCentered,
+} from './gradientHelpers'
+import {
   DEFAULT_QR_FIELDS,
   buildVCardFromFields,
   generateQRDataURL,
   getContactFromCard,
 } from './qrCodeHelper'
+
+// ── Contact-role → Iconify icon ID (matches BusinessCard.vue ICON_COMPONENTS) ─
+const CONTACT_ROLE_ICONS = {
+  email: 'lucide:mail',
+  phone: 'lucide:phone',
+  website: 'lucide:globe',
+  address: 'lucide:map-pin',
+}
 
 // ── Image loaders ──────────────────────────────────────────────────────────
 
@@ -57,49 +72,162 @@ async function loadQRImage(el, contact, contactExtra) {
   }
 }
 
+// ── Shadow helper (mirrors EditorCanvas.vue) ─────────────────────────────
+function shadowProps(el) {
+  if (!el.shadowEnabled) return {}
+  return {
+    shadowEnabled: true,
+    shadowColor: el.shadowColor || '#000000',
+    shadowBlur: el.shadowBlur ?? 8,
+    shadowOffsetX: el.shadowOffsetX ?? 3,
+    shadowOffsetY: el.shadowOffsetY ?? 3,
+    shadowOpacity: el.shadowOpacity ?? 0.35,
+  }
+}
+
 // ── Build Konva nodes from element data ────────────────────────────────────
 
 function addElementToLayer(layer, el, imageMap) {
   if (el.visible === false) return
 
   if (el.type === 'text') {
-    layer.add(
-      new Konva.Text({
-        x: el.x,
-        y: el.y,
-        width: el.width,
-        height: el.height || undefined,
-        text: el.text || '',
-        fontSize: el.fontSize || 16,
-        fontFamily: el.fontFamily || 'Inter',
-        fontStyle: el.fontStyle || 'normal',
-        textDecoration: el.textDecoration || '',
-        fill: el.fill || '#000000',
-        align: el.align || 'left',
-        opacity: el.opacity ?? 1,
-        rotation: el.rotation || 0,
-        letterSpacing: el.letterSpacing || 0,
-        lineHeight: el.lineHeight || 1.25,
-        wrap: 'word',
-      }),
-    )
+    const contactIcon = imageMap[el.id + '_contactIcon']
+    // Konva auto-sizes text when width is null — use undefined so Konva does the same
+    const baseW = el.width ?? undefined
+    let textX = el.x
+    let textW = baseW
+
+    // Render contact-role icon to the left of the text (mirrors BusinessCard.vue)
+    if (el.showContactIcon && contactIcon) {
+      const fs = el.fontSize || 16
+      const iconSize = Math.round(fs * 1.1)
+      const iconGap = Math.round(fs * 0.4)
+      const elH = el.height || fs * (el.lineHeight || 1.25)
+      const iconY = el.y + (elH - iconSize) / 2
+
+      layer.add(
+        new Konva.Image({
+          x: el.x,
+          y: iconY,
+          width: iconSize,
+          height: iconSize,
+          image: contactIcon,
+          opacity: (el.opacity ?? 1) * 0.7,
+          rotation: el.rotation || 0,
+        }),
+      )
+
+      textX = el.x + iconSize + iconGap
+      textW = baseW != null ? Math.max(1, baseW - iconSize - iconGap) : undefined
+    }
+
+    const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
+    const textNode = new Konva.Text({
+      x: textX,
+      y: el.y,
+      width: textW,
+      height: el.height || undefined,
+      text: el.text || '',
+      fontSize: el.fontSize || 16,
+      fontFamily: el.fontFamily || 'Inter',
+      fontStyle: el.fontStyle || 'normal',
+      // Suppress Konva's native underline when a custom color is set — draw lines manually.
+      textDecoration: hasCustomUnderline ? '' : (el.textDecoration || ''),
+      fill: el.fillGradient ? undefined : (el.fill || '#000000'),
+      ...gradientProps(el, baseW || 200, el.height || 40),
+      align: el.align || 'left',
+      opacity: el.opacity ?? 1,
+      rotation: el.rotation || 0,
+      letterSpacing: el.letterSpacing || 0,
+      lineHeight: el.lineHeight || 1.25,
+      wrap: 'word',
+      ...shadowProps(el),
+    })
+    layer.add(textNode)
+
+    if (hasCustomUnderline) {
+      const fs = el.fontSize || 16
+      const lh = el.lineHeight || 1.25
+      const strokeW = Math.max(1, Math.round(fs * 0.07))
+      // Force Konva to compute text layout so textArr is populated before layer.draw()
+      textNode.getClientRect()
+      const textLines = textNode.textArr || []
+      if (textLines.length > 0) {
+        textLines.forEach((lineObj, i) => {
+          const lineY = el.y + (i + 1) * fs * lh * 0.92
+          let lineX = textX
+          const lineW = lineObj.width || 0
+          const align = el.align || 'left'
+          const containerW = textW || lineW
+          if (align === 'center') lineX = textX + (containerW - lineW) / 2
+          else if (align === 'right') lineX = textX + containerW - lineW
+          layer.add(new Konva.Line({
+            x: lineX,
+            y: lineY,
+            points: [0, 0, lineW, 0],
+            stroke: el.underlineColor,
+            strokeWidth: strokeW,
+            rotation: el.rotation || 0,
+            opacity: el.opacity ?? 1,
+            listening: false,
+          }))
+        })
+      } else {
+        layer.add(new Konva.Line({
+          x: textX,
+          y: el.y + fs * lh * 0.92,
+          points: [0, 0, textNode.getTextWidth() || 100, 0],
+          stroke: el.underlineColor,
+          strokeWidth: strokeW,
+          rotation: el.rotation || 0,
+          opacity: el.opacity ?? 1,
+          listening: false,
+        }))
+      }
+    }
     return
   }
 
   if (el.type === 'image' || el.type === 'icon' || el.type === 'qr') {
     const img = imageMap[el.id]
     if (!img) return
-    layer.add(
-      new Konva.Image({
+    const w = el.width || (el.type === 'icon' ? 64 : el.type === 'qr' ? 100 : 200)
+    const h = el.height || (el.type === 'icon' ? 64 : el.type === 'qr' ? 100 : 120)
+    const strokeAttrs = el.stroke && el.strokeWidth > 0
+      ? { stroke: el.stroke, strokeWidth: el.strokeWidth }
+      : {}
+    const imgNode = new Konva.Image({
+      x: 0,
+      y: 0,
+      width: w,
+      height: h,
+      image: img,
+      ...strokeAttrs,
+    })
+    if (el.type === 'image' && el.shape === 'circle') {
+      // clipFunc sur le Group (Container) — même logique que EditorCanvas.vue
+      const group = new Konva.Group({
         x: el.x,
         y: el.y,
-        width: el.width || (el.type === 'icon' ? 64 : el.type === 'qr' ? 100 : 200),
-        height: el.height || (el.type === 'icon' ? 64 : el.type === 'qr' ? 100 : 120),
-        image: img,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
-      }),
-    )
+        ...shadowProps(el),
+        clipFunc: (ctx) => {
+          ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2)
+        },
+      })
+      group.add(imgNode)
+      layer.add(group)
+    } else {
+      imgNode.setAttrs({
+        x: el.x,
+        y: el.y,
+        opacity: el.opacity ?? 1,
+        rotation: el.rotation || 0,
+        ...shadowProps(el),
+      })
+      layer.add(imgNode)
+    }
     return
   }
 
@@ -118,12 +246,14 @@ function addShapeToLayer(layer, el) {
         y: el.y,
         width: el.width,
         height: el.height,
-        fill: el.fill || '#3B82F6',
+        fill: el.fillGradient ? undefined : (el.fill || '#3B82F6'),
+        ...gradientProps(el, el.width, el.height),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         cornerRadius: el.cornerRadius || 0,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'circle') {
@@ -133,11 +263,13 @@ function addShapeToLayer(layer, el) {
         y: el.y + (el.height || 100) / 2,
         radiusX: (el.width || 100) / 2,
         radiusY: (el.height || 100) / 2,
-        fill: el.fill || '#3B82F6',
+        fill: el.fillGradient ? undefined : (el.fill || '#3B82F6'),
+        ...gradientPropsCentered(el, el.width || 100, el.height || 100),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'line') {
@@ -154,6 +286,7 @@ function addShapeToLayer(layer, el) {
         lineJoin: 'round',
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'arrow') {
@@ -173,6 +306,7 @@ function addShapeToLayer(layer, el) {
         pointerWidth: headSize,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'arrow-double') {
@@ -193,38 +327,21 @@ function addShapeToLayer(layer, el) {
         pointerAtBeginning: true,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'line-bar') {
     const sw = el.strokeWidth || el.height || 2
     const w = el.width || 200
     const barH = Math.max(sw * 5, 16)
-    layer.add(
-      new Konva.Shape({
-        x: el.x,
-        y: el.y,
-        width: w,
-        height: barH,
-        fill: 'transparent',
-        stroke: el.fill || '#000000',
-        strokeWidth: sw,
-        opacity: el.opacity ?? 1,
-        rotation: el.rotation || 0,
-        sceneFunc(ctx, shape) {
-          const W = shape.width()
-          const H = shape.height()
-          const mid = H / 2
-          ctx.beginPath()
-          ctx.moveTo(0, mid)
-          ctx.lineTo(W, mid)
-          ctx.moveTo(0, 0)
-          ctx.lineTo(0, H)
-          ctx.moveTo(W, 0)
-          ctx.lineTo(W, H)
-          ctx.fillStrokeShape(shape)
-        },
-      }),
-    )
+    const mid = barH / 2
+    const stroke = el.fill || '#000000'
+    const base = { x: el.x, y: el.y, stroke, strokeWidth: sw, opacity: el.opacity ?? 1, rotation: el.rotation || 0, lineCap: 'round', ...shadowProps(el) }
+    // Ligne centrale — avec dash pattern
+    layer.add(new Konva.Line({ ...base, points: [0, mid, w, mid], dash: el.dash?.length ? el.dash : undefined }))
+    // Barres verticales d'extrémité — toujours solides
+    layer.add(new Konva.Line({ ...base, points: [0, 0, 0, barH] }))
+    layer.add(new Konva.Line({ ...base, points: [w, 0, w, barH] }))
   } else if (st === 'polygon') {
     const r = Math.min(el.width || 110, el.height || 110) / 2
     layer.add(
@@ -233,11 +350,13 @@ function addShapeToLayer(layer, el) {
         y: el.y + (el.height || 110) / 2,
         sides: el.sides || 5,
         radius: r,
-        fill: el.fill || '#3B82F6',
+        fill: el.fillGradient ? undefined : (el.fill || '#3B82F6'),
+        ...gradientPropsCentered(el, el.width || 110, el.height || 110),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'star') {
@@ -249,11 +368,13 @@ function addShapeToLayer(layer, el) {
         numPoints: el.numPoints || 5,
         outerRadius: ro,
         innerRadius: el.innerRadius || ro * 0.45,
-        fill: el.fill || '#3B82F6',
+        fill: el.fillGradient ? undefined : (el.fill || '#3B82F6'),
+        ...gradientPropsCentered(el, el.width || 120, el.height || 120),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'path') {
@@ -263,13 +384,15 @@ function addShapeToLayer(layer, el) {
         x: el.x,
         y: el.y,
         data: el.pathData || '',
-        fill: el.fill || '#3B82F6',
+        fill: el.fillGradient ? undefined : (el.fill || '#3B82F6'),
+        ...gradientProps(el, el.width || 60, el.height || 60),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         scaleX: (el.width || 60) / vb[0],
         scaleY: (el.height || 60) / vb[1],
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
       }),
     )
   } else if (st === 'custom-poly') {
@@ -280,11 +403,13 @@ function addShapeToLayer(layer, el) {
         y: el.y,
         width: el.width || 100,
         height: el.height || 100,
-        fill: el.fill || '#ffffff',
+        fill: el.fillGradient ? undefined : (el.fill || '#ffffff'),
+        ...gradientProps(el, el.width || 100, el.height || 100),
         stroke: el.stroke || '',
         strokeWidth: el.strokeWidth || 0,
         opacity: el.opacity ?? 1,
         rotation: el.rotation || 0,
+        ...shadowProps(el),
         sceneFunc(ctx, shape) {
           const W = shape.width()
           const H = shape.height()
@@ -303,7 +428,7 @@ function addShapeToLayer(layer, el) {
 
 // ── Render one page into a Konva stage and return a data URL ───────────────
 
-async function renderPage(elements, background, cw, ch, contact, contactExtra, type, pixelRatio) {
+async function renderPage(elements, background, cw, ch, contact, contactExtra, type, pixelRatio, borderRadius = 0) {
   // Pre-load all assets in parallel
   const imageMap = {}
   await Promise.all(
@@ -314,6 +439,14 @@ async function renderPage(elements, background, cw, ch, contact, contactExtra, t
         imageMap[el.id] = await loadIconImage(el)
       } else if (el.type === 'qr') {
         imageMap[el.id] = await loadQRImage(el, contact, contactExtra)
+      }
+      // Pre-load contact-role icon for text elements with showContactIcon
+      if (el.type === 'text' && el.showContactIcon && CONTACT_ROLE_ICONS[el.role]) {
+        imageMap[el.id + '_contactIcon'] = await loadIconImage({
+          iconId: CONTACT_ROLE_ICONS[el.role],
+          fill: el.fill || '#000000',
+          colorful: false,
+        })
       }
     }),
   )
@@ -328,13 +461,46 @@ async function renderPage(elements, background, cw, ch, contact, contactExtra, t
   const layer = new Konva.Layer()
   stage.add(layer)
 
-  // Background
-  layer.add(new Konva.Rect({ x: 0, y: 0, width: cw, height: ch, fill: background || '#ffffff' }))
+  // Background (supports gradient CSS strings)
+  const grad = parseCSSGradient(background)
+  const bgGradProps = grad ? buildKonvaGradient(grad.angle, cw, ch, grad.from, grad.to) : {}
+  layer.add(
+    new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: cw,
+      height: ch,
+      fill: grad ? undefined : background || '#ffffff',
+      cornerRadius: borderRadius,
+      ...bgGradProps,
+    }),
+  )
+
+  // Clip all elements to the rounded card boundary
+  const r = borderRadius
+  const clipGroup = new Konva.Group({
+    clipFunc: r > 0
+      ? (ctx) => {
+          ctx.beginPath()
+          ctx.moveTo(r, 0)
+          ctx.lineTo(cw - r, 0)
+          ctx.quadraticCurveTo(cw, 0, cw, r)
+          ctx.lineTo(cw, ch - r)
+          ctx.quadraticCurveTo(cw, ch, cw - r, ch)
+          ctx.lineTo(r, ch)
+          ctx.quadraticCurveTo(0, ch, 0, ch - r)
+          ctx.lineTo(0, r)
+          ctx.quadraticCurveTo(0, 0, r, 0)
+          ctx.closePath()
+        }
+      : undefined,
+  })
+  layer.add(clipGroup)
 
   // Sort by zIndex and render
   const sorted = [...elements].sort((a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1))
   for (const el of sorted) {
-    addElementToLayer(layer, el, imageMap)
+    addElementToLayer(clipGroup, el, imageMap)
   }
 
   layer.draw()
@@ -370,6 +536,7 @@ export async function exportCardPages(card, type = 'png', pixelRatio = 3) {
 
   const cw = ed.cardWidth || card.data?.cardWidth || 680
   const ch = ed.cardHeight || card.data?.cardHeight || 429
+  const borderRadius = ed.cardBorderRadius ?? card.data?.cardBorderRadius ?? 0
   const contact = getContactFromCard(card.data)
   const contactExtra = ed.contactExtra || card.data?.contactExtra || []
 
@@ -388,6 +555,7 @@ export async function exportCardPages(card, type = 'png', pixelRatio = 3) {
       contactExtra,
       type,
       pixelRatio,
+      borderRadius,
     )
   }
 
@@ -401,6 +569,7 @@ export async function exportCardPages(card, type = 'png', pixelRatio = 3) {
       contactExtra,
       type,
       pixelRatio,
+      borderRadius,
     )
   }
 

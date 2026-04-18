@@ -2,9 +2,13 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useAuthStore } from './authStore'
 import { useCardsStore } from './cards'
+import { useNotificationStore } from './notificationStore'
+import { ADMIN_EMAIL } from '../data/mockData'
+import { konvaToCardEl } from '@/utils/cardElements'
 
 const LS_PREFIX = 'digitalcard_userTemplates_'
 const LS_PUBLIC_PREFIX = 'digitalcard_publicTemplate_'
+const LS_PENDING_NOTIF_PREFIX = 'digitalcard_pendingNotifications_'
 
 export const MAX_FREE_TEMPLATES = 2
 
@@ -15,6 +19,8 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   const userTemplates = ref([])
   const isLoading = ref(false)
   const error = ref(null)
+  // Compteur réactif incrémenté à chaque modification des snapshots communauté
+  const communityVersion = ref(0)
 
   // ── localStorage key for current user ─────────────────────────────────────
   function _lsKey() {
@@ -56,8 +62,12 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   watch(
     () => authStore.user?.email,
     (email) => {
-      if (email) loadUserTemplates()
-      else clearTemplates()
+      if (email) {
+        loadUserTemplates()
+        _deliverPendingNotifications(email)
+      } else {
+        clearTemplates()
+      }
     },
     { immediate: true },
   )
@@ -111,7 +121,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       }
 
       const template = {
-        id: Date.now(),
+        id: crypto.randomUUID(),
         name: data.name || 'Mon modèle',
         isAuto: data.isAuto || false,
         isPublic: data.isPublic || false,
@@ -169,6 +179,20 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   }
 
   /**
+   * Toggle a template's public/private visibility.
+   * If made public, writes the community snapshot.
+   * If made private, removes the community snapshot.
+   */
+  async function toggleTemplateVisibility(templateId) {
+    const tpl = userTemplates.value.find((t) => t.id === templateId)
+    if (!tpl) throw new Error('Modèle introuvable')
+    if (!tpl.isPublic && !authStore.isPremium && !authStore.isAdmin) {
+      throw new Error('La publication de modèles dans la communauté est réservée aux membres Premium.')
+    }
+    return updateTemplate(templateId, { isPublic: !tpl.isPublic })
+  }
+
+  /**
    * Delete a template.
    */
   async function deleteTemplate(templateId) {
@@ -210,6 +234,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
    * @param {number} templateId - ID of the source template
    * @param {Array<Object>} contactsList - Array of { firstName, lastName, ... } objects
    * @returns {{ created: number, errors: string[] }}
+   * TODO backend : valider chaque contact de contactsList (email, phone, name formats) côté serveur
    */
   async function createCardsFromTemplate(templateId, contactsList) {
     const template = getTemplateById(templateId)
@@ -251,8 +276,14 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
             ? `${contact.firstName} ${contact.lastName}`
             : contact.email || `Carte ${Date.now().toString().slice(-4)}`
 
-        const rectoEls = editorData.elements?.recto || []
-        const versoEls = editorData.elements?.verso || []
+        const rawRectoEls = editorData.elements?.recto || []
+        const rawVersoEls = editorData.elements?.verso || []
+
+        // Convert Konva px → BusinessCard % format (like CreateCardFromTemplateModal)
+        const cw = editorData.cardWidth || 680
+        const ch = editorData.cardHeight || 429
+        const rectoEls = rawRectoEls.map((el, i) => konvaToCardEl(el, cw, ch, i)).filter(Boolean)
+        const versoEls = rawVersoEls.map((el, i) => konvaToCardEl(el, cw, ch, i)).filter(Boolean)
 
         const contactExtra =
           template.fieldConfig?.customFields?.map((c) => ({
@@ -272,12 +303,12 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
             backgrounds: editorData.backgrounds,
             contactExtra,
             editorData,
-            showQR: [...rectoEls, ...versoEls].some((e) => e.type === 'qr'),
+            showQR: [...rawRectoEls, ...rawVersoEls].some((e) => e.type === 'qr'),
             orientation:
               editorData.orientation ||
-              (editorData.cardHeight > editorData.cardWidth ? 'portrait' : 'landscape'),
-            cardWidth: editorData.cardWidth || 680,
-            cardHeight: editorData.cardHeight || 429,
+              (ch > cw ? 'portrait' : 'landscape'),
+            cardWidth: cw,
+            cardHeight: ch,
           },
         })
         created.push(card)
@@ -293,38 +324,54 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
 
   function _syncPublicSnapshot(tpl) {
     const key = LS_PUBLIC_PREFIX + tpl.id
-    if (tpl.isPublic) {
+    // Les modèles admin ne vont jamais dans la communauté (ils sont officiels)
+    if (tpl.isPublic && (authStore.isPremium || authStore.isAdmin)) {
       try {
         const snapshot = {
           ...JSON.parse(JSON.stringify(tpl)),
           ownerEmail: authStore.user?.email || 'unknown',
           ownerName: authStore.user?.name || authStore.user?.email || 'Anonyme',
+          ownerRole: authStore.user?.role || 'user',
         }
         localStorage.setItem(key, JSON.stringify(snapshot))
-      } catch { /* quota */ }
+        communityVersion.value++
+      } catch {
+        const notifStore = useNotificationStore()
+        notifStore.error('Espace de stockage insuffisant — le modèle ne peut pas être publié dans la communauté.')
+      }
     } else {
       localStorage.removeItem(key)
+      communityVersion.value++
     }
   }
 
   function _unpublishSnapshot(templateId) {
     localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
+    communityVersion.value++
   }
 
   /**
    * Scan localStorage for public templates from OTHER users.
    */
   function getAllCommunityTemplates() {
-    const currentEmail = authStore.user?.email
+    void communityVersion.value // dépendance réactive — force recalcul après suppression
     const result = []
+    const keysToScan = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (!key.startsWith(LS_PUBLIC_PREFIX)) continue
+      if (key?.startsWith(LS_PUBLIC_PREFIX)) keysToScan.push(key)
+    }
+    for (const key of keysToScan) {
       try {
         const tpl = JSON.parse(localStorage.getItem(key))
-        if (tpl && tpl.isPublic) {
-          result.push(tpl)
+        if (!tpl || !tpl.isPublic) continue
+        // Exclure les modèles créés par un admin (ils sont officiels, pas communauté)
+        const isAdminSnapshot = tpl.ownerRole === 'admin' || tpl.ownerEmail === ADMIN_EMAIL
+        if (isAdminSnapshot) {
+          localStorage.removeItem(key)
+          continue
         }
+        result.push(tpl)
       } catch { /* skip corrupt entries */ }
     }
     return result
@@ -335,6 +382,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     userTemplates,
     isLoading,
     error,
+    communityVersion,
 
     // Getters
     allTemplates,
@@ -349,9 +397,65 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     addTemplate,
     updateTemplate,
     deleteTemplate,
+    toggleTemplateVisibility,
     getTemplateById,
     getCardsCountForTemplate,
     createCardsFromTemplate,
     getAllCommunityTemplates,
+    adminRemoveCommunityTemplate,
+  }
+
+  function adminRemoveCommunityTemplate(templateId) {
+    // Lire le snapshot avant suppression pour récupérer les infos (nom, propriétaire)
+    let ownerEmail = null
+    let templateName = null
+    try {
+      const raw = localStorage.getItem(LS_PUBLIC_PREFIX + templateId)
+      if (raw) {
+        const tpl = JSON.parse(raw)
+        ownerEmail = tpl.ownerEmail || null
+        templateName = tpl.name || null
+      }
+    } catch { /* ignore */ }
+
+    // Supprimer le snapshot public
+    localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
+
+    // Écrire une notification en attente pour le propriétaire du modèle
+    if (ownerEmail) {
+      _writePendingNotification(ownerEmail, templateName)
+    }
+
+    // Forcer le recalcul du computed getAllCommunityTemplates
+    communityVersion.value++
+  }
+
+  function _writePendingNotification(ownerEmail, templateName) {
+    const key = LS_PENDING_NOTIF_PREFIX + ownerEmail
+    try {
+      const existing = JSON.parse(localStorage.getItem(key) || '[]')
+      existing.push({
+        id: Date.now(),
+        type: 'warning',
+        message: templateName
+          ? `Votre modèle "${templateName}" a été retiré de la galerie communauté par un administrateur.`
+          : `Un de vos modèles a été retiré de la galerie communauté par un administrateur.`,
+        timestamp: new Date().toISOString(),
+      })
+      localStorage.setItem(key, JSON.stringify(existing))
+    } catch { /* quota */ }
+  }
+
+  function _deliverPendingNotifications(email) {
+    const key = LS_PENDING_NOTIF_PREFIX + email
+    try {
+      const pending = JSON.parse(localStorage.getItem(key) || '[]')
+      if (!pending.length) return
+      const notifStore = useNotificationStore()
+      for (const n of pending) {
+        notifStore.warning(n.message, 6000)
+      }
+      localStorage.removeItem(key)
+    } catch { /* ignore */ }
   }
 })

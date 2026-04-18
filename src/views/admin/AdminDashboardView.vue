@@ -205,6 +205,13 @@
               <span>{{ stats.blockedUsers }} compte(s) bloqué(s)</span>
             </router-link>
             <div
+              v-if="maintenanceMode"
+              class="flex items-center space-x-2 text-xs p-2 rounded-lg bg-red-500/10 text-red-500"
+            >
+              <AlertTriangle class="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Mode maintenance activé</span>
+            </div>
+            <div
               v-if="stats.publicCards > 0"
               class="flex items-center space-x-2 text-xs p-2 rounded-lg"
               :class="
@@ -214,12 +221,8 @@
               <Globe class="w-3.5 h-3.5 flex-shrink-0" />
               <span>{{ stats.publicCards }} carte(s) publique(s) dans la galerie</span>
             </div>
-            <!--
-              "Aucune alerte" ne s'affiche que si TOUS les indicateurs d'alerte sont à 0.
-              TODO backend : ajouter d'autres conditions (ex : paiements échoués, erreurs serveur)
-            -->
             <p
-              v-if="stats.blockedUsers === 0 && stats.publicCards === 0"
+              v-if="stats.blockedUsers === 0 && !maintenanceMode && stats.publicCards === 0"
               class="text-xs"
               :class="themeStore.darkMode ? 'text-green-400' : 'text-green-600'"
             >
@@ -265,10 +268,11 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Users, CreditCard, Layers, Eye, Globe, UserX, Settings, Plus } from 'lucide-vue-next'
+import { Users, CreditCard, Layers, Eye, Globe, UserX, Settings, Plus, AlertTriangle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useAuthStore } from '../../stores/authStore'
 import { useCardsStore } from '../../stores/cards'
+import { useAdminStore } from '../../stores/adminStore'
 
 const themeStore = useThemeStore()
 
@@ -282,6 +286,9 @@ const themeStore = useThemeStore()
  */
 const authStore = useAuthStore()
 const cardsStore = useCardsStore()
+const adminStore = useAdminStore()
+
+const maintenanceMode = computed(() => adminStore.settings?.maintenanceMode ?? false)
 
 // ── Données admin (cache unique) ────────────────────────────────────────
 // getAllCardsAdmin() scanne TOUS les localStorage → on le met dans un computed séparé
@@ -380,6 +387,8 @@ const recentActivity = computed(() => {
     }))
 
   const cards = adminCards.value
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5)
     .map((c) => ({
       type: 'card',

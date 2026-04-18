@@ -40,8 +40,8 @@
 
         <div :class="divCls" />
 
-        <!-- Verrouiller (single only) -->
-        <template v-if="selectionCount === 1">
+        <!-- Verrouiller (single ou groupe) -->
+        <template v-if="selectionCount === 1 || isGrouped">
           <button :class="btnCls" @click="emit('toggle-lock')">
             <LockOpen v-if="isLocked" :class="icoCls" />
             <Lock v-else :class="icoCls" />

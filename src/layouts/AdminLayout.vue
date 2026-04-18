@@ -218,6 +218,7 @@
             <span>{{ blockedUsersCount }} compte(s) bloqué(s)</span>
           </span>
           <span
+            v-if="!maintenanceMode"
             class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
             :class="
               themeStore.darkMode
@@ -227,6 +228,13 @@
           >
             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             <span>Système actif</span>
+          </span>
+          <span
+            v-else
+            class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500 border border-orange-500/20"
+          >
+            <AlertTriangle class="w-3.5 h-3.5" />
+            <span>Maintenance</span>
           </span>
         </div>
       </header>
@@ -256,15 +264,20 @@ import {
   Moon,
   ExternalLink,
   AlertTriangle,
+  Globe,
 } from 'lucide-vue-next'
 import { useThemeStore } from '../stores/themeStore'
 import { useAuthStore } from '../stores/authStore'
+import { useAdminStore } from '../stores/adminStore'
 
 const route = useRoute()
 const router = useRouter()
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
+const adminStore = useAdminStore()
 const sidebarOpen = ref(false)
+
+const maintenanceMode = computed(() => adminStore.settings?.maintenanceMode ?? false)
 
 // Nombre de comptes bloqués (données réelles depuis authStore)
 // TODO backend : vient du champ `blockedUsers` de GET /api/admin/overview
@@ -277,6 +290,7 @@ const navItems = computed(() => [
   { to: '/admin/users', label: 'Utilisateurs', icon: Users, badge: blockedUsersCount.value },
   { to: '/admin/templates', label: 'Modèles', icon: Layers, badge: 0 },
   { to: '/admin/cards', label: 'Cartes', icon: CreditCard, badge: 0 },
+  { to: '/admin/gallery', label: 'Galerie communauté', icon: Globe, badge: 0 },
   { to: '/admin/settings', label: 'Paramètres', icon: Settings, badge: 0 },
 ])
 
@@ -285,6 +299,7 @@ const PAGE_TITLES = {
   'admin-users': 'Gestion des utilisateurs',
   'admin-templates': 'Gestion des modèles',
   'admin-cards': 'Gestion des cartes',
+  'admin-gallery': 'Galerie communauté',
   'admin-settings': 'Paramètres système',
 }
 

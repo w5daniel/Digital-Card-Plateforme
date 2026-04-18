@@ -3,7 +3,8 @@
     <!-- ── Header ── -->
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+        <Search
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
           :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         />
         <input
@@ -19,14 +20,17 @@
         />
       </div>
       <div class="flex items-center justify-between gap-3">
-        <p class="text-xs whitespace-nowrap" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
+        <p
+          class="text-xs whitespace-nowrap"
+          :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+        >
           {{ filteredTemplates.length }} modèle(s)
           <span v-if="filteredTemplates.length !== cardsStore.getAllTemplates.length">
             sur {{ cardsStore.getAllTemplates.length }}
           </span>
         </p>
 
-      <!--
+        <!--
         TODO backend : "Nouveau modèle" doit créer un template dans la table `templates`.
         Flux prévu :
           1. Admin crée/édite le design dans l'éditeur (route /editor)
@@ -35,13 +39,13 @@
           4. Le nouveau template apparaît dans la galerie publique immédiatement
         Pour l'instant : redirige simplement vers l'éditeur vierge.
       -->
-      <button
-        @click="router.push('/editor')"
-        class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 text-white text-sm font-medium transition-colors"
-      >
-        <Plus class="w-4 h-4" />
-        <span>Nouveau modèle</span>
-      </button>
+        <button
+          @click="router.push('/editor?admin-new-template=1')"
+          class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 text-white text-sm font-medium transition-colors"
+        >
+          <Plus class="w-4 h-4" />
+          <span>Nouveau modèle</span>
+        </button>
       </div>
     </div>
 
@@ -60,28 +64,18 @@
           themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
         "
       >
-        <!-- ── Live preview (même pattern que GalleryView) ── -->
+        <!-- ── Live preview — adaptive aspect ratio, centred card, dot-grid backdrop ── -->
         <!--
           TODO backend : remplacer par un thumbnail PNG pré-généré côté serveur
             (Puppeteer / headless Chrome → POST /api/admin/templates/:slug/thumbnail)
           Avantage : pas de rendu Vue côté admin, chargement instantané
         -->
         <div
-          class="relative overflow-hidden cursor-pointer group bg-onyx-900"
-          style="height: 160px"
-          @click="router.push('/editor?template=' + tmpl.slug)"
+          class="group"
+          :style="previewContainerStyle(tmpl)"
+          @click="router.push('/editor?admin-edit=' + tmpl.slug)"
         >
-          <div
-            :style="{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '500px',
-              transformOrigin: 'top left',
-              transform: `scale(${previewScale})`,
-              pointerEvents: 'none',
-            }"
-          >
+          <div :style="previewInnerStyle(tmpl)">
             <BusinessCard :card="buildPreviewCard(tmpl, idx)" :isFlipped="false" />
           </div>
 
@@ -91,7 +85,7 @@
           >
             <span class="text-white text-xs font-semibold flex items-center gap-1.5">
               <Pencil class="w-3.5 h-3.5" />
-              Ouvrir dans l'éditeur
+              Modifier le modèle
             </span>
           </div>
 
@@ -123,7 +117,7 @@
             Pour l'instant la valeur est toujours 0 (non trackée côté front)
           -->
           <p class="text-xs mb-3" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
-            Utilisé {{ tmpl.usageCount ?? 0 }} fois
+            Utilisé {{ getUsageCount(tmpl.slug) }} fois
           </p>
 
           <!-- ── Actions ── -->
@@ -135,7 +129,7 @@
                 → invalider le cache CDN de la gallery
             -->
             <button
-              @click="cardsStore.toggleTemplatePremium(tmpl.slug)"
+              @click="doTogglePremium(tmpl)"
               class="flex-1 text-xs py-1.5 px-3 rounded-lg border transition-colors"
               :class="
                 tmpl.isPremium
@@ -155,7 +149,7 @@
                 Au lieu de créer une nouvelle carte utilisateur.
             -->
             <button
-              @click="router.push('/editor?template=' + tmpl.slug)"
+              @click="router.push('/editor?admin-edit=' + tmpl.slug)"
               class="p-1.5 rounded-lg transition-colors"
               :class="
                 themeStore.darkMode
@@ -192,9 +186,11 @@
         :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
       >
         <p class="text-sm">
-          {{ cardsStore.getAllTemplates.length === 0
-            ? 'Aucun modèle disponible.'
-            : 'Aucun modèle ne correspond à la recherche.' }}
+          {{
+            cardsStore.getAllTemplates.length === 0
+              ? 'Aucun modèle disponible.'
+              : 'Aucun modèle ne correspond à la recherche.'
+          }}
         </p>
         <button
           v-if="searchQuery && cardsStore.getAllTemplates.length > 0"
@@ -212,7 +208,8 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       @click.self="templateToDelete = null"
       @keydown.escape="templateToDelete = null"
-      tabindex="0"
+      tabindex="-1"
+      ref="deleteModalRef"
     >
       <div
         class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
@@ -254,13 +251,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast notification -->
+    <Transition name="toast">
+      <div
+        v-if="toast"
+        class="fixed bottom-6 right-6 z-50 flex items-center space-x-2 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium bg-green-500 text-white"
+      >
+        <CheckCircle class="w-4 h-4 flex-shrink-0" />
+        <span>{{ toast }}</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Pencil, Trash2, Search } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, Search, CheckCircle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useCardsStore } from '../../stores/cards'
 import BusinessCard from '../../components/BusinessCard.vue'
@@ -288,6 +296,7 @@ const filteredTemplates = computed(() => {
 // TODO backend : remplacer les previews live par des thumbnails PNG pré-générés
 const gridRef = ref(null)
 const previewScale = ref(0.52)
+const previewColW = ref(240) // column width in px — used by per-template style helpers
 
 let ro = null
 onMounted(() => {
@@ -305,11 +314,68 @@ onMounted(() => {
     }
     const gap = 16 // gap-4 = 16px
     const colW = (w - (cols - 1) * gap) / cols
+    previewColW.value = colW
     previewScale.value = Math.min(1, colW / 500)
   })
   ro.observe(gridRef.value)
 })
 onBeforeUnmount(() => ro?.disconnect())
+
+// ── Template preview styles — adaptive container + centred card ────────
+const PREVIEW_PAD = 0.08 // 8% padding on all 4 sides
+
+// Container: ratio fixe 16/9 pour uniformité de la grille (portrait et paysage alignés)
+const previewContainerStyle = (tmpl) => {
+  const dark = themeStore.darkMode
+  return {
+    aspectRatio: '16 / 9',
+    overflow: 'hidden',
+    position: 'relative',
+    cursor: 'pointer',
+    backgroundColor: dark ? '#0d1520' : '#f0f4f8',
+    backgroundImage: dark
+      ? 'radial-gradient(circle, #1a2640 1.5px, transparent 1.5px)'
+      : 'radial-gradient(circle, #c6cfd9 1px, transparent 1px)',
+    backgroundSize: '18px 18px',
+  }
+}
+
+// Inner wrapper: fit-inside 16/9 container, centred — handles both portrait and landscape
+const previewInnerStyle = (tmpl) => {
+  const cw = tmpl.previewCardWidth || 680
+  const ch = tmpl.previewCardHeight || 429
+  const isPortrait = ch > cw
+  const naturalW = isPortrait ? 300 : 500 // BusinessCard maxWidth
+  const naturalH = naturalW * (ch / cw)
+
+  const col = previewColW.value
+  const containerH = col * (9 / 16)
+
+  const P = PREVIEW_PAD
+  const scale = Math.min((col * (1 - 2 * P)) / naturalW, (containerH * (1 - 2 * P)) / naturalH)
+
+  const renderedW = naturalW * scale
+  const renderedH = naturalH * scale
+  const offsetX = (col - renderedW) / 2
+  const offsetY = (containerH - renderedH) / 2
+
+  return {
+    position: 'absolute',
+    top: `${offsetY}px`,
+    left: `${offsetX}px`,
+    width: `${naturalW}px`,
+    transformOrigin: 'top left',
+    transform: `scale(${scale})`,
+    pointerEvents: 'none',
+  }
+}
+
+// Kept for backward-compat (was referenced in template before refactor)
+const getPreviewAspect = (tmpl) => {
+  const cw = tmpl.previewCardWidth || 680
+  const ch = tmpl.previewCardHeight || 429
+  return `${cw} / ${ch}`
+}
 
 // ── Personnes exemples pour les previews ──────────────────────────────
 const samplePersons = [
@@ -356,19 +422,68 @@ const samplePersons = [
 ]
 
 function buildPreviewCard(tmpl, idx) {
+  // Admin custom templates with saved preview elements → use them directly
+  if (tmpl.previewElements) {
+    return {
+      id: `admin-preview-${tmpl.slug}`,
+      template: tmpl.slug,
+      data: {
+        elements: tmpl.previewElements,
+        versoElements: tmpl.previewVersoElements || [],
+        backgrounds: tmpl.previewBackgrounds || { recto: tmpl.colors?.primary, verso: tmpl.colors?.secondary },
+        cardWidth: tmpl.previewCardWidth || 680,
+        cardHeight: tmpl.previewCardHeight || 429,
+        cardBorderRadius: tmpl.previewCardBorderRadius ?? 8,
+        orientation: tmpl.previewOrientation || 'landscape',
+        fontFamily: tmpl.previewFontFamily || undefined,
+        showQR: false,
+      },
+    }
+  }
+  // Layout-based templates → generate from layout + colors
   const person = samplePersons[idx % samplePersons.length]
   const layout = LAYOUT_MAP[tmpl.slug] || 'center'
   return {
     id: `admin-preview-${tmpl.slug}`,
     template: tmpl.slug,
-    // cardWidth/cardHeight obligatoires : BusinessCard.vue calcule fontScale = actualWidth / cardWidth
-    // Sans ces valeurs → division par undefined → NaN / Infinity
-    data: { elements: buildElements(layout, person, tmpl.colors), showQR: false, cardWidth: 500, cardHeight: 300 },
+    data: {
+      elements: buildElements(layout, person, tmpl.colors),
+      showQR: false,
+    },
   }
 }
 
 // ── Suppression ────────────────────────────────────────────────────────
 const templateToDelete = ref(null)
+const deleteModalRef = ref(null)
+const toast = ref(null)
+let toastTimer = null
+
+function showToast(msg) {
+  if (toastTimer) clearTimeout(toastTimer)
+  toast.value = msg
+  toastTimer = setTimeout(() => {
+    toast.value = null
+  }, 2500)
+}
+
+watch(templateToDelete, (v) => {
+  if (v) nextTick(() => deleteModalRef.value?.focus())
+})
+
+// Usage count per template (from real card data)
+const templateUsageMap = computed(() => {
+  const allCards = cardsStore.getAllCardsAdmin()
+  const map = {}
+  for (const c of allCards) {
+    const slug = c.templateSlug || c.template
+    if (slug) map[slug] = (map[slug] || 0) + 1
+  }
+  return map
+})
+function getUsageCount(slug) {
+  return templateUsageMap.value[slug] || 0
+}
 
 function confirmDelete(tmpl) {
   templateToDelete.value = tmpl
@@ -376,7 +491,16 @@ function confirmDelete(tmpl) {
 
 function doDelete() {
   if (!templateToDelete.value) return
+  const name = templateToDelete.value.name
   cardsStore.removeTemplate(templateToDelete.value.slug)
   templateToDelete.value = null
+  showToast(`"${name}" supprimé`)
+}
+
+function doTogglePremium(tmpl) {
+  cardsStore.toggleTemplatePremium(tmpl.slug)
+  showToast(
+    tmpl.isPremium ? `"${tmpl.name}" est maintenant Premium` : `Premium retiré de "${tmpl.name}"`,
+  )
 }
 </script>

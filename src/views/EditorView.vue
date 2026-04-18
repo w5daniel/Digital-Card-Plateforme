@@ -42,6 +42,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useEditorStore, CARD_W, CARD_H } from '@/stores/useEditorStore'
 import { useCardsStore } from '@/stores/cards'
+import { useAuthStore } from '@/stores/authStore'
 import { useUserTemplatesStore } from '@/stores/userTemplatesStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useFontStore } from '@/stores/fontStore'
@@ -62,6 +63,7 @@ const route = useRoute()
 const router = useRouter()
 const editorStore = useEditorStore()
 const cardsStore = useCardsStore()
+const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const fontStore = useFontStore()
 const shellRef = ref(null)
@@ -128,6 +130,14 @@ onMounted(() => {
       // Restore fieldConfig if present
       if (card.data?.fieldConfig) {
         editorStore.fieldConfig = JSON.parse(JSON.stringify(card.data.fieldConfig))
+        // Re-sync contactExtra depuis card.data.contactExtra (source autoritaire).
+        // initEditor reçoit editorData qui peut ne pas contenir contactExtra
+        // (cas création depuis modèle), donc on l'écrase ici avec les vraies valeurs.
+        const savedExtra = Array.isArray(card.data.contactExtra) ? card.data.contactExtra : []
+        const extraMap = new Map(savedExtra.map((c) => [c.id, c]))
+        editorStore.contactExtra = (editorStore.fieldConfig.customFields || []).map(
+          (cf) => extraMap.get(cf.id) || { id: cf.id, label: cf.label, value: '' },
+        )
       } else if (Array.isArray(card.data?.contactExtra)) {
         // backward comp
         editorStore.contactExtra = card.data.contactExtra
@@ -164,88 +174,130 @@ onMounted(() => {
     }
   } else {
     // ── New card — may come from gallery with ?template=slug or ?community=id ──
-    editorStore.editMode = 'new'
-    const slug = route.query.template || cardsStore.currentTemplate || null
-    const communityId = route.query.community || null
-    const t = slug ? cardsStore.getTemplateBySlug(slug) : null
+    // ── Or admin editing/creating a gallery template ──
+    const adminEditSlug = route.query['admin-edit'] || null
+    const adminNewTemplate = route.query['admin-new-template'] || null
 
-    if (t) {
-      const layout = LAYOUT_MAP[slug] || 'center'
-      const editorEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, t.colors)
-      editorStore.initEditor({
-        elements: { recto: editorEls, verso: [] },
-        backgrounds: { recto: t.colors.primary, verso: t.colors.secondary },
-      })
-      editorStore.cardName = `Carte ${t.name}`
-      editorStore.templateSlug = slug
-      editorStore.templatePrimaryColor = t.colors.secondary || t.colors.primary || '#6366F1'
-    } else if (communityId) {
-      // ── Community template — load design, replace contact text with defaults ──
-      const ROLE_DEFAULTS = {
-        firstName: 'Prénom',
-        lastName: 'Nom',
-        title: 'Votre titre professionnel',
-        company: 'MON ENTREPRISE',
-        email: 'email@monentreprise.fr',
-        phone: '+33 6 00 00 00 00',
-        website: 'www.monentreprise.fr',
-        address: '123 Rue Exemple, Paris',
-      }
-      // Resolve source: public card (numeric ID) or public template ("tpl_" prefix)
-      let sourceCard = null
-      if (communityId.startsWith('tpl_')) {
-        const tplId = communityId.replace('tpl_', '')
-        try {
-          const raw = localStorage.getItem(`digitalcard_publicTemplate_${tplId}`)
-          if (raw) {
-            const tpl = JSON.parse(raw)
-            sourceCard = { name: tpl.name, data: { editorData: tpl.editorData } }
-          }
-        } catch {
-          /* ignore corrupt entry */
-        }
-      } else {
-        sourceCard = cardsStore.getPublicCard(Number(communityId))
-      }
-      if (sourceCard?.data?.editorData) {
-        const edData = JSON.parse(JSON.stringify(sourceCard.data.editorData))
-        const replaceDefaults = (els) =>
-          (els || []).map((el) => {
-            if (el.type === 'text' && el.role && ROLE_DEFAULTS[el.role]) {
-              return { ...el, text: ROLE_DEFAULTS[el.role] }
-            }
-            return el
-          })
-        if (edData.elements?.recto) edData.elements.recto = replaceDefaults(edData.elements.recto)
-        if (edData.elements?.verso) edData.elements.verso = replaceDefaults(edData.elements.verso)
-        editorStore.initEditor(edData)
-        editorStore.cardName = `Carte basée sur ${sourceCard.name || 'communauté'}`
-        editorStore.isPublic = false // New card from community template → private by default
-      } else if (sourceCard?.data?.elements) {
-        // Fallback: rebuild from BusinessCard format
-        const savedW = sourceCard.data.cardWidth || CARD_W
-        const savedH = sourceCard.data.cardHeight || CARD_H
-        const rebuilt = rebuildEditorElements(
-          sourceCard.data.elements,
-          sourceCard.data.versoElements,
-          savedW,
-          savedH,
-        )
+    if (adminEditSlug && authStore.isAdmin) {
+      // ── Admin editing an existing gallery template ──
+      const t = cardsStore.getTemplateBySlug(adminEditSlug)
+      if (t?.editorData) {
+        // Template with saved editor data → restore it
+        editorStore.initEditor(JSON.parse(JSON.stringify(t.editorData)))
+      } else if (t) {
+        // Original template (layout-based) → build from layout
+        const layout = LAYOUT_MAP[adminEditSlug] || 'center'
+        const editorEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, t.colors)
         editorStore.initEditor({
-          elements: rebuilt,
-          backgrounds: sourceCard.data.backgrounds || { recto: '#FFFFFF', verso: '#1E293B' },
-          cardWidth: savedW,
-          cardHeight: savedH,
-          orientation: sourceCard.data.orientation || (savedH > savedW ? 'portrait' : 'landscape'),
+          elements: { recto: editorEls, verso: [] },
+          backgrounds: { recto: t.colors.primary, verso: t.colors.secondary },
         })
-        editorStore.cardName = `Carte basée sur ${sourceCard.name || 'communauté'}`
       } else {
         editorStore.initEditor()
       }
-    } else {
+      editorStore.editMode = 'edit-gallery-template'
+      editorStore.editingGallerySlug = adminEditSlug
+      editorStore.cardName = t?.name || adminEditSlug
+      editorStore.templateSlug = adminEditSlug
+    } else if (adminNewTemplate && authStore.isAdmin) {
+      // ── Admin creating a new gallery template ──
       editorStore.initEditor()
-    }
-    cardsStore.currentTemplate = null
+      editorStore.editMode = 'edit-gallery-template'
+      editorStore.editingGallerySlug = null
+      editorStore.cardName = 'Nouveau modèle'
+    } else {
+      // ── Regular new card flow ──
+      editorStore.editMode = 'new'
+      const slug = route.query.template || cardsStore.currentTemplate || null
+      const communityId = route.query.community || null
+      const t = slug ? cardsStore.getTemplateBySlug(slug) : null
+
+      if (t) {
+        if (t.editorData) {
+          // Admin custom template with saved editor data → restore and let user customize
+          const edData = JSON.parse(JSON.stringify(t.editorData))
+          editorStore.initEditor(edData)
+        } else {
+          // Layout-based template → build from layout + colors
+          const layout = LAYOUT_MAP[slug] || 'center'
+          const editorEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, t.colors)
+          editorStore.initEditor({
+            elements: { recto: editorEls, verso: [] },
+            backgrounds: { recto: t.colors.primary, verso: t.colors.secondary },
+          })
+        }
+        editorStore.cardName = `Carte ${t.name}`
+        editorStore.templateSlug = slug
+        editorStore.templatePrimaryColor = t.colors.secondary || t.colors.primary || '#6366F1'
+      } else if (communityId) {
+        // ── Community template — load design, replace contact text with defaults ──
+        const ROLE_DEFAULTS = {
+          firstName: 'Prénom',
+          lastName: 'Nom',
+          title: 'Votre titre professionnel',
+          company: 'MON ENTREPRISE',
+          email: 'email@monentreprise.fr',
+          phone: '+33 6 00 00 00 00',
+          website: 'www.monentreprise.fr',
+          address: '123 Rue Exemple, Ouagadougou',
+        }
+        // Resolve source: public card (numeric ID) or public template ("tpl_" prefix)
+        let sourceCard = null
+        if (communityId.startsWith('tpl_')) {
+          const tplId = communityId.replace('tpl_', '')
+          try {
+            const raw = localStorage.getItem(`digitalcard_publicTemplate_${tplId}`)
+            if (raw) {
+              const tpl = JSON.parse(raw)
+              sourceCard = { name: tpl.name, data: { editorData: tpl.editorData } }
+            }
+          } catch {
+            /* ignore corrupt entry */
+          }
+        } else {
+          sourceCard = cardsStore.getPublicCard(Number(communityId))
+        }
+        if (sourceCard?.data?.editorData) {
+          const edData = JSON.parse(JSON.stringify(sourceCard.data.editorData))
+          const replaceDefaults = (els) =>
+            (els || []).map((el) => {
+              if (el.type === 'text' && el.role && ROLE_DEFAULTS[el.role]) {
+                return { ...el, text: ROLE_DEFAULTS[el.role] }
+              }
+              return el
+            })
+          if (edData.elements?.recto) edData.elements.recto = replaceDefaults(edData.elements.recto)
+          if (edData.elements?.verso) edData.elements.verso = replaceDefaults(edData.elements.verso)
+          editorStore.initEditor(edData)
+          editorStore.cardName = `Carte basée sur ${sourceCard.name || 'communauté'}`
+          editorStore.isPublic = false // New card from community template → private by default
+        } else if (sourceCard?.data?.elements) {
+          // Fallback: rebuild from BusinessCard format
+          const savedW = sourceCard.data.cardWidth || CARD_W
+          const savedH = sourceCard.data.cardHeight || CARD_H
+          const rebuilt = rebuildEditorElements(
+            sourceCard.data.elements,
+            sourceCard.data.versoElements,
+            savedW,
+            savedH,
+          )
+          editorStore.initEditor({
+            elements: rebuilt,
+            backgrounds: sourceCard.data.backgrounds || { recto: '#FFFFFF', verso: '#1E293B' },
+            cardWidth: savedW,
+            cardHeight: savedH,
+            orientation:
+              sourceCard.data.orientation || (savedH > savedW ? 'portrait' : 'landscape'),
+          })
+          editorStore.cardName = `Carte basée sur ${sourceCard.name || 'communauté'}`
+        } else {
+          editorStore.initEditor()
+        }
+      } else {
+        editorStore.initEditor()
+      }
+      cardsStore.currentTemplate = null
+    } // end regular new card flow
   }
 
   // Load all Google Fonts used by the editor elements
@@ -303,7 +355,7 @@ function onKeyDown(e) {
     if (editorStore.singleSelected) editorStore.sendBackward(editorStore.singleSelected.id)
   } else if (e.altKey && (e.key === 'l' || e.key === 'L')) {
     e.preventDefault()
-    if (editorStore.singleSelected) editorStore.toggleLock(editorStore.singleSelected.id)
+    if (editorStore.selectedIds.length) editorStore.toggleLock(editorStore.selectedIds)
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
     editorStore.deleteSelected()
   } else if (e.key === 'Escape') {

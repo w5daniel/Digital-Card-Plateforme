@@ -196,8 +196,11 @@
                       v-model="profileForm.name"
                       type="text"
                       placeholder="Votre nom complet"
-                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                      :class="profileErrors.name ? 'border-red-400 dark:border-red-500' : 'border-powder-200 dark:border-onyx-600'"
+                      @blur="profileErrors.name = validateField('fullName', profileForm.name)"
                     />
+                    <p v-if="profileErrors.name" class="text-[11px] text-red-500 mt-1">{{ profileErrors.name }}</p>
                   </div>
                   <div>
                     <label
@@ -208,8 +211,11 @@
                       v-model="profileForm.email"
                       type="email"
                       placeholder="votre@email.com"
-                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                      class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                      :class="profileErrors.email ? 'border-red-400 dark:border-red-500' : 'border-powder-200 dark:border-onyx-600'"
+                      @blur="profileErrors.email = validateField('email', profileForm.email)"
                     />
+                    <p v-if="profileErrors.email" class="text-[11px] text-red-500 mt-1">{{ profileErrors.email }}</p>
                   </div>
                 </div>
                 <div>
@@ -220,8 +226,11 @@
                     v-model="profileForm.title"
                     type="text"
                     placeholder="Ex : Développeur Web · Chef de projet"
-                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 border-powder-200 dark:border-onyx-600 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                    class="w-full px-3.5 py-2.5 rounded-lg text-sm border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-flame-500/30 focus:border-flame-500 bg-powder-50 dark:bg-onyx-700/50 text-onyx-900 dark:text-powder-100 placeholder-onyx-400 dark:placeholder-powder-600"
+                    :class="profileErrors.title ? 'border-red-400 dark:border-red-500' : 'border-powder-200 dark:border-onyx-600'"
+                    @blur="profileErrors.title = validateField('title', profileForm.title)"
                   />
+                  <p v-if="profileErrors.title" class="text-[11px] text-red-500 mt-1">{{ profileErrors.title }}</p>
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-onyx-500 dark:text-powder-500 mb-1.5"
@@ -624,7 +633,7 @@
                   </div>
                   <div class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-3">
                     0 FCFA<span class="text-xs font-normal text-onyx-500 dark:text-powder-500"
-                      >/mois</span
+                      >/an</span
                     >
                   </div>
                   <ul class="space-y-2">
@@ -663,7 +672,7 @@
                   </div>
                   <div class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-3">
                     4 990 FCFA<span class="text-xs font-normal text-onyx-500 dark:text-powder-500"
-                      >/mois</span
+                      >/an</span
                     >
                   </div>
                   <ul class="space-y-2">
@@ -727,7 +736,7 @@
               </div>
 
               <!-- Invoice table -->
-              <div v-if="mockInvoices.length > 0" class="overflow-x-auto">
+              <div v-if="invoices.length > 0" class="overflow-x-auto">
                 <table class="w-full text-sm">
                   <thead>
                     <tr
@@ -741,7 +750,7 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-powder-50 dark:divide-onyx-800/50">
-                    <tr v-for="inv in mockInvoices" :key="inv.id" class="group">
+                    <tr v-for="inv in invoices" :key="inv.id" class="group">
                       <td class="py-3.5">
                         <div class="text-sm font-medium text-onyx-900 dark:text-powder-100">
                           {{ inv.description }}
@@ -879,6 +888,7 @@ import {
   Receipt,
 } from 'lucide-vue-next'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import { validateField } from '@/utils/validators'
 
 const router = useRouter()
 const route = useRoute()
@@ -946,9 +956,18 @@ const profileForm = reactive({
   bio: authStore.user?.bio || '',
 })
 
+const profileErrors = reactive({ name: '', email: '', title: '' })
+
+// TODO backend : valider name, email, title, bio côté serveur (PUT /api/users/me)
 const saveProfile = async () => {
-  if (!profileForm.name.trim()) {
-    notify.error('Le nom ne peut pas être vide')
+  profileErrors.name = validateField('fullName', profileForm.name)
+  profileErrors.email = validateField('email', profileForm.email)
+  profileErrors.title = validateField('title', profileForm.title)
+  if (!profileForm.name.trim()) profileErrors.name = 'Le nom ne peut pas être vide'
+  if (!profileForm.email.trim()) profileErrors.email = "L'email ne peut pas être vide"
+  if (profileErrors.name || profileErrors.email || profileErrors.title) {
+    const firstErr = profileErrors.name || profileErrors.email || profileErrors.title
+    notify.error(firstErr)
     return
   }
   profileLoading.value = true
@@ -1120,13 +1139,6 @@ const handleUpgrade = async () => {
   try {
     await authStore.upgradeToPremium()
     notify.success('Bienvenue dans le plan Premium !')
-    mockInvoices.value.unshift({
-      id: `INV-${Date.now()}`,
-      description: 'Plan Premium · 1 mois',
-      date: new Date().toLocaleDateString('fr-FR'),
-      amount: '4 990 FCFA',
-      status: 'Payé',
-    })
   } catch {
     notify.error('Erreur lors de la mise à niveau')
   } finally {
@@ -1150,19 +1162,8 @@ const onCancelSubConfirmed = () => {
 }
 
 // ── Billing ─────────────────────────────────────────────────────
-const mockInvoices = ref(
-  authStore.hasPremium()
-    ? [
-        {
-          id: 'INV-001',
-          description: 'Plan Premium · 1 mois',
-          date: new Date().toLocaleDateString('fr-FR'),
-          amount: '4 990 FCFA',
-          status: 'Payé',
-        },
-      ]
-    : [],
-)
+// TODO: fetch invoices from backend API
+const invoices = ref([])
 
 const downloadInvoice = (inv) => {
   const content = [

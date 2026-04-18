@@ -839,7 +839,12 @@ export function buildEditorElements(layout, person, colors = {}) {
  * Reconstructs Konva editor elements from a saved BusinessCard % format.
  * Used when a card has card.data.elements but no card.data.editorData.
  */
-export function rebuildEditorElements(elements = [], versoElements = [], targetW = CARD_W, targetH = CARD_H) {
+export function rebuildEditorElements(
+  elements = [],
+  versoElements = [],
+  targetW = CARD_W,
+  targetH = CARD_H,
+) {
   return {
     recto: _toEditorEls(elements, targetW, targetH),
     verso: _toEditorEls(versoElements, targetW, targetH),
@@ -859,11 +864,12 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
         const polyPts = el.clipPath ? parseClipPolygon(el.clipPath) : null
         const isCircle = (el.borderRadius || 0) >= 50
         const rgba = (el.bgColor || '').match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)
-        const fill = rgba ? `rgb(${rgba[1]},${rgba[2]},${rgba[3]})` : el.bgColor || '#000000'
+        const fill = el.fillGradient ? undefined : (rgba ? `rgb(${rgba[1]},${rgba[2]},${rgba[3]})` : el.bgColor || '#000000')
         const opacity = rgba ? parseFloat(rgba[4]) : (el.opacity ?? 1)
+        const fg = el.fillGradient?.from ? el.fillGradient : undefined
 
         if (el.pathData) {
-          return {
+          const out = {
             id,
             type: 'shape',
             shapeType: 'path',
@@ -879,13 +885,15 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
             stroke: el.strokePath || el.stroke || '',
             strokeWidth: el.strokeWidthPath || el.strokeWidth || 0,
             dash: el.dashPath || [],
-            zIndex: el.zIndex ?? (i + 1),
+            zIndex: el.zIndex ?? i + 1,
             visible: el.visible !== false,
             draggable: true,
           }
+          if (fg) out.fillGradient = fg
+          return out
         }
         if (polyPts) {
-          return {
+          const out = {
             id,
             type: 'shape',
             shapeType: 'custom-poly',
@@ -899,13 +907,15 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
             rotation: el.rotation || 0,
             stroke: el.stroke || '',
             strokeWidth: el.strokeWidth || 0,
-            zIndex: el.zIndex ?? (i + 1),
+            zIndex: el.zIndex ?? i + 1,
             visible: el.visible !== false,
             draggable: true,
           }
+          if (fg) out.fillGradient = fg
+          return out
         }
         if (isCircle) {
-          return {
+          const out = {
             id,
             type: 'shape',
             shapeType: 'circle',
@@ -918,12 +928,14 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
             rotation: el.rotation || 0,
             stroke: el.stroke || '',
             strokeWidth: el.strokeWidth || 0,
-            zIndex: el.zIndex ?? (i + 1),
+            zIndex: el.zIndex ?? i + 1,
             visible: el.visible !== false,
             draggable: true,
           }
+          if (fg) out.fillGradient = fg
+          return out
         }
-        return {
+        const out = {
           id,
           type: 'shape',
           shapeType: 'rect',
@@ -937,16 +949,18 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
           cornerRadius: el.borderRadius ? Math.round((el.borderRadius / 100) * Math.min(w, h)) : 0,
           stroke: el.stroke || '',
           strokeWidth: el.strokeWidth || 0,
-          zIndex: el.zIndex ?? (i + 1),
+          zIndex: el.zIndex ?? i + 1,
           visible: el.visible !== false,
           draggable: true,
         }
+        if (fg) out.fillGradient = fg
+        return out
       }
 
       if (el.type === 'text' || el.type === 'contact') {
         const fontStyle =
           el.bold && el.italic ? 'bold italic' : el.bold ? 'bold' : el.italic ? 'italic' : 'normal'
-        return {
+        const out = {
           id,
           type: 'text',
           role: el.role || null,
@@ -958,18 +972,21 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
           text: el.text || '',
           fontSize: el.fontSize || 14,
           fontFamily: el.fontFamily || 'Inter',
-          fill: el.color || '#000000',
+          fill: el.fillGradient ? undefined : el.color || '#000000',
           fontStyle,
           align: el.textAlign || 'left',
           letterSpacing: el.letterSpacing || 0,
           textDecoration: el.textDecoration || '',
+          underlineColor: el.underlineColor || undefined,
           lineHeight: el.lineHeight || 1.25,
           opacity: el.opacity ?? 1,
           rotation: el.rotation || 0,
-          zIndex: el.zIndex ?? (i + 1),
+          zIndex: el.zIndex ?? i + 1,
           visible: el.visible !== false,
           draggable: true,
         }
+        if (el.fillGradient?.from) out.fillGradient = el.fillGradient
+        return out
       }
 
       if (el.type === 'image') {
@@ -983,9 +1000,10 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
           width: w,
           height: h,
           borderRadius: el.borderRadius || 0,
+          shape: el.shape || ((el.borderRadius || 0) >= 50 ? 'circle' : undefined),
           opacity: el.opacity ?? 1,
           rotation: el.rotation || 0,
-          zIndex: el.zIndex ?? (i + 1),
+          zIndex: el.zIndex ?? i + 1,
           visible: el.visible !== false,
           draggable: true,
         }
@@ -1004,7 +1022,7 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
           height: h,
           opacity: el.opacity ?? 1,
           rotation: el.rotation || 0,
-          zIndex: el.zIndex ?? (i + 1),
+          zIndex: el.zIndex ?? i + 1,
           visible: el.visible !== false,
           draggable: true,
         }
@@ -1020,7 +1038,7 @@ function _toEditorEls(els, targetW = CARD_W, targetH = CARD_H) {
           height: h,
           opacity: el.opacity ?? 1,
           rotation: el.rotation || 0,
-          zIndex: el.zIndex ?? (i + 1),
+          zIndex: el.zIndex ?? i + 1,
           visible: el.visible !== false,
           draggable: true,
           qrFields: el.qrFields ? { ...el.qrFields } : { ...DEFAULT_QR_FIELDS },

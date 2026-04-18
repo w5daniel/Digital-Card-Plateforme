@@ -4,28 +4,111 @@
     v-if="editorStore.selectedIds.length > 0"
     class="flex items-center gap-1 px-3 h-11 shrink-0 border-b overflow-x-auto"
     :class="
-      themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200 shadow-sm'
+      themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'
     "
   >
+    <!-- ── LOCK / UNLOCK BUTTON ──────────────────────────────────────── -->
+    <template v-if="isSelectionLocked !== null">
+      <button
+        @click="editorStore.toggleLock(editorStore.selectedIds)"
+        class="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors shrink-0"
+        :class="isSelectionLocked
+          ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
+          : (themeStore.darkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900')"
+        :title="isSelectionLocked ? 'Déverrouiller (Alt+L)' : 'Verrouiller (Alt+L)'"
+      >
+        <Lock v-if="isSelectionLocked" class="w-3.5 h-3.5 shrink-0" />
+        <LockOpen v-else class="w-3.5 h-3.5 shrink-0" />
+        <span>{{ isSelectionLocked ? 'Déverrouillé' : 'Verrouiller' }}</span>
+      </button>
+      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
+    </template>
+
+    <!-- ── UNLOCK ALL BUTTON ─────────────────────────────────────────── -->
+    <template v-if="hasAnyLocked">
+      <button
+        @click="editorStore.unlockAll()"
+        class="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors shrink-0 text-amber-500 bg-amber-500/10 hover:bg-amber-500/20"
+        title="Tout déverrouiller"
+      >
+        <LockOpen class="w-3.5 h-3.5 shrink-0" />
+        <span>Tout déverrouiller</span>
+      </button>
+      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
+    </template>
+
     <!-- ── TEXT CONTROLS ──────────────────────────────────────────────── -->
-    <template v-if="selType === 'text'">
-      <!-- Text color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur du texte">
-        <Type class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
+    <template v-if="!sel?.locked && selType === 'text'">
+      <!-- Text color (solid or gradient) -->
+      <div class="flex items-center gap-1">
+        <Type class="w-4 h-4 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+
+        <!-- Solid mode: direct color picker -->
+        <label
+          v-if="shapeFillMode !== 'gradient'"
+          class="relative w-6 h-6 rounded border overflow-hidden cursor-pointer"
           :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+          title="Couleur du texte"
         >
-          <div class="absolute inset-0" :style="{ background: sel.fill }" />
+          <div class="absolute inset-0" :style="{ background: sel.fill || '#000' }" />
           <input
             type="color"
-            :value="sel.fill"
+            :value="sel.fill || '#000000'"
             @input="update('fill', $event.target.value)"
             @change="commit('fill', $event.target.value)"
             class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
           />
+        </label>
+
+        <!-- Gradient mode: preview swatch that opens fill popover -->
+        <button
+          v-else
+          ref="fillTriggerRef"
+          @click="openFillPopover($event)"
+          class="w-6 h-6 rounded border overflow-hidden shrink-0"
+          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+          title="Dégradé texte"
+          :style="{ background: `linear-gradient(${shapeGradAngle}deg, ${shapeGradFrom}, ${shapeGradTo})` }"
+        />
+
+        <!-- Gradient toggle button -->
+        <button
+          @click="toggleTextGradient"
+          class="w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0"
+          :class="shapeFillMode === 'gradient'
+            ? (themeStore.darkMode ? 'bg-violet-900/50 text-violet-400' : 'bg-violet-50 text-violet-600')
+            : btnCls"
+          title="Basculer en dégradé"
+        >
+          <span class="text-[9px] font-bold leading-none"
+            :style="shapeFillMode === 'gradient'
+              ? { background: `linear-gradient(90deg,${shapeGradFrom},${shapeGradTo})`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }
+              : {}"
+          >GR</span>
+        </button>
+      </div>
+
+      <!-- Gradient controls (inline when active) -->
+      <template v-if="shapeFillMode === 'gradient' && selType === 'text'">
+        <div class="flex items-center gap-1">
+          <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'" title="Couleur début">
+            <div class="absolute inset-0" :style="{ background: shapeGradFrom }" />
+            <input type="color" :value="shapeGradFrom" @input="shapeGradFrom = $event.target.value; updateGradientFill()" @change="commitGradientFill()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+          </label>
+          <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'" title="Couleur fin">
+            <div class="absolute inset-0" :style="{ background: shapeGradTo }" />
+            <input type="color" :value="shapeGradTo" @input="shapeGradTo = $event.target.value; updateGradientFill()" @change="commitGradientFill()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+          </label>
+          <!-- Angle presets -->
+          <div class="flex gap-0.5">
+            <button v-for="dir in [{a:0,icon:'↑'},{a:90,icon:'→'},{a:135,icon:'↘'},{a:180,icon:'↓'}]" :key="dir.a"
+              @click="shapeGradAngle = dir.a; commitGradientFill()"
+              class="w-5 h-5 rounded text-xs flex items-center justify-center transition-colors"
+              :class="shapeGradAngle === dir.a ? 'bg-violet-500 text-white' : btnCls"
+            >{{ dir.icon }}</button>
+          </div>
         </div>
-      </label>
+      </template>
 
       <div class="w-px h-5 shrink-0" :class="divCls" />
 
@@ -61,19 +144,53 @@
                 ref="fontSearchRef"
                 v-model="fontQuery"
                 type="text"
-                placeholder="Rechercher parmi 300+ polices..."
+                :placeholder="authStore.isPremium || authStore.isAdmin ? 'Rechercher parmi 300+ polices...' : 'Rechercher parmi 50 polices...'"
                 class="w-full text-sm rounded px-2 py-1.5 outline-none border"
                 :class="inputCls"
                 @keydown.escape="fontDropdownOpen = false"
               />
             </div>
 
+            <!-- Import button (premium only) + upgrade banner (free) -->
+            <div
+              class="px-3 py-1.5 flex items-center justify-between border-b shrink-0"
+              :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+            >
+              <span
+                v-if="!authStore.isPremium && !authStore.isAdmin"
+                class="text-[10px]"
+                :class="themeStore.darkMode ? 'text-amber-400' : 'text-amber-600'"
+              >
+                Limité à 50 polices — passez au Premium pour 300+
+              </span>
+              <span v-else class="text-[10px] opacity-40" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+                300+ polices disponibles
+              </span>
+              <button
+                v-if="authStore.isPremium || authStore.isAdmin"
+                @click.stop="triggerFontUploadCtx"
+                class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border transition-colors"
+                :class="themeStore.darkMode ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400' : 'border-gray-300 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+                title="Importer une police personnalisée (.ttf, .otf, .woff, .woff2)"
+              >
+                <Upload class="w-2.5 h-2.5" />
+                Importer
+              </button>
+            </div>
+            <input
+              ref="fontFileInputCtxRef"
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2"
+              class="hidden"
+              @change="onFontFileSelectedCtx"
+            />
+
             <!-- Font list — 2 sections when no search, flat list when searching -->
             <div class="overflow-y-auto overscroll-contain" style="max-height: 320px">
               <!-- No search: 4 sections -->
               <template v-if="!fontQuery">
-                <!-- Section: Polices importées -->
-                <template v-if="importedFonts.length">
+                <!-- Section: Polices importées (premium only) -->
+                <template v-if="(authStore.isPremium || authStore.isAdmin) && importedFonts.length">
                   <div
                     class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider opacity-40"
                     :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
@@ -361,6 +478,38 @@
         U
       </button>
 
+      <!-- Underline color (only visible when underline is active) -->
+      <label
+        v-if="isUnderline"
+        class="relative w-5 h-5 rounded cursor-pointer border overflow-hidden shrink-0"
+        :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+        title="Couleur du soulignement"
+      >
+        <div
+          class="absolute inset-0"
+          :style="{ background: sel.underlineColor || sel.fill || '#000000' }"
+        />
+        <input
+          type="color"
+          :value="sel.underlineColor || sel.fill || '#000000'"
+          @input="update('underlineColor', $event.target.value)"
+          @change="commit('underlineColor', $event.target.value)"
+          class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+        />
+      </label>
+
+      <!-- Bullet list styles -->
+      <div class="flex items-center gap-0.5">
+        <button
+          v-for="bullet in bulletStyles"
+          :key="bullet.prefix"
+          @click="toggleBullets(bullet.prefix)"
+          class="px-1.5 py-1 rounded text-xs font-mono transition-colors"
+          :class="activeBullet === bullet.prefix ? activeBtnCls : btnCls"
+          :title="bullet.label"
+        >{{ bullet.symbol }}</button>
+      </div>
+
       <div class="w-px h-5 shrink-0" :class="divCls" />
 
       <!-- Alignment -->
@@ -408,7 +557,7 @@
           @click="commit('showContactIcon', !sel.showContactIcon)"
           class="flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors"
           :class="sel.showContactIcon ? activeBtnCls : btnCls"
-          title="Afficher l'icône contact"
+          title="Afficher l'icône correspondante au rôle (email, téléphone, site web, adresse)"
         >
           <Contact2 class="w-3.5 h-3.5" />
           <span>Icône</span>
@@ -416,619 +565,68 @@
       </template>
     </template>
 
-    <!-- ── LINE CONTROLS ─────────────────────────────────────────────── -->
-    <template
-      v-else-if="selType === 'shape' && (sel.shapeType === 'line' || sel.shapeType === 'line-bar')"
-    >
-      <!-- Line color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de la ligne">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.fill || '#000000' }" />
-          <input
-            type="color"
-            :value="sel.fill || '#000000'"
-            @input="update('fill', $event.target.value)"
-            @change="commit('fill', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Couleur</span
-        >
-      </label>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Stroke width -->
-      <div class="flex items-center gap-1.5">
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Épaisseur</span
-        >
-        <input
-          type="number"
-          :value="sel.strokeWidth || 2"
-          @change="commit('strokeWidth', Math.max(1, +$event.target.value))"
-          class="w-14 text-center text-sm rounded px-1 py-1 outline-none border"
-          :class="inputCls"
-          min="1"
-          max="30"
-        />
-      </div>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Line style: solid / dashed / dotted -->
-      <div class="flex items-center gap-1">
-        <button
-          @click="setLineDash([])"
-          class="px-2 py-1 rounded text-xs flex items-center gap-1.5 transition-colors"
-          :class="lineStyle === 'solid' ? activeBtnCls : btnCls"
-          title="Plein"
-        >
-          <svg width="20" height="4" class="shrink-0">
-            <line x1="0" y1="2" x2="20" y2="2" stroke="currentColor" stroke-width="2" />
-          </svg>
-          <span>Plein</span>
-        </button>
-        <button
-          @click="setLineDash([10, 6])"
-          class="px-2 py-1 rounded text-xs flex items-center gap-1.5 transition-colors"
-          :class="lineStyle === 'dashed' ? activeBtnCls : btnCls"
-          title="Tirets"
-        >
-          <svg width="20" height="4" class="shrink-0">
-            <line
-              x1="0"
-              y1="2"
-              x2="20"
-              y2="2"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-dasharray="6,4"
-            />
-          </svg>
-          <span>Tirets</span>
-        </button>
-        <button
-          @click="setLineDash([2, 8])"
-          class="px-2 py-1 rounded text-xs flex items-center gap-1.5 transition-colors"
-          :class="lineStyle === 'dotted' ? activeBtnCls : btnCls"
-          title="Points"
-        >
-          <svg width="20" height="4" class="shrink-0">
-            <line
-              x1="0"
-              y1="2"
-              x2="20"
-              y2="2"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-dasharray="2,6"
-              stroke-linecap="round"
-            />
-          </svg>
-          <span>Points</span>
-        </button>
-      </div>
-    </template>
-
-    <!-- ── ARROW CONTROLS ─────────────────────────────────────────────── -->
-    <template
+    <!-- ── LINE / ARROW CONTROLS ─────────────────────────────────────── -->
+    <ContextBarLine
       v-else-if="
-        selType === 'shape' && (sel.shapeType === 'arrow' || sel.shapeType === 'arrow-double')
+        !sel?.locked && selType === 'shape' &&
+        (sel.shapeType === 'line' || sel.shapeType === 'line-bar' ||
+         sel.shapeType === 'arrow' || sel.shapeType === 'arrow-double')
       "
-    >
-      <!-- Arrow color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de la flèche">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.fill || '#000000' }" />
-          <input
-            type="color"
-            :value="sel.fill || '#000000'"
-            @input="update('fill', $event.target.value)"
-            @change="commit('fill', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Couleur</span
-        >
-      </label>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Arrow size (height = overall height controls tip size) -->
-      <div class="flex items-center gap-1.5">
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Taille</span
-        >
-        <input
-          type="number"
-          :value="sel.height || 24"
-          @change="commit('height', Math.max(8, Math.min(80, +$event.target.value)))"
-          class="w-14 text-center text-sm rounded px-1 py-1 outline-none border"
-          :class="inputCls"
-          min="8"
-          max="80"
-        />
-      </div>
-    </template>
+    />
 
     <!-- ── SHAPE CONTROLS ─────────────────────────────────────────────── -->
-    <template v-else-if="selType === 'shape'">
-      <!-- Fill color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de remplissage">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.fill }" />
-          <input
-            type="color"
-            :value="sel.fill"
-            @input="update('fill', $event.target.value)"
-            @change="commit('fill', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span
-          class="text-xs font-mono"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Fond</span
-        >
-      </label>
-
-      <!-- Border color -->
-      <label class="flex items-center gap-1.5 cursor-pointer ml-2" title="Couleur de bordure">
-        <div
-          class="relative w-6 h-6 rounded border-2 overflow-hidden"
-          :style="{ borderColor: sel.stroke || '#9CA3AF' }"
-        >
-          <div class="absolute inset-0 bg-transparent" />
-          <input
-            type="color"
-            :value="sel.stroke || '#000000'"
-            @input="update('stroke', $event.target.value)"
-            @change="commit('stroke', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span
-          class="text-xs font-mono"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Bordure</span
-        >
-      </label>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Stroke width -->
-      <div class="flex items-center gap-1.5">
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Ep.</span
-        >
-        <input
-          type="number"
-          :value="sel.strokeWidth ?? 0"
-          @change="commit('strokeWidth', +$event.target.value)"
-          class="w-12 text-center text-sm rounded px-1 py-1 outline-none border"
-          :class="inputCls"
-          min="0"
-          max="20"
-        />
-      </div>
-
-      <!-- Corner radius (only for rect) -->
-      <template v-if="sel.shapeType === 'rect'">
-        <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-        <div class="flex items-center gap-1.5">
-          <RectangleHorizontal class="w-4 h-4 opacity-50" />
-          <input
-            type="number"
-            :value="sel.cornerRadius ?? 0"
-            @change="commit('cornerRadius', +$event.target.value)"
-            class="w-12 text-center text-sm rounded px-1 py-1 outline-none border"
-            :class="inputCls"
-            min="0"
-            max="200"
-          />
-        </div>
-      </template>
-    </template>
+    <ContextBarShape
+      v-else-if="!sel?.locked && selType === 'shape'"
+      @open-fill="onShapeOpenFill"
+    />
 
     <!-- ── ICON CONTROLS ──────────────────────────────────────────────── -->
-    <template v-else-if="selType === 'icon' && !sel.colorful">
-      <!-- Fill color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de l'icône">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.fill || '#1a1a1a' }" />
-          <input
-            type="color"
-            :value="sel.fill || '#1a1a1a'"
-            @input="update('fill', $event.target.value)"
-            @change="commit('fill', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span
-          class="text-xs font-mono"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Couleur</span
-        >
-      </label>
-    </template>
+    <ContextBarIcon v-else-if="!sel?.locked && selType === 'icon'" />
 
     <!-- ── QR CODE CONTROLS ────────────────────────────────────────────── -->
-    <template v-else-if="selType === 'qr'">
-      <!-- Foreground color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur avant-plan QR">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.qrForeground || '#000000' }" />
-          <input
-            type="color"
-            :value="sel.qrForeground || '#000000'"
-            @input="update('qrForeground', $event.target.value)"
-            @change="commit('qrForeground', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >QR</span
-        >
-      </label>
+    <ContextBarQR v-else-if="!sel?.locked && selType === 'qr'" />
 
-      <div class="w-px h-5 shrink-0" :class="divCls" />
-
-      <!-- Background color -->
-      <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur arrière-plan QR">
-        <div
-          class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
-        >
-          <div class="absolute inset-0" :style="{ background: sel.qrBackground || '#ffffff' }" />
-          <input
-            type="color"
-            :value="sel.qrBackground || '#ffffff'"
-            @input="update('qrBackground', $event.target.value)"
-            @change="commit('qrBackground', $event.target.value)"
-            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </div>
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-          >Fond</span
-        >
-      </label>
-
-      <div class="w-px h-5 shrink-0" :class="divCls" />
-
-      <!-- Mode toggle -->
-      <div class="flex items-center gap-1">
-        <button
-          v-for="m in [
-            { v: 'standard', l: 'Standard' },
-            { v: 'styled', l: 'Stylé' },
-          ]"
-          :key="m.v"
-          @click="commit('qrMode', m.v)"
-          class="text-[10px] px-2 py-0.5 rounded border transition-colors"
-          :class="
-            (sel.qrMode || 'standard') === m.v
-              ? 'border-violet-500 bg-violet-500/20 text-violet-400 font-semibold'
-              : themeStore.darkMode
-                ? 'border-gray-600 text-gray-400 hover:border-gray-500'
-                : 'border-gray-300 text-gray-500 hover:border-gray-400'
-          "
-        >
-          {{ m.l }}
-        </button>
-      </div>
-    </template>
+    <!-- ── IMAGE CONTROLS ───────────────────────────────────────────────── -->
+    <ContextBarImage v-else-if="!sel?.locked && selType === 'image'" />
 
     <!-- ── MULTI-SELECTION TOOLBAR ────────────────────────────────────── -->
-    <template v-if="editorStore.selectedIds.length >= 2">
-      <span class="text-xs mr-1" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
-        {{ editorStore.selectedIds.length }} éléments
-      </span>
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Group / Ungroup -->
-      <button
-        v-if="!editorStore.canUngroup"
-        @click="editorStore.groupSelected()"
-        class="flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors"
-        :class="btnCls"
-        title="Grouper (Ctrl+G)"
-      >
-        <Group class="w-3.5 h-3.5" />
-        Grouper
-      </button>
-      <button
-        v-else
-        @click="editorStore.ungroupSelected()"
-        class="flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors"
-        :class="btnCls"
-        title="Dégrouper (Ctrl+Shift+G)"
-      >
-        <Ungroup class="w-3.5 h-3.5" />
-        Dégrouper
-      </button>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Quick align -->
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'left')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Aligner à gauche"
-      >
-        <AlignLeft class="w-3.5 h-3.5" />
-      </button>
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'centerH')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Centrer horizontalement"
-      >
-        <AlignCenter class="w-3.5 h-3.5" />
-      </button>
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'right')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Aligner à droite"
-      >
-        <AlignRight class="w-3.5 h-3.5" />
-      </button>
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'top')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Aligner en haut"
-      >
-        <ArrowUpToLine class="w-3.5 h-3.5" />
-      </button>
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'centerV')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Centrer verticalement"
-      >
-        <AlignCenter class="w-3.5 h-3.5" style="transform: rotate(90deg)" />
-      </button>
-      <button
-        @click="editorStore.alignElements(editorStore.selectedIds, 'bottom')"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Aligner en bas"
-      >
-        <ArrowDownToLine class="w-3.5 h-3.5" />
-      </button>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Delete multi -->
-      <button
-        @click="editorStore.deleteSelected()"
-        class="p-1.5 rounded text-red-500 hover:bg-red-50 transition-colors"
-        :class="themeStore.darkMode && 'dark:hover:bg-red-900/20'"
-        title="Supprimer la sélection"
-      >
-        <Trash2 class="w-3.5 h-3.5" />
-      </button>
-    </template>
+    <ContextBarMulti />
 
     <!-- ── COMMON CONTROLS (all element types) ────────────────────────── -->
-    <template v-if="editorStore.selectedIds.length === 1">
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
+    <ContextBarCommon />
 
-      <!-- Position X / Y -->
-      <div class="flex items-center gap-1">
-        <span
-          class="text-[10px] font-semibold w-3 shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          >X</span
-        >
-        <input
-          type="number"
-          :value="Math.round(sel.x)"
-          @change="commit('x', +$event.target.value)"
-          class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
-          :class="inputCls"
-          title="Position X (px)"
-        />
-      </div>
-      <div class="flex items-center gap-1 ml-1">
-        <span
-          class="text-[10px] font-semibold w-3 shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          >Y</span
-        >
-        <input
-          type="number"
-          :value="Math.round(sel.y)"
-          @change="commit('y', +$event.target.value)"
-          class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
-          :class="inputCls"
-          title="Position Y (px)"
-        />
-      </div>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Size W / H with ratio lock -->
-      <div class="flex items-center gap-1">
-        <span
-          class="text-[10px] font-semibold w-3 shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          >L</span
-        >
-        <input
-          type="number"
-          :value="Math.round(sel.width || 0)"
-          @change="commitWidth(+$event.target.value)"
-          class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
-          :class="inputCls"
-          min="1"
-          title="Largeur (px)"
-        />
-      </div>
-      <button
-        @click="lockRatio = !lockRatio"
-        class="p-0.5 rounded mx-0.5 transition-colors"
-        :class="
-          lockRatio
-            ? themeStore.darkMode
-              ? 'text-violet-400 bg-violet-900/40'
-              : 'text-violet-600 bg-violet-50'
-            : btnCls
-        "
-        title="Verrouiller les proportions"
-      >
-        <Link2 class="w-3 h-3" />
-      </button>
-      <div class="flex items-center gap-1">
-        <span
-          class="text-[10px] font-semibold w-3 shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          >H</span
-        >
-        <input
-          type="number"
-          :value="Math.round(sel.height || 0)"
-          @change="commitHeight(+$event.target.value)"
-          class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
-          :class="inputCls"
-          min="1"
-          title="Hauteur (px)"
-        />
-      </div>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Rotation -->
-      <div class="flex items-center gap-1">
-        <RotateCw
-          class="w-3 h-3 shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          title="Rotation"
-        />
-        <input
-          type="number"
-          :value="Math.round(sel.rotation ?? 0)"
-          @change="commit('rotation', +$event.target.value)"
-          class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
-          :class="inputCls"
-          min="-180"
-          max="180"
-          title="Rotation (°)"
-        />
-        <span
-          class="text-[10px] shrink-0"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
-          >°</span
-        >
-      </div>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Opacity -->
-      <div class="flex items-center gap-1.5">
-        <Layers
-          class="w-3.5 h-3.5"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-        />
-        <input
-          type="range"
-          :value="Math.round((sel?.opacity ?? 1) * 100)"
-          @input="update('opacity', +$event.target.value / 100)"
-          @change="commit('opacity', +$event.target.value / 100)"
-          min="0"
-          max="100"
-          class="w-20 accent-violet-500"
-        />
-        <span
-          class="text-xs w-7 shrink-0 text-right"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
-        >
-          {{ Math.round((sel?.opacity ?? 1) * 100) }}%
-        </span>
-      </div>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Layer order -->
-      <button
-        @click="editorStore.sendBackward(sel.id)"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Reculer"
-      >
-        <ArrowDown class="w-3.5 h-3.5" />
-      </button>
-      <button
-        @click="editorStore.bringForward(sel.id)"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Avancer"
-      >
-        <ArrowUp class="w-3.5 h-3.5" />
-      </button>
-
-      <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
-
-      <!-- Duplicate -->
-      <button
-        @click="editorStore.duplicateSelected()"
-        class="p-1.5 rounded"
-        :class="btnCls"
-        title="Dupliquer (Ctrl+D)"
-      >
-        <Copy class="w-3.5 h-3.5" />
-      </button>
-
-      <!-- Delete -->
-      <button
-        @click="editorStore.deleteSelected()"
-        class="p-1.5 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-        title="Supprimer (Suppr)"
-      >
-        <Trash2 class="w-3.5 h-3.5" />
-      </button>
-    </template>
+    <!-- ── GRADIENT FILL POPOVER (shared by Shape + Text) ─────────────── -->
+    <GradientFillPopover
+      v-model:open="fillPopoverOpen"
+      :popover-style="fillPopoverStyle"
+      v-model:fill-mode="shapeFillMode"
+      v-model:grad-angle="shapeGradAngle"
+      v-model:grad-from="shapeGradFrom"
+      v-model:grad-to="shapeGradTo"
+      :current-fill="sel?.fill"
+      :trigger-ref="fillTriggerRef"
+      @solid-input="updSolidFill"
+      @solid-change="commitSolidFill"
+      @grad-input="updateGradientFill"
+      @grad-change="commitGradientFill"
+    />
   </div>
 
   <!-- Placeholder bar when nothing selected -->
   <div
     v-else
-    class="flex items-center px-4 h-11 shrink-0 border-b"
+    class="flex items-center gap-2 px-4 h-11 shrink-0 border-b"
     :class="themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'"
   >
+    <RectangleHorizontal class="w-3.5 h-3.5 opacity-30" />
     <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">
-      Sélectionnez un élément pour modifier ses propriétés
+      Cliquez sur un élément pour le modifier
     </span>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import {
   Minus,
   Plus,
@@ -1037,33 +635,47 @@ import {
   AlignRight,
   Type,
   MoveHorizontal,
-  Palette,
-  Layers,
-  ArrowUp,
-  ArrowDown,
-  Copy,
-  Trash2,
   RectangleHorizontal,
-  RotateCw,
-  Link2,
-  Group,
-  Ungroup,
-  ArrowUpToLine,
-  ArrowDownToLine,
   Contact2,
   ChevronDown,
   Star,
+  Upload,
+  Lock,
+  LockOpen,
 } from 'lucide-vue-next'
+import ContextBarImage from './contextbar/ContextBarImage.vue'
+import ContextBarQR from './contextbar/ContextBarQR.vue'
+import ContextBarIcon from './contextbar/ContextBarIcon.vue'
+import ContextBarLine from './contextbar/ContextBarLine.vue'
+import ContextBarMulti from './contextbar/ContextBarMulti.vue'
+import ContextBarCommon from './contextbar/ContextBarCommon.vue'
+import ContextBarShape from './contextbar/ContextBarShape.vue'
+import GradientFillPopover from './contextbar/GradientFillPopover.vue'
 import { useEditorStore } from '@/stores/useEditorStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useFontStore } from '@/stores/fontStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const editorStore = useEditorStore()
 const themeStore = useThemeStore()
 const fontStore = useFontStore()
+const authStore = useAuthStore()
+
+const MAX_FREE_FONTS = 50
 
 const sel = computed(() => editorStore.singleSelected)
 const selType = computed(() => sel.value?.type ?? null)
+
+// Returns true/false for lock button (single element or group), null when no selection
+const isSelectionLocked = computed(() => {
+  if (!editorStore.selectedIds.length) return null
+  const firstId = editorStore.selectedIds[0]
+  const el = editorStore.currentElements.find((e) => e.id === firstId)
+  if (!el) return null
+  return !!el.locked
+})
+
+const hasAnyLocked = computed(() => editorStore.currentElements.some((el) => el.locked))
 
 // ── Style helpers ─────────────────────────────────────────────────────────
 const inputCls = computed(() =>
@@ -1087,14 +699,30 @@ const fontDropdownRef = ref(null)
 const fontSearchRef = ref(null)
 const fontQuery = ref('')
 const dropdownPos = ref({ top: 0, left: 0 })
+const fontFileInputCtxRef = ref(null)
+
+function triggerFontUploadCtx() {
+  fontFileInputCtxRef.value?.click()
+}
+
+async function onFontFileSelectedCtx(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  e.target.value = ''
+  await fontStore.addCustomFont(file)
+}
 
 const dropdownStyle = computed(() => ({
   top: dropdownPos.value.top + 'px',
   left: dropdownPos.value.left + 'px',
 }))
 
-// Search results filtered by query
-const filteredFonts = computed(() => fontStore.searchFonts(fontQuery.value))
+// Search results filtered by query — capped for free users
+const filteredFonts = computed(() => {
+  const all = fontStore.searchFonts(fontQuery.value)
+  if (authStore.isPremium || authStore.isAdmin) return all
+  return all.slice(0, MAX_FREE_FONTS)
+})
 
 // "Toutes les polices" section = full list minus popular, imported, and favorites
 const importedFonts = computed(() => fontStore.customFonts.map((f) => f.name))
@@ -1109,9 +737,12 @@ const otherFonts = computed(() => {
   const popularSet = new Set(fontStore.popularFonts)
   const customSet = new Set(importedFonts.value)
   const favSet = fontStore.favoriteFonts
-  return (fontStore.allFontFamilies || []).filter(
+  const all = (fontStore.allFontFamilies || []).filter(
     (f) => !popularSet.has(f) && !customSet.has(f) && !favSet.has(f),
   )
+  if (authStore.isPremium || authStore.isAdmin) return all
+  const budget = MAX_FREE_FONTS - favFonts.value.length - filteredPopularFonts.value.length
+  return budget > 0 ? all.slice(0, budget) : []
 })
 
 function toggleFontDropdown() {
@@ -1162,17 +793,18 @@ function selectFont(family) {
 
 // Close dropdown on outside click — check both the trigger button and the teleported dropdown
 function onDocClick(e) {
-  if (!fontDropdownOpen.value) return
-  const btn = fontDropdownRef.value
-  // The teleported dropdown has no DOM ancestor relationship, so check by data attribute
-  const inDropdown = e.target.closest('[data-font-dropdown]')
-  if (!btn?.contains(e.target) && !inDropdown) {
-    fontDropdownOpen.value = false
+  if (fontDropdownOpen.value) {
+    const btn = fontDropdownRef.value
+    const inDropdown = e.target.closest('[data-font-dropdown]')
+    if (!btn?.contains(e.target) && !inDropdown) fontDropdownOpen.value = false
   }
+
 }
 
 onMounted(() => document.addEventListener('mousedown', onDocClick, true))
-onBeforeUnmount(() => document.removeEventListener('mousedown', onDocClick, true))
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', onDocClick, true)
+})
 
 const alignments = [
   { value: 'left', label: 'Aligner à gauche', icon: AlignLeft },
@@ -1180,9 +812,28 @@ const alignments = [
   { value: 'right', label: 'Aligner à droite', icon: AlignRight },
 ]
 
+const bulletStyles = [
+  { prefix: '• ', symbol: '•', label: 'Puces rondes' },
+  { prefix: '- ', symbol: '—', label: 'Tirets' },
+  { prefix: '1. ', symbol: '1.', label: 'Liste numérotée' },
+]
+
 const isBold = computed(() => sel.value?.fontStyle?.includes('bold'))
 const isItalic = computed(() => sel.value?.fontStyle?.includes('italic'))
 const isUnderline = computed(() => sel.value?.textDecoration?.includes('underline'))
+
+const activeBullet = computed(() => {
+  const text = sel.value?.text
+  if (!text) return null
+  const lines = text.split('\n').filter((l) => l.trim())
+  if (!lines.length) return null
+  for (const { prefix } of bulletStyles) {
+    const isNumbered = prefix === '1. '
+    const count = lines.filter((l) => (isNumbered ? /^\d+\. /.test(l) : l.startsWith(prefix))).length
+    if (count > lines.length / 2) return prefix
+  }
+  return null
+})
 
 const CONTACT_ICON_ROLES = ['email', 'phone', 'website', 'address']
 const isContactRole = computed(() => CONTACT_ICON_ROLES.includes(sel.value?.role))
@@ -1198,36 +849,95 @@ function commit(key, value) {
   editorStore.updateElementCommit(sel.value.id, { [key]: value })
 }
 
-// Ratio lock for W/H inputs
-const lockRatio = ref(false)
+// ── Shape fill mode (solid / gradient) ────────────────────────────────────
+const shapeFillMode = ref('solid')
+const shapeGradAngle = ref(135)
+const shapeGradFrom = ref('#3B82F6')
+const shapeGradTo = ref('#8B5CF6')
+const fillPopoverOpen = ref(false)
+const fillTriggerRef = ref(null)
+const fillPopoverStyle = ref({})
 
-function commitWidth(newW) {
-  if (!sel.value) return
-  const w = Math.max(1, newW)
-  if (lockRatio.value && sel.value.width && sel.value.height) {
-    const ratio = sel.value.height / sel.value.width
-    editorStore.updateElementCommit(sel.value.id, { width: w, height: Math.round(w * ratio) })
+watch(sel, (el) => {
+  if (!el) return
+  if (el.fillGradient?.from) {
+    shapeFillMode.value = 'gradient'
+    shapeGradAngle.value = el.fillGradient.angle ?? 135
+    shapeGradFrom.value = el.fillGradient.from
+    shapeGradTo.value = el.fillGradient.to ?? el.fillGradient.from
   } else {
-    editorStore.updateElementCommit(sel.value.id, { width: w })
+    shapeFillMode.value = 'solid'
+    shapeGradFrom.value = el.fill || '#3B82F6'
+  }
+}, { immediate: true })
+
+function openFillPopover(e) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  fillPopoverStyle.value = {
+    position: 'fixed',
+    top: `${rect.bottom + 6}px`,
+    left: `${Math.min(rect.left, window.innerWidth - 220)}px`,
+    zIndex: 9999,
+  }
+  fillPopoverOpen.value = !fillPopoverOpen.value
+}
+
+
+function updSolidFill(color) {
+  if (!sel.value) return
+  editorStore.updateElement(sel.value.id, { fill: color, fillGradient: undefined })
+}
+
+function commitSolidFill(color) {
+  if (!sel.value) return
+  editorStore.updateElementCommit(sel.value.id, { fill: color, fillGradient: undefined })
+}
+
+function updateGradientFill() {
+  if (!sel.value) return
+  editorStore.updateElement(sel.value.id, {
+    fill: '',
+    fillGradient: { angle: shapeGradAngle.value, from: shapeGradFrom.value, to: shapeGradTo.value },
+  })
+}
+
+function commitGradientFill() {
+  if (!sel.value) return
+  editorStore.updateElementCommit(sel.value.id, {
+    fill: '',
+    fillGradient: { angle: shapeGradAngle.value, from: shapeGradFrom.value, to: shapeGradTo.value },
+  })
+}
+
+function toggleTextGradient() {
+  if (shapeFillMode.value === 'gradient') {
+    commitSolidFill(shapeGradFrom.value)
+  } else {
+    shapeFillMode.value = 'gradient'
+    commitGradientFill()
   }
 }
 
-function commitHeight(newH) {
-  if (!sel.value) return
-  const h = Math.max(1, newH)
-  if (lockRatio.value && sel.value.width && sel.value.height) {
-    const ratio = sel.value.width / sel.value.height
-    editorStore.updateElementCommit(sel.value.id, { height: h, width: Math.round(h * ratio) })
-  } else {
-    editorStore.updateElementCommit(sel.value.id, { height: h })
-  }
-}
+
 
 function changeFontSize(delta) {
   if (!sel.value) return
   editorStore.updateElementCommit(sel.value.id, {
     fontSize: Math.max(6, (sel.value.fontSize || 16) + delta),
   })
+}
+
+
+function onShapeOpenFill(triggerEl) {
+  fillTriggerRef.value = triggerEl
+  const rect = triggerEl.getBoundingClientRect()
+  fillPopoverStyle.value = {
+    position: 'fixed',
+    top: `${rect.bottom + 6}px`,
+    left: `${Math.min(rect.left, window.innerWidth - 220)}px`,
+    zIndex: 9999,
+  }
+  fillPopoverOpen.value = !fillPopoverOpen.value
 }
 
 function toggleBold() {
@@ -1251,21 +961,72 @@ function toggleItalic() {
 function toggleUnderline() {
   if (!sel.value) return
   const cur = sel.value.textDecoration || ''
-  editorStore.updateElementCommit(sel.value.id, {
-    textDecoration: cur.includes('underline') ? '' : 'underline',
+  const turningOn = !cur.includes('underline')
+  const patch = { textDecoration: turningOn ? 'underline' : '' }
+  // Initialize underlineColor to the current fill the first time underline is activated,
+  // so the color stays stable when the user later changes the text fill color.
+  if (turningOn && !sel.value.underlineColor) {
+    patch.underlineColor = sel.value.fill || '#000000'
+  }
+  editorStore.updateElementCommit(sel.value.id, patch)
+}
+
+function stripBulletPrefix(line) {
+  for (const { prefix: p } of bulletStyles) {
+    // For numbered lists match any "N. " pattern, not just "1. "
+    if (p === '1. ') {
+      if (/^\d+\. /.test(line)) return line.replace(/^\d+\. /, '')
+    } else if (line.startsWith(p)) {
+      return line.slice(p.length)
+    }
+  }
+  return line
+}
+
+function applyNumberedPrefix(lines) {
+  let n = 0
+  return lines.map((l) => {
+    if (!l.trim()) return l
+    n++
+    return `${n}. ${l}`
   })
 }
 
-// ── Line / Arrow helpers ───────────────────────────────────────────────────
-const lineStyle = computed(() => {
-  const d = sel.value?.dash
-  if (!d || !d.length) return 'solid'
-  if (d[0] <= 2) return 'dotted'
-  return 'dashed'
-})
-
-function setLineDash(dashArray) {
+function toggleBullets(prefix) {
   if (!sel.value) return
-  editorStore.updateElementCommit(sel.value.id, { dash: dashArray })
+  let rawText = sel.value.text || ''
+
+  // Texte vide : initialiser avec une ligne vide préfixée
+  if (!rawText.trim()) {
+    const starter = prefix === '1. ' ? '1. ' : prefix
+    editorStore.updateElementCommit(sel.value.id, { text: starter })
+    return
+  }
+
+  const lines = rawText.split('\n')
+  const nonEmptyLines = lines.filter((l) => l.trim())
+  const isNumbered = prefix === '1. '
+
+  // Détecte si la majorité des lignes non-vides ont déjà ce préfixe
+  const withPrefix = nonEmptyLines.filter((l) =>
+    isNumbered ? /^\d+\. /.test(l) : l.startsWith(prefix),
+  )
+  const majority = withPrefix.length > nonEmptyLines.length / 2
+
+  let newLines
+  if (majority) {
+    // Retirer le préfixe de toutes les lignes non-vides
+    newLines = lines.map((l) => (l.trim() ? stripBulletPrefix(l) : l))
+  } else {
+    // Retirer tout préfixe existant, puis appliquer le nouveau
+    const stripped = lines.map((l) => (l.trim() ? stripBulletPrefix(l) : l))
+    if (isNumbered) {
+      newLines = applyNumberedPrefix(stripped)
+    } else {
+      newLines = stripped.map((l) => (l.trim() ? prefix + l : l))
+    }
+  }
+  editorStore.updateElementCommit(sel.value.id, { text: newLines.join('\n') })
 }
+
 </script>

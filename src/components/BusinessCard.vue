@@ -43,14 +43,14 @@
               <div
                 v-if="el.type === 'contact'"
                 class="flex items-center space-x-1.5 h-full pointer-events-none select-none"
-                :style="textStyle(el)"
               >
                 <component
                   :is="ICON_COMPONENTS[el.role]"
                   v-if="ICON_COMPONENTS[el.role]"
                   class="w-3 h-3 opacity-70 flex-shrink-0"
+                  :style="el.fillGradient ? { color: el.fillGradient.from, WebkitTextFillColor: 'initial' } : {}"
                 />
-                <span class="truncate">{{ el.text || '' }}</span>
+                <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
               </div>
               <!-- text (firstName/lastName → h2, autres → p) -->
               <component
@@ -58,7 +58,10 @@
                 v-else
                 class="leading-tight select-none pointer-events-none"
                 :style="textStyle(el)"
-              >{{ el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '') }}</component>
+                >{{
+                  el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '')
+                }}</component
+              >
             </template>
             <!-- Poignées (masquées pendant l'édition) -->
             <template v-if="editMode && editingEl?.id !== el.id">
@@ -90,9 +93,9 @@
                   :src="el.src"
                   :alt="el.role"
                   :class="
-                    el.shape === 'circle'
+                    el.cover || el.shape === 'circle'
                       ? 'w-full h-full object-cover'
-                      : 'w-full h-full object-contain'
+                      : 'w-full h-full object-fill'
                   "
                 />
               </div>
@@ -144,7 +147,15 @@
             :style="elemStyle(el)"
             @mousedown.prevent="editMode && !editingEl ? startDrag(el, $event) : undefined"
           >
+            <!-- Pre-rasterized SVG data URL (pixel-identical to editor/export) -->
+            <img
+              v-if="el.iconSvgUrl"
+              :src="el.iconSvgUrl"
+              class="w-full h-full pointer-events-none"
+            />
+            <!-- Fallback: Iconify component for cards saved before icon pre-rasterization -->
             <IconifyIcon
+              v-else
               :icon="el.iconId"
               class="w-full h-full pointer-events-none"
               :style="el.colorful ? {} : { color: el.color || el.fill || '#1a1a1a' }"
@@ -171,10 +182,19 @@
             >
               <path
                 :d="el.pathData"
-                :fill="el.strokePath ? 'none' : el.bgColor || '#000'"
+                :fill="el.bgColor || (el.strokePath ? 'none' : '#000')"
                 :stroke="el.strokePath || 'none'"
                 :stroke-width="el.strokeWidthPath || 0"
                 :stroke-dasharray="el.dashPath ? el.dashPath.join(' ') : undefined"
+                stroke-linecap="round"
+              />
+              <!-- Barres d'extrémité solides (line-bar) — séparées pour éviter que le dash s'y applique -->
+              <path
+                v-if="el.pathDataSolid"
+                :d="el.pathDataSolid"
+                fill="none"
+                :stroke="el.strokePath || 'none'"
+                :stroke-width="el.strokeWidthPath || 0"
                 stroke-linecap="round"
               />
             </svg>
@@ -217,14 +237,14 @@
             <div
               v-if="el.type === 'contact'"
               class="flex items-center space-x-1.5 h-full pointer-events-none select-none"
-              :style="textStyle(el)"
             >
               <component
                 :is="ICON_COMPONENTS[el.role]"
                 v-if="ICON_COMPONENTS[el.role]"
                 class="w-3 h-3 opacity-70 flex-shrink-0"
+                :style="el.fillGradient ? { color: el.fillGradient.from, WebkitTextFillColor: 'initial' } : {}"
               />
-              <span class="truncate">{{ el.text || '' }}</span>
+              <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
             </div>
             <!-- text -->
             <component
@@ -242,7 +262,7 @@
             class="absolute overflow-hidden"
             :style="elemStyle(el)"
           >
-            <img :src="el.src" class="w-full h-full object-contain" />
+            <img :src="el.src" :class="el.cover || el.shape === 'circle' ? 'w-full h-full object-cover' : 'w-full h-full object-fill'" />
           </div>
           <!-- ICON -->
           <div
@@ -251,7 +271,13 @@
             class="absolute overflow-hidden"
             :style="elemStyle(el)"
           >
+            <img
+              v-if="el.iconSvgUrl"
+              :src="el.iconSvgUrl"
+              class="w-full h-full pointer-events-none"
+            />
             <IconifyIcon
+              v-else
               :icon="el.iconId"
               class="w-full h-full pointer-events-none"
               :style="el.colorful ? {} : { color: el.color || el.fill || '#1a1a1a' }"
@@ -271,10 +297,19 @@
             >
               <path
                 :d="el.pathData"
-                :fill="el.strokePath ? 'none' : el.bgColor || '#000'"
+                :fill="el.bgColor || (el.strokePath ? 'none' : '#000')"
                 :stroke="el.strokePath || 'none'"
                 :stroke-width="el.strokeWidthPath || 0"
                 :stroke-dasharray="el.dashPath ? el.dashPath.join(' ') : undefined"
+                stroke-linecap="round"
+              />
+              <!-- Barres d'extrémité solides (line-bar) — séparées pour éviter que le dash s'y applique -->
+              <path
+                v-if="el.pathDataSolid"
+                :d="el.pathDataSolid"
+                fill="none"
+                :stroke="el.strokePath || 'none'"
+                :stroke-width="el.strokeWidthPath || 0"
                 stroke-linecap="round"
               />
             </svg>
@@ -519,10 +554,14 @@ const elClass = (id) => {
 }
 
 const elemStyle = (el) => {
+  // Contact elements: auto-size to content in view mode so full text is always visible.
+  // In editMode keep the stored percentage width so drag/resize handles work correctly.
+  const useAutoWidth = el.type === 'contact' && !props.editMode
   const style = {
     left: `${el.x}%`,
     top: `${el.y}%`,
-    width: `${el.w}%`,
+    width: useAutoWidth ? 'max-content' : `${el.w}%`,
+    maxWidth: useAutoWidth ? '88%' : undefined,
     height: el.h ? `${el.h}%` : el.type === 'text' || el.type === 'contact' ? 'auto' : `${el.h}%`,
     zIndex: el.zIndex ?? 1,
   }
@@ -536,8 +575,14 @@ const elemStyle = (el) => {
   // Otherwise the div background covers the entire rectangle, hiding the shape.
   if (el.bgColor && !el.pathData) style.backgroundColor = el.bgColor
   if (el.gradient) style.background = el.gradient
+  // fillGradient on blocks/shapes → div background; on text → handled by textStyle instead
+  if (el.fillGradient?.from && el.type !== 'text' && el.type !== 'contact')
+    style.background = `linear-gradient(${el.fillGradient.angle ?? 180}deg, ${el.fillGradient.from} 0%, ${el.fillGradient.to ?? el.fillGradient.from} 100%)`
   if (el.clipPath) style.clipPath = el.clipPath
-  if (el.borderRadius) {
+  if (el.cornerRadiusPx !== undefined) {
+    style.borderRadius = `${el.cornerRadiusPx * fontScale.value}px`
+    if (!props.editMode) style.overflow = 'hidden'
+  } else if (el.borderRadius && (el.type !== 'image' || el.shape === 'circle')) {
     style.borderRadius = `${el.borderRadius}%`
     if (!props.editMode) style.overflow = 'hidden'
   }
@@ -546,8 +591,20 @@ const elemStyle = (el) => {
     style.transformOrigin = '0 0' // match Konva rotation around (x, y) top-left
   }
   if (el.stroke && el.strokeWidth) {
-    style.border = `${el.strokeWidth}px solid ${el.stroke}`
+    style.border = `${el.strokeWidth * fontScale.value}px solid ${el.stroke}`
     style.boxSizing = 'border-box'
+  }
+  if (el.shadowEnabled) {
+    const s = fontScale.value
+    const ox = (el.shadowOffsetX ?? 3) * s
+    const oy = (el.shadowOffsetY ?? 3) * s
+    const blur = (el.shadowBlur ?? 8) * s
+    const color = el.shadowColor || '#000000'
+    const opacity = el.shadowOpacity ?? 0.35
+    const r = parseInt(color.slice(1, 3), 16) || 0
+    const g = parseInt(color.slice(3, 5), 16) || 0
+    const b = parseInt(color.slice(5, 7), 16) || 0
+    style.filter = `drop-shadow(${ox}px ${oy}px ${blur}px rgba(${r},${g},${b},${opacity}))`
   }
   return style
 }
@@ -561,11 +618,24 @@ const textStyle = (el) => {
     fontWeight: el.bold ? 'bold' : 'normal',
     fontStyle: el.italic ? 'italic' : 'normal',
     textDecoration: el.textDecoration || undefined,
+    textDecorationColor:
+      el.underlineColor && el.textDecoration?.includes('underline')
+        ? el.underlineColor
+        : undefined,
     textAlign: el.textAlign || 'left',
     letterSpacing: el.letterSpacing
       ? `${Math.round(el.letterSpacing * s * 100) / 100}px`
       : undefined,
     lineHeight: el.lineHeight ? String(el.lineHeight) : undefined,
+    whiteSpace: 'pre-wrap',
+  }
+  // Gradient text: use background-clip technique
+  if (el.fillGradient?.from) {
+    style.background = `linear-gradient(${el.fillGradient.angle ?? 180}deg, ${el.fillGradient.from} 0%, ${el.fillGradient.to ?? el.fillGradient.from} 100%)`
+    style.WebkitBackgroundClip = 'text'
+    style.backgroundClip = 'text'
+    style.WebkitTextFillColor = 'transparent'
+    style.color = 'transparent'
   }
   return style
 }

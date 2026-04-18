@@ -373,6 +373,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useUserTemplatesStore, MAX_FREE_TEMPLATES } from '@/stores/userTemplatesStore'
+import { iconToDataUrl } from '@/utils/iconRenderer'
 import SaveAsModal from '@/components/editor/SaveAsModal.vue'
 
 const router = useRouter()
@@ -419,8 +420,21 @@ function commitName() {
   editorStore.isDirty = true
 }
 
+// Serialize shadow properties (shared across all element types)
+function serializeShadow(el) {
+  if (!el.shadowEnabled) return {}
+  return {
+    shadowEnabled: true,
+    shadowColor: el.shadowColor || '#000000',
+    shadowBlur: el.shadowBlur ?? 8,
+    shadowOffsetX: el.shadowOffsetX ?? 3,
+    shadowOffsetY: el.shadowOffsetY ?? 3,
+    shadowOpacity: el.shadowOpacity ?? 0.35,
+  }
+}
+
 // Convert a Konva editor element to BusinessCard.vue's % format
-function editorToCardEl(el, index) {
+function editorToCardEl(el, index, iconUrls = {}) {
   const cw = editorStore.cardWidth
   const ch = editorStore.cardHeight
 
@@ -436,6 +450,7 @@ function editorToCardEl(el, index) {
       h: (el.height / ch) * 100,
       zIndex: el.zIndex ?? index + 1,
       bgColor: el.fillGradient ? undefined : el.fill || '#000000',
+      ...serializeShadow(el),
     }
     if (el.fillGradient?.from) block.fillGradient = el.fillGradient
     if ((el.opacity ?? 1) < 1) block.opacity = el.opacity
@@ -508,6 +523,7 @@ function editorToCardEl(el, index) {
       block.pathViewBox = [w, sw]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash && el.dash.length) block.dashPath = el.dash
     }
     // ── Arrow → SVG path (open chevron style) ───────────────────────
@@ -521,6 +537,7 @@ function editorToCardEl(el, index) {
       block.pathViewBox = [w, h]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash && el.dash.length) block.dashPath = el.dash
     }
     // ── Arrow-double → SVG path (↔ open chevron both sides) ─────────
@@ -534,6 +551,7 @@ function editorToCardEl(el, index) {
       block.pathViewBox = [w, h]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash && el.dash.length) block.dashPath = el.dash
     }
     // ── Line-bar → SVG path (|—|) ────────────────────────────────────
@@ -547,6 +565,7 @@ function editorToCardEl(el, index) {
       block.pathViewBox = [w, barH]
       block.strokePath = el.fill || '#000000'
       block.strokeWidthPath = sw
+      block.bgColor = undefined
       if (el.dash && el.dash.length) block.dashPath = el.dash
     }
     // CSS stroke/border — only for shapes WITHOUT SVG pathData (rect, circle, etc.)
@@ -561,6 +580,8 @@ function editorToCardEl(el, index) {
   // ── Text → BusinessCard element ───────────────────────────────────────
   if (el.type === 'text' || el.type === 'contact') {
     const role = el.role || el.id
+    // Konva auto-sizes text when width is null — estimate for CSS preview
+    const effectiveW = el.width ?? Math.min(cw * 0.85, Math.max(150, (el.text || '').length * (el.fontSize || 16) * 1.0))
     const out = {
       id: el.id,
       type: el.showContactIcon ? 'contact' : 'text',
@@ -568,7 +589,7 @@ function editorToCardEl(el, index) {
       text: el.text || '',
       x: (el.x / cw) * 100,
       y: (el.y / ch) * 100,
-      w: (el.width / cw) * 100,
+      w: (effectiveW / cw) * 100,
       h: el.height ? (el.height / ch) * 100 : undefined,
       zIndex: el.zIndex ?? index + 1,
       color: el.fillGradient ? undefined : (el.fill || undefined),
@@ -576,6 +597,7 @@ function editorToCardEl(el, index) {
       fontFamily: el.fontFamily || undefined,
       letterSpacing: el.letterSpacing != null ? el.letterSpacing : undefined,
       textDecoration: el.textDecoration || undefined,
+      underlineColor: el.underlineColor || undefined,
       bold: el.fontStyle?.includes('bold') || false,
       italic: el.fontStyle?.includes('italic') || false,
       textAlign: el.align || 'left',
@@ -583,6 +605,7 @@ function editorToCardEl(el, index) {
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
     if (el.fillGradient?.from) out.fillGradient = el.fillGradient
     return out
@@ -590,7 +613,7 @@ function editorToCardEl(el, index) {
 
   // ── Icon (icons, illustrations, stickers) ──────────────────────────
   if (el.type === 'icon') {
-    return {
+    const out = {
       id: el.id,
       type: 'icon',
       iconId: el.iconId,
@@ -604,12 +627,19 @@ function editorToCardEl(el, index) {
       visible: el.visible !== false,
       opacity: (el.opacity ?? 1) < 1 ? el.opacity : undefined,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
+    if (iconUrls[el.id]) out.iconSvgUrl = iconUrls[el.id]
+    if (el.stroke && el.strokeWidth > 0) {
+      out.stroke = el.stroke
+      out.strokeWidth = el.strokeWidth
+    }
+    return out
   }
 
   // ── Image elements ──────────────────────────────────────────────────
   if (el.type === 'image') {
-    return {
+    const imgOut = {
       id: el.id,
       type: 'image',
       role: el.role || 'logo',
@@ -621,11 +651,17 @@ function editorToCardEl(el, index) {
       zIndex: el.zIndex ?? index + 1,
       visible: el.visible !== false,
       borderRadius: el.borderRadius || undefined,
-      shape: el.shape || undefined,
+      shape: el.shape || ((el.borderRadius || 0) >= 50 ? 'circle' : undefined),
       cover: el.role === 'background' || el.cover || undefined,
       opacity: el.opacity !== undefined ? el.opacity : undefined,
       rotation: el.rotation || undefined,
+      ...serializeShadow(el),
     }
+    if (el.stroke && el.strokeWidth > 0) {
+      imgOut.stroke = el.stroke
+      imgOut.strokeWidth = el.strokeWidth
+    }
+    return imgOut
   }
 
   if (el.type === 'qr') {
@@ -650,6 +686,7 @@ function editorToCardEl(el, index) {
       qrErrorCorrection: el.qrErrorCorrection || 'M',
       qrLogoSrc: el.qrLogoSrc || '',
       qrMargin: el.qrMargin ?? 10,
+      ...serializeShadow(el),
     }
   }
 
@@ -811,9 +848,18 @@ async function saveAsGalleryTemplate(name, meta = {}) {
     const primaryColor = typeof bgRecto === 'string' && bgRecto.startsWith('#') ? bgRecto : '#6366F1'
     const secondaryColor = typeof bgVerso === 'string' && bgVerso.startsWith('#') ? bgVerso : '#1E293B'
 
+    // Pre-compute icon SVG data URLs for pixel-identical rendering in BusinessCard.vue
+    const allEls = [...(cardData.elements?.recto || []), ...(cardData.elements?.verso || [])]
+    const iconUrls = {}
+    await Promise.all(
+      allEls.filter((e) => e.type === 'icon' && e.iconId).map(async (el) => {
+        iconUrls[el.id] = await iconToDataUrl(el.iconId, el.fill || '#1a1a1a', el.colorful)
+      }),
+    )
+
     // Convert Konva px elements → BusinessCard % elements for gallery preview
-    const rectoEls = (cardData.elements?.recto || []).map((el, i) => editorToCardEl(el, i)).filter(Boolean)
-    const versoEls = (cardData.elements?.verso || []).map((el, i) => editorToCardEl(el, i)).filter(Boolean)
+    const rectoEls = (cardData.elements?.recto || []).map((el, i) => editorToCardEl(el, i, iconUrls)).filter(Boolean)
+    const versoEls = (cardData.elements?.verso || []).map((el, i) => editorToCardEl(el, i, iconUrls)).filter(Boolean)
 
     // Extract dominant fontFamily (same approach as saveAsCard)
     const fontCounts = {}
@@ -871,12 +917,21 @@ async function saveAsCard(name) {
   try {
     const cardData = editorStore.getCardData()
 
+    // Pre-compute icon SVG data URLs for pixel-identical rendering in BusinessCard.vue
+    const allEls = [...(cardData.elements?.recto || []), ...(cardData.elements?.verso || [])]
+    const iconUrls = {}
+    await Promise.all(
+      allEls.filter((e) => e.type === 'icon' && e.iconId).map(async (el) => {
+        iconUrls[el.id] = await iconToDataUrl(el.iconId, el.fill || '#1a1a1a', el.colorful)
+      }),
+    )
+
     const rectoEls = (cardData.elements?.recto || [])
-      .map((el, i) => editorToCardEl(el, i))
+      .map((el, i) => editorToCardEl(el, i, iconUrls))
       .filter(Boolean)
 
     const versoEls = (cardData.elements?.verso || [])
-      .map((el, i) => editorToCardEl(el, i))
+      .map((el, i) => editorToCardEl(el, i, iconUrls))
       .filter(Boolean)
 
     const contact = extractContact([...rectoEls, ...versoEls], editorStore.contactExtra)

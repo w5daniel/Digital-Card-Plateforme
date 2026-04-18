@@ -59,7 +59,7 @@
               </h2>
               <p class="text-white/65 text-sm leading-relaxed">
                 Rejoignez des milliers de professionnels qui partagent leur contact avec style grâce
-                à ECODEV.
+                à ECODEV CARD PRO.
               </p>
             </div>
           </Transition>
@@ -151,9 +151,12 @@
                       type="email"
                       placeholder="votre@email.com"
                       class="auth-input pl-10 pr-3.5"
+                      :class="loginErrors.email ? 'border-red-400 dark:border-red-500' : ''"
                       required
+                      @blur="loginErrors.email = validateField('email', loginEmail)"
                     />
                   </div>
+                  <p v-if="loginErrors.email" class="text-[11px] text-red-500 mt-1">{{ loginErrors.email }}</p>
                 </div>
 
                 <!-- Password -->
@@ -172,6 +175,7 @@
                       :type="showLoginPassword ? 'text' : 'password'"
                       placeholder="••••••••"
                       class="auth-input pl-10 pr-10"
+                      :class="loginErrors.password ? 'border-red-400 dark:border-red-500' : ''"
                       required
                     />
                     <button
@@ -183,6 +187,7 @@
                       <EyeOff v-else class="w-4 h-4" />
                     </button>
                   </div>
+                  <p v-if="loginErrors.password" class="text-[11px] text-red-500 mt-1">{{ loginErrors.password }}</p>
                 </div>
 
                 <!-- Remember + Forgot -->
@@ -220,14 +225,7 @@
                 </button>
               </form>
 
-              <!-- Demo hint -->
-              <div
-                class="mt-6 p-3 rounded-xl bg-powder-100 dark:bg-onyx-800 border border-powder-200 dark:border-onyx-700"
-              >
-                <p class="text-xs text-onyx-600 dark:text-powder-400">
-                  <strong>Mode démo :</strong> n'importe quel email + mot de passe ≥ 6 caractères
-                </p>
-              </div>
+
             </div>
 
             <!-- ── Register Form ── -->
@@ -252,9 +250,12 @@
                       type="text"
                       placeholder="Jean Dupont"
                       class="auth-input pl-10 pr-3.5"
+                      :class="regErrors.fullName ? 'border-red-400 dark:border-red-500' : ''"
                       required
+                      @blur="regErrors.fullName = validateField('fullName', regFullName)"
                     />
                   </div>
+                  <p v-if="regErrors.fullName" class="text-[11px] text-red-500 mt-1">{{ regErrors.fullName }}</p>
                 </div>
 
                 <!-- Email -->
@@ -273,9 +274,12 @@
                       type="email"
                       placeholder="votre@email.com"
                       class="auth-input pl-10 pr-3.5"
+                      :class="regErrors.email ? 'border-red-400 dark:border-red-500' : ''"
                       required
+                      @blur="regErrors.email = validateField('email', regEmail)"
                     />
                   </div>
+                  <p v-if="regErrors.email" class="text-[11px] text-red-500 mt-1">{{ regErrors.email }}</p>
                 </div>
 
                 <!-- Password -->
@@ -297,6 +301,7 @@
                       :type="showRegPassword ? 'text' : 'password'"
                       placeholder="••••••••"
                       class="auth-input pl-10 pr-10"
+                      :class="regErrors.password ? 'border-red-400 dark:border-red-500' : ''"
                       required
                     />
                     <button
@@ -319,6 +324,7 @@
                       "
                     ></div>
                   </div>
+                  <p v-if="regErrors.password" class="text-[11px] text-red-500 mt-1">{{ regErrors.password }}</p>
                 </div>
 
                 <!-- Confirm Password -->
@@ -352,6 +358,7 @@
                       <XCircle v-else class="w-4 h-4 text-red-400" />
                     </div>
                   </div>
+                  <p v-if="regErrors.confirm" class="text-[11px] text-red-500 mt-1">{{ regErrors.confirm }}</p>
                 </div>
 
                 <!-- Error -->
@@ -387,7 +394,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -403,23 +410,28 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-vue-next'
+import { validateField } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 // ── Mode ──────────────────────────────────────────────────────────────
-const isRegister = computed(() => route.name === 'register')
+// Use a local ref so switching tabs never remounts the component (no router push).
+// history.replaceState keeps the URL in sync without navigation.
+const isRegister = ref(route.query.mode === 'register')
 const slideDir = ref('slide-left')
 
 const switchTo = (mode) => {
   authStore.error = null
   if (mode === 'login' && isRegister.value) {
     slideDir.value = 'slide-right'
-    router.push('/login')
+    isRegister.value = false
+    history.replaceState(null, '', '/login')
   } else if (mode === 'register' && !isRegister.value) {
     slideDir.value = 'slide-left'
-    router.push('/register')
+    isRegister.value = true
+    history.replaceState(null, '', '/register')
   }
 }
 
@@ -441,8 +453,18 @@ const loginEmail = ref('')
 const loginPassword = ref('')
 const showLoginPassword = ref(false)
 const rememberMe = ref(false)
+const loginErrors = reactive({ email: '', password: '' })
+
+function validateLogin() {
+  loginErrors.email = validateField('email', loginEmail.value)
+  loginErrors.password = validateField('password', loginPassword.value)
+  if (!loginEmail.value.trim()) loginErrors.email = 'Email requis'
+  if (!loginPassword.value) loginErrors.password = 'Mot de passe requis'
+  return !loginErrors.email && !loginErrors.password
+}
 
 const handleLogin = async () => {
+  if (!validateLogin()) return
   try {
     await authStore.login(loginEmail.value, loginPassword.value)
     router.push('/dashboard')
@@ -457,6 +479,7 @@ const regEmail = ref('')
 const regPassword = ref('')
 const regConfirm = ref('')
 const showRegPassword = ref(false)
+const regErrors = reactive({ fullName: '', email: '', password: '', confirm: '' })
 
 const passwordStrength = computed(() => {
   const p = regPassword.value
@@ -474,7 +497,22 @@ const strengthColor = computed(() => {
   return colors[passwordStrength.value - 1] || 'bg-red-400'
 })
 
+function validateRegister() {
+  regErrors.fullName = validateField('fullName', regFullName.value)
+  regErrors.email = validateField('email', regEmail.value)
+  regErrors.password = validateField('password', regPassword.value)
+  regErrors.confirm = ''
+  if (!regFullName.value.trim()) regErrors.fullName = 'Nom complet requis'
+  if (!regEmail.value.trim()) regErrors.email = 'Email requis'
+  if (!regPassword.value) regErrors.password = 'Mot de passe requis'
+  if (regPassword.value && regConfirm.value && regPassword.value !== regConfirm.value)
+    regErrors.confirm = 'Les mots de passe ne correspondent pas'
+  if (!regConfirm.value) regErrors.confirm = 'Confirmation requise'
+  return !regErrors.fullName && !regErrors.email && !regErrors.password && !regErrors.confirm
+}
+
 const handleRegister = async () => {
+  if (!validateRegister()) return
   try {
     await authStore.register(regEmail.value, regPassword.value, regConfirm.value, regFullName.value)
     router.push('/dashboard')
@@ -491,8 +529,20 @@ watch(isRegister, () => {
 
 <style scoped>
 /* ── Animated background ──────────────────────────────────────────── */
+@keyframes authBg {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .auth-animated-bg {
-  background: #0a100d;
+  background: linear-gradient(270deg, #397256, #1c2a24, #18363d, #0f1a16, #397256);
+  background-size: 400% 400%;
+  animation: authBg 20s ease infinite;
 }
 
 /* ── Brand panel ──────────────────────────────────────────────────── */

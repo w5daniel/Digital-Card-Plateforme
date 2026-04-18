@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ADMIN_EMAIL } from '../data/mockData'
+import { useAdminStore } from './adminStore'
+import { useNotificationStore } from './notificationStore'
+import { validateField } from '../utils/validators'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Registre global de tous les utilisateurs inscrits (sans mots de passe).
@@ -61,7 +64,9 @@ export const useAuthStore = defineStore('auth', () => {
     // TODO backend : remplacer par un appel API (le serveur est la source de vérité)
     try {
       localStorage.setItem(ALL_USERS_LS_KEY, JSON.stringify(allUsers.value))
-    } catch { /* quota localStorage — non bloquant */ }
+    } catch {
+      /* quota localStorage — non bloquant */
+    }
   }
 
   /**
@@ -147,15 +152,18 @@ export const useAuthStore = defineStore('auth', () => {
       // TODO: remplacer par `const res = await api.post('/auth/login', { email, password })`
       await new Promise((resolve) => setTimeout(resolve, 500))
 
+      // TODO backend : ces validations seront dupliquées côté serveur (express-validator / Zod)
       if (!email || !password || password.length < 6) {
         throw new Error('Email ou mot de passe invalide')
       }
+      const emailErr = validateField('email', email)
+      if (emailErr) throw new Error(emailErr)
 
       // Vérification locale du statut bloqué (best-effort avant backend)
       // TODO backend : cette vérification sera faite par le serveur (HTTP 403)
       const existing = allUsers.value.find((u) => u.email.toLowerCase() === email.toLowerCase())
       if (existing?.status === 'blocked') {
-        throw new Error('Ce compte a été bloqué. Contactez l\'administrateur.')
+        throw new Error("Ce compte a été bloqué. Contactez l'administrateur.")
       }
 
       const role = email.toLowerCase() === ADMIN_EMAIL ? 'admin' : 'user'
@@ -166,7 +174,7 @@ export const useAuthStore = defineStore('auth', () => {
         name: existing?.name ?? (role === 'admin' ? 'Administrateur' : email.split('@')[0]),
         role,
         createdAt: existing?.createdAt || new Date().toISOString(),
-        isPremium: existing?.isPremium ?? (role === 'admin'),
+        isPremium: existing?.isPremium ?? role === 'admin',
         premiumUntil: existing?.premiumUntil || null,
       }
       const mockToken = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -206,8 +214,19 @@ export const useAuthStore = defineStore('auth', () => {
       // TODO: remplacer par `const res = await api.post('/auth/register', { email, password, fullName })`
       await new Promise((resolve) => setTimeout(resolve, 500))
 
+      // TODO backend : valider fullName, email, password côté serveur (express-validator / Zod)
       if (!email || !password || !fullName) {
         throw new Error('Tous les champs sont requis')
+      }
+      const nameErr = validateField('fullName', fullName)
+      if (nameErr) throw new Error(nameErr)
+      const emailErr = validateField('email', email)
+      if (emailErr) throw new Error(emailErr)
+
+      // Vérifier si les inscriptions sont autorisées (paramètre admin)
+      const adminStore = useAdminStore()
+      if (adminStore.settings?.allowRegistration === false) {
+        throw new Error("Les inscriptions sont temporairement fermées. Veuillez réessayer plus tard.")
       }
 
       if (password !== confirmPassword) {
@@ -261,6 +280,9 @@ export const useAuthStore = defineStore('auth', () => {
     profilePhoto.value = null
     localStorage.removeItem('authToken')
     localStorage.removeItem('user')
+    // Vider l'inbox pour éviter que les notifications d'un utilisateur
+    // soient visibles par le suivant (le store Pinia persiste en mémoire)
+    useNotificationStore().clearInbox()
   }
 
   /**
@@ -385,7 +407,9 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         const raw = localStorage.getItem(`digitalcard_userCards_${u.email}`)
         cardCount = raw ? JSON.parse(raw).length : 0
-      } catch { /* ignorer */ }
+      } catch {
+        /* ignorer */
+      }
       return { ...u, cardCount }
     })
   })
@@ -401,8 +425,9 @@ export const useAuthStore = defineStore('auth', () => {
    *   → logguer : INSERT INTO admin_audit_log (admin_id, action, target_user_id, created_at)
    */
   function adminBanUser(id) {
+    if (!isAdmin.value) return
     const u = allUsers.value.find((u) => u.id === id)
-    if (!u || u.role === 'admin') return // protéger les comptes admin
+    if (!u || u.role === 'admin') return
     u.status = 'blocked'
     _saveRegistry()
   }
@@ -415,6 +440,7 @@ export const useAuthStore = defineStore('auth', () => {
    *   → logguer dans admin_audit_log
    */
   function adminUnbanUser(id) {
+    if (!isAdmin.value) return
     const u = allUsers.value.find((u) => u.id === id)
     if (!u) return
     u.status = 'active'
@@ -433,6 +459,7 @@ export const useAuthStore = defineStore('auth', () => {
    *   → logguer dans admin_audit_log avec ancien et nouveau statut
    */
   function adminTogglePremium(id) {
+    if (!isAdmin.value) return
     const u = allUsers.value.find((u) => u.id === id)
     if (!u) return
     u.isPremium = !u.isPremium
@@ -468,8 +495,9 @@ export const useAuthStore = defineStore('auth', () => {
    *   → NE PAS exposer cet endpoint sans authentification admin + confirmation 2FA
    */
   function adminDeleteUser(id) {
+    if (!isAdmin.value) return
     const u = allUsers.value.find((u) => u.id === id)
-    if (!u || u.role === 'admin') return // protéger les comptes admin
+    if (!u || u.role === 'admin') return
     allUsers.value = allUsers.value.filter((u) => u.id !== id)
     _saveRegistry()
     // Nettoyage localStorage associé à cet utilisateur
@@ -486,7 +514,9 @@ export const useAuthStore = defineStore('auth', () => {
       }
       localStorage.removeItem(`digitalcard_userCards_${u.email}`)
       localStorage.removeItem(`userProfilePhoto_${u.email}`)
-    } catch { /* non bloquant — données potentiellement corrompues */ }
+    } catch {
+      /* non bloquant — données potentiellement corrompues */
+    }
   }
 
   return {

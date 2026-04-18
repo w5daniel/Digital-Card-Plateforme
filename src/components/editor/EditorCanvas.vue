@@ -2,10 +2,10 @@
   <div
     ref="wrapperRef"
     class="relative flex-1 overflow-hidden flex items-center justify-center"
-    :class="[
-      themeStore.darkMode ? 'bg-gray-950' : 'bg-gray-200',
-      isDragOver && 'ring-2 ring-inset ring-violet-400',
-    ]"
+    :class="[isDragOver && 'ring-2 ring-inset ring-violet-400']"
+    :style="themeStore.darkMode
+      ? 'background-color:#0a0a0f; background-image:radial-gradient(circle,#1e2030 1px,transparent 1px); background-size:20px 20px'
+      : 'background-color:#e5e7eb; background-image:radial-gradient(circle,#c4c9d4 1px,transparent 1px); background-size:20px 20px'"
     @click.self="editorStore.clearSelection(); closeCtxMenu()"
     @wheel.prevent="onWheel"
     @mouseup.self="onStageMouseUp"
@@ -24,6 +24,7 @@
       @mouseup="onStageMouseUp"
       @touchstart="onStageMouseDown"
       @contextmenu="onContextMenu"
+      @click="onStageClick"
     >
       <!-- Layer 1: Background (checkerboard + card shadow + card bg) -->
       <v-layer :config="{ listening: false }">
@@ -36,22 +37,58 @@
       </v-layer>
 
       <!-- Layer 2: Elements + Transformer -->
-      <v-layer ref="elementsLayerRef">
+      <v-layer ref="elementsLayerRef" @dragstart="onLayerDragStart" @dragmove="onLayerDragMove">
         <!-- All elements, clipped to card rect -->
         <v-group :config="cardGroupConfig">
+          <!-- Group bounding box indicators (dashed outline, hidden when group fully selected) -->
+          <v-rect
+            v-for="(bounds, gid) in groupBoundingBoxes"
+            :key="'group-bb-' + gid"
+            :config="{
+              x: bounds.x,
+              y: bounds.y,
+              width: bounds.width,
+              height: bounds.height,
+              fill: 'transparent',
+              stroke: '#9e8ff5',
+              strokeWidth: 1,
+              dash: [5, 3],
+              listening: true,
+              draggable: true,
+              name: 'group-indicator',
+            }"
+            @click="onGroupIndicatorClick(gid)"
+            @dragstart="onGroupIndicatorDragStart($event, gid)"
+            @dragmove="onGroupIndicatorDragMove($event, gid)"
+            @dragend="onGroupIndicatorDragEnd($event, gid)"
+          />
+
           <template v-for="el in editorStore.currentElements" :key="el.id">
             <!-- TEXT -->
-            <v-text
-              v-if="el.type === 'text' && el.visible"
-              :config="buildTextConfig(el)"
-              @click="onElementClick($event, el)"
-              @tap="onElementClick($event, el)"
-              @dblclick="startTextEdit(el)"
-              @dbltap="startTextEdit(el)"
-              @dragend="onDragEnd($event, el)"
-              @transform="onTextTransform($event, el)"
-              @transformend="onTransformEnd($event, el)"
-            />
+            <template v-if="el.type === 'text' && el.visible">
+              <v-text
+                :config="buildTextConfig(el)"
+                @click="onElementClick($event, el)"
+                @tap="onElementClick($event, el)"
+                @dblclick="startTextEdit(el)"
+                @dbltap="startTextEdit(el)"
+                @dragend="onDragEnd($event, el)"
+                @transform="onTextTransform($event, el)"
+                @transformend="onTransformEnd($event, el)"
+              />
+              <!-- Custom underline color overlay — one v-line per text line -->
+              <v-line
+                v-for="(ulCfg, ulIdx) in (el.underlineColor && el.textDecoration?.includes('underline')
+                  ? buildTextUnderlineConfigs(el) : [])"
+                :key="el.id + '-ul-' + ulIdx"
+                :config="ulCfg"
+              />
+              <!-- Contact icon badge — shows that this element will display a contact icon in the preview -->
+              <v-circle
+                v-if="el.showContactIcon"
+                :config="{ x: el.x + 2, y: el.y + 2, radius: 4, fill: '#3b82f6', opacity: 0.85, listening: false }"
+              />
+            </template>
 
             <!-- RECT shape -->
             <v-rect
@@ -153,25 +190,34 @@
               @transformend="onTransformEnd($event, el)"
             />
 
-            <!-- IMAGE element -->
-            <v-image
+            <!-- IMAGE element — v-group wrapper pour que clipFunc (cercle) soit
+                 appliqué sur un Container Konva (clipFunc ignoré sur Shape) -->
+            <v-group
               v-else-if="el.type === 'image' && el.visible && imageCache[el.id]"
               :config="buildImageConfig(el)"
               @click="onElementClick($event, el)"
               @tap="onElementClick($event, el)"
               @dragend="onDragEnd($event, el)"
               @transformend="onTransformEnd($event, el)"
-            />
+            >
+              <v-image :config="buildImageNodeConfig(el)" />
+            </v-group>
 
             <!-- ICON element (SVG loaded from Iconify) -->
-            <v-image
-              v-else-if="el.type === 'icon' && el.visible && imageCache[el.id]"
-              :config="buildIconConfig(el)"
-              @click="onElementClick($event, el)"
-              @tap="onElementClick($event, el)"
-              @dragend="onDragEnd($event, el)"
-              @transformend="onTransformEnd($event, el)"
-            />
+            <template v-else-if="el.type === 'icon' && el.visible">
+              <v-image
+                v-if="imageCache[el.id]"
+                :config="buildIconConfig(el)"
+                @click="onElementClick($event, el)"
+                @tap="onElementClick($event, el)"
+                @dragend="onDragEnd($event, el)"
+                @transformend="onTransformEnd($event, el)"
+              />
+              <v-rect
+                v-if="el.strokeWidth > 0"
+                :config="buildIconBorderConfig(el)"
+              />
+            </template>
 
             <!-- QR code element (real QR image when loaded, grey placeholder while generating) -->
             <v-image
@@ -233,9 +279,9 @@
         </v-group>
       </v-layer>
 
-      <!-- Layer 3: Drag-selection rectangle -->
-      <v-layer v-if="isDraggingSelection" :config="{ listening: false }">
-        <v-rect :config="selectionRectConfig" />
+      <!-- Layer 3: Drag-selection rectangle (layer always present; rect toggled) -->
+      <v-layer :config="{ listening: false }">
+        <v-rect v-if="isDraggingSelection" :config="selectionRectConfig" />
       </v-layer>
     </v-stage>
 
@@ -283,6 +329,30 @@
       :style="safeZoneStyle"
     />
 
+    <!-- ── Snap guide lines (live during drag) ───────────────────────── -->
+    <template v-if="snapGuides.length">
+      <div
+        v-for="(guide, i) in snapGuides"
+        :key="i"
+        class="absolute pointer-events-none z-20"
+        :style="guide.type === 'V'
+          ? {
+              left: cardOffset.x + guide.pos * editorStore.zoom + 'px',
+              top: cardOffset.y + 'px',
+              width: '1px',
+              height: editorStore.cardHeight * editorStore.zoom + 'px',
+              background: '#f43f5e',
+            }
+          : {
+              left: cardOffset.x + 'px',
+              top: cardOffset.y + guide.pos * editorStore.zoom + 'px',
+              width: editorStore.cardWidth * editorStore.zoom + 'px',
+              height: '1px',
+              background: '#f43f5e',
+            }"
+      />
+    </template>
+
     <!-- ── Textarea overlay for inline text editing ─────────────────── -->
     <textarea
       v-if="editingEl"
@@ -292,6 +362,7 @@
       class="absolute resize-none outline-none border-2 border-violet-500 rounded bg-transparent z-50 overflow-hidden p-0 leading-none"
       @blur="finishTextEdit"
       @keydown.esc="finishTextEdit"
+      @keydown="onTextareaKeydown"
     />
 
     <!-- ── Lock indicator overlays ───────────────────────────────────── -->
@@ -347,15 +418,15 @@
       :y="ctxY"
       :has-selection="editorStore.selectedIds.length > 0"
       :selection-count="editorStore.selectedIds.length"
-      :has-clipboard="!!editorStore.clipboardEl"
-      :is-locked="!!editorStore.singleSelected?.locked"
+      :has-clipboard="editorStore.clipboardEl.length > 0"
+      :is-locked="!!(editorStore.singleSelected?.locked ?? editorStore.currentElements.find(e => e.id === editorStore.selectedIds[0])?.locked)"
       :is-grouped="editorStore.canUngroup"
       :dark="themeStore.darkMode"
       @copy="editorStore.copySelected(); closeCtxMenu()"
       @paste="editorStore.pasteClipboard(); closeCtxMenu()"
       @duplicate="editorStore.duplicateSelected(); closeCtxMenu()"
       @delete="editorStore.deleteSelected(); closeCtxMenu()"
-      @toggle-lock="editorStore.toggleLock(editorStore.singleSelected?.id); closeCtxMenu()"
+      @toggle-lock="editorStore.toggleLock(editorStore.selectedIds); closeCtxMenu()"
       @align="(type) => { editorStore.alignElements(editorStore.selectedIds, type); closeCtxMenu() }"
       @group="editorStore.groupSelected(); closeCtxMenu()"
       @ungroup="editorStore.ungroupSelected(); closeCtxMenu()"
@@ -460,7 +531,8 @@ function onCardDrop(event) {
   } else if (data.action === 'addIcon') {
     editorStore.addIconElement(data.icon, { ...data.preset, ...pos })
   } else if (data.action === 'addText') {
-    editorStore.addTextElement({ ...data.preset, ...pos })
+    const newTextEl = editorStore.addTextElement({ ...data.preset, ...pos })
+    nextTick(() => syncTextRenderedDims(newTextEl.id))
   } else if (data.action === 'addShape') {
     editorStore.addShapeElement(data.shapeType, { ...data.preset, ...pos })
   } else if (data.action === 'addImage') {
@@ -485,10 +557,16 @@ function onCardDrop(event) {
     const tpl = cardsStore.getTemplateBySlug(data.slug)
     if (tpl) {
       if (tpl.isPremium && !authStore.isPremium && !authStore.isAdmin) return
-      const layout = LAYOUT_MAP[tpl.slug] || 'center'
-      const rectoEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, tpl.colors)
-      editorStore.applyRectoTemplate(rectoEls, tpl.colors.primary)
+      if (tpl.editorData) {
+        const ed = JSON.parse(JSON.stringify(tpl.editorData))
+        editorStore.applyRectoTemplate(ed.elements?.recto || [], ed.backgrounds?.recto || tpl.colors?.primary || '#FFFFFF')
+      } else {
+        const layout = LAYOUT_MAP[tpl.slug] || 'center'
+        const rectoEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, tpl.colors)
+        editorStore.applyRectoTemplate(rectoEls, tpl.colors.primary)
+      }
       editorStore.templateSlug = tpl.slug
+      editorStore.templatePrimaryColor = tpl.colors?.secondary || tpl.colors?.primary || '#6366F1'
     }
   }
 }
@@ -521,8 +599,34 @@ function onContextMenu(e) {
   openCtxMenu(e.evt.clientX, e.evt.clientY, elementId || null)
 }
 
+function onStageClick(e) {
+  // A click fires right after mouseup — skip it if a drag-select just completed
+  if (justFinishedDragSelect.value) {
+    justFinishedDragSelect.value = false
+    return
+  }
+  const target = e.target
+  const stageNode = stageRef.value?.getNode()
+  // Click on stage background (area outside elements) → deselect all
+  if (target === stageNode || target === stageNode?.findOne('.background')) {
+    editorStore.clearSelection()
+  }
+}
+
+// ── Live drag/transform position tracking ────────────────────────────────
+// Alias for editorStore.livePosState — reactive map { [elId]: { x, y, width? } }.
+// Updated in onLayerDragMove / onTextTransform; cleared at dragend/transformend.
+// Shared with EditorContextBar for live field updates.
+const liveDragPos = editorStore.livePosState
+
+// ── Snap guides (computed during drag, cleared on dragend) ────────────────
+// Each guide: { type: 'H'|'V', pos: number } in canvas-space coordinates.
+const snapGuides = ref([])
+
 // ── Drag selection state ──────────────────────────────────────────────────
 const isDraggingSelection = ref(false)
+const justFinishedDragSelect = ref(false)
+const selectionAdditive = ref(false)
 const selectionStartPos = ref({ x: 0, y: 0 })
 const selectionCurrentPos = ref({ x: 0, y: 0 })
 
@@ -543,6 +647,68 @@ const selectionRectConfig = computed(() => {
     listening: false,
   }
 })
+
+// ── Group bounding box indicators ────────────────────────────────────────
+// One dashed-outline rect per group whose members are NOT all selected.
+// Shown when group is deselected so users can see the group boundary and
+// click empty space inside it to reselect the whole group.
+const groupBoundingBoxes = computed(() => {
+  // Reading liveDragPos (reactive) causes this computed to recompute on every drag frame.
+  const livePos = liveDragPos
+  const groups = {}
+  for (const el of editorStore.currentElements) {
+    if (!el.groupId || el.visible === false) continue
+    const memberIds = editorStore.currentElements
+      .filter((m) => m.groupId === el.groupId)
+      .map((m) => m.id)
+    const allSelected = memberIds.every((id) => editorStore.selectedIds.includes(id))
+    if (allSelected) continue
+    if (!groups[el.groupId]) {
+      groups[el.groupId] = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    }
+    const g = groups[el.groupId]
+    const live = livePos[el.id]
+    const px = live?.x ?? el.x
+    const py = live?.y ?? el.y
+    const isText = el.type === 'text' || el.type === 'contact'
+    const cw = editorStore.cardWidth || 350
+    const w = el.width ?? (isText
+      ? Math.min(cw * 0.85, Math.max(150, (el.text || '').length * (el.fontSize || 16) * 0.65))
+      : 100)
+    const h = el.height || (isText ? (el.fontSize || 16) * 1.4 : 50)
+    // Account for rotation: expand bounding box using rotated corners
+    const rot = ((el.rotation || 0) * Math.PI) / 180
+    if (rot === 0) {
+      g.minX = Math.min(g.minX, px)
+      g.minY = Math.min(g.minY, py)
+      g.maxX = Math.max(g.maxX, px + w)
+      g.maxY = Math.max(g.maxY, py + h)
+    } else {
+      const corners = [[0, 0], [w, 0], [w, h], [0, h]]
+      const cos = Math.cos(rot), sin = Math.sin(rot)
+      for (const [cx, cy] of corners) {
+        const rx = px + cx * cos - cy * sin
+        const ry = py + cx * sin + cy * cos
+        g.minX = Math.min(g.minX, rx)
+        g.minY = Math.min(g.minY, ry)
+        g.maxX = Math.max(g.maxX, rx)
+        g.maxY = Math.max(g.maxY, ry)
+      }
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(groups).map(([gid, b]) => [
+      gid,
+      { x: b.minX - 6, y: b.minY - 6, width: b.maxX - b.minX + 12, height: b.maxY - b.minY + 12 },
+    ]),
+  )
+})
+
+// Refresh Transformer when groupId assignments change (e.g. after Ctrl+G)
+watch(
+  () => editorStore.currentElements.map((el) => el.groupId).join(','),
+  () => nextTick(updateTransformer),
+)
 
 // ── Image loading cache ───────────────────────────────────────────────────
 const imageCache = ref({})
@@ -730,15 +896,23 @@ const cardShadowConfig = computed(() => ({
   listening: false,
 }))
 
-const cardBgConfig = computed(() => ({
-  x: cardOffset.value.x,
-  y: cardOffset.value.y,
-  width: editorStore.cardWidth * editorStore.zoom,
-  height: editorStore.cardHeight * editorStore.zoom,
-  fill: editorStore.currentBackground,
-  cornerRadius: editorStore.cardBorderRadius * editorStore.zoom,
-  listening: true,
-}))
+const cardBgConfig = computed(() => {
+  const W = editorStore.cardWidth * editorStore.zoom
+  const H = editorStore.cardHeight * editorStore.zoom
+  const bg = editorStore.currentBackground
+  const grad = parseCSSGradient(bg)
+  const gradPropsObj = grad ? buildKonvaGradient(grad.angle, W, H, grad.from, grad.to) : {}
+  return {
+    x: cardOffset.value.x,
+    y: cardOffset.value.y,
+    width: W,
+    height: H,
+    fill: grad ? undefined : bg || '#ffffff',
+    cornerRadius: editorStore.cardBorderRadius * editorStore.zoom,
+    listening: true,
+    ...gradPropsObj,
+  }
+})
 
 // Group that contains elements — applies zoom + card offset as transform
 const cardGroupConfig = computed(() => {
@@ -799,6 +973,7 @@ const TEXT_ANCHORS = [
 const transformerConfig = computed(() => {
   const sel = editorStore.singleSelected
   const isText = sel?.type === 'text'
+  const isLocked = !!sel?.locked
   return {
     borderStroke: '#7C3AED',
     borderStrokeWidth: 1.5,
@@ -806,8 +981,9 @@ const transformerConfig = computed(() => {
     anchorStroke: '#7C3AED',
     anchorSize: 10,
     anchorCornerRadius: 3,
-    rotateEnabled: !isText, // custom rotation handle for text
-    enabledAnchors: isText ? TEXT_ANCHORS : ALL_ANCHORS,
+    resizeEnabled: !isLocked,
+    rotateEnabled: !isText && !isLocked, // custom rotation handle for text; none for locked
+    enabledAnchors: isLocked ? [] : isText ? TEXT_ANCHORS : ALL_ANCHORS,
     keepRatio: false,
     anchorStyleFunc: (anchor) => {
       const name = anchor.name?.() || ''
@@ -847,40 +1023,115 @@ const transformerConfig = computed(() => {
   }
 })
 
+// ── Gradient helpers ──────────────────────────────────────────────────────
+import {
+  buildKonvaGradient,
+  buildKonvaGradientCentered,
+  parseCSSGradient,
+  gradientProps,
+  gradientPropsCentered,
+} from '@/utils/gradientHelpers'
+
+// ── Shadow helper ─────────────────────────────────────────────────────────
+function shadowProps(el) {
+  if (!el.shadowEnabled) return {}
+  return {
+    shadowEnabled: true,
+    shadowColor: el.shadowColor || '#000000',
+    shadowBlur: el.shadowBlur ?? 8,
+    shadowOffsetX: el.shadowOffsetX ?? 3,
+    shadowOffsetY: el.shadowOffsetY ?? 3,
+    shadowOpacity: el.shadowOpacity ?? 0.35,
+  }
+}
+
 // ── Element config builders ───────────────────────────────────────────────
 function buildTextConfig(el) {
+  // When a custom underline color is set, disable Konva's native underline (which always uses fill)
+  // and let the v-line overlay handle it instead.
+  const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
   const cfg = {
     id: el.id,
     x: el.x,
     y: el.y,
-    width: el.width,
-    height: el.height || undefined,
+    width: el.width != null ? el.width : undefined,
+    height: el.height != null ? el.height : undefined,
     text: el.text || '',
     fontSize: el.fontSize || 16,
     fontFamily: el.fontFamily || 'Inter',
     fontStyle: el.fontStyle || 'normal',
-    textDecoration: el.textDecoration || '',
-    fill: el.fill || '#000000',
+    textDecoration: hasCustomUnderline ? '' : el.textDecoration || '',
+    fill: el.fillGradient ? '' : el.fill || '#000000',
+    ...gradientProps(el, el.width || 200, el.height || 40),
     align: el.align || 'left',
+    verticalAlign: el.verticalAlign || 'middle',
     opacity: editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1),
     rotation: el.rotation || 0,
     letterSpacing: el.letterSpacing || 0,
     lineHeight: el.lineHeight || 1.25,
     draggable: !el.locked,
-    wrap: 'word',
+    wrap: el.wrap || 'word',
     listening: true,
+    ...shadowProps(el),
   }
   return cfg
 }
 
+function buildTextUnderlineConfigs(el) {
+  const live = liveDragPos[el.id]
+  const lx = live?.x ?? el.x
+  const ly = live?.y ?? el.y
+  const fs = el.fontSize || 16
+  const lh = el.lineHeight || 1.25
+  const strokeW = Math.max(1, Math.round(fs * 0.07))
+  const rot = el.rotation || 0
+
+  // Use per-line metrics from liveDragPos (updated during resize), or read from Konva node
+  const lines = live?.underlineLines || getTextUnderlineLines(el)
+  if (!lines || lines.length === 0) {
+    // Fallback: single line using actual text width (not container width)
+    const textW = getTextNodeTextWidth(el)
+    const underlineY = fs * lh * 0.92
+    return [
+      {
+        x: lx,
+        y: ly,
+        offsetY: -underlineY,
+        points: [0, 0, textW, 0],
+        stroke: el.underlineColor,
+        strokeWidth: strokeW,
+        rotation: rot,
+        opacity: el.opacity ?? 1,
+        listening: false,
+      },
+    ]
+  }
+
+  return lines.map((line) => ({
+    x: lx,
+    y: ly,
+    offsetX: -line.xOffset,
+    offsetY: -line.y,
+    points: [0, 0, line.width, 0],
+    stroke: el.underlineColor,
+    strokeWidth: strokeW,
+    rotation: rot,
+    opacity: el.opacity ?? 1,
+    listening: false,
+  }))
+}
+
 function buildRectConfig(el) {
+  const W = el.width || 100
+  const H = el.height || 100
+  const gp = gradientProps(el, W, H)
   return {
     id: el.id,
     x: el.x,
     y: el.y,
-    width: el.width,
-    height: el.height,
-    fill: el.fill || '#3B82F6',
+    width: W,
+    height: H,
+    fill: el.fillGradient ? '' : el.fill || '#3B82F6',
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     cornerRadius: el.cornerRadius || 0,
@@ -888,23 +1139,30 @@ function buildRectConfig(el) {
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...gp,
+    ...shadowProps(el),
   }
 }
 
 function buildEllipseConfig(el) {
+  const W = el.width || 100
+  const H = el.height || 100
+  const gp = gradientPropsCentered(el, W, H)
   return {
     id: el.id,
-    x: el.x + (el.width || 100) / 2,
-    y: el.y + (el.height || 100) / 2,
-    radiusX: (el.width || 100) / 2,
-    radiusY: (el.height || 100) / 2,
-    fill: el.fill || '#3B82F6',
+    x: el.x + W / 2,
+    y: el.y + H / 2,
+    radiusX: W / 2,
+    radiusY: H / 2,
+    fill: el.fillGradient ? '' : el.fill || '#3B82F6',
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...gp,
+    ...shadowProps(el),
   }
 }
 
@@ -920,8 +1178,8 @@ function buildLineConfig(el) {
     stroke: el.fill || '#000000',
     strokeWidth: Math.max(1, sw),
     dash: el.dash && el.dash.length ? el.dash : undefined,
-    lineCap: 'round',
-    lineJoin: 'round',
+    lineCap: el.lineCap || 'round',
+    lineJoin: el.lineJoin || 'round',
     // wide hit area so it's easy to click
     hitStrokeWidth: Math.max(14, sw),
     opacity: el.opacity ?? 1,
@@ -946,8 +1204,8 @@ function buildArrowConfig(el) {
     fill: el.fill || '#000000',
     stroke: el.fill || '#000000',
     strokeWidth: sw,
-    pointerLength: headSize,
-    pointerWidth: headSize,
+    pointerLength: el.pointerLength || headSize,
+    pointerWidth: el.pointerWidth || headSize,
     hitStrokeWidth: Math.max(14, h),
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
@@ -967,6 +1225,7 @@ function buildLineBarConfig(el) {
   const sw = el.strokeWidth || el.height || 2
   const w = el.width || 200
   const barH = Math.max(sw * 5, 16) // bar height is 5× stroke width, min 16px
+  const dash = el.dash || []
   return {
     id: el.id,
     x: el.x,
@@ -976,6 +1235,7 @@ function buildLineBarConfig(el) {
     fill: 'transparent',
     stroke: el.fill || '#000000',
     strokeWidth: sw,
+    dash,
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
     draggable: !el.locked,
@@ -985,14 +1245,39 @@ function buildLineBarConfig(el) {
       const W = shape.width()
       const H = shape.height()
       const mid = H / 2
+      const native = ctx._context
+      native.save()
+      native.strokeStyle = shape.stroke()
+      native.lineWidth = shape.strokeWidth()
+
+      // Horizontal line — with dash pattern
+      native.setLineDash(dash)
+      native.beginPath()
+      native.moveTo(0, mid)
+      native.lineTo(W, mid)
+      native.stroke()
+
+      // Vertical bars — always solid
+      native.setLineDash([])
+      native.beginPath()
+      native.moveTo(0, 0)
+      native.lineTo(0, H)
+      native.moveTo(W, 0)
+      native.lineTo(W, H)
+      native.stroke()
+
+      native.restore()
+    },
+    hitFunc(ctx, shape) {
+      // Redraw the same paths via Konva ctx so hit detection works
+      const W = shape.width()
+      const H = shape.height()
+      const mid = H / 2
       ctx.beginPath()
-      // Main horizontal line
       ctx.moveTo(0, mid)
       ctx.lineTo(W, mid)
-      // Left vertical bar
       ctx.moveTo(0, 0)
       ctx.lineTo(0, H)
-      // Right vertical bar
       ctx.moveTo(W, 0)
       ctx.lineTo(W, H)
       ctx.fillStrokeShape(shape)
@@ -1008,7 +1293,8 @@ function buildCustomPolyConfig(el) {
     y: el.y,
     width: el.width || 100,
     height: el.height || 100,
-    fill: el.fill || '#ffffff',
+    fill: el.fillGradient ? '' : el.fill || '#ffffff',
+    ...gradientProps(el, el.width || 100, el.height || 100),
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     opacity: el.opacity ?? 1,
@@ -1036,7 +1322,8 @@ function buildPathConfig(el) {
     x: el.x,
     y: el.y,
     data: el.pathData || '',
-    fill: el.fill || '#3B82F6',
+    fill: el.fillGradient ? '' : el.fill || '#3B82F6',
+    ...gradientProps(el, el.width || 60, el.height || 60),
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     scaleX: (el.width || 60) / vb[0],
@@ -1046,6 +1333,7 @@ function buildPathConfig(el) {
     draggable: !el.locked,
     listening: true,
     hitStrokeWidth: 10,
+    ...shadowProps(el),
   }
 }
 
@@ -1057,13 +1345,15 @@ function buildPolygonConfig(el) {
     y: el.y + (el.height || 110) / 2,
     sides: el.sides || 5,
     radius: r,
-    fill: el.fill || '#3B82F6',
+    fill: el.fillGradient ? '' : el.fill || '#3B82F6',
+    ...gradientPropsCentered(el, el.width || 110, el.height || 110),
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...shadowProps(el),
   }
 }
 
@@ -1077,29 +1367,60 @@ function buildStarConfig(el) {
     numPoints: el.numPoints || 5,
     outerRadius: ro,
     innerRadius: el.innerRadius || ri,
-    fill: el.fill || '#3B82F6',
+    fill: el.fillGradient ? '' : el.fill || '#3B82F6',
+    ...gradientPropsCentered(el, el.width || 120, el.height || 120),
     stroke: el.stroke || '',
     strokeWidth: el.strokeWidth || 0,
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...shadowProps(el),
   }
 }
 
+// Config du groupe wrapper — porte l'ID, la position, la rotation, l'opacité,
+// le draggable et le clipFunc (cercle). clipFunc doit être sur un Container
+// (Group/Layer/Stage) : sur un nœud Shape/Image il est silencieusement ignoré.
 function buildImageConfig(el) {
-  return {
+  const w = el.width || 200
+  const h = el.height || 120
+  const cfg = {
     id: el.id,
     x: el.x,
     y: el.y,
-    width: el.width || 200,
-    height: el.height || 120,
-    image: imageCache.value[el.id] || null,
+    width: w,   // requis pour node.width() dans onTransformEnd
+    height: h,
     opacity: el.opacity ?? 1,
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...shadowProps(el),
   }
+  // clipFunc sur le GROUP (Container) — fonctionne ; sur v-image (Shape) il était ignoré
+  cfg.clipFunc = el.shape === 'circle'
+    ? (ctx) => { ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2) }
+    : null
+  return cfg
+}
+
+// Config du nœud v-image interne (positionné à 0/0 dans le groupe wrapper)
+function buildImageNodeConfig(el) {
+  const cfg = {
+    x: 0,
+    y: 0,
+    width: el.width || 200,
+    height: el.height || 120,
+    image: imageCache.value[el.id] || null,
+    listening: true,  // requis pour hit-detection — events bubblent au groupe parent
+  }
+  if (el.cropWidth && el.cropHeight) {
+    cfg.cropX = el.cropX ?? 0
+    cfg.cropY = el.cropY ?? 0
+    cfg.cropWidth = el.cropWidth
+    cfg.cropHeight = el.cropHeight
+  }
+  return cfg
 }
 
 function buildIconConfig(el) {
@@ -1114,6 +1435,28 @@ function buildIconConfig(el) {
     rotation: el.rotation || 0,
     draggable: !el.locked,
     listening: true,
+    ...shadowProps(el),
+  }
+}
+
+function buildIconBorderConfig(el) {
+  const w = el.width || 64
+  const h = el.height || 64
+  const sw = el.strokeWidth || 0
+  // Inset the rect by sw/2 so the stroke (centered on the rect edge) aligns exactly
+  // with the icon boundary — instead of extending half a strokeWidth outside the icon.
+  const inset = sw / 2
+  return {
+    x: el.x + inset,
+    y: el.y + inset,
+    width: Math.max(0, w - sw),
+    height: Math.max(0, h - sw),
+    fill: '',
+    stroke: el.stroke || '#000000',
+    strokeWidth: sw,
+    opacity: el.opacity ?? 1,
+    rotation: el.rotation || 0,
+    listening: false,
   }
 }
 
@@ -1151,8 +1494,39 @@ function buildQRPlaceholder(el) {
 // ── Update transformer when selection changes ────────────────────────────
 watch(
   () => [...editorStore.selectedIds],
-  () => nextTick(updateTransformer),
+  () =>
+    nextTick(() => {
+      updateTransformer()
+      // Sync rendered dimensions so the context bar shows real width/height for text
+      for (const id of editorStore.selectedIds) {
+        const el = editorStore.currentElements.find((e) => e.id === id)
+        if (el?.type === 'text') syncTextRenderedDims(id)
+      }
+    }),
   { deep: true },
+)
+
+// Invalide le cache underline quand le layout d'un texte change (fontSize, lineHeight, align,
+// width, contenu). Sans ce watcher, liveDragPos.underlineLines reste stale après un changement
+// de taille via +/-, et le souligné ne suit pas dynamiquement.
+watch(
+  () =>
+    editorStore.currentElements
+      .filter((el) => el.type === 'text')
+      .map((el) => `${el.id}|${el.fontSize}|${el.lineHeight}|${el.align}|${el.width}|${el.text}`),
+  (newKeys, oldKeys) => {
+    if (!oldKeys) return
+    const oldSet = new Set(oldKeys)
+    for (const key of newKeys) {
+      if (!oldSet.has(key)) {
+        const id = key.split('|')[0]
+        // Invalider immédiatement pour éviter d'afficher des positions stalles
+        if (liveDragPos[id]) liveDragPos[id] = { ...liveDragPos[id], underlineLines: null }
+        // Attendre Vue render + Konva draw (rAF) : textArr recompté seulement après le draw
+        nextTick(() => requestAnimationFrame(() => syncTextRenderedDims(id)))
+      }
+    }
+  },
 )
 
 function updateTransformer() {
@@ -1176,6 +1550,7 @@ function updateTransformer() {
   const nodes = editorStore.selectedIds
     .map((id) => {
       const el = editorStore.currentElements.find((e) => e.id === id)
+      if (el?.locked) return null
       if (soloSelection && el && HANDLE_EXCLUDED.has(el.shapeType)) return null
       return stage.findOne('#' + id)
     })
@@ -1193,7 +1568,7 @@ const LINE_HANDLE_TYPES = new Set(['line', 'arrow', 'arrow-double'])
 const selectedLineEl = computed(() => {
   if (editorStore.selectedIds.length !== 1) return null
   const el = editorStore.currentElements.find((e) => e.id === editorStore.selectedIds[0])
-  return el && LINE_HANDLE_TYPES.has(el.shapeType) ? el : null
+  return el && !el.locked && LINE_HANDLE_TYPES.has(el.shapeType) ? el : null
 })
 
 // Returns stage coords of both visual endpoints plus the local offsets needed
@@ -1201,6 +1576,9 @@ const selectedLineEl = computed(() => {
 // line:          local left = (0, 0),   right = (w, 0)
 // arrow/double:  local left = (0, h/2), right = (w, h/2)
 function getLineEndpoints(el) {
+  const live = liveDragPos[el.id]
+  const px = live?.x ?? el.x
+  const py = live?.y ?? el.y
   const r = ((el.rotation || 0) * Math.PI) / 180
   const w = el.width || 200
   const loy =
@@ -1211,10 +1589,10 @@ function getLineEndpoints(el) {
   const c = Math.cos(r),
     s = Math.sin(r)
   return {
-    lx: el.x + lox * c - loy * s,
-    ly: el.y + lox * s + loy * c,
-    rx: el.x + rox * c - roy * s,
-    ry: el.y + rox * s + roy * c,
+    lx: px + lox * c - loy * s,
+    ly: py + lox * s + loy * c,
+    rx: px + rox * c - roy * s,
+    ry: py + rox * s + roy * c,
     lox,
     loy,
   }
@@ -1339,7 +1717,7 @@ function onLeftHandleDragEnd(e) {
 const selectedTextEl = computed(() => {
   if (editorStore.selectedIds.length !== 1) return null
   const el = editorStore.currentElements.find((e) => e.id === editorStore.selectedIds[0])
-  return el?.type === 'text' ? el : null
+  return el?.type === 'text' && !el.locked ? el : null
 })
 
 const TEXT_BOTTOM_HANDLE_R = 9
@@ -1353,17 +1731,73 @@ function getTextHeight(el) {
   return node ? node.height() : el.fontSize || 20
 }
 
+// Get the Konva text node's rendered width (card-space px, unscaled)
+function getTextWidth(el) {
+  const stage = stageRef.value?.getNode()
+  const node = stage?.findOne('#' + el.id)
+  return node ? node.width() : el.fontSize * (el.text?.length || 5) * 0.6
+}
+
+// Get the actual rendered text width (not container width) from the Konva node
+function getTextNodeTextWidth(el) {
+  const stage = stageRef.value?.getNode()
+  const node = stage?.findOne('#' + el.id)
+  return node?.getTextWidth?.() ?? el.fontSize * (el.text?.length || 5) * 0.6
+}
+
+// Get per-line underline metrics from the Konva text node
+function getTextUnderlineLines(el) {
+  const stage = stageRef.value?.getNode()
+  const node = stage?.findOne('#' + el.id)
+  if (!node || !node.textArr || node.textArr.length === 0) return null
+  const fs = node.fontSize()
+  const lh = node.lineHeight()
+  const lineHeightPx = fs * lh
+  const containerW = node.width()
+  const align = el.align || 'left'
+
+  return node.textArr.map((line, i) => {
+    let xOffset = 0
+    if (align === 'center') xOffset = (containerW - line.width) / 2
+    else if (align === 'right') xOffset = containerW - line.width
+    return {
+      xOffset,
+      y: lineHeightPx * i + lineHeightPx * 0.92,
+      width: line.width,
+    }
+  })
+}
+
+// Read actual Konva-rendered dimensions for a text node and cache them in liveDragPos
+// so the context bar (which reads livePosState) always shows real values.
+function syncTextRenderedDims(elId) {
+  const stage = stageRef.value?.getNode()
+  const node = stage?.findOne('#' + elId)
+  if (!node) return
+  const el = editorStore.currentElements.find((e) => e.id === elId)
+  liveDragPos[elId] = {
+    ...(liveDragPos[elId] || {}),
+    width: node.width(),
+    height: node.height(),
+    underlineLines: el ? getTextUnderlineLines(el) : null,
+  }
+}
+
 // Compute handle position accounting for element rotation.
 // Returns {x, y} in card space usable inside handleGroupConfig.
 function textHandlePos(el, offsetX, offsetY) {
+  const live = liveDragPos[el.id]
+  const px = live?.x ?? el.x
+  const py = live?.y ?? el.y
   const h = getTextHeight(el)
   const r = ((el.rotation || 0) * Math.PI) / 180
-  // Local position relative to element origin (el.x, el.y), before rotation
-  const lx = el.width / 2 + offsetX
+  // Use live visual width (updated during resize) so handles track the resize in real time.
+  const w = live?.width ?? el.width ?? getTextWidth(el)
+  const lx = w / 2 + offsetX
   const ly = h + offsetY
   return {
-    x: el.x + lx * Math.cos(r) - ly * Math.sin(r),
-    y: el.y + lx * Math.sin(r) + ly * Math.cos(r),
+    x: px + lx * Math.cos(r) - ly * Math.sin(r),
+    y: py + lx * Math.sin(r) + ly * Math.cos(r),
   }
 }
 
@@ -1467,21 +1901,44 @@ function onTextMoveMove(e) {
   const zoom = editorStore.zoom
   const dx = (e.clientX - textMoveState.startClientX) / zoom
   const dy = (e.clientY - textMoveState.startClientY) / zoom
-  editorStore.updateElement(textMoveState.elId, {
-    x: textMoveState.startX + dx,
-    y: textMoveState.startY + dy,
-  })
+  const rawX = textMoveState.startX + dx
+  const rawY = textMoveState.startY + dy
+
+  let finalX = rawX
+  let finalY = rawY
+
+  if (editorStore.snapEnabled || editorStore.snapToEdges) {
+    const el = editorStore.currentElements.find((el) => el.id === textMoveState.elId)
+    const w = el?.width ?? getTextWidth(el)
+    const h = el ? getTextHeight(el) : 0
+    const snapped = computeSnapWithGuides(rawX, rawY, w, h, textMoveState.elId)
+    finalX = snapped.x
+    finalY = snapped.y
+  } else {
+    snapGuides.value = []
+  }
+
+  liveDragPos[textMoveState.elId] = { x: finalX, y: finalY }
+  editorStore.updateElement(textMoveState.elId, { x: finalX, y: finalY })
 }
 
 function onTextMoveUp() {
+  snapGuides.value = []
   window.removeEventListener('mousemove', onTextMoveMove)
   window.removeEventListener('mouseup', onTextMoveUp)
-  if (textMoveState) editorStore.saveHistory()
+  if (textMoveState) {
+    nextTick(() => syncTextRenderedDims(textMoveState.elId))
+    editorStore.saveHistory()
+  }
   textMoveState = null
 }
 
 // ── Text rotation via bottom handle ───────────────────────────────────────
 let textRotateState = null
+
+// Lignes de souligné originales capturées au début d'un resize drag (avant tout scaling).
+// Permet de toujours scaler depuis les valeurs initiales et d'éviter l'accumulation d'échelle.
+let resizeDragBaseLines = {}
 
 function startTextRotate(e) {
   e.cancelBubble = true
@@ -1489,12 +1946,13 @@ function startTextRotate(e) {
   if (!el) return
 
   const h = getTextHeight(el)
+  const w = el.width ?? getTextWidth(el)
   const zoom = editorStore.zoom
   const r0 = ((el.rotation || 0) * Math.PI) / 180
 
   // Card-space center (kept fixed during rotation so it pivots from center)
-  const cardCx = el.x + (el.width / 2) * Math.cos(r0) - (h / 2) * Math.sin(r0)
-  const cardCy = el.y + (el.width / 2) * Math.sin(r0) + (h / 2) * Math.cos(r0)
+  const cardCx = el.x + (w / 2) * Math.cos(r0) - (h / 2) * Math.sin(r0)
+  const cardCy = el.y + (w / 2) * Math.sin(r0) + (h / 2) * Math.cos(r0)
 
   // Stage-space center (for angle calculation with mouse position)
   const stageCx = cardCx * zoom + cardOffset.value.x
@@ -1512,7 +1970,7 @@ function startTextRotate(e) {
     cardCy,
     stageCx,
     stageCy,
-    w: el.width,
+    w,
     h,
     containerLeft: rect?.left ?? 0,
     containerTop: rect?.top ?? 0,
@@ -1536,17 +1994,25 @@ function onTextRotateMove(e) {
   const r = (newRotation * Math.PI) / 180
   const { cardCx, cardCy, w, h } = textRotateState
   // Recompute top-left so the visual center stays fixed
-  editorStore.updateElement(textRotateState.elId, {
-    x: cardCx - (w / 2) * Math.cos(r) + (h / 2) * Math.sin(r),
-    y: cardCy - (w / 2) * Math.sin(r) - (h / 2) * Math.cos(r),
-    rotation: newRotation,
-  })
+  const newX = cardCx - (w / 2) * Math.cos(r) + (h / 2) * Math.sin(r)
+  const newY = cardCy - (w / 2) * Math.sin(r) - (h / 2) * Math.cos(r)
+  editorStore.updateElement(textRotateState.elId, { x: newX, y: newY, rotation: newRotation })
+  // Garder liveDragPos en sync : buildTextUnderlineConfigs préfère live.x/y sur el.x/y,
+  // donc sans cette mise à jour le souligné reste ancré à l'ancienne position.
+  if (liveDragPos[textRotateState.elId]) {
+    liveDragPos[textRotateState.elId] = { ...liveDragPos[textRotateState.elId], x: newX, y: newY }
+  }
 }
 
 function onTextRotateUp() {
   window.removeEventListener('mousemove', onTextRotateMove)
   window.removeEventListener('mouseup', onTextRotateUp)
-  if (textRotateState) editorStore.saveHistory()
+  if (textRotateState) {
+    // Purger le cache underline après rotation : Konva dessine en rAF, on attend qu'il l'ait fait.
+    const elId = textRotateState.elId
+    nextTick(() => requestAnimationFrame(() => syncTextRenderedDims(elId)))
+    editorStore.saveHistory()
+  }
   textRotateState = null
 }
 
@@ -1560,38 +2026,86 @@ function onTextTransform(e, el) {
     // Side: horizontal only — freeze vertical scale
     node.scaleY(1)
   } else {
-    // Corner: uniform scale — Y follows X
+    // Corner: uniform scale — Y follows X.
+    // For top anchors (top-left / top-right) the pivot is the BOTTOM edge.
+    // Konva already moved node.y() to keep that bottom edge fixed based on its
+    // own scaleY. When we override scaleY with scaleX the bottom edge shifts
+    // unless we compensate y by the difference in height.
+    const konvaScaleY = node.scaleY()
     node.scaleY(node.scaleX())
+    if (anchor === 'top-left' || anchor === 'top-right') {
+      node.y(node.y() + node.height() * (konvaScaleY - node.scaleX()))
+    }
   }
+  // Track live visual width so textHandlePos and context bar update in real time.
+  // We do NOT touch node.width() or scaleX here to avoid breaking the Transformer.
+  const baseW = el.width ?? node.width()
+  const visualW = Math.max(10, baseW * Math.abs(node.scaleX()))
+  const sx = Math.abs(node.scaleX())
+  const sy = Math.abs(node.scaleY())
+
+  // Scale underline line metrics proportionally during resize.
+  // On capture les lignes originales UNE SEULE FOIS au début du drag (resizeDragBaseLines),
+  // puis on scale toujours depuis ces originaux — évite l'accumulation d'échelle entre events.
+  if (!resizeDragBaseLines[el.id]) {
+    resizeDragBaseLines[el.id] = getTextUnderlineLines(el) || liveDragPos[el.id]?.underlineLines || null
+  }
+  const scaledLines = resizeDragBaseLines[el.id]?.map((line) => ({
+    xOffset: line.xOffset * sx,
+    y: line.y * sy,
+    width: line.width * sx,
+  }))
+
+  liveDragPos[el.id] = { x: node.x(), y: node.y(), width: visualW, underlineLines: scaledLines }
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────
+
+// Convert a native MouseEvent to stage-space coordinates (same as Konva getPointerPosition)
+function getStagePos(evt) {
+  const container = stageRef.value?.getNode()?.container()
+  if (!container) return null
+  const rect = container.getBoundingClientRect()
+  return { x: evt.clientX - rect.left, y: evt.clientY - rect.top }
+}
+
 function onStageMouseDown(e) {
   const target = e.target
-  const isBackground = target === e.target.getStage() || target.hasName('background')
+  const stage = e.target.getStage()
+  // Also treat background-role elements (full-card background images/rects) as background
+  const targetStoreEl = target.id ? editorStore.currentElements.find((el) => el.id === target.id()) : null
+  const isBackground =
+    target === stage || target.hasName('background') || targetStoreEl?.role === 'background'
   if (!isBackground) return
 
-  if (!e.evt?.shiftKey) editorStore.clearSelection()
+  selectionAdditive.value = !!e.evt?.shiftKey
+  if (!selectionAdditive.value) editorStore.clearSelection()
 
   const pos = e.target.getStage().getPointerPosition()
   selectionStartPos.value = { x: pos.x, y: pos.y }
   selectionCurrentPos.value = { x: pos.x, y: pos.y }
   isDraggingSelection.value = true
+
+  // Use document-level listeners so drag stays tracked even outside the canvas
+  document.addEventListener('mousemove', onSelDragMove)
+  document.addEventListener('mouseup', onSelDragEnd)
 }
 
-function onStageMouseMove(e) {
+function onSelDragMove(evt) {
   if (!isDraggingSelection.value) return
-  const pos = e.target.getStage()?.getPointerPosition()
-  if (pos) selectionCurrentPos.value = { x: pos.x, y: pos.y }
+  const pos = getStagePos(evt)
+  if (pos) selectionCurrentPos.value = pos
 }
 
-function onStageMouseUp() {
+function onSelDragEnd() {
+  document.removeEventListener('mousemove', onSelDragMove)
+  document.removeEventListener('mouseup', onSelDragEnd)
   if (!isDraggingSelection.value) return
   isDraggingSelection.value = false
 
   const w = Math.abs(selectionCurrentPos.value.x - selectionStartPos.value.x)
   const h = Math.abs(selectionCurrentPos.value.y - selectionStartPos.value.y)
-  if (w < 5 || h < 5) return
+  if (Math.hypot(w, h) < 5) return
 
   // Convert selection rect from stage coords to card coords
   const z = editorStore.zoom
@@ -1602,22 +2116,75 @@ function onStageMouseUp() {
   const rx2 = (Math.max(selectionStartPos.value.x, selectionCurrentPos.value.x) - ox) / z
   const ry2 = (Math.max(selectionStartPos.value.y, selectionCurrentPos.value.y) - oy) / z
 
+  const stage = stageRef.value?.getNode()
+
   const ids = editorStore.currentElements
     .filter((el) => {
       if (!el.visible || el.locked) return false
+
+      // Lines and arrows are rotated around their start point with zero height in the store.
+      // Use the rotation-aware bounding box of both endpoints + stroke padding.
+      if (
+        el.shapeType === 'line' ||
+        el.shapeType === 'line-bar' ||
+        el.shapeType === 'arrow' ||
+        el.shapeType === 'arrow-double'
+      ) {
+        const r = ((el.rotation || 0) * Math.PI) / 180
+        const w = el.width || 200
+        const loy =
+          el.shapeType === 'arrow' || el.shapeType === 'arrow-double' ? (el.height || 24) / 2 : 0
+        const pad = Math.max((el.strokeWidth || el.height || 4) / 2, 8)
+        const c = Math.cos(r),
+          s = Math.sin(r)
+        const lx = el.x - loy * s
+        const ly = el.y + loy * c
+        const rx = el.x + w * c - loy * s
+        const ry = el.y + w * s + loy * c
+        return (
+          rx1 < Math.max(lx, rx) + pad &&
+          rx2 > Math.min(lx, rx) - pad &&
+          ry1 < Math.max(ly, ry) + pad &&
+          ry2 > Math.min(ly, ry) - pad
+        )
+      }
+
       const ex1 = el.x
       const ey1 = el.y
-      const ex2 = el.x + (el.width || 0)
-      const ey2 = el.y + (el.height || 0)
+      let elW = el.width || 0
+      let elH = el.height || 0
+      // Texts have width/height: null in the store — fall back to the Konva node's rendered dimensions.
+      if ((!elW || !elH) && stage) {
+        const node = stage.findOne('#' + el.id)
+        if (node) {
+          if (!elW) elW = node.width()
+          if (!elH) elH = node.height()
+        }
+      }
+      const ex2 = ex1 + elW
+      const ey2 = ey1 + elH
       return rx1 < ex2 && rx2 > ex1 && ry1 < ey2 && ry2 > ey1
     })
     .map((el) => el.id)
 
   if (ids.length) {
-    editorStore.selectedIds = ids
+    const finalIds = selectionAdditive.value
+      ? [...new Set([...editorStore.selectedIds, ...ids])]
+      : ids
+    editorStore.selectedIds = finalIds
+    // Prevent the click event (that fires right after mouseup) from clearing this selection
+    justFinishedDragSelect.value = true
     nextTick(updateTransformer)
   }
 }
+
+// Konva-level handlers kept as thin pass-throughs (doc handlers are authoritative)
+function onStageMouseMove() {}
+
+function onStageMouseUp() {
+  if (isDraggingSelection.value) onSelDragEnd()
+}
+
 
 function onElementClick(e, el) {
   e.cancelBubble = true
@@ -1647,7 +2214,309 @@ function applySnap(x, y, w, h) {
   return { x: nx, y: ny }
 }
 
+// ── Smart snap: inter-element + card guides ───────────────────────────────
+// Returns { x, y } snapped position AND populates snapGuides for visual overlay.
+// Threshold is 8px in canvas space.
+function computeSnapWithGuides(rawX, rawY, w, h, draggedId) {
+  const THRESHOLD = 8
+  const cw = editorStore.cardWidth
+  const ch = editorStore.cardHeight
+
+  // Candidate snap lines in canvas space
+  // V (vertical lines at given x): snap dragged left/centerX/right to them
+  // H (horizontal lines at given y): snap dragged top/centerY/bottom to them
+  const vCandidates = [] // x positions
+  const hCandidates = [] // y positions
+
+  // Card edges and center
+  vCandidates.push(0, cw / 2, cw)
+  hCandidates.push(0, ch / 2, ch)
+
+  // Other elements
+  if (editorStore.snapToEdges) {
+    for (const el of editorStore.currentElements) {
+      if (el.id === draggedId || el.locked || !el.visible) continue
+      const ew = el.width || 0
+      const eh = el.height || 0
+      vCandidates.push(el.x, el.x + ew / 2, el.x + ew)
+      hCandidates.push(el.y, el.y + eh / 2, el.y + eh)
+    }
+  }
+
+  // Dragged element snap points
+  const dLeft = rawX
+  const dCenterX = rawX + w / 2
+  const dRight = rawX + w
+  const dTop = rawY
+  const dCenterY = rawY + h / 2
+  const dBottom = rawY + h
+
+  let nx = rawX
+  let ny = rawY
+  const guides = []
+
+  // Find closest V snap
+  let bestDX = THRESHOLD + 1
+  let snapVPos = null
+  let snapVOffset = 0
+  for (const vx of vCandidates) {
+    for (const [dp, off] of [[dLeft, 0], [dCenterX, w / 2], [dRight, w]]) {
+      const d = Math.abs(dp - vx)
+      if (d < bestDX) { bestDX = d; snapVPos = vx; snapVOffset = off }
+    }
+  }
+  if (snapVPos !== null) {
+    nx = snapVPos - snapVOffset
+    guides.push({ type: 'V', pos: snapVPos })
+  }
+
+  // Find closest H snap
+  let bestDY = THRESHOLD + 1
+  let snapHPos = null
+  let snapHOffset = 0
+  for (const hy of hCandidates) {
+    for (const [dp, off] of [[dTop, 0], [dCenterY, h / 2], [dBottom, h]]) {
+      const d = Math.abs(dp - hy)
+      if (d < bestDY) { bestDY = d; snapHPos = hy; snapHOffset = off }
+    }
+  }
+  if (snapHPos !== null) {
+    ny = snapHPos - snapHOffset
+    guides.push({ type: 'H', pos: snapHPos })
+  }
+
+  // Also apply grid snap on top (if enabled)
+  if (editorStore.snapEnabled) {
+    const G = editorStore.gridSize / 2
+    if (snapVPos === null) nx = Math.round(nx / G) * G
+    if (snapHPos === null) ny = Math.round(ny / G) * G
+  }
+
+  snapGuides.value = guides
+  return { x: nx, y: ny }
+}
+
+// ── Group drag coordination ───────────────────────────────────────────────
+// Konva node start positions recorded at dragstart, keyed by element id.
+const groupDragStartNodePos = {}
+
+// Returns the Konva node's resting position (may differ from store x/y for
+// center-based shapes like circle, polygon, star).
+function konvaStartPosForEl(el) {
+  const hw = (el.width || 100) / 2
+  const hh = (el.height || 100) / 2
+  if (el.shapeType === 'circle' || el.shapeType === 'polygon' || el.shapeType === 'star') {
+    return { x: el.x + hw, y: el.y + hh }
+  }
+  return { x: el.x, y: el.y }
+}
+
+function onLayerDragStart(e) {
+  const targetId = e.target.id?.()
+  if (!targetId) return
+  const el = editorStore.currentElements.find((m) => m.id === targetId)
+  if (!el?.groupId) return
+  // Record the Konva position of every group member at drag start
+  const stage = stageRef.value?.getNode()
+  editorStore.currentElements
+    .filter((m) => m.groupId === el.groupId)
+    .forEach((m) => {
+      const node = m.id === targetId ? e.target : stage?.findOne('#' + m.id)
+      if (node) groupDragStartNodePos[m.id] = { x: node.x(), y: node.y() }
+      else groupDragStartNodePos[m.id] = konvaStartPosForEl(m)
+    })
+}
+
+function onLayerDragMove(e) {
+  const targetId = e.target.id?.()
+  if (!targetId) return
+  const el = editorStore.currentElements.find((m) => m.id === targetId)
+
+  // ── Live position tracking (feeds handle/indicator computeds) ─────────────
+  if (el) {
+    const isCenterBased =
+      el.shapeType === 'circle' || el.shapeType === 'polygon' || el.shapeType === 'star'
+    const rawX = e.target.x()
+    const rawY = e.target.y()
+    const liveX = isCenterBased ? rawX - (el.width || 100) / 2 : rawX
+    const liveY = isCenterBased ? rawY - (el.height || 100) / 2 : rawY
+
+    // ── Live smart snap (grid + card edges + inter-element) ──────────────────
+    if (editorStore.snapEnabled || editorStore.snapToEdges) {
+      const { x: sx, y: sy } = computeSnapWithGuides(liveX, liveY, el.width || 0, el.height || 0, targetId)
+      const dx = sx - liveX
+      const dy = sy - liveY
+      if (dx !== 0 || dy !== 0) {
+        e.target.x(isCenterBased ? sx + (el.width || 100) / 2 : sx)
+        e.target.y(isCenterBased ? sy + (el.height || 100) / 2 : sy)
+        liveDragPos[targetId] = { x: sx, y: sy }
+      } else {
+        liveDragPos[targetId] = { x: liveX, y: liveY }
+      }
+    } else {
+      snapGuides.value = []
+      liveDragPos[targetId] = { x: liveX, y: liveY }
+    }
+
+    if (el.groupId) {
+      const groupMembers = editorStore.currentElements.filter((m) => m.groupId === el.groupId)
+      const allSelected = groupMembers.every((m) => editorStore.selectedIds.includes(m.id))
+      if (allSelected) {
+        // Transformer moves all nodes — propagate delta to every member's live position
+        const deltaX = liveX - el.x
+        const deltaY = liveY - el.y
+        groupMembers.forEach((m) => {
+          if (m.id !== targetId) liveDragPos[m.id] = { x: m.x + deltaX, y: m.y + deltaY }
+        })
+        return // Transformer handles visual movement; nothing else to do
+      }
+    }
+  }
+
+  if (!el?.groupId) return // non-grouped element or indicator rect — done
+
+  // ── Partial group: manually sync other members' Konva nodes ──────────────
+  const startPos = groupDragStartNodePos[targetId]
+  if (!startPos) return
+  const deltaX = e.target.x() - startPos.x
+  const deltaY = e.target.y() - startPos.y
+  const stage = stageRef.value?.getNode()
+  if (!stage) return
+
+  editorStore.currentElements
+    .filter((m) => m.groupId === el.groupId && m.id !== targetId && !m.locked)
+    .forEach((m) => {
+      const memberNode = stage.findOne('#' + m.id)
+      if (!memberNode) return
+      const mStart = groupDragStartNodePos[m.id] || konvaStartPosForEl(m)
+      memberNode.x(mStart.x + deltaX)
+      memberNode.y(mStart.y + deltaY)
+      // Also keep live positions current for this member
+      const mCenter =
+        m.shapeType === 'circle' || m.shapeType === 'polygon' || m.shapeType === 'star'
+      const mHW = (m.width || 100) / 2
+      const mHH = (m.height || 100) / 2
+      liveDragPos[m.id] = {
+        x: mCenter ? mStart.x + deltaX - mHW : mStart.x + deltaX,
+        y: mCenter ? mStart.y + deltaY - mHH : mStart.y + deltaY,
+      }
+    })
+}
+
+// Moves all group members by the same store-space delta and commits to store.
+function onGroupIndicatorClick(gid) {
+  const memberIds = editorStore.currentElements
+    .filter((el) => el.groupId === gid)
+    .map((el) => el.id)
+  editorStore.selectedIds = memberIds
+  nextTick(updateTransformer)
+}
+
+// Drag the group indicator rect → move all group members together
+const indicatorDragStart = {} // gid → { ix, iy, members snapshot }
+
+function onGroupIndicatorDragStart(e, gid) {
+  // Do NOT select members here — selecting would make allSelected=true,
+  // causing groupBoundingBoxes to hide this indicator and cancelling the drag.
+  const members = editorStore.currentElements.filter((el) => el.groupId === gid && !el.locked)
+  indicatorDragStart[gid] = {
+    ix: e.target.x(),
+    iy: e.target.y(),
+    members: members.map((m) => ({
+      id: m.id,
+      x: m.x,
+      y: m.y,
+      shapeType: m.shapeType,
+      width: m.width,
+      height: m.height,
+    })),
+  }
+}
+
+function onGroupIndicatorDragMove(e, gid) {
+  const start = indicatorDragStart[gid]
+  if (!start) return
+  const deltaX = e.target.x() - start.ix
+  const deltaY = e.target.y() - start.iy
+  const stage = stageRef.value?.getNode()
+  if (!stage) return
+  start.members.forEach((m) => {
+    const node = stage.findOne('#' + m.id)
+    if (!node) return
+    const isCenterBased =
+      m.shapeType === 'circle' || m.shapeType === 'polygon' || m.shapeType === 'star'
+    const hw = (m.width || 100) / 2
+    const hh = (m.height || 100) / 2
+    node.x(isCenterBased ? m.x + hw + deltaX : m.x + deltaX)
+    node.y(isCenterBased ? m.y + hh + deltaY : m.y + deltaY)
+    // Update liveDragPos so groupBoundingBoxes re-positions the indicator in sync
+    liveDragPos[m.id] = { x: m.x + deltaX, y: m.y + deltaY }
+  })
+}
+
+function onGroupIndicatorDragEnd(e, gid) {
+  const start = indicatorDragStart[gid]
+  if (!start) return
+  const deltaX = e.target.x() - start.ix
+  const deltaY = e.target.y() - start.iy
+  // Commit store positions
+  start.members.forEach((m) => {
+    editorStore.updateElement(m.id, { x: m.x + deltaX, y: m.y + deltaY })
+    delete liveDragPos[m.id]
+  })
+  delete indicatorDragStart[gid]
+  editorStore.saveHistory()
+  // Now select the group so the Transformer appears
+  editorStore.selectedIds = start.members.map((m) => m.id)
+  nextTick(updateTransformer)
+}
+
+function applyGroupDelta(el, deltaX, deltaY) {
+  if (!el.groupId || (deltaX === 0 && deltaY === 0)) return
+  const stage = stageRef.value?.getNode()
+  editorStore.currentElements
+    .filter((m) => m.groupId === el.groupId && m.id !== el.id && !m.locked)
+    .forEach((m) => {
+      const newX = m.x + deltaX
+      const newY = m.y + deltaY
+      // Reposition the Konva node to the new store position
+      if (stage) {
+        const node = stage.findOne('#' + m.id)
+        if (node) {
+          const hw = (m.width || 100) / 2
+          const hh = (m.height || 100) / 2
+          const isCenterBased =
+            m.shapeType === 'circle' || m.shapeType === 'polygon' || m.shapeType === 'star'
+          node.x(isCenterBased ? newX + hw : newX)
+          node.y(isCenterBased ? newY + hh : newY)
+        }
+      }
+      editorStore.updateElement(m.id, { x: newX, y: newY })
+    })
+}
+
 function onDragEnd(e, el) {
+  // Clear snap guides
+  snapGuides.value = []
+
+  // Clear live position(s) — covers both single elements and full-group Transformer drags.
+  // For text elements, sync rendered dims instead of clearing so the context bar keeps real values.
+  if (el.groupId) {
+    editorStore.currentElements
+      .filter((m) => m.groupId === el.groupId)
+      .forEach((m) => {
+        if (m.type === 'text') {
+          nextTick(() => syncTextRenderedDims(m.id))
+        } else {
+          delete liveDragPos[m.id]
+        }
+      })
+  } else if (el.type === 'text') {
+    nextTick(() => syncTextRenderedDims(el.id))
+  } else {
+    delete liveDragPos[el.id]
+  }
+
   let rawX = e.target.x()
   let rawY = e.target.y()
   const isCircle = el.shapeType === 'circle'
@@ -1662,6 +2531,16 @@ function onDragEnd(e, el) {
   } else {
     e.target.x(x)
     e.target.y(y)
+  }
+  // Skip group propagation when all members are selected: Transformer already moved every
+  // node, and each fires its own onDragEnd — applyGroupDelta here would double-apply.
+  if (el.groupId) {
+    const allGroupSelected = editorStore.currentElements
+      .filter((m) => m.groupId === el.groupId)
+      .every((m) => editorStore.selectedIds.includes(m.id))
+    if (!allGroupSelected) applyGroupDelta(el, x - el.x, y - el.y)
+  } else {
+    applyGroupDelta(el, x - el.x, y - el.y)
   }
   editorStore.updateElement(el.id, { x, y })
   editorStore.saveHistory()
@@ -1754,11 +2633,29 @@ function onTransformEnd(e, el) {
   }
   node.scaleX(1)
   node.scaleY(1)
+  if (el.type === 'text') {
+    delete resizeDragBaseLines[el.id]
+    // Attendre Vue render + Konva draw (rAF) avant de re-syncer les métriques du souligné,
+    // car textArr de Konva n'est recompté qu'après le prochain draw cycle.
+    nextTick(() => requestAnimationFrame(() => syncTextRenderedDims(el.id)))
+  } else {
+    delete liveDragPos[el.id]
+  }
   editorStore.saveHistory()
 }
 
 // Center-based drag (polygon / star) — node x/y is the center
 function onDragEndCenter(e, el) {
+  snapGuides.value = []
+
+  if (el.groupId) {
+    editorStore.currentElements
+      .filter((m) => m.groupId === el.groupId)
+      .forEach((m) => delete liveDragPos[m.id])
+  } else {
+    delete liveDragPos[el.id]
+  }
+
   const node = e.target
   const half = (el.width || 100) / 2
   const rawX = node.x() - half
@@ -1766,6 +2663,14 @@ function onDragEndCenter(e, el) {
   const { x, y } = applySnap(rawX, rawY, el.width || 0, el.height || 0)
   node.x(x + half)
   node.y(y + half)
+  if (el.groupId) {
+    const allGroupSelected = editorStore.currentElements
+      .filter((m) => m.groupId === el.groupId)
+      .every((m) => editorStore.selectedIds.includes(m.id))
+    if (!allGroupSelected) applyGroupDelta(el, x - el.x, y - el.y)
+  } else {
+    applyGroupDelta(el, x - el.x, y - el.y)
+  }
   editorStore.updateElement(el.id, { x, y })
   editorStore.saveHistory()
 }
@@ -1787,7 +2692,12 @@ function onTransformEndCenter(e, el) {
 
 // ── Inline text editing ───────────────────────────────────────────────────
 
+function isLocked(el) {
+  return el?.locked === true
+}
+
 function startTextEdit(el) {
+  if (isLocked(el)) return
   editingEl.value = el
   editingText.value = el.text || ''
   nextTick(() => {
@@ -1795,6 +2705,111 @@ function startTextEdit(el) {
     textareaRef.value?.focus()
     textareaRef.value?.select()
   })
+}
+
+// ── Bullet helpers ────────────────────────────────────────────────────────
+function renumberIfNeeded(text) {
+  const lines = text.split('\n')
+  const nonEmpty = lines.filter((l) => l.trim())
+  if (!nonEmpty.length) return text
+  // Vérifie si la majorité des lignes non-vides ont un préfixe numéroté
+  const numbered = nonEmpty.filter((l) => /^\d+\. /.test(l))
+  if (numbered.length <= nonEmpty.length / 2) return text
+  let n = 0
+  return lines
+    .map((l) => {
+      if (!l.trim()) return l
+      const content = l.replace(/^\d+\. /, '')
+      n++
+      return `${n}. ${content}`
+    })
+    .join('\n')
+}
+
+// ── Bullet-aware keydown handler ─────────────────────────────────────────
+const BULLET_PREFIXES = ['• ', '- ']
+const NUMBERED_RE = /^(\d+)\. /
+
+function getLineBulletPrefix(line) {
+  for (const p of BULLET_PREFIXES) {
+    if (line.startsWith(p)) return p
+  }
+  const m = line.match(NUMBERED_RE)
+  if (m) return m[0] // e.g. "3. "
+  return null
+}
+
+function onTextareaKeydown(e) {
+  const ta = e.target
+  const text = ta.value
+  const pos = ta.selectionStart
+  const selEnd = ta.selectionEnd
+
+  // ── Enter : auto-prefix ──────────────────────────────────────────────
+  if (e.key === 'Enter' && !e.shiftKey) {
+    // Find start of current line
+    const lineStart = text.lastIndexOf('\n', pos - 1) + 1
+    const lineEnd = text.indexOf('\n', pos)
+    const currentLine = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd)
+    const prefix = getLineBulletPrefix(currentLine)
+
+    if (!prefix) return // pas de liste active → comportement natif
+
+    e.preventDefault()
+
+    // Si la ligne est vide (juste le préfixe), Entrée sort de la liste
+    const content = currentLine.slice(prefix.length)
+    if (!content.trim()) {
+      // Supprimer le préfixe de la ligne vide et ne pas en ajouter un nouveau
+      const before = text.slice(0, lineStart)
+      const after = text.slice(lineStart + prefix.length)
+      const newText = before + after
+      const newPos = lineStart
+      editingText.value = newText
+      nextTick(() => {
+        ta.setSelectionRange(newPos, newPos)
+      })
+      return
+    }
+
+    // Calculer le prochain préfixe (numéroté : incrémenter)
+    let nextPrefix
+    const numMatch = prefix.match(/^(\d+)\. $/)
+    if (numMatch) {
+      nextPrefix = `${parseInt(numMatch[1]) + 1}. `
+    } else {
+      nextPrefix = prefix
+    }
+
+    const before = text.slice(0, pos)
+    const after = text.slice(selEnd)
+    const newText = before + '\n' + nextPrefix + after
+    const newPos = pos + 1 + nextPrefix.length
+    editingText.value = newText
+    nextTick(() => {
+      ta.setSelectionRange(newPos, newPos)
+    })
+    return
+  }
+
+  // ── Backspace : retirer le préfixe si curseur juste après ────────────
+  if (e.key === 'Backspace' && pos === selEnd) {
+    const lineStart = text.lastIndexOf('\n', pos - 1) + 1
+    const currentLine = text.slice(lineStart, pos)
+    const prefix = getLineBulletPrefix(currentLine)
+    // Si le curseur est exactement à la fin du préfixe (contenu vide sur la ligne)
+    if (prefix && currentLine === prefix) {
+      e.preventDefault()
+      const before = text.slice(0, lineStart)
+      const after = text.slice(lineStart + prefix.length)
+      const newText = before + after
+      const newPos = lineStart
+      editingText.value = newText
+      nextTick(() => {
+        ta.setSelectionRange(newPos, newPos)
+      })
+    }
+  }
 }
 
 function finishTextEdit() {
@@ -1810,7 +2825,10 @@ function finishTextEdit() {
     editingText.value = ''
     return
   }
-  editorStore.updateElementCommit(editingEl.value.id, { text: editingText.value })
+  const elId = editingEl.value.id
+  // Re-numéroter les listes ordonnées en cas d'ajout/suppression de lignes pendant l'édition
+  const finalText = renumberIfNeeded(editingText.value)
+  editorStore.updateElementCommit(elId, { text: finalText, height: null })
   const role = editingEl.value.role || ''
   if (role.startsWith('custom_')) {
     const cfId = role.replace('custom_', '')
@@ -1819,7 +2837,10 @@ function finishTextEdit() {
   }
   editingEl.value = null
   editingText.value = ''
-  nextTick(updateTransformer)
+  nextTick(() => {
+    updateTransformer()
+    syncTextRenderedDims(elId)
+  })
 }
 
 // Finish any ongoing text edit when the user switches page
@@ -1833,7 +2854,7 @@ watch(
       if (!editingText.value.trim()) {
         pageEls.splice(idx, 1)
       } else {
-        pageEls[idx] = { ...pageEls[idx], text: editingText.value }
+        pageEls[idx] = { ...pageEls[idx], text: renumberIfNeeded(editingText.value) }
       }
       editorStore.saveHistory()
     }
@@ -2043,6 +3064,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('mousemove', onTextMoveMove)
   window.removeEventListener('mouseup', onTextMoveUp)
   window.removeEventListener('mousemove', onTextRotateMove)
+  // Drag-selection cleanup
+  document.removeEventListener('mousemove', onSelDragMove)
+  document.removeEventListener('mouseup', onSelDragEnd)
   window.removeEventListener('mouseup', onTextRotateUp)
 })
 
@@ -2128,8 +3152,9 @@ async function downloadExport(type, pages, cw, ch) {
   const baseName = (editorStore.cardName || 'carte').replace(/\s+/g, '-').toLowerCase()
   // Unified px→mm scale: 680px = 85.6mm (standard business card resolution)
   const PX_PER_MM = CARD_W / 85.6
-  const mmW = cw / PX_PER_MM
-  const mmH = ch / PX_PER_MM
+  const PDF_SCALE = 3 // même ratio que le rendu PNG → page visible comparable
+  const mmW = (cw / PX_PER_MM) * PDF_SCALE
+  const mmH = (ch / PX_PER_MM) * PDF_SCALE
   const isTwoFace = !!(pages.recto && pages.verso)
 
   if (type === 'pdf') {
