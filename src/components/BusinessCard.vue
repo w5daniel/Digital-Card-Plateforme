@@ -41,14 +41,14 @@
             <template v-else>
               <!-- contact -->
               <div
-                v-if="el.type === 'contact'"
+                v-if="el.type === 'contact' || el.showContactIcon"
                 class="flex items-center space-x-1.5 h-full pointer-events-none select-none"
               >
                 <component
                   :is="ICON_COMPONENTS[el.role]"
                   v-if="ICON_COMPONENTS[el.role]"
-                  class="w-3 h-3 opacity-70 flex-shrink-0"
-                  :style="el.fillGradient ? { color: el.fillGradient.from, WebkitTextFillColor: 'initial' } : {}"
+                  class="opacity-70 flex-shrink-0"
+                  :style="contactIconStyle(el)"
                 />
                 <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
               </div>
@@ -235,14 +235,14 @@
           >
             <!-- contact: icon + text -->
             <div
-              v-if="el.type === 'contact'"
+              v-if="el.type === 'contact' || el.showContactIcon"
               class="flex items-center space-x-1.5 h-full pointer-events-none select-none"
             >
               <component
                 :is="ICON_COMPONENTS[el.role]"
                 v-if="ICON_COMPONENTS[el.role]"
-                class="w-3 h-3 opacity-70 flex-shrink-0"
-                :style="el.fillGradient ? { color: el.fillGradient.from, WebkitTextFillColor: 'initial' } : {}"
+                class="opacity-70 flex-shrink-0"
+                :style="contactIconStyle(el)"
               />
               <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
             </div>
@@ -556,7 +556,7 @@ const elClass = (id) => {
 const elemStyle = (el) => {
   // Contact elements: auto-size to content in view mode so full text is always visible.
   // In editMode keep the stored percentage width so drag/resize handles work correctly.
-  const useAutoWidth = el.type === 'contact' && !props.editMode
+  const useAutoWidth = (el.type === 'contact' || el.showContactIcon) && !props.editMode
   const style = {
     left: `${el.x}%`,
     top: `${el.y}%`,
@@ -638,6 +638,13 @@ const textStyle = (el) => {
     style.color = 'transparent'
   }
   return style
+}
+
+const contactIconStyle = (el) => {
+  const s = fontScale.value
+  const size = `${Math.round((el.fontSize || 14) * s * 1.1)}px`
+  const color = el.fillGradient ? el.fillGradient.from : (el.fill || el.color || 'inherit')
+  return { width: size, height: size, color, WebkitTextFillColor: 'initial' }
 }
 
 // ── Drag & resize ─────────────────────────────────────────────

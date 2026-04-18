@@ -111,8 +111,8 @@ Du plus simple (zéro couplage) au plus complexe :
 - [x] `ContextBarCommon.vue`
 - [x] `GradientFillPopover.vue`
 - [x] `ContextBarShape.vue`
-- [ ] `FontPickerDropdown.vue`
-- [ ] `ContextBarText.vue`
+- [x] `FontPickerDropdown.vue`
+- [x] `ContextBarText.vue`
 
 ---
 
@@ -146,13 +146,14 @@ Du plus simple (zéro couplage) au plus complexe :
 - `ContextBarCommon.vue`
 - `GradientFillPopover.vue`
 - `ContextBarShape.vue`
+- `FontPickerDropdown.vue`
+- `ContextBarText.vue`
 
 ### En cours
 _(aucun pour l'instant)_
 
 ### Reste à faire
-- `FontPickerDropdown.vue`
-- `ContextBarText.vue`
+_(aucun — refactor terminé ✅)_
 
 ---
 

@@ -311,7 +311,7 @@
           >
             <div :style="commInnerStyle(card)">
               <BusinessCard
-                :card="buildCommunityPreview(card)"
+                :card="card"
                 :isFlipped="hoveredId === card.id && (card.data?.versoElements?.length ?? 0) > 0"
               />
             </div>
@@ -607,16 +607,6 @@ const filterTabs = computed(() => [
 ])
 
 // ── Community cards (public cards from other users) ──────────────────
-const DEFAULT_COMMUNITY_TEXT = {
-  firstName: 'Prénom',
-  lastName: 'Nom',
-  title: 'Votre titre professionnel',
-  company: 'MON ENTREPRISE',
-  email: 'email@exemple.fr',
-  phone: '+33 6 00 00 00 00',
-  website: 'www.exemple.fr',
-  address: '123 Rue Exemple, Paris',
-}
 
 const communityCards = computed(() => {
   void communityRefreshKey.value // dépendance réactive — force recalcul au montage
@@ -666,27 +656,6 @@ const communityCards = computed(() => {
   return cards
 })
 
-function buildCommunityPreview(card) {
-  const replaceText = (els) =>
-    (els || []).map((el) => {
-      if (
-        (el.type === 'text' || el.type === 'contact') &&
-        el.role &&
-        DEFAULT_COMMUNITY_TEXT[el.role]
-      ) {
-        return { ...el, text: DEFAULT_COMMUNITY_TEXT[el.role] }
-      }
-      return el
-    })
-  return {
-    ...card,
-    data: {
-      ...card.data,
-      elements: replaceText(card.data?.elements),
-      versoElements: replaceText(card.data?.versoElements),
-    },
-  }
-}
 
 const selectCommunityTemplate = (card) => {
   router.push({ path: '/editor', query: { community: String(card.id) } })

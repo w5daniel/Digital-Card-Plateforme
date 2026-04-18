@@ -118,7 +118,8 @@ function addElementToLayer(layer, el, imageMap) {
       )
 
       textX = el.x + iconSize + iconGap
-      textW = baseW != null ? Math.max(1, baseW - iconSize - iconGap) : undefined
+      // Don't reduce textW: BusinessCard.vue uses max-content for contact elements in view
+      // mode, so text never wraps there. Keeping textW = baseW matches that behavior.
     }
 
     const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
