@@ -15,6 +15,18 @@ import {
   gradientProps,
   gradientPropsCentered,
 } from './gradientHelpers'
+import { segmentize as segmentizeRuns } from './textRuns'
+
+const _exportMeasureCanvas =
+  typeof document !== 'undefined' ? document.createElement('canvas') : null
+const _exportMeasureCtx = _exportMeasureCanvas?.getContext('2d')
+function _measureSeg(text, fontSize, fontFamily, fontStyle, letterSpacing = 0) {
+  if (!text) return 0
+  if (!_exportMeasureCtx) return text.length * fontSize * 0.5
+  _exportMeasureCtx.font = `${fontStyle || 'normal'} ${fontSize}px ${fontFamily || 'Inter'}`
+  const w = _exportMeasureCtx.measureText(text).width
+  return w + Math.max(0, text.length - 1) * (letterSpacing || 0)
+}
 import {
   DEFAULT_QR_FIELDS,
   buildVCardFromFields,
@@ -123,6 +135,81 @@ function addElementToLayer(layer, el, imageMap) {
     }
 
     const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
+    const runsActive = Array.isArray(el.runs) && el.runs.length > 0
+
+    if (runsActive) {
+      const fs = el.fontSize || 16
+      const ff = el.fontFamily || 'Inter'
+      const ls = el.letterSpacing || 0
+      const globalStyle = {
+        bold: (el.fontStyle || '').includes('bold'),
+        italic: (el.fontStyle || '').includes('italic'),
+        underline: (el.textDecoration || '').includes('underline'),
+        color: el.fill || '#000000',
+        underlineColor: el.underlineColor || '',
+      }
+      const segments = segmentizeRuns(el.text || '', el.runs, globalStyle)
+      const withMeta = segments.map((seg) => {
+        const parts = []
+        if (seg.style.bold) parts.push('bold')
+        if (seg.style.italic) parts.push('italic')
+        const fontStyle = parts.join(' ') || 'normal'
+        const w = _measureSeg(seg.text, fs, ff, fontStyle, ls)
+        return { seg, fontStyle, width: w }
+      })
+      const totalWidth = withMeta.reduce((a, m) => a + m.width, 0)
+      const containerW = baseW || totalWidth || 200
+      let cursorX = 0
+      if (el.align === 'center') cursorX = (containerW - totalWidth) / 2
+      else if (el.align === 'right') cursorX = containerW - totalWidth
+
+      const lh = el.lineHeight || 1.25
+      const strokeW = Math.max(1, Math.round(fs * 0.07))
+      const underlineY = fs * lh * 0.92
+
+      for (const { seg, fontStyle, width } of withMeta) {
+        const useNativeUnderline = seg.style.underline && !seg.style.underlineColor
+        layer.add(
+          new Konva.Text({
+            x: textX + cursorX,
+            y: el.y,
+            width: width || undefined,
+            height: el.height || undefined,
+            text: seg.text,
+            fontSize: fs,
+            fontFamily: ff,
+            fontStyle,
+            textDecoration: useNativeUnderline ? 'underline' : '',
+            fill: seg.style.color || '#000000',
+            align: 'left',
+            opacity: el.opacity ?? 1,
+            rotation: el.rotation || 0,
+            letterSpacing: ls,
+            lineHeight: lh,
+            ...shadowProps(el),
+          }),
+        )
+        if (seg.style.underline && seg.style.underlineColor) {
+          layer.add(
+            new Konva.Line({
+              x: textX,
+              y: el.y,
+              offsetX: -cursorX,
+              offsetY: -underlineY,
+              points: [0, 0, width || 0, 0],
+              stroke: seg.style.underlineColor,
+              strokeWidth: strokeW,
+              rotation: el.rotation || 0,
+              opacity: el.opacity ?? 1,
+              listening: false,
+            }),
+          )
+        }
+        cursorX += width
+      }
+      return
+    }
+
     const textNode = new Konva.Text({
       x: textX,
       y: el.y,

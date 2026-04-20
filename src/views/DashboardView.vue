@@ -174,7 +174,7 @@
 
 
       <!-- Tab Switch: Modèles / Cartes -->
-      <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-8 max-w-md">
+      <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-4 max-w-md">
         <!-- Sliding pill -->
         <div
           class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
@@ -202,6 +202,17 @@
         >
           Cartes ({{ store.userCards.length }})
         </button>
+      </div>
+
+      <!-- Preview quality notice -->
+      <div class="flex items-center gap-2 mb-8 px-3 py-2 rounded-lg bg-powder-100 dark:bg-onyx-800/60 border border-powder-300/60 dark:border-onyx-700/40 max-w-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="shrink-0 w-3 h-3 text-onyx-400 dark:text-onyx-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <p class="text-xs text-onyx-400 dark:text-onyx-500">
+          Les aperçus sont affichés en version réduite pour améliorer la performance, ce qui peut provoquer de légers décalages visuels. Toutefois, les exports conservent toujours une mise en page correcte et complète.
+          <span class="text-onyx-300 dark:text-onyx-600">Les exports sont toujours parfaits.</span>
+        </p>
       </div>
 
       <!-- My Templates Section -->

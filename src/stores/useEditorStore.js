@@ -14,6 +14,16 @@ export const useEditorStore = defineStore('editor', () => {
   // Using reactive (not ref) avoids Pinia's auto-unwrapping of refs.
   const livePosState = reactive({})
 
+  // ── Inline text editing state (shared with context bar for partial styling) ─
+  // When a text element is being edited, this exposes the current textarea
+  // selection so the context bar can apply bold/italic/color to just the
+  // highlighted range (via style runs) instead of the whole element.
+  const textEditState = reactive({
+    elId: null,
+    start: 0,
+    end: 0,
+  })
+
   // ── Core state ──────────────────────────────────────────────────────────
   const cardName = ref('Ma carte de visite')
   const isDirty = ref(false)
@@ -694,6 +704,7 @@ export const useEditorStore = defineStore('editor', () => {
       shadowOffsetX: 3,
       shadowOffsetY: 3,
       shadowOpacity: 0.35,
+      runs: [],
       ...preset,
     })
   }
@@ -922,6 +933,7 @@ export const useEditorStore = defineStore('editor', () => {
     showCenterGuides,
     showSafeZone,
     livePosState,
+    textEditState,
     // computed
     currentElements,
     currentBackground,

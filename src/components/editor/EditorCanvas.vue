@@ -70,16 +70,24 @@
                 :config="buildTextConfig(el)"
                 @click="onElementClick($event, el)"
                 @tap="onElementClick($event, el)"
-                @dblclick="startTextEdit(el)"
-                @dbltap="startTextEdit(el)"
+                @dblclick="startTextEdit(el, $event)"
+                @dbltap="startTextEdit(el, $event)"
                 @dragend="onDragEnd($event, el)"
                 @transform="onTextTransform($event, el)"
                 @transformend="onTransformEnd($event, el)"
               />
-              <!-- Custom underline color overlay — one v-line per text line -->
+              <!-- Style-runs overlay: one v-text per segment when el.runs is set -->
+              <v-text
+                v-for="(segCfg, segIdx) in buildTextSegmentConfigs(el)"
+                :key="el.id + '-seg-' + segIdx"
+                :config="segCfg"
+              />
+              <!-- Custom underline color overlay — per text line when no runs, per segment when runs -->
               <v-line
-                v-for="(ulCfg, ulIdx) in (el.underlineColor && el.textDecoration?.includes('underline')
-                  ? buildTextUnderlineConfigs(el) : [])"
+                v-for="(ulCfg, ulIdx) in (hasRuns(el)
+                  ? buildTextSegmentUnderlineConfigs(el)
+                  : (el.underlineColor && el.textDecoration?.includes('underline')
+                    ? buildTextUnderlineConfigs(el) : []))"
                 :key="el.id + '-ul-' + ulIdx"
                 :config="ulCfg"
               />
@@ -363,6 +371,10 @@
       @blur="finishTextEdit"
       @keydown.esc="finishTextEdit"
       @keydown="onTextareaKeydown"
+      @select="onTextareaSelectionChange"
+      @keyup="onTextareaSelectionChange"
+      @mouseup="onTextareaSelectionChange"
+      @input="onTextareaSelectionChange"
     />
 
     <!-- ── Lock indicator overlays ───────────────────────────────────── -->
@@ -486,6 +498,29 @@ const stageHeight = ref(600)
 // ── Text editing state ────────────────────────────────────────────────────
 const editingEl = ref(null)
 const editingText = ref('')
+
+function onTextareaSelectionChange() {
+  const ta = textareaRef.value
+  if (!ta || !editingEl.value) return
+  editorStore.textEditState.elId = editingEl.value.id
+  editorStore.textEditState.start = ta.selectionStart ?? 0
+  editorStore.textEditState.end = ta.selectionEnd ?? 0
+  if (_clearTextEditStateTimer) {
+    clearTimeout(_clearTextEditStateTimer)
+    _clearTextEditStateTimer = null
+  }
+}
+
+let _clearTextEditStateTimer = null
+function scheduleTextEditStateClear() {
+  if (_clearTextEditStateTimer) clearTimeout(_clearTextEditStateTimer)
+  _clearTextEditStateTimer = setTimeout(() => {
+    editorStore.textEditState.elId = null
+    editorStore.textEditState.start = 0
+    editorStore.textEditState.end = 0
+    _clearTextEditStateTimer = null
+  }, 500)
+}
 
 // ── Drag & drop from sidebar ─────────────────────────────────────────────
 const isDragOver = ref(false)
@@ -1032,6 +1067,29 @@ import {
   gradientPropsCentered,
 } from '@/utils/gradientHelpers'
 
+import {
+  segmentize as segmentizeRuns,
+  shiftRuns,
+  diffSingleEdit,
+  normalizeRuns,
+} from '@/utils/textRuns'
+
+// Canvas 2D text-width measurement (shared offscreen context)
+const _measureCanvas =
+  typeof document !== 'undefined' ? document.createElement('canvas') : null
+const _measureCtx = _measureCanvas?.getContext('2d')
+function measureSegmentWidth(text, fontSize, fontFamily, fontStyle, letterSpacing = 0) {
+  if (!text) return 0
+  if (!_measureCtx) return text.length * fontSize * 0.5
+  _measureCtx.font = `${fontStyle || 'normal'} ${fontSize}px ${fontFamily || 'Inter'}`
+  const w = _measureCtx.measureText(text).width
+  return w + Math.max(0, text.length - 1) * (letterSpacing || 0)
+}
+
+function hasRuns(el) {
+  return Array.isArray(el?.runs) && el.runs.length > 0
+}
+
 // ── Shadow helper ─────────────────────────────────────────────────────────
 function shadowProps(el) {
   if (!el.shadowEnabled) return {}
@@ -1050,6 +1108,7 @@ function buildTextConfig(el) {
   // When a custom underline color is set, disable Konva's native underline (which always uses fill)
   // and let the v-line overlay handle it instead.
   const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
+  const runsActive = hasRuns(el)
   const cfg = {
     id: el.id,
     x: el.x,
@@ -1060,9 +1119,13 @@ function buildTextConfig(el) {
     fontSize: el.fontSize || 16,
     fontFamily: el.fontFamily || 'Inter',
     fontStyle: el.fontStyle || 'normal',
-    textDecoration: hasCustomUnderline ? '' : el.textDecoration || '',
-    fill: el.fillGradient ? '' : el.fill || '#000000',
-    ...gradientProps(el, el.width || 200, el.height || 40),
+    textDecoration: runsActive || hasCustomUnderline ? '' : el.textDecoration || '',
+    fill: runsActive
+      ? 'rgba(0,0,0,0)'
+      : el.fillGradient
+        ? ''
+        : el.fill || '#000000',
+    ...(runsActive ? {} : gradientProps(el, el.width || 200, el.height || 40)),
     align: el.align || 'left',
     verticalAlign: el.verticalAlign || 'middle',
     opacity: editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1),
@@ -1072,9 +1135,111 @@ function buildTextConfig(el) {
     draggable: !el.locked,
     wrap: el.wrap || 'word',
     listening: true,
-    ...shadowProps(el),
+    ...(runsActive ? {} : shadowProps(el)),
   }
   return cfg
+}
+
+// Build per-segment v-text configs for a text element with runs. Returns [] if
+// no runs are defined. MVP: assumes single-line text (no word-wrap on runs).
+function buildTextSegmentConfigs(el) {
+  if (!hasRuns(el)) return []
+  const fs = el.fontSize || 16
+  const ff = el.fontFamily || 'Inter'
+  const ls = el.letterSpacing || 0
+  const globalStyle = {
+    bold: (el.fontStyle || '').includes('bold'),
+    italic: (el.fontStyle || '').includes('italic'),
+    underline: (el.textDecoration || '').includes('underline'),
+    color: el.fill || '#000000',
+    underlineColor: el.underlineColor || '',
+  }
+  const segments = segmentizeRuns(el.text || '', el.runs, globalStyle)
+  if (segments.length === 0) return []
+
+  const withMeta = segments.map((seg) => {
+    const parts = []
+    if (seg.style.bold) parts.push('bold')
+    if (seg.style.italic) parts.push('italic')
+    const fontStyle = parts.join(' ') || 'normal'
+    const w = measureSegmentWidth(seg.text, fs, ff, fontStyle, ls)
+    return { seg, fontStyle, width: w }
+  })
+
+  const totalWidth = withMeta.reduce((a, m) => a + m.width, 0)
+  const containerW = el.width || totalWidth || 200
+  let cursorX = 0
+  if (el.align === 'center') cursorX = (containerW - totalWidth) / 2
+  else if (el.align === 'right') cursorX = containerW - totalWidth
+
+  const opacity = editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1)
+  const rotation = el.rotation || 0
+
+  const configs = []
+  for (const { seg, fontStyle, width } of withMeta) {
+    const hasSegUnderline = seg.style.underline
+    const segUnderlineColor = seg.style.underlineColor
+    // Konva's native underline uses fill color → only use it if no custom underline color.
+    const useNativeUnderline = hasSegUnderline && !segUnderlineColor
+    configs.push({
+      // Relative offsets (the parent v-text provides the element origin); we mirror
+      // its coordinate system by reusing el.x/el.y directly here.
+      x: el.x + cursorX,
+      y: el.y,
+      width: width || undefined,
+      height: el.height != null ? el.height : undefined,
+      text: seg.text,
+      fontSize: fs,
+      fontFamily: ff,
+      fontStyle,
+      fill: seg.style.color || '#000000',
+      textDecoration: useNativeUnderline ? 'underline' : '',
+      align: 'left',
+      verticalAlign: el.verticalAlign || 'middle',
+      letterSpacing: ls,
+      lineHeight: el.lineHeight || 1.25,
+      opacity,
+      rotation,
+      listening: false,
+      ...shadowProps(el),
+      __segStart: seg.start,
+      __segEnd: seg.end,
+      __customUnderline: hasSegUnderline && segUnderlineColor ? segUnderlineColor : null,
+      __segWidth: width,
+      __segOffset: cursorX,
+    })
+    cursorX += width
+  }
+  return configs
+}
+
+// Build per-segment custom-underline v-line configs when a segment has an
+// underline with a dedicated color (Konva's native underline always uses fill).
+function buildTextSegmentUnderlineConfigs(el) {
+  const segs = buildTextSegmentConfigs(el)
+  if (!segs.length) return []
+  const fs = el.fontSize || 16
+  const lh = el.lineHeight || 1.25
+  const strokeW = Math.max(1, Math.round(fs * 0.07))
+  const rot = el.rotation || 0
+  const underlineY = fs * lh * 0.92
+  const out = []
+  for (const s of segs) {
+    if (!s.__customUnderline) continue
+    out.push({
+      x: el.x,
+      y: el.y,
+      offsetX: -s.__segOffset,
+      offsetY: -underlineY,
+      points: [0, 0, s.__segWidth || 0, 0],
+      stroke: s.__customUnderline,
+      strokeWidth: strokeW,
+      rotation: rot,
+      opacity: editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1),
+      listening: false,
+    })
+  }
+  return out
 }
 
 function buildTextUnderlineConfigs(el) {
@@ -2696,14 +2861,73 @@ function isLocked(el) {
   return el?.locked === true
 }
 
-function startTextEdit(el) {
+function findWordBounds(text, index) {
+  if (!text.length) return { start: 0, end: 0 }
+  const isWordChar = (ch) => /\w/.test(ch)
+  if (!isWordChar(text[index] ?? '')) return { start: index, end: index }
+  let start = index
+  while (start > 0 && isWordChar(text[start - 1])) start--
+  let end = index
+  while (end < text.length && isWordChar(text[end])) end++
+  return { start, end }
+}
+
+function positionCaretAtPoint(x, y, selectWord = false) {
+  const ta = textareaRef.value
+  if (!ta) return
+
+  let pos = null
+
+  // Chrome/Edge
+  const range = document.caretRangeFromPoint?.(x, y)
+  if (range?.startContainer?.nodeType === Node.TEXT_NODE) {
+    pos = range.startOffset
+  }
+
+  // Firefox
+  if (pos === null) {
+    const caret = document.caretPositionFromPoint?.(x, y)
+    if (caret) pos = caret.offset
+  }
+
+  // Fallback : curseur à la fin du texte
+  if (pos === null) pos = ta.value.length
+
+  if (selectWord) {
+    const { start, end } = findWordBounds(ta.value, pos)
+    ta.setSelectionRange(start, end)
+  } else {
+    ta.setSelectionRange(pos, pos)
+  }
+}
+
+function startTextEdit(el, e = null) {
   if (isLocked(el)) return
   editingEl.value = el
   editingText.value = el.text || ''
+  editorStore.textEditState.elId = el.id
+  editorStore.textEditState.start = 0
+  editorStore.textEditState.end = 0
+  const nativeEvt = e?.evt ?? e
+  const clickPos =
+    nativeEvt?.clientX != null
+      ? { x: nativeEvt.clientX, y: nativeEvt.clientY }
+      : nativeEvt?.changedTouches?.[0]
+        ? { x: nativeEvt.changedTouches[0].clientX, y: nativeEvt.changedTouches[0].clientY }
+        : null
   nextTick(() => {
     updateTransformer()
     textareaRef.value?.focus()
-    textareaRef.value?.select()
+    if (clickPos) {
+      requestAnimationFrame(() => {
+        positionCaretAtPoint(clickPos.x, clickPos.y, true)
+        onTextareaSelectionChange()
+      })
+    } else {
+      const len = editingText.value.length
+      textareaRef.value?.setSelectionRange(len, len)
+      onTextareaSelectionChange()
+    }
   })
 }
 
@@ -2823,12 +3047,24 @@ function finishTextEdit() {
     editorStore.saveHistory()
     editingEl.value = null
     editingText.value = ''
+    editorStore.textEditState.elId = null
+    editorStore.textEditState.start = 0
+    editorStore.textEditState.end = 0
     return
   }
   const elId = editingEl.value.id
   // Re-numéroter les listes ordonnées en cas d'ajout/suppression de lignes pendant l'édition
   const finalText = renumberIfNeeded(editingText.value)
-  editorStore.updateElementCommit(elId, { text: finalText, height: null })
+  const originalText = editingEl.value.text || ''
+  const commitPayload = { text: finalText, height: null }
+  if (Array.isArray(editingEl.value.runs) && editingEl.value.runs.length) {
+    const { at, delta } = diffSingleEdit(originalText, finalText)
+    const shifted = delta === 0
+      ? normalizeRuns(editingEl.value.runs, finalText.length)
+      : shiftRuns(editingEl.value.runs, at, delta, finalText.length)
+    commitPayload.runs = shifted
+  }
+  editorStore.updateElementCommit(elId, commitPayload)
   const role = editingEl.value.role || ''
   if (role.startsWith('custom_')) {
     const cfId = role.replace('custom_', '')
@@ -2837,6 +3073,9 @@ function finishTextEdit() {
   }
   editingEl.value = null
   editingText.value = ''
+  // Preserve textEditState briefly so native color pickers (which blur the
+  // textarea before committing the value) can still target the user's range.
+  scheduleTextEditStateClear()
   nextTick(() => {
     updateTransformer()
     syncTextRenderedDims(elId)
@@ -2854,7 +3093,16 @@ watch(
       if (!editingText.value.trim()) {
         pageEls.splice(idx, 1)
       } else {
-        pageEls[idx] = { ...pageEls[idx], text: renumberIfNeeded(editingText.value) }
+        const prevEl = pageEls[idx]
+        const newText = renumberIfNeeded(editingText.value)
+        const patch = { ...prevEl, text: newText }
+        if (Array.isArray(prevEl.runs) && prevEl.runs.length) {
+          const { at, delta } = diffSingleEdit(prevEl.text || '', newText)
+          patch.runs = delta === 0
+            ? normalizeRuns(prevEl.runs, newText.length)
+            : shiftRuns(prevEl.runs, at, delta, newText.length)
+        }
+        pageEls[idx] = patch
       }
       editorStore.saveHistory()
     }

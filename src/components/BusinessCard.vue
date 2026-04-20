@@ -50,7 +50,17 @@
                   class="opacity-70 flex-shrink-0"
                   :style="contactIconStyle(el)"
                 />
-                <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
+                <span class="whitespace-nowrap" :style="textStyle(el)">
+                  <template v-if="textSegments(el)"
+                    ><span
+                      v-for="(seg, i) in textSegments(el)"
+                      :key="i"
+                      :style="segmentStyle(el, seg)"
+                      >{{ seg.text }}</span
+                    ></template
+                  >
+                  <template v-else>{{ el.text || '' }}</template>
+                </span>
               </div>
               <!-- text (firstName/lastName → h2, autres → p) -->
               <component
@@ -58,10 +68,19 @@
                 v-else
                 class="leading-tight select-none pointer-events-none"
                 :style="textStyle(el)"
-                >{{
-                  el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '')
-                }}</component
               >
+                <template v-if="textSegments(el)"
+                  ><span
+                    v-for="(seg, i) in textSegments(el)"
+                    :key="i"
+                    :style="segmentStyle(el, seg)"
+                    >{{ seg.text }}</span
+                  ></template
+                >
+                <template v-else>{{
+                  el.text || (editMode ? ROLE_LABELS[el.role] || el.label || 'Texte…' : '')
+                }}</template>
+              </component>
             </template>
             <!-- Poignées (masquées pendant l'édition) -->
             <template v-if="editMode && editingEl?.id !== el.id">
@@ -356,6 +375,7 @@ import {
 import { useCardsStore } from '@/stores/cards'
 import { useFontStore } from '@/stores/fontStore'
 import { ROLE_LABELS } from '@/utils/cardElements'
+import { segmentize } from '@/utils/textRuns'
 
 const ICON_COMPONENTS = { email: Mail, phone: Phone, website: Globe, address: MapPin }
 
@@ -636,6 +656,40 @@ const textStyle = (el) => {
     style.backgroundClip = 'text'
     style.WebkitTextFillColor = 'transparent'
     style.color = 'transparent'
+  }
+  return style
+}
+
+const textSegments = (el) => {
+  if (!el.runs?.length) return null
+  return segmentize(el.text || '', el.runs)
+}
+
+const segmentStyle = (el, seg) => {
+  const s = fontScale.value
+  const hasGradient = !!el.fillGradient?.from
+  const runColor = seg.style.color
+  const style = {
+    fontWeight: seg.style.bold ?? el.bold ? 'bold' : 'normal',
+    fontStyle: seg.style.italic ?? el.italic ? 'italic' : 'normal',
+  }
+  const underline = seg.style.underline || el.textDecoration?.includes('underline')
+  if (underline) {
+    style.textDecoration = 'underline'
+    const uc = seg.style.underlineColor || el.underlineColor
+    if (uc) style.textDecorationColor = uc
+  }
+  if (runColor) {
+    // A run color overrides gradient for this segment
+    style.color = runColor
+    style.background = 'none'
+    style.WebkitBackgroundClip = 'initial'
+    style.backgroundClip = 'initial'
+    style.WebkitTextFillColor = runColor
+  } else if (hasGradient) {
+    // Inherit gradient from parent container
+    style.color = 'transparent'
+    style.WebkitTextFillColor = 'transparent'
   }
   return style
 }

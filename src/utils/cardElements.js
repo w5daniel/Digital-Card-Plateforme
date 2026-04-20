@@ -264,6 +264,7 @@ export function konvaToCardEl(el, cw, ch, index) {
       ...serializeShadow(el),
     }
     if (el.fillGradient?.from) out.fillGradient = el.fillGradient
+    if (Array.isArray(el.runs) && el.runs.length) out.runs = el.runs
     return out
   }
 

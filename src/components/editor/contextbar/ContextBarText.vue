@@ -14,8 +14,8 @@
       <input
         type="color"
         :value="sel.fill || '#000000'"
-        @input="emit('solid-input', $event.target.value)"
-        @change="emit('solid-change', $event.target.value)"
+        @input="onSolidColorInput($event.target.value)"
+        @change="onSolidColorChange($event.target.value)"
         class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
       />
     </label>
@@ -79,7 +79,7 @@
 
   <!-- Font size -->
   <div class="flex items-center gap-0.5">
-    <button @click="changeFontSize(-1)" class="p-1 rounded" :class="btnCls">
+    <button @mousedown.prevent @click="changeFontSize(-1)" class="p-1 rounded" :class="btnCls">
       <Minus class="w-3 h-3" />
     </button>
     <input
@@ -91,7 +91,7 @@
       min="6"
       max="200"
     />
-    <button @click="changeFontSize(1)" class="p-1 rounded" :class="btnCls">
+    <button @mousedown.prevent @click="changeFontSize(1)" class="p-1 rounded" :class="btnCls">
       <Plus class="w-3 h-3" />
     </button>
   </div>
@@ -100,6 +100,7 @@
 
   <!-- Bold -->
   <button
+    @mousedown.prevent
     @click="toggleBold"
     class="p-1.5 rounded font-bold text-sm w-7 h-7 flex items-center justify-center transition-colors"
     :class="isBold ? activeBtnCls : btnCls"
@@ -110,6 +111,7 @@
 
   <!-- Italic -->
   <button
+    @mousedown.prevent
     @click="toggleItalic"
     class="p-1.5 rounded italic text-sm w-7 h-7 flex items-center justify-center transition-colors"
     :class="isItalic ? activeBtnCls : btnCls"
@@ -120,6 +122,7 @@
 
   <!-- Underline -->
   <button
+    @mousedown.prevent
     @click="toggleUnderline"
     class="p-1.5 rounded underline text-sm w-7 h-7 flex items-center justify-center transition-colors"
     :class="isUnderline ? activeBtnCls : btnCls"
@@ -167,6 +170,7 @@
     <button
       v-for="a in alignments"
       :key="a.value"
+      @mousedown.prevent
       @click="commit('align', a.value)"
       class="p-1.5 rounded transition-colors"
       :class="sel.align === a.value ? activeBtnCls : btnCls"
@@ -221,6 +225,7 @@ import { Minus, Plus, AlignLeft, AlignCenter, AlignRight, Type, MoveHorizontal, 
 import { useEditorStore } from '@/stores/useEditorStore'
 import { useThemeStore } from '@/stores/themeStore'
 import FontPickerDropdown from './FontPickerDropdown.vue'
+import { applyRunStyle, toggleRunFlag } from '@/utils/textRuns'
 
 const props = defineProps({
   fillMode: { type: String, default: 'solid' },
@@ -286,9 +291,37 @@ const bulletStyles = [
 
 const CONTACT_ICON_ROLES = ['email', 'phone', 'website', 'address']
 
-const isBold = computed(() => sel.value?.fontStyle?.includes('bold'))
-const isItalic = computed(() => sel.value?.fontStyle?.includes('italic'))
-const isUnderline = computed(() => sel.value?.textDecoration?.includes('underline'))
+function isRunFlagOnRange(runs, start, end, flag) {
+  if (!runs?.length || start >= end) return false
+  for (let i = start; i < end; i++) {
+    if (!runs.some((r) => r.start <= i && r.end > i && r[flag])) return false
+  }
+  return true
+}
+
+const isBold = computed(() => {
+  const runSel = activeRunSelection()
+  if (runSel && sel.value?.runs?.length) {
+    return isRunFlagOnRange(sel.value.runs, runSel.start, runSel.end, 'bold')
+  }
+  return sel.value?.fontStyle?.includes('bold') ?? false
+})
+
+const isItalic = computed(() => {
+  const runSel = activeRunSelection()
+  if (runSel && sel.value?.runs?.length) {
+    return isRunFlagOnRange(sel.value.runs, runSel.start, runSel.end, 'italic')
+  }
+  return sel.value?.fontStyle?.includes('italic') ?? false
+})
+
+const isUnderline = computed(() => {
+  const runSel = activeRunSelection()
+  if (runSel && sel.value?.runs?.length) {
+    return isRunFlagOnRange(sel.value.runs, runSel.start, runSel.end, 'underline')
+  }
+  return sel.value?.textDecoration?.includes('underline') ?? false
+})
 
 const activeBullet = computed(() => {
   const text = sel.value?.text
@@ -312,8 +345,30 @@ function changeFontSize(delta) {
   })
 }
 
+// Returns { start, end } if there is a non-empty selection in the inline text
+// editor for the currently selected element — else null.
+function activeRunSelection() {
+  if (!sel.value) return null
+  const st = editorStore.textEditState
+  if (!st || st.elId !== sel.value.id) return null
+  if (st.end <= st.start) return null
+  return { start: st.start, end: st.end }
+}
+
 function toggleBold() {
   if (!sel.value) return
+  const runSel = activeRunSelection()
+  if (runSel) {
+    const runs = toggleRunFlag(
+      sel.value.runs || [],
+      runSel.start,
+      runSel.end,
+      'bold',
+      (sel.value.text || '').length,
+    )
+    editorStore.updateElementCommit(sel.value.id, { runs })
+    return
+  }
   const cur = sel.value.fontStyle || 'normal'
   const bold = cur.includes('bold')
   const italic = cur.includes('italic')
@@ -323,6 +378,18 @@ function toggleBold() {
 
 function toggleItalic() {
   if (!sel.value) return
+  const runSel = activeRunSelection()
+  if (runSel) {
+    const runs = toggleRunFlag(
+      sel.value.runs || [],
+      runSel.start,
+      runSel.end,
+      'italic',
+      (sel.value.text || '').length,
+    )
+    editorStore.updateElementCommit(sel.value.id, { runs })
+    return
+  }
   const cur = sel.value.fontStyle || 'normal'
   const bold = cur.includes('bold')
   const italic = cur.includes('italic')
@@ -332,6 +399,18 @@ function toggleItalic() {
 
 function toggleUnderline() {
   if (!sel.value) return
+  const runSel = activeRunSelection()
+  if (runSel) {
+    const runs = toggleRunFlag(
+      sel.value.runs || [],
+      runSel.start,
+      runSel.end,
+      'underline',
+      (sel.value.text || '').length,
+    )
+    editorStore.updateElementCommit(sel.value.id, { runs })
+    return
+  }
   const cur = sel.value.textDecoration || ''
   const turningOn = !cur.includes('underline')
   const patch = { textDecoration: turningOn ? 'underline' : '' }
@@ -339,6 +418,33 @@ function toggleUnderline() {
     patch.underlineColor = sel.value.fill || '#000000'
   }
   editorStore.updateElementCommit(sel.value.id, patch)
+}
+
+// Apply a color on the active selection (if any) via runs, else return false
+// so the caller propagates the emit to the parent (updating fill globally).
+function applyRunColor(color, commit) {
+  const runSel = activeRunSelection()
+  if (!runSel || !sel.value) return false
+  const runs = applyRunStyle(
+    sel.value.runs || [],
+    runSel.start,
+    runSel.end,
+    { color },
+    (sel.value.text || '').length,
+  )
+  if (commit) editorStore.updateElementCommit(sel.value.id, { runs })
+  else editorStore.updateElement(sel.value.id, { runs })
+  return true
+}
+
+function onSolidColorInput(color) {
+  if (applyRunColor(color, false)) return
+  emit('solid-input', color)
+}
+
+function onSolidColorChange(color) {
+  if (applyRunColor(color, true)) return
+  emit('solid-change', color)
 }
 
 function stripBulletPrefix(line) {
