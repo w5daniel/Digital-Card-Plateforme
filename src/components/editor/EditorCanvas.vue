@@ -367,7 +367,10 @@
       ref="textareaRef"
       v-model="editingText"
       :style="textareaStyle"
-      class="absolute resize-none outline-none border-2 border-violet-500 rounded bg-transparent z-50 overflow-hidden p-0 leading-none"
+      :class="[
+        'absolute resize-none outline-none border-2 border-violet-500 rounded bg-transparent z-50 overflow-hidden p-0 leading-none',
+        editingEl && hasRuns(editingEl) ? 'rich-text-editing' : '',
+      ]"
       @blur="finishTextEdit"
       @keydown.esc="finishTextEdit"
       @keydown="onTextareaKeydown"
@@ -496,8 +499,34 @@ const stageWidth = ref(800)
 const stageHeight = ref(600)
 
 // ── Text editing state ────────────────────────────────────────────────────
-const editingEl = ref(null)
+// editingElId tracks by ID so updateElement (which replaces the object in the
+// array) never makes editingEl stale — editingEl always resolves to the live
+// object from the store.
+const editingElId = ref(null)
+const editingEl = computed(() =>
+  editingElId.value
+    ? editorStore.currentElements.find((el) => el.id === editingElId.value) ?? null
+    : null,
+)
 const editingText = ref('')
+
+// Sync text + runs to the store on every keystroke so Konva segments reflect
+// the current text in real time (enables transparent-textarea approach).
+watch(editingText, (newText) => {
+  const el = editingEl.value
+  if (!el) return
+  const oldText = el.text || ''
+  if (oldText === newText) return
+  const { at, delta } = diffSingleEdit(oldText, newText)
+  const patch = { text: newText }
+  if (hasRuns(el)) {
+    patch.runs =
+      delta === 0
+        ? normalizeRuns(el.runs, newText.length)
+        : shiftRuns(el.runs, at, delta, newText.length)
+  }
+  editorStore.updateElement(el.id, patch)
+})
 
 function onTextareaSelectionChange() {
   const ta = textareaRef.value
@@ -1144,9 +1173,14 @@ function buildTextConfig(el) {
 // no runs are defined. MVP: assumes single-line text (no word-wrap on runs).
 function buildTextSegmentConfigs(el) {
   if (!hasRuns(el)) return []
-  const fs = el.fontSize || 16
+  const live = liveDragPos[el.id]
+  const baseX = live?.x ?? el.x
+  const baseY = live?.y ?? el.y
+  const liveRot = live?.rotation ?? el.rotation ?? 0
+  const liveScale = live?.scaleX ?? 1
+  const fs = (el.fontSize || 16) * liveScale
   const ff = el.fontFamily || 'Inter'
-  const ls = el.letterSpacing || 0
+  const ls = (el.letterSpacing || 0) * liveScale
   const globalStyle = {
     bold: (el.fontStyle || '').includes('bold'),
     italic: (el.fontStyle || '').includes('italic'),
@@ -1167,13 +1201,12 @@ function buildTextSegmentConfigs(el) {
   })
 
   const totalWidth = withMeta.reduce((a, m) => a + m.width, 0)
-  const containerW = el.width || totalWidth || 200
+  const containerW = (live?.width ?? el.width) || totalWidth || 200
   let cursorX = 0
   if (el.align === 'center') cursorX = (containerW - totalWidth) / 2
   else if (el.align === 'right') cursorX = containerW - totalWidth
 
-  const opacity = editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1)
-  const rotation = el.rotation || 0
+  const opacity = el.opacity ?? 1
 
   const configs = []
   for (const { seg, fontStyle, width } of withMeta) {
@@ -1182,10 +1215,9 @@ function buildTextSegmentConfigs(el) {
     // Konva's native underline uses fill color → only use it if no custom underline color.
     const useNativeUnderline = hasSegUnderline && !segUnderlineColor
     configs.push({
-      // Relative offsets (the parent v-text provides the element origin); we mirror
-      // its coordinate system by reusing el.x/el.y directly here.
-      x: el.x + cursorX,
-      y: el.y,
+      x: baseX,
+      y: baseY,
+      offsetX: -cursorX,
       width: width || undefined,
       height: el.height != null ? el.height : undefined,
       text: seg.text,
@@ -1199,7 +1231,7 @@ function buildTextSegmentConfigs(el) {
       letterSpacing: ls,
       lineHeight: el.lineHeight || 1.25,
       opacity,
-      rotation,
+      rotation: liveRot,
       listening: false,
       ...shadowProps(el),
       __segStart: seg.start,
@@ -1218,24 +1250,27 @@ function buildTextSegmentConfigs(el) {
 function buildTextSegmentUnderlineConfigs(el) {
   const segs = buildTextSegmentConfigs(el)
   if (!segs.length) return []
-  const fs = el.fontSize || 16
+  const live = liveDragPos[el.id]
+  const baseX = live?.x ?? el.x
+  const baseY = live?.y ?? el.y
+  const fs = (el.fontSize || 16) * (live?.scaleX ?? 1)
   const lh = el.lineHeight || 1.25
   const strokeW = Math.max(1, Math.round(fs * 0.07))
-  const rot = el.rotation || 0
+  const rot = live?.rotation ?? el.rotation ?? 0
   const underlineY = fs * lh * 0.92
   const out = []
   for (const s of segs) {
     if (!s.__customUnderline) continue
     out.push({
-      x: el.x,
-      y: el.y,
+      x: baseX,
+      y: baseY,
       offsetX: -s.__segOffset,
       offsetY: -underlineY,
       points: [0, 0, s.__segWidth || 0, 0],
       stroke: s.__customUnderline,
       strokeWidth: strokeW,
       rotation: rot,
-      opacity: editingEl.value?.id === el.id ? 0 : (el.opacity ?? 1),
+      opacity: el.opacity ?? 1,
       listening: false,
     })
   }
@@ -2162,10 +2197,12 @@ function onTextRotateMove(e) {
   const newX = cardCx - (w / 2) * Math.cos(r) + (h / 2) * Math.sin(r)
   const newY = cardCy - (w / 2) * Math.sin(r) - (h / 2) * Math.cos(r)
   editorStore.updateElement(textRotateState.elId, { x: newX, y: newY, rotation: newRotation })
-  // Garder liveDragPos en sync : buildTextUnderlineConfigs préfère live.x/y sur el.x/y,
-  // donc sans cette mise à jour le souligné reste ancré à l'ancienne position.
-  if (liveDragPos[textRotateState.elId]) {
-    liveDragPos[textRotateState.elId] = { ...liveDragPos[textRotateState.elId], x: newX, y: newY }
+  // Garder liveDragPos en sync : builders de segments et underlines préfèrent live sur el.
+  liveDragPos[textRotateState.elId] = {
+    ...liveDragPos[textRotateState.elId],
+    x: newX,
+    y: newY,
+    rotation: newRotation,
   }
 }
 
@@ -2187,23 +2224,41 @@ function onTextTransform(e, el) {
   if (!tr || el.type !== 'text') return
   const node = e.target
   const anchor = tr.getActiveAnchor()
+
   if (anchor === 'middle-left' || anchor === 'middle-right') {
-    // Side: horizontal only — freeze vertical scale
+    // Side: horizontal only — reset scale immediately and apply width directly.
+    // This prevents Konva from stretching the node, allows text to reflow live,
+    // and keeps the Transformer bounding box aligned with the visual content.
     node.scaleY(1)
-  } else {
-    // Corner: uniform scale — Y follows X.
-    // For top anchors (top-left / top-right) the pivot is the BOTTOM edge.
-    // Konva already moved node.y() to keep that bottom edge fixed based on its
-    // own scaleY. When we override scaleY with scaleX the bottom edge shifts
-    // unless we compensate y by the difference in height.
-    const konvaScaleY = node.scaleY()
-    node.scaleY(node.scaleX())
-    if (anchor === 'top-left' || anchor === 'top-right') {
-      node.y(node.y() + node.height() * (konvaScaleY - node.scaleX()))
+    const newWidth = Math.max(10, node.width() * node.scaleX())
+    const liveSx = Math.abs(node.scaleX())
+    node.scaleX(1)
+    node.width(newWidth)
+    editorStore.updateElement(el.id, { width: newWidth })
+    if (!resizeDragBaseLines[el.id]) {
+      resizeDragBaseLines[el.id] = getTextUnderlineLines(el) || liveDragPos[el.id]?.underlineLines || null
     }
+    const scaledLines = resizeDragBaseLines[el.id]?.map((line) => ({
+      xOffset: line.xOffset * liveSx,
+      y: line.y,
+      width: line.width * liveSx,
+    }))
+    liveDragPos[el.id] = { x: node.x(), y: node.y(), width: newWidth, underlineLines: scaledLines }
+    return
   }
+
+  // Corner: uniform scale — Y follows X.
+  // For top anchors (top-left / top-right) the pivot is the BOTTOM edge.
+  // Konva already moved node.y() to keep that bottom edge fixed based on its
+  // own scaleY. When we override scaleY with scaleX the bottom edge shifts
+  // unless we compensate y by the difference in height.
+  const konvaScaleY = node.scaleY()
+  node.scaleY(node.scaleX())
+  if (anchor === 'top-left' || anchor === 'top-right') {
+    node.y(node.y() + node.height() * (konvaScaleY - node.scaleX()))
+  }
+
   // Track live visual width so textHandlePos and context bar update in real time.
-  // We do NOT touch node.width() or scaleX here to avoid breaking the Transformer.
   const baseW = el.width ?? node.width()
   const visualW = Math.max(10, baseW * Math.abs(node.scaleX()))
   const sx = Math.abs(node.scaleX())
@@ -2221,7 +2276,7 @@ function onTextTransform(e, el) {
     width: line.width * sx,
   }))
 
-  liveDragPos[el.id] = { x: node.x(), y: node.y(), width: visualW, underlineLines: scaledLines }
+  liveDragPos[el.id] = { x: node.x(), y: node.y(), width: visualW, scaleX: sx, underlineLines: scaledLines }
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────
@@ -2903,7 +2958,7 @@ function positionCaretAtPoint(x, y, selectWord = false) {
 
 function startTextEdit(el, e = null) {
   if (isLocked(el)) return
-  editingEl.value = el
+  editingElId.value = el.id
   editingText.value = el.text || ''
   editorStore.textEditState.elId = el.id
   editorStore.textEditState.start = 0
@@ -3045,33 +3100,33 @@ function finishTextEdit() {
       (e) => e.id !== editingEl.value.id,
     )
     editorStore.saveHistory()
-    editingEl.value = null
+    editingElId.value = null
     editingText.value = ''
     editorStore.textEditState.elId = null
     editorStore.textEditState.start = 0
     editorStore.textEditState.end = 0
     return
   }
-  const elId = editingEl.value.id
-  // Re-numéroter les listes ordonnées en cas d'ajout/suppression de lignes pendant l'édition
+  // editingEl.value is now always live (computed by ID), so .runs/.text are current.
+  const el = editingEl.value
+  const elId = el.id
   const finalText = renumberIfNeeded(editingText.value)
-  const originalText = editingEl.value.text || ''
   const commitPayload = { text: finalText, height: null }
-  if (Array.isArray(editingEl.value.runs) && editingEl.value.runs.length) {
-    const { at, delta } = diffSingleEdit(originalText, finalText)
-    const shifted = delta === 0
-      ? normalizeRuns(editingEl.value.runs, finalText.length)
-      : shiftRuns(editingEl.value.runs, at, delta, finalText.length)
-    commitPayload.runs = shifted
+  if (hasRuns(el)) {
+    const { at, delta } = diffSingleEdit(el.text || '', finalText)
+    commitPayload.runs =
+      delta === 0
+        ? normalizeRuns(el.runs, finalText.length)
+        : shiftRuns(el.runs, at, delta, finalText.length)
   }
   editorStore.updateElementCommit(elId, commitPayload)
-  const role = editingEl.value.role || ''
+  const role = el.role || ''
   if (role.startsWith('custom_')) {
     const cfId = role.replace('custom_', '')
     const cf = editorStore.contactExtra.find((c) => c.id === cfId)
     if (cf) cf.value = editingText.value
   }
-  editingEl.value = null
+  editingElId.value = null
   editingText.value = ''
   // Preserve textEditState briefly so native color pickers (which blur the
   // textarea before committing the value) can still target the user's range.
@@ -3086,9 +3141,11 @@ function finishTextEdit() {
 watch(
   () => editorStore.activePage,
   (_newPage, oldPage) => {
-    if (!editingEl.value) return
+    // Capture the ID before the computed re-evaluates against the new page.
+    const elId = editingElId.value
+    if (!elId) return
     const pageEls = editorStore.elements[oldPage]
-    const idx = pageEls?.findIndex((e) => e.id === editingEl.value.id) ?? -1
+    const idx = pageEls?.findIndex((e) => e.id === elId) ?? -1
     if (idx !== -1) {
       if (!editingText.value.trim()) {
         pageEls.splice(idx, 1)
@@ -3098,15 +3155,16 @@ watch(
         const patch = { ...prevEl, text: newText }
         if (Array.isArray(prevEl.runs) && prevEl.runs.length) {
           const { at, delta } = diffSingleEdit(prevEl.text || '', newText)
-          patch.runs = delta === 0
-            ? normalizeRuns(prevEl.runs, newText.length)
-            : shiftRuns(prevEl.runs, at, delta, newText.length)
+          patch.runs =
+            delta === 0
+              ? normalizeRuns(prevEl.runs, newText.length)
+              : shiftRuns(prevEl.runs, at, delta, newText.length)
         }
         pageEls[idx] = patch
       }
       editorStore.saveHistory()
     }
-    editingEl.value = null
+    editingElId.value = null
     editingText.value = ''
   },
 )
@@ -3161,6 +3219,11 @@ const textareaStyle = computed(() => {
   // Canvas wrapper offset relative to viewport
   const rect = wrapperRef.value?.getBoundingClientRect() || { left: 0, top: 0 }
 
+  // When the element has active runs, make the textarea text invisible so the
+  // Konva segments (which stay visible during editing) provide the styled view.
+  // The caret remains visible via caretColor.
+  const activeRuns = hasRuns(el)
+
   return {
     left: ox + el.x * z + 'px',
     top: oy + el.y * z + 'px',
@@ -3170,11 +3233,12 @@ const textareaStyle = computed(() => {
     fontFamily: el.fontFamily || 'Inter',
     fontStyle: el.fontStyle?.includes('italic') ? 'italic' : 'normal',
     fontWeight: el.fontStyle?.includes('bold') ? 'bold' : 'normal',
-    color: el.fill || '#000000',
+    color: activeRuns ? 'transparent' : (el.fill || '#000000'),
+    caretColor: el.fill || '#000000',
     textAlign: el.align || 'left',
     lineHeight: el.lineHeight || 1.25,
     letterSpacing: (el.letterSpacing || 0) * z + 'px',
-    textDecoration: el.textDecoration || 'none',
+    textDecoration: activeRuns ? 'none' : (el.textDecoration || 'none'),
   }
 })
 
@@ -3517,3 +3581,17 @@ async function exportCanvas(type) {
   await downloadExport(type, { recto: rectoUrl, verso: versoUrl }, cw, ch)
 }
 </script>
+
+<style>
+/*
+ * When the textarea is in rich-text mode (transparent text + Konva segments
+ * visible underneath), the browser's default ::selection overrides color to
+ * white/black, causing a "double text" ghost. Force the selected text to stay
+ * transparent so only the Konva segments (and the selection background) show.
+ */
+.rich-text-editing::selection {
+  color: transparent;
+  background-color: rgba(99, 102, 241, 0.35);
+}
+</style>
+

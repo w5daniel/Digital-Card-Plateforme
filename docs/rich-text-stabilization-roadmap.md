@@ -494,27 +494,33 @@ Chaque élément texte devient :
 
 ## 6. Checklist progressive
 
-### Session 1 — ContextBar ✅ implémentée
+### Session 1 + 1.5 — ContextBar + overlay textarea ✅ implémentées
 - [x] `@mousedown.prevent` sur bouton **Bold**
 - [x] `@mousedown.prevent` sur bouton **Italic**
 - [x] `@mousedown.prevent` sur bouton **Underline**
 - [x] `@mousedown.prevent` sur boutons **Alignement** (left/center/right)
 - [x] `@mousedown.prevent` sur boutons **Taille** (+/-)
-- [ ] `@mousedown.prevent` sur déclencheur **color picker** (fill + underline) — labels natifs, blur non problématique
+- [x] `@mousedown.prevent` sur labels **color picker** fill et underline
 - [x] `isBold` lit les runs sur la plage active
 - [x] `isItalic` lit les runs sur la plage active
 - [x] `isUnderline` lit les runs sur la plage active
 - [x] Color picker du souligné visible quand un run underline est actif
-- [ ] Sélection re-entrable après modification partielle — **à valider en test**
+- [x] `editingEl` calculé par ID (jamais stale après `updateElement`)
+- [x] Watcher `editingText` → sync temps réel texte+runs dans le store
+- [x] Textarea transparente quand runs actifs (`color: transparent`, `caretColor`)
+- [x] Segments Konva visibles pendant l'édition (opacity non masquée)
+- [x] `finishTextEdit` utilise l'élément live (runs toujours à jour)
+- [x] Styles visibles pendant édition + toggle ON/OFF — **validé session 1**
+- [x] Color picker souligné reste ouvert — **validé session 1**
 
 ### Session 2 — Dynamisme canvas
-- [ ] `buildTextSegmentConfigs` lit `liveDragPos` pour x/y
-- [ ] `buildTextSegmentConfigs` lit `liveDragPos` pour rotation
-- [ ] `buildTextSegmentUnderlineConfigs` lit `liveDragPos` pour x/y
-- [ ] `liveDragPos` stocke `rotation` pendant la rotation live
-- [ ] Drag d'un texte avec runs → segments suivent en temps réel
-- [ ] Resize poignée latérale → segments repositionnés live
-- [ ] Rotation → segments tournent en synchronisation
+- [x] `buildTextSegmentConfigs` lit `liveDragPos` pour x/y
+- [x] `buildTextSegmentConfigs` lit `liveDragPos` pour rotation
+- [x] `buildTextSegmentUnderlineConfigs` lit `liveDragPos` pour x/y
+- [x] `liveDragPos` stocke `rotation` pendant la rotation live
+- [ ] Drag d'un texte avec runs → segments suivent en temps réel — **à valider en test**
+- [ ] Resize poignée latérale → segments repositionnés live — **à valider en test**
+- [ ] Rotation → segments tournent en synchronisation — **à valider en test**
 
 ### Session 3 — Dashboard
 - [ ] `textSegments()` passe `globalStyle` à `segmentize`

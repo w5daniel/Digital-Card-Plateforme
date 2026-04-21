@@ -6,6 +6,7 @@
     <!-- Solid mode: direct color picker -->
     <label
       v-if="props.fillMode !== 'gradient'"
+      @mousedown.prevent
       class="relative w-6 h-6 rounded border overflow-hidden cursor-pointer"
       :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
       title="Couleur du texte"
@@ -134,6 +135,7 @@
   <!-- Underline color (only visible when underline is active) -->
   <label
     v-if="isUnderline"
+    @mousedown.prevent
     class="relative w-5 h-5 rounded cursor-pointer border overflow-hidden shrink-0"
     :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
     title="Couleur du soulignement"
