@@ -522,8 +522,10 @@ Chaque élément texte devient :
 - [x] Rotation → segments tournent en synchronisation — **validé**
 - [x] Resize side (poignée latérale) → text wrap, minWidth 20px, fontSize fixe
 - [x] Resize corner (poignée diagonale) → scale proportionnel fontSize + width, segments en sync, reset scaleX immédiat, top-anchor y-compensation
-- [ ] Resize corner runs → segments scalent en synchronisation — **à valider en test**
-- [ ] Resize side simple → pas d'effondrement sous 20px — **à valider en test**
+- [x] Resize corner runs → segments scalent en synchronisation — **validé session 2.5**
+- [x] Resize side simple → pas d'effondrement sous 20px — **validé session 2.5**
+- [x] Resize side runs → bounding box hauteur suit le reflow en temps réel — **validé session 2.5**
+- [x] Resize side runs → word-wrap + char-wrap si mot > containerW (parité texte non stylé) — **validé session 2.5**
 
 ### Session 3 — Dashboard
 - [ ] `textSegments()` passe `globalStyle` à `segmentize`

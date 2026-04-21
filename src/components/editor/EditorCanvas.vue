@@ -1196,6 +1196,8 @@ function buildTextSegmentConfigs(el) {
 
   // Flatten segments into word-level tokens, preserving each token's style.
   const wordItems = []
+  const containerW = live?.width ?? el.width ?? 200
+
   for (const seg of segments) {
     const parts = []
     if (seg.style.bold) parts.push('bold')
@@ -1203,18 +1205,33 @@ function buildTextSegmentConfigs(el) {
     const fontStyle = parts.join(' ') || 'normal'
     const tokens = seg.text.split(/(\s+)/).filter((t) => t !== '')
     for (const token of tokens) {
-      wordItems.push({
-        text: token,
-        style: seg.style,
-        fontStyle,
-        width: measureSegmentWidth(token, fs, ff, fontStyle, ls),
-        isSpace: /^\s+$/.test(token),
-      })
+      if (/^\s+$/.test(token)) {
+        wordItems.push({ text: token, style: seg.style, fontStyle, width: measureSegmentWidth(token, fs, ff, fontStyle, ls), isSpace: true })
+        continue
+      }
+      const tokenW = measureSegmentWidth(token, fs, ff, fontStyle, ls)
+      if (tokenW <= containerW) {
+        wordItems.push({ text: token, style: seg.style, fontStyle, width: tokenW, isSpace: false })
+      } else {
+        // Word wider than container: break character by character like Konva native wrap
+        let chunk = ''
+        let chunkW = 0
+        for (const char of token) {
+          const charW = measureSegmentWidth(char, fs, ff, fontStyle, ls)
+          if (chunkW + charW > containerW && chunk.length > 0) {
+            wordItems.push({ text: chunk, style: seg.style, fontStyle, width: chunkW, isSpace: false })
+            chunk = char
+            chunkW = charW
+          } else {
+            chunk += char
+            chunkW += charW
+          }
+        }
+        if (chunk.length > 0) wordItems.push({ text: chunk, style: seg.style, fontStyle, width: chunkW, isSpace: false })
+      }
     }
   }
   if (wordItems.length === 0) return []
-
-  const containerW = live?.width ?? el.width ?? 200
 
   // Greedy line packing: break before a non-space token that doesn't fit.
   const lines = []
@@ -2300,6 +2317,20 @@ function onTextTransform(e, el) {
       width: line.width * liveSx,
     }))
     liveDragPos[el.id] = { x: node.x(), y: node.y(), width: newWidth, underlineLines: scaledLines }
+
+    // Pour les runs : recalculer la hauteur réelle depuis le layout de segments
+    // et forcer le Transformer à suivre immédiatement.
+    if (hasRuns(el)) {
+      const segConfigs = buildTextSegmentConfigs(el)
+      if (segConfigs.length > 0) {
+        const lineH = (el.fontSize || 16) * (el.lineHeight || 1.25)
+        const maxLineY = Math.max(...segConfigs.map((s) => s.__lineY ?? 0))
+        const newHeight = maxLineY + lineH
+        liveDragPos[el.id] = { ...liveDragPos[el.id], height: newHeight }
+        node.height(newHeight)
+        updateTransformer()
+      }
+    }
     return
   }
 
