@@ -518,9 +518,12 @@ Chaque élément texte devient :
 - [x] `buildTextSegmentConfigs` lit `liveDragPos` pour rotation
 - [x] `buildTextSegmentUnderlineConfigs` lit `liveDragPos` pour x/y
 - [x] `liveDragPos` stocke `rotation` pendant la rotation live
-- [ ] Drag d'un texte avec runs → segments suivent en temps réel — **à valider en test**
-- [ ] Resize poignée latérale → segments repositionnés live — **à valider en test**
-- [ ] Rotation → segments tournent en synchronisation — **à valider en test**
+- [x] Drag d'un texte avec runs → segments suivent en temps réel — **validé**
+- [x] Rotation → segments tournent en synchronisation — **validé**
+- [x] Resize side (poignée latérale) → text wrap, minWidth 20px, fontSize fixe
+- [x] Resize corner (poignée diagonale) → scale proportionnel fontSize + width, segments en sync, reset scaleX immédiat, top-anchor y-compensation
+- [ ] Resize corner runs → segments scalent en synchronisation — **à valider en test**
+- [ ] Resize side simple → pas d'effondrement sous 20px — **à valider en test**
 
 ### Session 3 — Dashboard
 - [ ] `textSegments()` passe `globalStyle` à `segmentize`

@@ -1169,18 +1169,21 @@ function buildTextConfig(el) {
   return cfg
 }
 
-// Build per-segment v-text configs for a text element with runs. Returns [] if
-// no runs are defined. MVP: assumes single-line text (no word-wrap on runs).
+// Build per-word v-text configs for a text element with runs, with word-level line breaking.
+// Each word (token) is a separate Konva node positioned at its line's y offset so the text wraps
+// naturally when containerW changes (side resize or window fit).
 function buildTextSegmentConfigs(el) {
   if (!hasRuns(el)) return []
   const live = liveDragPos[el.id]
   const baseX = live?.x ?? el.x
   const baseY = live?.y ?? el.y
   const liveRot = live?.rotation ?? el.rotation ?? 0
-  const liveScale = live?.scaleX ?? 1
-  const fs = (el.fontSize || 16) * liveScale
+  const fs = el.fontSize || 16
   const ff = el.fontFamily || 'Inter'
-  const ls = (el.letterSpacing || 0) * liveScale
+  const ls = el.letterSpacing || 0
+  const lh = el.lineHeight || 1.25
+  const lineH = fs * lh
+
   const globalStyle = {
     bold: (el.fontStyle || '').includes('bold'),
     italic: (el.fontStyle || '').includes('italic'),
@@ -1191,56 +1194,98 @@ function buildTextSegmentConfigs(el) {
   const segments = segmentizeRuns(el.text || '', el.runs, globalStyle)
   if (segments.length === 0) return []
 
-  const withMeta = segments.map((seg) => {
+  // Flatten segments into word-level tokens, preserving each token's style.
+  const wordItems = []
+  for (const seg of segments) {
     const parts = []
     if (seg.style.bold) parts.push('bold')
     if (seg.style.italic) parts.push('italic')
     const fontStyle = parts.join(' ') || 'normal'
-    const w = measureSegmentWidth(seg.text, fs, ff, fontStyle, ls)
-    return { seg, fontStyle, width: w }
-  })
+    const tokens = seg.text.split(/(\s+)/).filter((t) => t !== '')
+    for (const token of tokens) {
+      wordItems.push({
+        text: token,
+        style: seg.style,
+        fontStyle,
+        width: measureSegmentWidth(token, fs, ff, fontStyle, ls),
+        isSpace: /^\s+$/.test(token),
+      })
+    }
+  }
+  if (wordItems.length === 0) return []
 
-  const totalWidth = withMeta.reduce((a, m) => a + m.width, 0)
-  const containerW = (live?.width ?? el.width) || totalWidth || 200
-  let cursorX = 0
-  if (el.align === 'center') cursorX = (containerW - totalWidth) / 2
-  else if (el.align === 'right') cursorX = containerW - totalWidth
+  const containerW = live?.width ?? el.width ?? 200
+
+  // Greedy line packing: break before a non-space token that doesn't fit.
+  const lines = []
+  let curLine = []
+  let curLineW = 0
+  for (const item of wordItems) {
+    if (curLine.length > 0 && !item.isSpace && curLineW + item.width > containerW) {
+      while (curLine.length > 0 && curLine[curLine.length - 1].isSpace) curLine.pop()
+      if (curLine.length > 0) lines.push(curLine)
+      curLine = [item]
+      curLineW = item.width
+    } else {
+      curLine.push(item)
+      curLineW += item.width
+    }
+  }
+  while (curLine.length > 0 && curLine[curLine.length - 1].isSpace) curLine.pop()
+  if (curLine.length > 0) lines.push(curLine)
+
+  // Vertical alignment within a fixed height (corner drag locks el.height).
+  const totalTextH = lines.length * lineH
+  let vOffset = 0
+  if (el.height != null) {
+    const va = el.verticalAlign || 'middle'
+    if (va === 'middle') vOffset = Math.max(0, (el.height - totalTextH) / 2)
+    else if (va === 'bottom') vOffset = Math.max(0, el.height - totalTextH)
+  }
 
   const opacity = el.opacity ?? 1
-
   const configs = []
-  for (const { seg, fontStyle, width } of withMeta) {
-    const hasSegUnderline = seg.style.underline
-    const segUnderlineColor = seg.style.underlineColor
-    // Konva's native underline uses fill color → only use it if no custom underline color.
-    const useNativeUnderline = hasSegUnderline && !segUnderlineColor
-    configs.push({
-      x: baseX,
-      y: baseY,
-      offsetX: -cursorX,
-      width: width || undefined,
-      height: el.height != null ? el.height : undefined,
-      text: seg.text,
-      fontSize: fs,
-      fontFamily: ff,
-      fontStyle,
-      fill: seg.style.color || '#000000',
-      textDecoration: useNativeUnderline ? 'underline' : '',
-      align: 'left',
-      verticalAlign: el.verticalAlign || 'middle',
-      letterSpacing: ls,
-      lineHeight: el.lineHeight || 1.25,
-      opacity,
-      rotation: liveRot,
-      listening: false,
-      ...shadowProps(el),
-      __segStart: seg.start,
-      __segEnd: seg.end,
-      __customUnderline: hasSegUnderline && segUnderlineColor ? segUnderlineColor : null,
-      __segWidth: width,
-      __segOffset: cursorX,
-    })
-    cursorX += width
+
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li]
+    const lineW = line.reduce((a, item) => a + item.width, 0)
+    const lineY = vOffset + li * lineH
+    let wordX = 0
+    if (el.align === 'center') wordX = Math.max(0, (containerW - lineW) / 2)
+    else if (el.align === 'right') wordX = Math.max(0, containerW - lineW)
+
+    for (const item of line) {
+      const hasSegUnderline = item.style.underline
+      const segUnderlineColor = item.style.underlineColor
+      const useNativeUnderline = hasSegUnderline && !segUnderlineColor
+      configs.push({
+        x: baseX,
+        y: baseY,
+        offsetX: -wordX,
+        offsetY: -lineY,
+        width: item.width || undefined,
+        height: undefined,
+        text: item.text,
+        fontSize: fs,
+        fontFamily: ff,
+        fontStyle: item.fontStyle,
+        fill: item.style.color || '#000000',
+        textDecoration: useNativeUnderline ? 'underline' : '',
+        align: 'left',
+        verticalAlign: 'top',
+        letterSpacing: ls,
+        lineHeight: lh,
+        opacity,
+        rotation: liveRot,
+        listening: false,
+        ...shadowProps(el),
+        __customUnderline: hasSegUnderline && segUnderlineColor ? segUnderlineColor : null,
+        __segWidth: item.width,
+        __segOffset: wordX,
+        __lineY: lineY,
+      })
+      wordX += item.width
+    }
   }
   return configs
 }
@@ -1253,7 +1298,7 @@ function buildTextSegmentUnderlineConfigs(el) {
   const live = liveDragPos[el.id]
   const baseX = live?.x ?? el.x
   const baseY = live?.y ?? el.y
-  const fs = (el.fontSize || 16) * (live?.scaleX ?? 1)
+  const fs = el.fontSize || 16
   const lh = el.lineHeight || 1.25
   const strokeW = Math.max(1, Math.round(fs * 0.07))
   const rot = live?.rotation ?? el.rotation ?? 0
@@ -1265,7 +1310,9 @@ function buildTextSegmentUnderlineConfigs(el) {
       x: baseX,
       y: baseY,
       offsetX: -s.__segOffset,
-      offsetY: -underlineY,
+      // __lineY : décalage vertical de la ligne (multi-line layout). L'underline doit
+      // être au bas du token, donc on descend de underlineY depuis le haut de sa ligne.
+      offsetY: -(underlineY + (s.__lineY ?? 0)),
       points: [0, 0, s.__segWidth || 0, 0],
       stroke: s.__customUnderline,
       strokeWidth: strokeW,
@@ -1722,8 +1769,9 @@ watch(
         const id = key.split('|')[0]
         // Invalider immédiatement pour éviter d'afficher des positions stalles
         if (liveDragPos[id]) liveDragPos[id] = { ...liveDragPos[id], underlineLines: null }
-        // Attendre Vue render + Konva draw (rAF) : textArr recompté seulement après le draw
-        nextTick(() => requestAnimationFrame(() => syncTextRenderedDims(id)))
+        // Attendre Vue render + Konva draw (rAF) : textArr recompté seulement après le draw.
+        // updateTransformer() ensuite pour que le cadre violet suive la nouvelle hauteur.
+        nextTick(() => requestAnimationFrame(() => { syncTextRenderedDims(id); updateTransformer() }))
       }
     }
   },
@@ -2139,7 +2187,9 @@ let textRotateState = null
 // Lignes de souligné originales capturées au début d'un resize drag (avant tout scaling).
 // Permet de toujours scaler depuis les valeurs initiales et d'éviter l'accumulation d'échelle.
 let resizeDragBaseLines = {}
-
+const MIN_TEXT_SIDE_WIDTH = 20
+// Baseline { fontSize, width, height, y } capturée au premier frame d'un corner drag.
+let resizeDragBaseEl = {}
 function startTextRotate(e) {
   e.cancelBubble = true
   const el = selectedTextEl.value
@@ -2227,12 +2277,18 @@ function onTextTransform(e, el) {
 
   if (anchor === 'middle-left' || anchor === 'middle-right') {
     // Side: horizontal only — reset scale immediately and apply width directly.
-    // This prevents Konva from stretching the node, allows text to reflow live,
-    // and keeps the Transformer bounding box aligned with the visual content.
     node.scaleY(1)
-    const newWidth = Math.max(10, node.width() * node.scaleX())
+    const rawWidth = node.width() * node.scaleX()
     const liveSx = Math.abs(node.scaleX())
     node.scaleX(1)
+    // minWidth dynamique : jamais moins large qu'un caractère à la fontSize courante.
+    const fontMin = (el.fontSize || 16) * 1.1
+    const newWidth = Math.max(MIN_TEXT_SIDE_WIDTH, fontMin, rawWidth)
+    // Pour middle-left : le bord DROIT est l'ancre fixe.
+    // Si on clamp newWidth > rawWidth, corriger x pour que le bord droit ne saute pas.
+    if (anchor === 'middle-left' && newWidth > rawWidth) {
+      node.x(node.x() + rawWidth - newWidth)
+    }
     node.width(newWidth)
     editorStore.updateElement(el.id, { width: newWidth })
     if (!resizeDragBaseLines[el.id]) {
@@ -2247,36 +2303,51 @@ function onTextTransform(e, el) {
     return
   }
 
-  // Corner: uniform scale — Y follows X.
-  // For top anchors (top-left / top-right) the pivot is the BOTTOM edge.
-  // Konva already moved node.y() to keep that bottom edge fixed based on its
-  // own scaleY. When we override scaleY with scaleX the bottom edge shifts
-  // unless we compensate y by the difference in height.
-  const konvaScaleY = node.scaleY()
-  node.scaleY(node.scaleX())
+  // Corner: proportional scale — reset scale immédiatement comme pour les side handles.
+  // Cela évite le stretch Konva, garde le Transformer bounding box aligné avec le contenu,
+  // et permet de mettre à jour fontSize + width directement dans le store (segments suivent via el).
+  if (!resizeDragBaseEl[el.id]) {
+    resizeDragBaseEl[el.id] = {
+      fontSize: el.fontSize || 16,
+      width: el.width || node.width(),
+      height: node.height(),   // hauteur auto-calculée par Konva avant tout lock
+      y: node.y(),
+    }
+  }
+  const baseEl = resizeDragBaseEl[el.id]
+
+  // Scale cumulatif depuis la baseline (toujours depuis les originaux, pas d'accumulation).
+  const rawWidth = node.width() * Math.abs(node.scaleX())
+  const scale = rawWidth / baseEl.width
+  const newWidth = Math.max(MIN_TEXT_SIDE_WIDTH, rawWidth)
+  const newFontSize = Math.max(6, Math.round(baseEl.fontSize * scale))
+  const newHeight = Math.max(6, baseEl.height * scale)
+
+  // Reset Konva scale → no stretch, Transformer bounding box = contenu réel.
+  node.scaleX(1)
+  node.scaleY(1)
+  node.width(newWidth)
+  node.height(newHeight)   // verrouille la hauteur pendant le drag (pas de reflow)
+
+  // Pour les poignées TOP : garder le bord bas fixe.
   if (anchor === 'top-left' || anchor === 'top-right') {
-    node.y(node.y() + node.height() * (konvaScaleY - node.scaleX()))
+    node.y(baseEl.y + baseEl.height - newHeight)
   }
 
-  // Track live visual width so textHandlePos and context bar update in real time.
-  const baseW = el.width ?? node.width()
-  const visualW = Math.max(10, baseW * Math.abs(node.scaleX()))
-  const sx = Math.abs(node.scaleX())
-  const sy = Math.abs(node.scaleY())
+  // Mise à jour store live (pas d'historique) — segments re-renderent via el.fontSize / el.width.
+  editorStore.updateElement(el.id, { width: newWidth, fontSize: newFontSize, height: newHeight })
 
-  // Scale underline line metrics proportionally during resize.
-  // On capture les lignes originales UNE SEULE FOIS au début du drag (resizeDragBaseLines),
-  // puis on scale toujours depuis ces originaux — évite l'accumulation d'échelle entre events.
+  // Scale underline metrics depuis la baseline (évite l'accumulation).
   if (!resizeDragBaseLines[el.id]) {
     resizeDragBaseLines[el.id] = getTextUnderlineLines(el) || liveDragPos[el.id]?.underlineLines || null
   }
   const scaledLines = resizeDragBaseLines[el.id]?.map((line) => ({
-    xOffset: line.xOffset * sx,
-    y: line.y * sy,
-    width: line.width * sx,
+    xOffset: line.xOffset * scale,
+    y: line.y * scale,
+    width: line.width * scale,
   }))
 
-  liveDragPos[el.id] = { x: node.x(), y: node.y(), width: visualW, scaleX: sx, underlineLines: scaledLines }
+  liveDragPos[el.id] = { x: node.x(), y: node.y(), width: newWidth, underlineLines: scaledLines }
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────
@@ -2818,26 +2889,23 @@ function onTransformEnd(e, el) {
       rotation: node.rotation(),
     })
   } else if (el.type === 'text') {
-    const sx = node.scaleX()
-    const sy = node.scaleY()
-    if (Math.abs(sy - 1) > 0.001) {
-      // Corner handle: scaleY = scaleX (enforced by onTextTransform)
-      // Scale fontSize proportionally + resize width
-      const newFontSize = Math.max(6, Math.round((el.fontSize || 16) * sy))
+    if (resizeDragBaseEl[el.id]) {
+      // Corner drag : fontSize + width déjà appliqués live, height à déverrouiller.
+      // node.scaleX = 1 (reset dans onTextTransform), donc node.width() = valeur finale réelle.
       editorStore.updateElement(el.id, {
         x: node.x(),
         y: node.y(),
-        width: Math.max(10, node.width() * sx),
+        width: Math.max(MIN_TEXT_SIDE_WIDTH, node.width()),
         height: null,
-        fontSize: newFontSize,
+        fontSize: el.fontSize,   // déjà correct depuis les updateElement du drag
         rotation: node.rotation(),
       })
     } else {
-      // Side handle: horizontal resize only, font size unchanged
+      // Side drag : fontSize inchangé, width déjà appliqué live.
       editorStore.updateElement(el.id, {
         x: node.x(),
         y: node.y(),
-        width: Math.max(10, node.width() * sx),
+        width: Math.max(MIN_TEXT_SIDE_WIDTH, node.width()),
         height: null,
         rotation: node.rotation(),
       })
@@ -2855,6 +2923,7 @@ function onTransformEnd(e, el) {
   node.scaleY(1)
   if (el.type === 'text') {
     delete resizeDragBaseLines[el.id]
+    delete resizeDragBaseEl[el.id]
     // Attendre Vue render + Konva draw (rAF) avant de re-syncer les métriques du souligné,
     // car textArr de Konva n'est recompté qu'après le prochain draw cycle.
     nextTick(() => requestAnimationFrame(() => syncTextRenderedDims(el.id)))
