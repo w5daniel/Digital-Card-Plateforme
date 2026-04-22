@@ -126,6 +126,7 @@ import ContextBarText from './contextbar/ContextBarText.vue'
 import GradientFillPopover from './contextbar/GradientFillPopover.vue'
 import { useEditorStore } from '@/stores/useEditorStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { normalizeRuns } from '@/utils/textRuns'
 
 const editorStore = useEditorStore()
 const themeStore = useThemeStore()
@@ -168,14 +169,22 @@ watch(sel, (el) => {
   }
 }, { immediate: true })
 
+function _withRunColorsCleaned(patch) {
+  const el = sel.value
+  if ((el.type === 'text' || el.type === 'contact') && el.runs?.some((r) => 'color' in r)) {
+    patch.runs = normalizeRuns(el.runs.map(({ color: _c, ...rest }) => rest))
+  }
+  return patch
+}
+
 function updSolidFill(color) {
   if (!sel.value) return
-  editorStore.updateElement(sel.value.id, { fill: color, fillGradient: undefined })
+  editorStore.updateElement(sel.value.id, _withRunColorsCleaned({ fill: color, fillGradient: undefined }))
 }
 
 function commitSolidFill(color) {
   if (!sel.value) return
-  editorStore.updateElementCommit(sel.value.id, { fill: color, fillGradient: undefined })
+  editorStore.updateElementCommit(sel.value.id, _withRunColorsCleaned({ fill: color, fillGradient: undefined }))
 }
 
 function updateGradientFill() {

@@ -365,6 +365,7 @@
     <textarea
       v-if="editingEl"
       ref="textareaRef"
+      rows="1"
       v-model="editingText"
       :style="textareaStyle"
       :class="[
@@ -526,6 +527,10 @@ watch(editingText, (newText) => {
         : shiftRuns(el.runs, at, delta, newText.length)
   }
   editorStore.updateElement(el.id, patch)
+  const elId = el.id
+  nextTick(() => requestAnimationFrame(() => {
+    if (editingElId.value === elId) syncTextRenderedDims(elId)
+  }))
 })
 
 function onTextareaSelectionChange() {
@@ -2671,13 +2676,13 @@ function onLayerDragMove(e) {
       if (dx !== 0 || dy !== 0) {
         e.target.x(isCenterBased ? sx + (el.width || 100) / 2 : sx)
         e.target.y(isCenterBased ? sy + (el.height || 100) / 2 : sy)
-        liveDragPos[targetId] = { x: sx, y: sy }
+        liveDragPos[targetId] = { ...liveDragPos[targetId], x: sx, y: sy }
       } else {
-        liveDragPos[targetId] = { x: liveX, y: liveY }
+        liveDragPos[targetId] = { ...liveDragPos[targetId], x: liveX, y: liveY }
       }
     } else {
       snapGuides.value = []
-      liveDragPos[targetId] = { x: liveX, y: liveY }
+      liveDragPos[targetId] = { ...liveDragPos[targetId], x: liveX, y: liveY }
     }
 
     if (el.groupId) {
@@ -2688,7 +2693,7 @@ function onLayerDragMove(e) {
         const deltaX = liveX - el.x
         const deltaY = liveY - el.y
         groupMembers.forEach((m) => {
-          if (m.id !== targetId) liveDragPos[m.id] = { x: m.x + deltaX, y: m.y + deltaY }
+          if (m.id !== targetId) liveDragPos[m.id] = { ...liveDragPos[m.id], x: m.x + deltaX, y: m.y + deltaY }
         })
         return // Transformer handles visual movement; nothing else to do
       }
@@ -2719,6 +2724,7 @@ function onLayerDragMove(e) {
       const mHW = (m.width || 100) / 2
       const mHH = (m.height || 100) / 2
       liveDragPos[m.id] = {
+        ...liveDragPos[m.id],
         x: mCenter ? mStart.x + deltaX - mHW : mStart.x + deltaX,
         y: mCenter ? mStart.y + deltaY - mHH : mStart.y + deltaY,
       }
@@ -3058,6 +3064,7 @@ function positionCaretAtPoint(x, y, selectWord = false) {
 
 function startTextEdit(el, e = null) {
   if (isLocked(el)) return
+  syncTextRenderedDims(el.id)
   editingElId.value = el.id
   editingText.value = el.text || ''
   editorStore.textEditState.elId = el.id
@@ -3327,8 +3334,9 @@ const textareaStyle = computed(() => {
   return {
     left: ox + el.x * z + 'px',
     top: oy + el.y * z + 'px',
-    width: (el.width || 200) * z + 'px',
-    minHeight: (el.fontSize || 16) * 1.5 * z + 'px',
+    boxSizing: 'content-box',
+    width: (liveDragPos[el.id]?.width ?? el.width ?? 200) * z + 'px',
+    height: (liveDragPos[el.id]?.height ?? el.height ?? (el.fontSize || 16) * 1.5) * z + 'px',
     fontSize: (el.fontSize || 16) * z + 'px',
     fontFamily: el.fontFamily || 'Inter',
     fontStyle: el.fontStyle?.includes('italic') ? 'italic' : 'normal',

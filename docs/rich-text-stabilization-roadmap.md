@@ -527,12 +527,34 @@ Chaque élément texte devient :
 - [x] Resize side runs → bounding box hauteur suit le reflow en temps réel — **validé session 2.5**
 - [x] Resize side runs → word-wrap + char-wrap si mot > containerW (parité texte non stylé) — **validé session 2.5**
 
-### Session 3 — Dashboard
+### Session 3 — Dashboard (textSegments globalStyle)
 - [ ] `textSegments()` passe `globalStyle` à `segmentize`
 - [ ] `segmentStyle()` utilise `seg.style.bold` (plus `el.bold`)
 - [ ] `segmentStyle()` utilise `seg.style.italic` (plus `el.italic`)
 - [ ] Texte global bold + run couleur → dashboard cohérent avec le canvas
 - [ ] Export PNG cohérent avec canvas (vérification de régression)
+
+### Sessions 3.1–3.3 — Corrections & Privacy Guard ✅ implémentées
+
+**Session 3.1 — Bug : couleur globale bloquée par run colors**
+- [x] `updSolidFill` et `commitSolidFill` dans `EditorContextBar.vue` nettoient les `color` dans les runs avant d'appliquer la couleur globale (`_withRunColorsCleaned`)
+
+**Session 3.2 — Bug : asymétrie recto/verso rich text (Dashboard)**
+- [x] Verso `BusinessCard.vue` : bloc contact → `textSegments(el)` + `segmentStyle(el, seg)` (parité recto)
+- [x] Verso `BusinessCard.vue` : bloc text (`<component>`) → idem
+
+**Session 3.2.1 — Privacy Guard (logique)**
+- [x] `EditorTopBar.vue` : garde dans `saveAsTemplate` — toast si champ Info stylé + isPublic
+- [x] `userTemplatesStore.js` : garde dans `toggleTemplateVisibility` — throw si champ Info stylé
+
+**Session 3.3 — Privacy Guard (UI/UX enrichi)**
+- [x] `src/utils/cardElements.js` : export `CONTACT_ROLES` + `hasStyledInfoFields(elements)`
+- [x] `tailwind.config.js` : keyframe `shake` + `animate-shake`
+- [x] `SaveAsModal.vue` : prop `privacyConflict`, erreur inline orange avec `animate-shake`, bouton Enregistrer disabled
+- [x] `EditorTopBar.vue` : computed `savePrivacyConflict` → prop `:privacy-conflict`, suppression du toast inline
+- [x] `userTemplatesStore.js` : import `CONTACT_ROLES` + `hasStyledInfoFields` depuis utils (cleanup)
+- [x] `PrivacyBlockModal.vue` : nouveau composant modal 🛡️ avec bouton "Modifier le modèle"
+- [x] `DashboardView.vue` : intercept avant store, ouvre `PrivacyBlockModal` si conflit détecté
 
 ### Session 4 — Bugs indépendants
 - [ ] Underline Y : 'j' non coupé à 14px

@@ -225,6 +225,22 @@
             </span>
           </div>
 
+          <!-- Privacy conflict inline error -->
+          <Transition name="modal-fade">
+            <div
+              v-if="saveType === 'template' && isPublic && privacyConflict"
+              :class="[
+                'mb-4 px-4 py-3 rounded-xl border text-xs leading-snug',
+                'border-orange-300/60 bg-orange-50/80 dark:bg-orange-900/20 dark:border-orange-700/40',
+                'text-orange-700 dark:text-orange-300',
+                { 'animate-shake': shaking },
+              ]"
+            >
+              <p class="font-semibold mb-0.5">🛡️ Publication bloquée</p>
+              <p>Les champs Infos (nom, email…) contiennent du texte stylé. Retirez le style ou passez en mode <strong>Privé</strong>.</p>
+            </div>
+          </Transition>
+
           <!-- Actions -->
           <div class="flex gap-2">
             <button
@@ -240,7 +256,7 @@
             </button>
             <button
               @click="onConfirm"
-              :disabled="!name.trim() || (saveType === 'template' && !canCreateTemplate)"
+              :disabled="!name.trim() || (saveType === 'template' && !canCreateTemplate) || (saveType === 'template' && isPublic && privacyConflict)"
               class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               :class="
                 saveType === 'template'
@@ -268,6 +284,7 @@ const props = defineProps({
   canCreateTemplate: { type: Boolean, default: true },
   maxFreeTemplates: { type: Number, default: 2 },
   canPublish: { type: Boolean, default: false },
+  privacyConflict: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['cancel', 'save'])
@@ -276,6 +293,17 @@ const saveType = ref('template') // 'template' | 'card'
 const name = ref(props.initialName)
 const nameInput = ref(null)
 const isPublic = ref(false)
+const shaking = ref(false)
+
+function triggerShake() {
+  shaking.value = false
+  nextTick(() => {
+    shaking.value = true
+  })
+  setTimeout(() => {
+    shaking.value = false
+  }, 500)
+}
 
 watch(
   () => props.visible,
@@ -304,6 +332,10 @@ function toggleIsPublic() {
 function onConfirm() {
   if (!name.value.trim()) return
   if (saveType.value === 'template' && !props.canCreateTemplate) return
+  if (saveType.value === 'template' && isPublic.value && props.privacyConflict) {
+    triggerShake()
+    return
+  }
   emit('save', {
     type: saveType.value,
     name: name.value.trim(),

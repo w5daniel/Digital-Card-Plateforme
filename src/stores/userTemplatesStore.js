@@ -4,7 +4,7 @@ import { useAuthStore } from './authStore'
 import { useCardsStore } from './cards'
 import { useNotificationStore } from './notificationStore'
 import { ADMIN_EMAIL } from '../data/mockData'
-import { konvaToCardEl } from '@/utils/cardElements'
+import { konvaToCardEl, CONTACT_ROLES, hasStyledInfoFields } from '@/utils/cardElements'
 
 const LS_PREFIX = 'digitalcard_userTemplates_'
 const LS_PUBLIC_PREFIX = 'digitalcard_publicTemplate_'
@@ -186,8 +186,20 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   async function toggleTemplateVisibility(templateId) {
     const tpl = userTemplates.value.find((t) => t.id === templateId)
     if (!tpl) throw new Error('Modèle introuvable')
-    if (!tpl.isPublic && !authStore.isPremium && !authStore.isAdmin) {
-      throw new Error('La publication de modèles dans la communauté est réservée aux membres Premium.')
+    const goingPublic = !tpl.isPublic
+    if (goingPublic) {
+      if (!authStore.isPremium && !authStore.isAdmin) {
+        throw new Error('La publication de modèles dans la communauté est réservée aux membres Premium.')
+      }
+      const allEls = [
+        ...(tpl.editorData?.elements?.recto ?? []),
+        ...(tpl.editorData?.elements?.verso ?? []),
+      ]
+      if (hasStyledInfoFields(allEls)) {
+        throw new Error(
+          'Confidentialité : Les modèles comportant des textes stylés dans les champs d\'informations (nom, email, etc.) ne peuvent pas être publiés. Veuillez retirer le style de ces champs ou enregistrer le modèle en mode privé.'
+        )
+      }
     }
     return updateTemplate(templateId, { isPublic: !tpl.isPublic })
   }

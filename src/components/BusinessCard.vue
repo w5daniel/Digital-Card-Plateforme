@@ -263,7 +263,17 @@
                 class="opacity-70 flex-shrink-0"
                 :style="contactIconStyle(el)"
               />
-              <span class="whitespace-nowrap" :style="textStyle(el)">{{ el.text || '' }}</span>
+              <span class="whitespace-nowrap" :style="textStyle(el)">
+                <template v-if="textSegments(el)"
+                  ><span
+                    v-for="(seg, i) in textSegments(el)"
+                    :key="i"
+                    :style="segmentStyle(el, seg)"
+                    >{{ seg.text }}</span
+                  ></template
+                >
+                <template v-else>{{ el.text || '' }}</template>
+              </span>
             </div>
             <!-- text -->
             <component
@@ -271,8 +281,17 @@
               :is="el.role === 'firstName' || el.role === 'lastName' ? 'h2' : 'p'"
               class="leading-tight select-none pointer-events-none"
               :style="textStyle(el)"
-              >{{ el.text || '' }}</component
             >
+              <template v-if="textSegments(el)"
+                ><span
+                  v-for="(seg, i) in textSegments(el)"
+                  :key="i"
+                  :style="segmentStyle(el, seg)"
+                  >{{ seg.text }}</span
+                ></template
+              >
+              <template v-else>{{ el.text || '' }}</template>
+            </component>
           </div>
           <!-- IMAGE -->
           <div
@@ -662,16 +681,21 @@ const textStyle = (el) => {
 
 const textSegments = (el) => {
   if (!el.runs?.length) return null
-  return segmentize(el.text || '', el.runs)
+  const globalStyle = {
+    bold: el.bold || false,
+    italic: el.italic || false,
+    underline: (el.textDecoration || '').includes('underline'),
+    underlineColor: el.underlineColor || '',
+  }
+  return segmentize(el.text || '', el.runs, globalStyle)
 }
 
 const segmentStyle = (el, seg) => {
-  const s = fontScale.value
   const hasGradient = !!el.fillGradient?.from
   const runColor = seg.style.color
   const style = {
-    fontWeight: seg.style.bold ?? el.bold ? 'bold' : 'normal',
-    fontStyle: seg.style.italic ?? el.italic ? 'italic' : 'normal',
+    fontWeight: seg.style.bold ? 'bold' : 'normal',
+    fontStyle: seg.style.italic ? 'italic' : 'normal',
   }
   const underline = seg.style.underline || el.textDecoration?.includes('underline')
   if (underline) {

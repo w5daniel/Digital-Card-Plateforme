@@ -997,6 +997,15 @@
       @generated="onBatchGenerated"
     />
 
+    <!-- Privacy block modal (publication bloquée — champ Info stylé) -->
+    <PrivacyBlockModal
+      v-if="showPrivacyBlockModal"
+      :visible="showPrivacyBlockModal"
+      :template-id="privacyBlockTemplateId"
+      :dark="themeStore.darkMode"
+      @close="showPrivacyBlockModal = false"
+    />
+
     <!-- Delete selected cards confirm -->
     <ConfirmModal
       v-if="showDeleteSelectedConfirm"
@@ -1052,11 +1061,12 @@ import { useUserTemplatesStore, MAX_FREE_TEMPLATES } from '@/stores/userTemplate
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import PrivacyBlockModal from '@/components/PrivacyBlockModal.vue'
 import BusinessCard from '@/components/BusinessCard.vue'
 import BatchCreateModal from '@/components/BatchCreateModal.vue'
 import CreateCardFromTemplateModal from '@/components/CreateCardFromTemplateModal.vue'
 import { useThemeStore } from '@/stores/themeStore'
-import { getFullName, getElemText, konvaToCardEl, ROLE_LABELS } from '@/utils/cardElements'
+import { getFullName, getElemText, konvaToCardEl, ROLE_LABELS, hasStyledInfoFields } from '@/utils/cardElements'
 
 function getFieldLabel(card, role) {
   return (
@@ -1175,11 +1185,27 @@ const templateToFakeCard = (tpl) => {
   }
 }
 
+// ── Privacy block modal ──────────────────────────────────────
+const showPrivacyBlockModal = ref(false)
+const privacyBlockTemplateId = ref(null)
+
 // ── Toggle template visibility ───────────────────────────────
 const toggleTemplateVisibility = async (id) => {
+  const tpl = templatesStore.getTemplateById(id)
+  if (tpl && !tpl.isPublic) {
+    const allEls = [
+      ...(tpl.editorData?.elements?.recto ?? []),
+      ...(tpl.editorData?.elements?.verso ?? []),
+    ]
+    if (hasStyledInfoFields(allEls)) {
+      privacyBlockTemplateId.value = id
+      showPrivacyBlockModal.value = true
+      return
+    }
+  }
   try {
-    const tpl = await templatesStore.toggleTemplateVisibility(id)
-    notificationStore.success(tpl.isPublic ? 'Modèle publié dans la communauté' : 'Modèle rendu privé')
+    const updated = await templatesStore.toggleTemplateVisibility(id)
+    notificationStore.success(updated.isPublic ? 'Modèle publié dans la communauté' : 'Modèle rendu privé')
   } catch (err) {
     notificationStore.error(err?.message || 'Erreur lors du changement de visibilité')
   }

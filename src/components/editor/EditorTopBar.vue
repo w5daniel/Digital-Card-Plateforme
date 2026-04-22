@@ -221,6 +221,7 @@
     :can-create-template="templatesStore.canCreateTemplate"
     :max-free-templates="MAX_FREE_TEMPLATES"
     :can-publish="authStore.isPremium || authStore.isAdmin"
+    :privacy-conflict="savePrivacyConflict"
     @cancel="showSaveModal = false"
     @save="onSaveAs"
   />
@@ -374,6 +375,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useUserTemplatesStore, MAX_FREE_TEMPLATES } from '@/stores/userTemplatesStore'
 import { iconToDataUrl } from '@/utils/iconRenderer'
+import { hasStyledInfoFields } from '@/utils/cardElements'
 import SaveAsModal from '@/components/editor/SaveAsModal.vue'
 
 const router = useRouter()
@@ -608,6 +610,7 @@ function editorToCardEl(el, index, iconUrls = {}) {
       ...serializeShadow(el),
     }
     if (el.fillGradient?.from) out.fillGradient = el.fillGradient
+    if (Array.isArray(el.runs) && el.runs.length) out.runs = el.runs
     return out
   }
 
@@ -722,6 +725,15 @@ function extractContact(els, extras = []) {
 }
 
 // ── Save logic ──────────────────────────────────────────────────────────────
+
+// Reactively detects if any Info-role element has styled runs (Privacy Guard)
+const savePrivacyConflict = computed(() => {
+  const allEls = [
+    ...(editorStore.elements?.recto ?? []),
+    ...(editorStore.elements?.verso ?? []),
+  ]
+  return hasStyledInfoFields(allEls)
+})
 
 /**
  * Decide what to do when user clicks "Enregistrer":

@@ -1,5 +1,29 @@
 // src/utils/cardElements.js
 
+// Contact field roles (Info panel — structured data, QR vCard, batch import)
+export const CONTACT_ROLES = [
+  'firstName',
+  'lastName',
+  'title',
+  'company',
+  'email',
+  'phone',
+  'website',
+  'address',
+]
+
+/**
+ * Returns true if any element has a contact role AND non-empty styled runs.
+ * Used by the Privacy Guard to block public template publication.
+ * @param {Array} elements - Konva-format element array (recto or verso)
+ */
+export function hasStyledInfoFields(elements) {
+  if (!Array.isArray(elements)) return false
+  return elements.some(
+    (el) => CONTACT_ROLES.includes(el.role) && Array.isArray(el.runs) && el.runs.length > 0,
+  )
+}
+
 // Labels de rôles des éléments de carte de visite
 export const ROLE_LABELS = {
   firstName: 'Prénom',
