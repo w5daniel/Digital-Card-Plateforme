@@ -692,12 +692,10 @@
               <div v-if="!authStore.hasPremium()">
                 <button
                   @click="handleUpgrade"
-                  :disabled="upgradeLoading"
-                  class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white font-bold text-sm shadow-lg shadow-accent-500/20 transition-all duration-200"
+                  class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-accent-500 hover:bg-accent-600 text-white font-bold text-sm shadow-lg shadow-accent-500/20 transition-all duration-200"
                 >
-                  <Loader2 v-if="upgradeLoading" class="w-4 h-4 animate-spin" />
-                  <Star v-else class="w-4 h-4" />
-                  {{ upgradeLoading ? 'Traitement...' : 'Passer au Premium' }}
+                  <Star class="w-4 h-4" />
+                  Passer au Premium
                 </button>
                 <p class="text-[10px] text-center text-onyx-500 dark:text-powder-500 mt-2">
                   Sans engagement · Annulation à tout moment
@@ -728,10 +726,98 @@
                     Historique de vos paiements
                   </p>
                 </div>
-                <div
-                  class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center"
-                >
-                  <CreditCard class="w-4 h-4 text-indigo-500" />
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="authStore.user?.subscriptionHistory?.length"
+                    @click="showClearBillingConfirm = true"
+                    class="text-xs font-medium text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors underline"
+                  >
+                    Supprimer les données
+                  </button>
+                  <div
+                    class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center"
+                  >
+                    <CreditCard class="w-4 h-4 text-indigo-500" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Clear billing confirm -->
+              <div
+                v-if="showClearBillingConfirm"
+                class="mb-5 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+              >
+                <p class="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">
+                  Supprimer les données de facturation ?
+                </p>
+                <p class="text-xs text-red-600 dark:text-red-500 mb-3">
+                  Cette action est irréversible. Toutes vos factures seront effacées.
+                </p>
+                <div class="flex gap-2">
+                  <button
+                    @click="showClearBillingConfirm = false"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium bg-powder-200 dark:bg-onyx-700 text-onyx-700 dark:text-powder-300 hover:bg-powder-300 dark:hover:bg-onyx-600 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    @click="clearBillingData"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors"
+                  >
+                    Confirmer la suppression
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subscription summary card -->
+              <div
+                v-if="authStore.user?.subscriptionHistory?.length"
+                class="mb-6 p-4 rounded-xl bg-gradient-to-r from-accent-50 to-indigo-50 dark:from-accent-900/20 dark:to-indigo-900/20 border border-accent-200 dark:border-accent-800"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-bold uppercase tracking-wider text-accent-600 dark:text-accent-400">
+                    {{ authStore.isPremium ? 'Abonnement actif' : 'Abonnement annulé' }}
+                  </span>
+                  <span
+                    v-if="authStore.isPremium"
+                    class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Actif
+                  </span>
+                  <span
+                    v-else
+                    class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    Annulé
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p class="text-onyx-500 dark:text-powder-500">Plan</p>
+                    <p class="font-semibold text-onyx-900 dark:text-powder-100 mt-0.5">
+                      {{ authStore.user.subscriptionHistory.at(-1).plan }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-onyx-500 dark:text-powder-500">Montant annuel</p>
+                    <p class="font-semibold text-onyx-900 dark:text-powder-100 mt-0.5">
+                      {{ authStore.user.subscriptionHistory.at(-1).total.toLocaleString('fr-FR') }} FCFA TTC
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-onyx-500 dark:text-powder-500">Dernière souscription</p>
+                    <p class="font-semibold text-onyx-900 dark:text-powder-100 mt-0.5">
+                      {{ new Date(authStore.user.subscriptionHistory.at(-1).date).toLocaleDateString('fr-FR') }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-onyx-500 dark:text-powder-500">Renouvellement le</p>
+                    <p class="font-semibold text-onyx-900 dark:text-powder-100 mt-0.5">
+                      {{ new Date(authStore.user.premiumUntil).toLocaleDateString('fr-FR') }}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1110,7 +1196,6 @@ const savePreferences = () => {
 }
 
 // ── Subscription ────────────────────────────────────────────────
-const upgradeLoading = ref(false)
 
 const freeFeatures = [
   '3 cartes de visite',
@@ -1134,16 +1219,8 @@ const premiumFeatures = [
   'Support prioritaire',
 ]
 
-const handleUpgrade = async () => {
-  upgradeLoading.value = true
-  try {
-    await authStore.upgradeToPremium()
-    notify.success('Bienvenue dans le plan Premium !')
-  } catch {
-    notify.error('Erreur lors de la mise à niveau')
-  } finally {
-    upgradeLoading.value = false
-  }
+const handleUpgrade = () => {
+  router.push('/pricing')
 }
 
 const showCancelSubConfirm = ref(false)
@@ -1162,8 +1239,27 @@ const onCancelSubConfirmed = () => {
 }
 
 // ── Billing ─────────────────────────────────────────────────────
-// TODO: fetch invoices from backend API
-const invoices = ref([])
+const showClearBillingConfirm = ref(false)
+
+const clearBillingData = () => {
+  if (!authStore.user) return
+  delete authStore.user.subscriptionHistory
+  localStorage.setItem('user', JSON.stringify(authStore.user))
+  showClearBillingConfirm.value = false
+  notify.success('Données de facturation supprimées')
+}
+
+const invoices = computed(() => {
+  const history = authStore.user?.subscriptionHistory
+  if (!history?.length) return []
+  return [...history].reverse().map((sub) => ({
+    id: sub.reference,
+    description: 'Abonnement ' + sub.plan,
+    date: new Date(sub.date).toLocaleDateString('fr-FR'),
+    amount: sub.total.toLocaleString('fr-FR') + ' FCFA',
+    status: 'Payé',
+  }))
+})
 
 const downloadInvoice = (inv) => {
   const content = [

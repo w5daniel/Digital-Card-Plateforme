@@ -1155,10 +1155,11 @@ const sortedTemplates = computed(() => {
 
 const sortedCards = computed(() => {
   const list = [...store.userCards]
+  const effectiveDate = (c) => new Date(c.importedAt || c.createdAt)
   if (cardSortOrder.value === 'newest') {
-    list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    list.sort((a, b) => effectiveDate(b) - effectiveDate(a))
   } else {
-    list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    list.sort((a, b) => effectiveDate(a) - effectiveDate(b))
   }
   return list
 })

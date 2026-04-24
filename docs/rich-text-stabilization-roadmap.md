@@ -528,11 +528,11 @@ Chaque élément texte devient :
 - [x] Resize side runs → word-wrap + char-wrap si mot > containerW (parité texte non stylé) — **validé session 2.5**
 
 ### Session 3 — Dashboard (textSegments globalStyle)
-- [ ] `textSegments()` passe `globalStyle` à `segmentize`
-- [ ] `segmentStyle()` utilise `seg.style.bold` (plus `el.bold`)
-- [ ] `segmentStyle()` utilise `seg.style.italic` (plus `el.italic`)
-- [ ] Texte global bold + run couleur → dashboard cohérent avec le canvas
-- [ ] Export PNG cohérent avec canvas (vérification de régression)
+- [x] `textSegments()` passe `globalStyle` à `segmentize`
+- [x] `segmentStyle()` utilise `seg.style.bold` (plus `el.bold`)
+- [x] `segmentStyle()` utilise `seg.style.italic` (plus `el.italic`)
+- [x] Texte global bold + run couleur → dashboard cohérent avec le canvas
+- [x] Export PNG cohérent avec canvas (vérification de régression)
 
 ### Sessions 3.1–3.3 — Corrections & Privacy Guard ✅ implémentées
 
@@ -557,13 +557,13 @@ Chaque élément texte devient :
 - [x] `DashboardView.vue` : intercept avant store, ouvre `PrivacyBlockModal` si conflit détecté
 
 ### Session 4 — Bugs indépendants
-- [ ] Underline Y : 'j' non coupé à 14px
-- [ ] Underline Y : 'j' non coupé à 24px
-- [ ] Underline Y : 'j' non coupé à 48px
-- [ ] Underline Y : testé sur Inter, Poppins, et une police serif
-- [ ] Dashboard et canvas : underline au même niveau
-- [ ] Resize latéral : pas d'étirement du texte pendant le drag
-- [ ] Poignée gauche : comportement correct (pas de collage au bord)
+- [x] Underline Y : 'j' non coupé à 14px
+- [x] Underline Y : 'j' non coupé à 24px
+- [x] Underline Y : 'j' non coupé à 48px
+- [x] Underline Y : testé sur Inter, Poppins, et une police serif
+- [x] Dashboard et canvas : underline au même niveau
+- [x] Resize latéral : pas d'étirement du texte pendant le drag
+- [x] Poignée gauche : comportement correct (texte centré par défaut)
 
 ---
 

@@ -539,12 +539,14 @@ export const useCardsStore = defineStore('cards', () => {
         throw new Error('Format JSON invalide')
       }
 
+      const importTimestamp = new Date().toISOString()
       data.cards.forEach((card) => {
         const importedCard = {
           ...card,
           id: crypto.randomUUID(),
           ownerId: authStore.user?.email || 'anonymous',
-          createdAt: card.createdAt || new Date().toISOString(),
+          createdAt: card.createdAt || importTimestamp,
+          importedAt: importTimestamp,
         }
         userCards.value.push(importedCard)
         _publishSnapshot(importedCard)

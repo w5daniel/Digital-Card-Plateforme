@@ -355,6 +355,15 @@ export const useAuthStore = defineStore('auth', () => {
 
       user.value.isPremium = true
       user.value.premiumUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+      if (!Array.isArray(user.value.subscriptionHistory)) user.value.subscriptionHistory = []
+      user.value.subscriptionHistory.push({
+        reference: 'SUB-' + Date.now(),
+        date: new Date().toISOString(),
+        amount: 4990,
+        tax: 18,
+        total: 5888,
+        plan: 'Premium',
+      })
       localStorage.setItem('user', JSON.stringify(user.value))
       // Synchroniser le registre admin
       _upsertRegistry(user.value)

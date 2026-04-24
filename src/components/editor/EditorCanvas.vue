@@ -1353,7 +1353,7 @@ function buildTextSegmentUnderlineConfigs(el) {
   const lh = el.lineHeight || 1.25
   const strokeW = Math.max(1, Math.round(fs * 0.07))
   const rot = live?.rotation ?? el.rotation ?? 0
-  const underlineY = fs * lh * 0.92
+  const underlineY = fs + Math.max(1, Math.round(fs * 0.1))
   const out = []
   for (const s of segs) {
     if (!s.__customUnderline) continue
@@ -1380,7 +1380,6 @@ function buildTextUnderlineConfigs(el) {
   const lx = live?.x ?? el.x
   const ly = live?.y ?? el.y
   const fs = el.fontSize || 16
-  const lh = el.lineHeight || 1.25
   const strokeW = Math.max(1, Math.round(fs * 0.07))
   const rot = el.rotation || 0
 
@@ -1389,7 +1388,7 @@ function buildTextUnderlineConfigs(el) {
   if (!lines || lines.length === 0) {
     // Fallback: single line using actual text width (not container width)
     const textW = getTextNodeTextWidth(el)
-    const underlineY = fs * lh * 0.92
+    const underlineY = fs + Math.max(1, Math.round(fs * 0.1))
     return [
       {
         x: lx,

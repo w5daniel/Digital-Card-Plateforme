@@ -27,6 +27,7 @@ function _measureSeg(text, fontSize, fontFamily, fontStyle, letterSpacing = 0) {
   const w = _exportMeasureCtx.measureText(text).width
   return w + Math.max(0, text.length - 1) * (letterSpacing || 0)
 }
+
 import {
   DEFAULT_QR_FIELDS,
   buildVCardFromFields,
@@ -134,7 +135,6 @@ function addElementToLayer(layer, el, imageMap) {
       // mode, so text never wraps there. Keeping textW = baseW matches that behavior.
     }
 
-    const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
     const runsActive = Array.isArray(el.runs) && el.runs.length > 0
 
     if (runsActive) {
@@ -210,6 +210,7 @@ function addElementToLayer(layer, el, imageMap) {
       return
     }
 
+    const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
     const textNode = new Konva.Text({
       x: textX,
       y: el.y,
@@ -250,8 +251,10 @@ function addElementToLayer(layer, el, imageMap) {
           if (align === 'center') lineX = textX + (containerW - lineW) / 2
           else if (align === 'right') lineX = textX + containerW - lineW
           layer.add(new Konva.Line({
-            x: lineX,
-            y: lineY,
+            x: textX,
+            y: el.y,
+            offsetX: -(lineX - textX),
+            offsetY: -(lineY - el.y),
             points: [0, 0, lineW, 0],
             stroke: el.underlineColor,
             strokeWidth: strokeW,
@@ -263,7 +266,8 @@ function addElementToLayer(layer, el, imageMap) {
       } else {
         layer.add(new Konva.Line({
           x: textX,
-          y: el.y + fs * lh * 0.92,
+          y: el.y,
+          offsetY: -(fs * lh * 0.92),
           points: [0, 0, textNode.getTextWidth() || 100, 0],
           stroke: el.underlineColor,
           strokeWidth: strokeW,
