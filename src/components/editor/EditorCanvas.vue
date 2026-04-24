@@ -1143,12 +1143,16 @@ function buildTextConfig(el) {
   // and let the v-line overlay handle it instead.
   const hasCustomUnderline = el.underlineColor && el.textDecoration?.includes('underline')
   const runsActive = hasRuns(el)
+  // For runs: use liveDragPos dims (computed by syncRunsDims) so the transparent main node
+  // reflects the actual segment layout width/height for the Transformer bounding box.
+  const liveRW = runsActive ? liveDragPos[el.id]?.width : undefined
+  const liveRH = runsActive ? liveDragPos[el.id]?.height : undefined
   const cfg = {
     id: el.id,
     x: el.x,
     y: el.y,
-    width: el.width != null ? el.width : undefined,
-    height: el.height != null ? el.height : undefined,
+    width: el.width != null ? el.width : (runsActive ? liveRW : undefined),
+    height: el.height != null ? el.height : (runsActive ? liveRH : undefined),
     text: el.text || '',
     fontSize: el.fontSize || 16,
     fontFamily: el.fontFamily || 'Inter',
@@ -1199,8 +1203,12 @@ function buildTextSegmentConfigs(el) {
   const segments = segmentizeRuns(el.text || '', el.runs, globalStyle)
   if (segments.length === 0) return []
 
+  // Auto-width: el.width == null means the box must expand to fit content (same as classic text).
+  // Fixed-width: el.width is set by the user via resize handles — wraps at that value.
+  const isAutoWidth = el.width == null
   // Flatten segments into word-level tokens, preserving each token's style.
   const wordItems = []
+  // During resize drag liveDragPos carries the in-progress width; settled state uses el.width.
   const containerW = live?.width ?? el.width ?? 200
 
   for (const seg of segments) {
@@ -1211,11 +1219,12 @@ function buildTextSegmentConfigs(el) {
     const tokens = seg.text.split(/(\s+)/).filter((t) => t !== '')
     for (const token of tokens) {
       if (/^\s+$/.test(token)) {
-        wordItems.push({ text: token, style: seg.style, fontStyle, width: measureSegmentWidth(token, fs, ff, fontStyle, ls), isSpace: true })
+        wordItems.push({ text: token, style: seg.style, fontStyle, width: measureSegmentWidth(token, fs, ff, fontStyle, ls), isSpace: true, isNewline: token.includes('\n') })
         continue
       }
       const tokenW = measureSegmentWidth(token, fs, ff, fontStyle, ls)
-      if (tokenW <= containerW) {
+      // Auto-width: never char-split (the container will expand to fit). Fixed: split at containerW.
+      if (isAutoWidth || tokenW <= containerW) {
         wordItems.push({ text: token, style: seg.style, fontStyle, width: tokenW, isSpace: false })
       } else {
         // Word wider than container: break character by character like Konva native wrap
@@ -1238,12 +1247,32 @@ function buildTextSegmentConfigs(el) {
   }
   if (wordItems.length === 0) return []
 
+  // Auto-width: expand container to the widest explicit line so no word-wrap ever fires.
+  // Fixed-width: keep containerW as-is — the user set this size via the resize handles.
+  let effectiveContainerW = containerW
+  if (isAutoWidth) {
+    let _lineW = 0
+    let _maxNatW = 0
+    for (const item of wordItems) {
+      if (item.isNewline) { _maxNatW = Math.max(_maxNatW, _lineW); _lineW = 0 }
+      else _lineW += item.width
+    }
+    effectiveContainerW = Math.max(containerW, Math.max(_maxNatW, _lineW))
+  }
+
   // Greedy line packing: break before a non-space token that doesn't fit.
   const lines = []
   let curLine = []
   let curLineW = 0
   for (const item of wordItems) {
-    if (curLine.length > 0 && !item.isSpace && curLineW + item.width > containerW) {
+    if (item.isNewline) {
+      while (curLine.length > 0 && curLine[curLine.length - 1].isSpace) curLine.pop()
+      if (curLine.length > 0) lines.push(curLine)
+      curLine = []
+      curLineW = 0
+      continue
+    }
+    if (curLine.length > 0 && !item.isSpace && curLineW + item.width > effectiveContainerW) {
       while (curLine.length > 0 && curLine[curLine.length - 1].isSpace) curLine.pop()
       if (curLine.length > 0) lines.push(curLine)
       curLine = [item]
@@ -1273,8 +1302,8 @@ function buildTextSegmentConfigs(el) {
     const lineW = line.reduce((a, item) => a + item.width, 0)
     const lineY = vOffset + li * lineH
     let wordX = 0
-    if (el.align === 'center') wordX = Math.max(0, (containerW - lineW) / 2)
-    else if (el.align === 'right') wordX = Math.max(0, containerW - lineW)
+    if (el.align === 'center') wordX = Math.max(0, (effectiveContainerW - lineW) / 2)
+    else if (el.align === 'right') wordX = Math.max(0, effectiveContainerW - lineW)
 
     for (const item of line) {
       const hasSegUnderline = item.style.underline
@@ -1782,7 +1811,7 @@ watch(
   () =>
     editorStore.currentElements
       .filter((el) => el.type === 'text')
-      .map((el) => `${el.id}|${el.fontSize}|${el.lineHeight}|${el.align}|${el.width}|${el.text}`),
+      .map((el) => `${el.id}|${el.fontSize}|${el.lineHeight}|${el.align}|${el.width}|${el.text}|${el.letterSpacing ?? 0}`),
   (newKeys, oldKeys) => {
     if (!oldKeys) return
     const oldSet = new Set(oldKeys)
@@ -1793,7 +1822,17 @@ watch(
         if (liveDragPos[id]) liveDragPos[id] = { ...liveDragPos[id], underlineLines: null }
         // Attendre Vue render + Konva draw (rAF) : textArr recompté seulement après le draw.
         // updateTransformer() ensuite pour que le cadre violet suive la nouvelle hauteur.
-        nextTick(() => requestAnimationFrame(() => { syncTextRenderedDims(id); updateTransformer() }))
+        nextTick(() =>
+          requestAnimationFrame(() => {
+            const changedEl = editorStore.currentElements.find((e) => e.id === id)
+            if (changedEl && hasRuns(changedEl)) {
+              syncRunsDims(changedEl)
+            } else {
+              syncTextRenderedDims(id)
+              updateTransformer()
+            }
+          }),
+        )
       }
     }
   },
@@ -2051,6 +2090,29 @@ function syncTextRenderedDims(elId) {
     height: node.height(),
     underlineLines: el ? getTextUnderlineLines(el) : null,
   }
+}
+
+// Compute actual rendered dimensions for styled text (hasRuns) from segment layout.
+// Updates liveDragPos so buildTextConfig (Fix C) applies the correct width/height to
+// the transparent main node, keeping the Transformer bounding box in sync.
+function syncRunsDims(el) {
+  const lineH = (el.fontSize || 16) * (el.lineHeight || 1.25)
+  const segConfigs = buildTextSegmentConfigs(el)
+  if (!segConfigs.length) return
+
+  const lineWidthMap = new Map()
+  for (const s of segConfigs) {
+    const ly = s.__lineY ?? 0
+    lineWidthMap.set(ly, (lineWidthMap.get(ly) ?? 0) + (s.__segWidth ?? 0))
+  }
+  const maxLineW = Math.max(...lineWidthMap.values())
+  const maxLineY = Math.max(...lineWidthMap.keys())
+
+  const newW = el.width == null ? maxLineW : el.width
+  const totalH = el.height != null ? el.height : maxLineY + lineH
+
+  liveDragPos[el.id] = { ...liveDragPos[el.id], width: newW, height: totalH }
+  nextTick(() => updateTransformer())
 }
 
 // Compute handle position accounting for element rotation.

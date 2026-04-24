@@ -182,8 +182,12 @@
     </button>
   </div>
 
-  <!-- Letter spacing -->
-  <div class="flex items-center gap-1.5">
+  <!-- Letter spacing (disabled for styled text with mixed runs) -->
+  <div
+    class="flex items-center gap-1.5"
+    :class="isStyledText ? 'opacity-40 cursor-not-allowed' : ''"
+    :title="isStyledText ? 'Espacement indisponible pour le texte avec styles mixtes' : ''"
+  >
     <MoveHorizontal
       class="w-3.5 h-3.5"
       :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
@@ -191,12 +195,13 @@
     <input
       type="range"
       :value="sel.letterSpacing ?? 0"
-      @input="update('letterSpacing', +$event.target.value)"
-      @change="commit('letterSpacing', +$event.target.value)"
+      @input="!isStyledText && update('letterSpacing', +$event.target.value)"
+      @change="!isStyledText && commit('letterSpacing', +$event.target.value)"
       min="-5"
       max="20"
       step="0.5"
       class="w-20 accent-violet-500"
+      :disabled="isStyledText"
     />
     <span
       class="text-xs w-5 shrink-0"
@@ -252,6 +257,7 @@ const editorStore = useEditorStore()
 const themeStore = useThemeStore()
 
 const sel = computed(() => editorStore.singleSelected)
+const isStyledText = computed(() => Array.isArray(sel.value?.runs) && sel.value.runs.length > 0)
 const localFillBtnRef = ref(null)
 
 const inputCls = computed(() =>
@@ -368,7 +374,9 @@ function toggleBold() {
       'bold',
       (sel.value.text || '').length,
     )
-    editorStore.updateElementCommit(sel.value.id, { runs })
+    const patch = { runs }
+    if (!sel.value.runs?.length && sel.value.letterSpacing) patch.letterSpacing = 0
+    editorStore.updateElementCommit(sel.value.id, patch)
     return
   }
   const cur = sel.value.fontStyle || 'normal'
@@ -389,7 +397,9 @@ function toggleItalic() {
       'italic',
       (sel.value.text || '').length,
     )
-    editorStore.updateElementCommit(sel.value.id, { runs })
+    const patch = { runs }
+    if (!sel.value.runs?.length && sel.value.letterSpacing) patch.letterSpacing = 0
+    editorStore.updateElementCommit(sel.value.id, patch)
     return
   }
   const cur = sel.value.fontStyle || 'normal'
@@ -410,7 +420,9 @@ function toggleUnderline() {
       'underline',
       (sel.value.text || '').length,
     )
-    editorStore.updateElementCommit(sel.value.id, { runs })
+    const patch = { runs }
+    if (!sel.value.runs?.length && sel.value.letterSpacing) patch.letterSpacing = 0
+    editorStore.updateElementCommit(sel.value.id, patch)
     return
   }
   const cur = sel.value.textDecoration || ''
@@ -434,8 +446,10 @@ function applyRunColor(color, commit) {
     { color },
     (sel.value.text || '').length,
   )
-  if (commit) editorStore.updateElementCommit(sel.value.id, { runs })
-  else editorStore.updateElement(sel.value.id, { runs })
+  const patch = { runs }
+  if (!sel.value.runs?.length && sel.value.letterSpacing) patch.letterSpacing = 0
+  if (commit) editorStore.updateElementCommit(sel.value.id, patch)
+  else editorStore.updateElement(sel.value.id, patch)
   return true
 }
 

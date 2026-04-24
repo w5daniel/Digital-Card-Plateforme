@@ -156,7 +156,8 @@ const fillPopoverOpen = ref(false)
 const fillTriggerRef = ref(null)
 const fillPopoverStyle = ref({})
 
-watch(sel, (el) => {
+watch(sel, (el, prevEl) => {
+  if (el?.id !== prevEl?.id) fillPopoverOpen.value = false
   if (!el) return
   if (el.fillGradient?.from) {
     shapeFillMode.value = 'gradient'

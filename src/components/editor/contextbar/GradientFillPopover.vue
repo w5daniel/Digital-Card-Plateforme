@@ -3,6 +3,7 @@
     <div
       v-if="open"
       ref="popoverDivRef"
+      @mousedown.stop
       :style="popoverStyle"
       class="w-52 rounded-xl border shadow-2xl p-3"
       :class="themeStore.darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'"
