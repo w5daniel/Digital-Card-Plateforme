@@ -1,7 +1,7 @@
 <template>
   <div
     class="editor-shell flex flex-col h-full overflow-hidden select-none"
-    :class="themeStore.darkMode ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'"
+    :class="themeStore.darkMode ? 'bg-onyx-950 text-powder-100' : 'bg-powder-100 text-onyx-900'"
     tabindex="0"
     ref="shellRef"
   >

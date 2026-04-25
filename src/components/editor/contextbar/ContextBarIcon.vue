@@ -1,12 +1,12 @@
-<template>
+﻿<template>
   <template v-if="sel">
     <!-- Fill color (non-colorful icons only) -->
     <template v-if="!sel.colorful">
       <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de l'icône">
-        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+        <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
         <div
           class="relative w-6 h-6 rounded border overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+          :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
         >
           <div class="absolute inset-0" :style="{ background: sel.fill || '#1a1a1a' }" />
           <input
@@ -17,7 +17,7 @@
             class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
           />
         </div>
-        <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Couleur</span>
+        <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Couleur</span>
       </label>
 
       <div class="w-px h-5 shrink-0" :class="divCls" />
@@ -27,7 +27,7 @@
     <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur de bordure">
       <div
         class="relative w-6 h-6 rounded border overflow-hidden"
-        :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+        :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
         :style="{ background: sel.stroke || '#000000' }"
       >
         <input
@@ -38,7 +38,7 @@
           class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
       </div>
-      <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Bordure</span>
+      <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Bordure</span>
     </label>
     <input
       type="number"
@@ -88,14 +88,14 @@ const sel = computed(() => editorStore.singleSelected)
 
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 const inputCls = computed(() =>
   themeStore.darkMode
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
-    : 'bg-white border-gray-200 text-gray-800',
+    ? 'bg-onyx-800 border-onyx-700 text-powder-200'
+    : 'bg-white border-powder-200 text-onyx-800',
 )
 
 function update(key, value) {

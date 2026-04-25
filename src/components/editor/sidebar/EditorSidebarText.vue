@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pb-4">
     <!-- Main presets -->
     <div class="px-3 pt-3 flex flex-col gap-1.5 mb-3">
@@ -9,14 +9,14 @@
         draggable="true"
         @dragstart="onTextDragStart($event, preset)"
         class="w-full text-left px-3 py-2.5 rounded-lg border-2 transition-all hover:scale-[1.01]"
-        :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 hover:bg-gray-800' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50/50'"
+        :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 hover:bg-onyx-800' : 'border-powder-200 hover:border-flame-400 hover:bg-flame-50/50'"
         :style="{ fontFamily: preset.fontFamily, fontSize: preset.previewSize + 'px', fontWeight: preset.weight }"
       >
-        <span :class="themeStore.darkMode ? 'text-gray-100' : 'text-gray-800'">{{ preset.label }}</span>
+        <span :class="themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800'">{{ preset.label }}</span>
       </button>
     </div>
 
-    <div class="mx-3 h-px mb-3" :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'" />
+    <div class="mx-3 h-px mb-3" :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'" />
 
     <!-- Font search -->
     <div class="px-3 mb-3">
@@ -24,19 +24,19 @@
       <div
         v-if="selectedTextEl || selectedTextEls.length > 1"
         class="mb-2 px-2 py-1.5 rounded-lg text-xs flex items-center gap-1.5"
-        :class="themeStore.darkMode ? 'bg-violet-900/30 text-violet-300 border border-violet-700/50' : 'bg-violet-50 text-violet-700 border border-violet-200'"
+        :class="themeStore.darkMode ? 'bg-violet-900/30 text-violet-300 border border-violet-700/50' : 'bg-flame-50 text-violet-700 border border-violet-200'"
       >
         <Type class="w-3 h-3 shrink-0" />
         <span>Cliquez sur une police pour modifier {{ selectedTextEls.length > 1 ? 'les éléments sélectionnés' : "l'élément sélectionné" }}</span>
       </div>
       <div class="flex items-center justify-between mb-2">
-        <p class="text-xs font-medium" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Polices</p>
+        <p class="text-xs font-medium" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Polices</p>
         <!-- Upload custom font button -->
         <button
           v-if="authStore.isPremium || authStore.isAdmin"
           @click="triggerFontUpload"
           class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border transition-colors"
-          :class="themeStore.darkMode ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400' : 'border-gray-300 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+          :class="themeStore.darkMode ? 'border-onyx-700 text-onyx-400 hover:border-flame-500 hover:text-flame-400' : 'border-powder-300 text-onyx-500 hover:border-flame-400 hover:text-flame-600'"
           title="Importer une police personnalisée (.ttf, .otf, .woff, .woff2)"
         >
           <Upload class="w-2.5 h-2.5" />
@@ -45,7 +45,7 @@
         <span
           v-else
           class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border opacity-50 cursor-default"
-          :class="themeStore.darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'"
+          :class="themeStore.darkMode ? 'border-onyx-700 text-onyx-500' : 'border-powder-300 text-onyx-400'"
           title="Réservé au plan Premium"
         >
           <Upload class="w-2.5 h-2.5" />
@@ -57,7 +57,7 @@
 
       <!-- Custom fonts section -->
       <div v-if="fontStore.customFonts.length" class="mb-2">
-        <p class="text-[9px] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1" :class="themeStore.darkMode ? 'text-violet-400' : 'text-violet-500'">
+        <p class="text-[9px] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1" :class="themeStore.darkMode ? 'text-flame-400' : 'text-flame-500'">
           <span>Mes polices</span>
           <span class="opacity-60">({{ fontStore.customFonts.length }})</span>
         </p>
@@ -66,7 +66,7 @@
             <button
               @click="handleFontClick(cf.name)"
               class="flex-1 text-left px-2 py-1.5 rounded text-sm transition-colors"
-              :class="themeStore.darkMode ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-violet-50 text-gray-700'"
+              :class="themeStore.darkMode ? 'hover:bg-onyx-800 text-powder-300' : 'hover:bg-flame-50 text-onyx-700'"
               :style="{ fontFamily: cf.name }"
             >{{ cf.name }}</button>
             <button @click="fontStore.removeCustomFont(cf.name)" class="opacity-0 group-hover:opacity-100 p-1 rounded text-red-400 hover:text-red-500 transition-opacity shrink-0" title="Supprimer cette police">
@@ -75,14 +75,14 @@
             <button
               @click.stop="fontStore.toggleFavorite(cf.name)"
               class="p-1 rounded shrink-0 transition-opacity"
-              :class="fontStore.isFavorite(cf.name) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
+              :class="fontStore.isFavorite(cf.name) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-onyx-500 hover:text-yellow-400' : 'text-onyx-400 hover:text-yellow-400')"
               :title="fontStore.isFavorite(cf.name) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
             >
               <Star class="w-3 h-3" :fill="fontStore.isFavorite(cf.name) ? 'currentColor' : 'none'" />
             </button>
           </div>
         </div>
-        <div class="h-px my-2" :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'" />
+        <div class="h-px my-2" :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'" />
       </div>
 
       <!-- Upload error/warning message -->
@@ -93,13 +93,13 @@
       >{{ fontUploadMsg.text }}</p>
 
       <div class="relative mb-2">
-        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'" />
+        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'" />
         <input
           v-model="fontQuery"
           type="text"
           placeholder="Rechercher une police..."
           class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border outline-none"
-          :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'"
+          :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500' : 'bg-powder-50 border-powder-200 text-onyx-800 placeholder-onyx-400'"
         />
       </div>
       <div class="flex flex-col gap-1 max-h-64 overflow-y-auto">
@@ -108,13 +108,13 @@
             @mouseenter="fontStore.loadFont(font)"
             @click="handleFontClick(font)"
             class="flex-1 text-left px-2 py-1.5 rounded text-sm transition-colors"
-            :class="themeStore.darkMode ? 'border-transparent hover:bg-gray-800 text-gray-300' : 'border-transparent hover:bg-gray-50 text-gray-700'"
+            :class="themeStore.darkMode ? 'border-transparent hover:bg-onyx-800 text-powder-300' : 'border-transparent hover:bg-powder-50 text-onyx-700'"
             :style="{ fontFamily: fontStore.loadedFonts.has(font) ? font : 'inherit' }"
           >{{ font }}</button>
           <button
             @click.stop="fontStore.toggleFavorite(font)"
             class="p-1 rounded shrink-0 transition-opacity"
-            :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
+            :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-onyx-500 hover:text-yellow-400' : 'text-onyx-400 hover:text-yellow-400')"
             :title="fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
           >
             <Star class="w-3 h-3" :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'" />
@@ -126,11 +126,11 @@
       </p>
     </div>
 
-    <div class="mx-3 h-px mb-3" :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'" />
+    <div class="mx-3 h-px mb-3" :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'" />
 
     <!-- Font combinations -->
     <div class="px-3 mb-3">
-      <p class="text-xs font-medium mb-2 flex items-center gap-1" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+      <p class="text-xs font-medium mb-2 flex items-center gap-1" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
         Combinaisons de polices
         <span class="font-normal opacity-60 ml-1">(appliqué à tout le texte)</span>
         <span v-if="!authStore.isPremium && !authStore.isAdmin" class="text-[8px] font-bold text-amber-500 ml-auto">PRO</span>
@@ -142,33 +142,33 @@
           @mouseenter="preloadCombo(combo)"
           @click="applyFontCombo(combo)"
           class="w-full text-left px-3 py-2 rounded-lg border transition-all hover:scale-[1.01]"
-          :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 hover:bg-gray-800' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50/50'"
+          :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 hover:bg-onyx-800' : 'border-powder-200 hover:border-flame-400 hover:bg-flame-50/50'"
         >
           <div class="flex items-baseline gap-2 mb-0.5">
-            <span :style="{ fontFamily: fontStore.loadedFonts.has(combo.heading) ? combo.heading : 'inherit', fontWeight: combo.hw, fontSize: '15px' }" :class="themeStore.darkMode ? 'text-gray-100' : 'text-gray-800'">Aa</span>
-            <span :style="{ fontFamily: fontStore.loadedFonts.has(combo.body) ? combo.body : 'inherit', fontWeight: combo.bw, fontSize: '12px' }" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Aa</span>
-            <span class="ml-auto text-xs font-medium" :class="themeStore.darkMode ? 'text-gray-200' : 'text-gray-700'">{{ combo.name }}</span>
+            <span :style="{ fontFamily: fontStore.loadedFonts.has(combo.heading) ? combo.heading : 'inherit', fontWeight: combo.hw, fontSize: '15px' }" :class="themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800'">Aa</span>
+            <span :style="{ fontFamily: fontStore.loadedFonts.has(combo.body) ? combo.body : 'inherit', fontWeight: combo.bw, fontSize: '12px' }" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Aa</span>
+            <span class="ml-auto text-xs font-medium" :class="themeStore.darkMode ? 'text-powder-200' : 'text-onyx-700'">{{ combo.name }}</span>
           </div>
-          <div class="text-[9px] tracking-wide" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">{{ combo.heading }} &amp; {{ combo.body }}</div>
+          <div class="text-[9px] tracking-wide" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">{{ combo.heading }} &amp; {{ combo.body }}</div>
         </button>
       </div>
     </div>
 
     <!-- Recently used -->
     <div v-if="recentFonts.length" class="px-3">
-      <p class="text-xs font-medium mb-2" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Récemment utilisées</p>
+      <p class="text-xs font-medium mb-2" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Récemment utilisées</p>
       <div class="flex flex-col gap-1">
         <div v-for="font in recentFonts" :key="'recent-' + font" class="flex items-center group">
           <button
             @click="handleFontClick(font)"
             class="flex-1 text-left px-2 py-1.5 rounded text-sm transition-colors"
-            :class="themeStore.darkMode ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-gray-50 text-gray-700'"
+            :class="themeStore.darkMode ? 'hover:bg-onyx-800 text-powder-300' : 'hover:bg-powder-50 text-onyx-700'"
             :style="{ fontFamily: font }"
           >{{ font }}</button>
           <button
             @click.stop="fontStore.toggleFavorite(font)"
             class="p-1 rounded shrink-0 transition-opacity"
-            :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-400')"
+            :class="fontStore.isFavorite(font) ? 'text-yellow-400 opacity-100' : 'opacity-0 group-hover:opacity-60 ' + (themeStore.darkMode ? 'text-onyx-500 hover:text-yellow-400' : 'text-onyx-400 hover:text-yellow-400')"
             :title="fontStore.isFavorite(font) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
           >
             <Star class="w-3 h-3" :fill="fontStore.isFavorite(font) ? 'currentColor' : 'none'" />

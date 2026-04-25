@@ -1,23 +1,23 @@
-<template>
+﻿<template>
   <div class="pb-4">
     <!-- Search (masquée dans la vue illustrations qui a sa propre barre) -->
     <div v-if="!activeCategory?.isIllustration" class="px-3 pt-3 pb-2">
       <div class="relative">
-        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'" />
+        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'" />
         <input
           :value="elementsQuery"
           @input="$emit('update:elementsQuery', $event.target.value)"
           type="text"
           :placeholder="activeCategory ? `Rechercher dans ${activeCategory.name}…` : 'Rechercher des éléments...'"
           class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border outline-none"
-          :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'"
+          :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500' : 'bg-powder-50 border-powder-200 text-onyx-800 placeholder-onyx-400'"
         />
       </div>
     </div>
 
     <!-- Search results -->
     <template v-if="filteredElements">
-      <p class="text-xs font-medium px-3 py-1.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+      <p class="text-xs font-medium px-3 py-1.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
         {{ filteredElements.length }} résultat{{ filteredElements.length !== 1 ? 's' : '' }}
       </p>
       <div class="grid grid-cols-4 gap-1.5 px-3">
@@ -29,7 +29,7 @@
           @dragstart="onLibraryDragStart($event, el)"
           :title="el.label"
           class="aspect-square flex items-center justify-center rounded-lg border transition-all hover:scale-105"
-          :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 hover:bg-gray-800 bg-gray-850' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50 bg-white'"
+          :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 hover:bg-onyx-800 bg-onyx-900' : 'border-powder-200 hover:border-flame-400 hover:bg-flame-50 bg-white'"
         >
           <template v-if="el.type === 'icon'">
             <IconifyIcon :icon="el.iconId" class="w-7 h-7" />
@@ -47,21 +47,21 @@
 
     <!-- Browse view (categories grid) -->
     <template v-else-if="elementsView === 'browse'">
-      <p class="text-xs font-medium px-3 py-1" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Parcourir les catégories</p>
+      <p class="text-xs font-medium px-3 py-1" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Parcourir les catégories</p>
       <div class="grid grid-cols-3 gap-2 px-3 pt-1">
         <button
           v-for="cat in ELEMENT_CATEGORIES"
           :key="cat.id"
           @click="$emit('update:elementsView', 'category:' + cat.id); $emit('update:elementsQuery', '')"
           class="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all hover:scale-[1.03]"
-          :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 bg-gray-800/50' : 'border-gray-100 hover:border-violet-300 bg-white'"
+          :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 bg-onyx-800/50' : 'border-powder-100 hover:border-violet-300 bg-white'"
         >
           <div class="w-12 h-12 rounded-lg flex items-center justify-center" :class="cat.colorClass">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path v-for="(p, pi) in cat.thumbPaths" :key="pi" :d="p" />
             </svg>
           </div>
-          <span class="text-[10px] font-medium leading-tight text-center" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'">{{ cat.name }}</span>
+          <span class="text-[10px] font-medium leading-tight text-center" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-600'">{{ cat.name }}</span>
         </button>
       </div>
     </template>
@@ -69,37 +69,37 @@
     <!-- Category detail: Illustrations -->
     <template v-else-if="activeCategory && activeCategory.isIllustration">
       <div class="px-3 pt-2 pb-2 shrink-0">
-        <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border" :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'">
-          <Search class="w-3.5 h-3.5 shrink-0 text-gray-400" />
-          <input v-model="illustrationQuery" type="text" placeholder="Rechercher une illustration…" class="flex-1 bg-transparent text-xs outline-none" :class="themeStore.darkMode ? 'text-gray-200 placeholder-gray-500' : 'text-gray-700 placeholder-gray-400'" />
-          <button v-if="illustrationQuery" @click="illustrationQuery = ''" class="text-gray-400 hover:text-gray-600"><X class="w-3 h-3" /></button>
+        <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'">
+          <Search class="w-3.5 h-3.5 shrink-0 text-onyx-400" />
+          <input v-model="illustrationQuery" type="text" placeholder="Rechercher une illustration…" class="flex-1 bg-transparent text-xs outline-none" :class="themeStore.darkMode ? 'text-powder-200 placeholder-onyx-400' : 'text-onyx-700 placeholder-onyx-400'" />
+          <button v-if="illustrationQuery" @click="illustrationQuery = ''" class="text-onyx-400 hover:text-onyx-600"><X class="w-3 h-3" /></button>
         </div>
       </div>
       <div v-if="!illustrationQuery" class="px-3 pb-2 shrink-0">
         <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <button v-for="cat in ILLUSTRATION_CATEGORIES" :key="cat.id" @click="activeIllustrationCategoryId = cat.id" class="shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors whitespace-nowrap" :class="activeIllustrationCategoryId === cat.id ? 'bg-rose-500 text-white' : themeStore.darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">{{ cat.name }}</button>
+          <button v-for="cat in ILLUSTRATION_CATEGORIES" :key="cat.id" @click="activeIllustrationCategoryId = cat.id" class="shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors whitespace-nowrap" :class="activeIllustrationCategoryId === cat.id ? 'bg-rose-500 text-white' : themeStore.darkMode ? 'bg-onyx-800 text-onyx-400 hover:bg-onyx-700' : 'bg-powder-100 text-onyx-500 hover:bg-powder-200'">{{ cat.name }}</button>
         </div>
       </div>
       <div class="flex-1 overflow-y-auto px-3">
         <div class="grid grid-cols-5 gap-1.5">
-          <button v-for="item in filteredIllustrations" :key="item.id" draggable="true" @dragstart="onIllustrationDragStart($event, item)" @click="addIllustration(item)" class="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border transition-all cursor-pointer group overflow-hidden" :class="themeStore.darkMode ? 'border-gray-700 hover:border-rose-500 hover:bg-gray-800' : 'border-gray-200 hover:border-rose-400 hover:bg-rose-50'" :title="item.label">
+          <button v-for="item in filteredIllustrations" :key="item.id" draggable="true" @dragstart="onIllustrationDragStart($event, item)" @click="addIllustration(item)" class="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border transition-all cursor-pointer group overflow-hidden" :class="themeStore.darkMode ? 'border-onyx-700 hover:border-rose-500 hover:bg-onyx-800' : 'border-powder-200 hover:border-rose-400 hover:bg-rose-50'" :title="item.label">
             <template v-if="item.src">
               <img :src="item.src" :alt="item.label" class="w-9 h-9 object-contain shrink-0" loading="lazy" />
             </template>
             <template v-else>
               <IconifyIcon :icon="item.id" width="22" height="22" class="shrink-0" :style="item.color ? { color: item.color } : undefined" />
             </template>
-            <span class="text-[7px] leading-none truncate w-full text-center px-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">{{ item.label }}</span>
+            <span class="text-[7px] leading-none truncate w-full text-center px-0.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">{{ item.label }}</span>
           </button>
         </div>
-        <p v-if="filteredIllustrations.length === 0" class="text-xs text-center py-8" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Aucune illustration trouvée</p>
+        <p v-if="filteredIllustrations.length === 0" class="text-xs text-center py-8" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Aucune illustration trouvée</p>
       </div>
     </template>
 
     <!-- Category detail: Standard -->
     <template v-else-if="activeCategory">
       <div v-for="sub in activeCategoryFiltered" :key="sub.name" class="mb-1">
-        <p class="text-xs font-medium px-3 py-1.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">{{ sub.name }}</p>
+        <p class="text-xs font-medium px-3 py-1.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">{{ sub.name }}</p>
         <div class="grid grid-cols-4 gap-1.5 px-3">
           <button
             v-for="element in sub.elements"
@@ -109,7 +109,7 @@
             @dragstart="onLibraryDragStart($event, element)"
             :title="element.label"
             class="aspect-square flex items-center justify-center rounded-lg border transition-all hover:scale-105"
-            :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 hover:bg-gray-800 bg-gray-850' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50 bg-white'"
+            :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 hover:bg-onyx-800 bg-onyx-900' : 'border-powder-200 hover:border-flame-400 hover:bg-flame-50 bg-white'"
           >
             <template v-if="element.type === 'icon'">
               <IconifyIcon :icon="element.iconId" class="w-7 h-7" />

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="relative shrink-0" ref="fontDropdownRef">
     <button
       @click="toggleFontDropdown"
@@ -17,14 +17,14 @@
         data-font-dropdown
         class="fixed w-64 rounded-lg border shadow-2xl z-[9999] flex flex-col"
         :class="
-          themeStore.darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+          themeStore.darkMode ? 'bg-onyx-900 border-onyx-700' : 'bg-white border-powder-200'
         "
         :style="dropdownStyle"
       >
         <!-- Search input -->
         <div
           class="p-2 border-b shrink-0"
-          :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
         >
           <input
             ref="fontSearchRef"
@@ -40,7 +40,7 @@
         <!-- Import button (premium only) + upgrade banner (free) -->
         <div
           class="px-3 py-1.5 flex items-center justify-between border-b shrink-0"
-          :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
         >
           <span
             v-if="!authStore.isPremium && !authStore.isAdmin"
@@ -49,14 +49,14 @@
           >
             Limité à 50 polices — passez au Premium pour 300+
           </span>
-          <span v-else class="text-[10px] opacity-40" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+          <span v-else class="text-[10px] opacity-40" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
             300+ polices disponibles
           </span>
           <button
             v-if="authStore.isPremium || authStore.isAdmin"
             @click.stop="triggerFontUploadCtx"
             class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border transition-colors"
-            :class="themeStore.darkMode ? 'border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400' : 'border-gray-300 text-gray-500 hover:border-violet-400 hover:text-violet-600'"
+            :class="themeStore.darkMode ? 'border-onyx-700 text-onyx-400 hover:border-flame-500 hover:text-flame-400' : 'border-powder-300 text-onyx-500 hover:border-flame-400 hover:text-flame-600'"
             title="Importer une police personnalisée (.ttf, .otf, .woff, .woff2)"
           >
             <Upload class="w-2.5 h-2.5" />
@@ -79,7 +79,7 @@
             <template v-if="(authStore.isPremium || authStore.isAdmin) && importedFonts.length">
               <div
                 class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider opacity-40"
-                :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+                :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
               >
                 Polices importées
               </div>
@@ -92,8 +92,8 @@
                     sel.fontFamily === f
                       ? activeBtnCls
                       : themeStore.darkMode
-                        ? 'hover:bg-gray-800'
-                        : 'hover:bg-gray-100'
+                        ? 'hover:bg-onyx-800'
+                        : 'hover:bg-powder-100'
                   "
                   :style="{ fontFamily: fontStore.loadedFonts.has(f) ? f : 'inherit' }"
                 >
@@ -107,8 +107,8 @@
                       ? 'text-yellow-400 opacity-100'
                       : 'opacity-0 group-hover:opacity-60 ' +
                         (themeStore.darkMode
-                          ? 'text-gray-500 hover:text-yellow-400'
-                          : 'text-gray-400 hover:text-yellow-400')
+                          ? 'text-onyx-500 hover:text-yellow-400'
+                          : 'text-onyx-400 hover:text-yellow-400')
                   "
                   :title="
                     fontStore.isFavorite(f) ? 'Retirer des favoris' : 'Ajouter aux favoris'
@@ -127,10 +127,10 @@
               <div
                 class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider opacity-40"
                 :class="[
-                  themeStore.darkMode ? 'text-gray-400' : 'text-gray-500',
+                  themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
                   importedFonts.length
                     ? 'border-t ' +
-                      (themeStore.darkMode ? 'border-gray-700' : 'border-gray-100')
+                      (themeStore.darkMode ? 'border-onyx-700' : 'border-powder-100')
                     : '',
                 ]"
               >
@@ -145,8 +145,8 @@
                     sel.fontFamily === f
                       ? activeBtnCls
                       : themeStore.darkMode
-                        ? 'hover:bg-gray-800'
-                        : 'hover:bg-gray-100'
+                        ? 'hover:bg-onyx-800'
+                        : 'hover:bg-powder-100'
                   "
                   :style="{ fontFamily: fontStore.loadedFonts.has(f) ? f : 'inherit' }"
                 >
@@ -166,9 +166,9 @@
             <div
               class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider opacity-40"
               :class="[
-                themeStore.darkMode ? 'text-gray-400' : 'text-gray-500',
+                themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500',
                 importedFonts.length || favFonts.length
-                  ? 'border-t ' + (themeStore.darkMode ? 'border-gray-700' : 'border-gray-100')
+                  ? 'border-t ' + (themeStore.darkMode ? 'border-onyx-700' : 'border-powder-100')
                   : '',
               ]"
             >
@@ -187,8 +187,8 @@
                   sel.fontFamily === f
                     ? activeBtnCls
                     : themeStore.darkMode
-                      ? 'hover:bg-gray-800'
-                      : 'hover:bg-gray-100'
+                      ? 'hover:bg-onyx-800'
+                      : 'hover:bg-powder-100'
                 "
                 :style="{ fontFamily: fontStore.loadedFonts.has(f) ? f : 'inherit' }"
               >
@@ -202,8 +202,8 @@
                     ? 'text-yellow-400 opacity-100'
                     : 'opacity-0 group-hover:opacity-60 ' +
                       (themeStore.darkMode
-                        ? 'text-gray-500 hover:text-yellow-400'
-                        : 'text-gray-400 hover:text-yellow-400')
+                        ? 'text-onyx-500 hover:text-yellow-400'
+                        : 'text-onyx-400 hover:text-yellow-400')
                 "
                 :title="fontStore.isFavorite(f) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
               >
@@ -219,8 +219,8 @@
               class="px-3 pt-3 pb-1 border-t text-xs font-semibold uppercase tracking-wider opacity-40"
               :class="
                 themeStore.darkMode
-                  ? 'border-gray-700 text-gray-400'
-                  : 'border-gray-100 text-gray-500'
+                  ? 'border-onyx-700 text-onyx-400'
+                  : 'border-powder-100 text-onyx-500'
               "
             >
               Toutes les polices
@@ -234,8 +234,8 @@
                   sel.fontFamily === f
                     ? activeBtnCls
                     : themeStore.darkMode
-                      ? 'hover:bg-gray-800'
-                      : 'hover:bg-gray-100'
+                      ? 'hover:bg-onyx-800'
+                      : 'hover:bg-powder-100'
                 "
                 :style="{ fontFamily: fontStore.loadedFonts.has(f) ? f : 'inherit' }"
               >
@@ -249,8 +249,8 @@
                     ? 'text-yellow-400 opacity-100'
                     : 'opacity-0 group-hover:opacity-60 ' +
                       (themeStore.darkMode
-                        ? 'text-gray-500 hover:text-yellow-400'
-                        : 'text-gray-400 hover:text-yellow-400')
+                        ? 'text-onyx-500 hover:text-yellow-400'
+                        : 'text-onyx-400 hover:text-yellow-400')
                 "
                 :title="fontStore.isFavorite(f) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
               >
@@ -273,8 +273,8 @@
                   sel.fontFamily === f
                     ? activeBtnCls
                     : themeStore.darkMode
-                      ? 'hover:bg-gray-800'
-                      : 'hover:bg-gray-100'
+                      ? 'hover:bg-onyx-800'
+                      : 'hover:bg-powder-100'
                 "
                 :style="{ fontFamily: fontStore.loadedFonts.has(f) ? f : 'inherit' }"
               >
@@ -288,8 +288,8 @@
                     ? 'text-yellow-400 opacity-100'
                     : 'opacity-0 group-hover:opacity-60 ' +
                       (themeStore.darkMode
-                        ? 'text-gray-500 hover:text-yellow-400'
-                        : 'text-gray-400 hover:text-yellow-400')
+                        ? 'text-onyx-500 hover:text-yellow-400'
+                        : 'text-onyx-400 hover:text-yellow-400')
                 "
                 :title="fontStore.isFavorite(f) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
               >
@@ -331,8 +331,8 @@ const sel = computed(() => editorStore.singleSelected)
 
 const inputCls = computed(() =>
   themeStore.darkMode
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
-    : 'bg-white border-gray-200 text-gray-800',
+    ? 'bg-onyx-800 border-onyx-700 text-powder-200'
+    : 'bg-white border-powder-200 text-onyx-800',
 )
 const activeBtnCls = computed(() =>
   themeStore.darkMode ? 'bg-violet-700 text-white' : 'bg-violet-100 text-violet-700',

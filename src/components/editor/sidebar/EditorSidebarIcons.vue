@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="pb-4 flex flex-col h-full">
     <!-- Search -->
     <div class="px-3 pt-3 pb-2 shrink-0">
-      <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border" :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'">
-        <Search class="w-3.5 h-3.5 shrink-0 text-gray-400" />
-        <input v-model="iconQuery" type="text" placeholder="Rechercher une icône…" class="flex-1 bg-transparent text-xs outline-none" :class="themeStore.darkMode ? 'text-gray-200 placeholder-gray-500' : 'text-gray-700 placeholder-gray-400'" />
-        <button v-if="iconQuery" @click="iconQuery = ''" class="text-gray-400 hover:text-gray-600">
+      <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'">
+        <Search class="w-3.5 h-3.5 shrink-0 text-onyx-400" />
+        <input v-model="iconQuery" type="text" placeholder="Rechercher une icône…" class="flex-1 bg-transparent text-xs outline-none" :class="themeStore.darkMode ? 'text-powder-200 placeholder-onyx-400' : 'text-onyx-700 placeholder-onyx-400'" />
+        <button v-if="iconQuery" @click="iconQuery = ''" class="text-onyx-400 hover:text-onyx-600">
           <X class="w-3 h-3" />
         </button>
       </div>
@@ -19,7 +19,7 @@
           :key="cat.id"
           @click="activeIconCategoryId = cat.id"
           class="shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors whitespace-nowrap"
-          :class="activeIconCategoryId === cat.id ? 'bg-violet-600 text-white' : themeStore.darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+          :class="activeIconCategoryId === cat.id ? 'bg-flame-600 text-white' : themeStore.darkMode ? 'bg-onyx-800 text-onyx-400 hover:bg-onyx-700' : 'bg-powder-100 text-onyx-500 hover:bg-powder-200'"
         >
           {{ cat.name }}
         </button>
@@ -36,7 +36,7 @@
           @dragstart="onIconDragStart($event, icon, icon.id.startsWith('mdi:') ? {} : { colorful: true })"
           @click="editorStore.addIconElement(icon, icon.id.startsWith('mdi:') ? {} : { colorful: true })"
           class="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border transition-all cursor-pointer group overflow-hidden"
-          :class="themeStore.darkMode ? 'border-gray-700 hover:border-violet-500 hover:bg-gray-800' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50'"
+          :class="themeStore.darkMode ? 'border-onyx-700 hover:border-flame-500 hover:bg-onyx-800' : 'border-powder-200 hover:border-flame-400 hover:bg-flame-50'"
           :title="icon.label"
         >
           <IconifyIcon
@@ -44,12 +44,12 @@
             width="20"
             height="20"
             class="shrink-0 transition-colors"
-            :class="icon.id.startsWith('mdi:') ? themeStore.darkMode ? 'text-gray-400 group-hover:text-violet-400' : 'text-gray-600 group-hover:text-violet-600' : ''"
+            :class="icon.id.startsWith('mdi:') ? themeStore.darkMode ? 'text-onyx-400 group-hover:text-flame-400' : 'text-onyx-600 group-hover:text-flame-600' : ''"
           />
-          <span class="text-[8px] leading-none truncate w-full text-center px-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">{{ icon.label }}</span>
+          <span class="text-[8px] leading-none truncate w-full text-center px-0.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">{{ icon.label }}</span>
         </button>
       </div>
-      <p v-if="filteredIcons.length === 0" class="text-xs text-center py-8" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Aucune icône trouvée</p>
+      <p v-if="filteredIcons.length === 0" class="text-xs text-center py-8" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Aucune icône trouvée</p>
     </div>
   </div>
 </template>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <Transition name="modal-fade">
       <div v-if="visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -8,7 +8,7 @@
         <!-- Modal -->
         <div
           class="relative w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all"
-          :class="dark ? 'bg-gray-900 border border-gray-700' : 'bg-white'"
+          :class="dark ? 'bg-onyx-900 border border-onyx-700' : 'bg-white'"
         >
           <!-- Close -->
           <button
@@ -16,18 +16,18 @@
             class="absolute top-4 right-4 p-1.5 rounded-lg transition-colors"
             :class="
               dark
-                ? 'text-gray-500 hover:bg-gray-800 hover:text-gray-300'
-                : 'text-gray-400 hover:bg-gray-100'
+                ? 'text-onyx-500 hover:bg-onyx-800 hover:text-powder-300'
+                : 'text-onyx-400 hover:bg-powder-100'
             "
           >
             <X class="w-4 h-4" />
           </button>
 
           <!-- Title -->
-          <h2 class="text-lg font-bold mb-1" :class="dark ? 'text-white' : 'text-gray-900'">
+          <h2 class="text-lg font-bold mb-1" :class="dark ? 'text-white' : 'text-onyx-900'">
             Enregistrer comme…
           </h2>
-          <p class="text-xs mb-6" :class="dark ? 'text-gray-500' : 'text-gray-400'">
+          <p class="text-xs mb-6" :class="dark ? 'text-onyx-500' : 'text-onyx-400'">
             Choisissez le type d'enregistrement
           </p>
 
@@ -41,8 +41,8 @@
                 saveType === 'template'
                   ? 'border-violet-500 bg-violet-500/10 shadow-md shadow-violet-500/10'
                   : dark
-                    ? 'border-gray-700 hover:border-violet-500/50 hover:bg-gray-800/50'
-                    : 'border-gray-200 hover:border-violet-300 hover:bg-violet-50/50',
+                    ? 'border-onyx-700 hover:border-violet-500/50 hover:bg-onyx-800/50'
+                    : 'border-powder-200 hover:border-violet-300 hover:bg-violet-50/50',
               ]"
             >
               <!-- Check indicator -->
@@ -58,8 +58,8 @@
                   saveType === 'template'
                     ? 'bg-violet-500/20 text-violet-500'
                     : dark
-                      ? 'bg-gray-800 text-gray-400 group-hover:text-violet-400'
-                      : 'bg-gray-100 text-gray-400 group-hover:text-violet-500'
+                      ? 'bg-onyx-800 text-onyx-400 group-hover:text-violet-400'
+                      : 'bg-powder-100 text-onyx-400 group-hover:text-violet-500'
                 "
               >
                 <LayoutTemplate class="w-6 h-6" />
@@ -71,15 +71,15 @@
                     saveType === 'template'
                       ? 'text-violet-500'
                       : dark
-                        ? 'text-gray-200'
-                        : 'text-gray-700'
+                        ? 'text-powder-200'
+                        : 'text-onyx-700'
                   "
                 >
                   Modèle
                 </p>
                 <p
                   class="text-[10px] leading-relaxed"
-                  :class="dark ? 'text-gray-500' : 'text-gray-400'"
+                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
                 >
                   Design réutilisable pour créer plusieurs cartes
                 </p>
@@ -94,8 +94,8 @@
                 saveType === 'card'
                   ? 'border-emerald-500 bg-emerald-500/10 shadow-md shadow-emerald-500/10'
                   : dark
-                    ? 'border-gray-700 hover:border-emerald-500/50 hover:bg-gray-800/50'
-                    : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50',
+                    ? 'border-onyx-700 hover:border-emerald-500/50 hover:bg-onyx-800/50'
+                    : 'border-powder-200 hover:border-emerald-300 hover:bg-emerald-50/50',
               ]"
             >
               <!-- Check indicator -->
@@ -111,8 +111,8 @@
                   saveType === 'card'
                     ? 'bg-emerald-500/20 text-emerald-500'
                     : dark
-                      ? 'bg-gray-800 text-gray-400 group-hover:text-emerald-400'
-                      : 'bg-gray-100 text-gray-400 group-hover:text-emerald-500'
+                      ? 'bg-onyx-800 text-onyx-400 group-hover:text-emerald-400'
+                      : 'bg-powder-100 text-onyx-400 group-hover:text-emerald-500'
                 "
               >
                 <CreditCard class="w-6 h-6" />
@@ -124,15 +124,15 @@
                     saveType === 'card'
                       ? 'text-emerald-500'
                       : dark
-                        ? 'text-gray-200'
-                        : 'text-gray-700'
+                        ? 'text-powder-200'
+                        : 'text-onyx-700'
                   "
                 >
                   Carte
                 </p>
                 <p
                   class="text-[10px] leading-relaxed"
-                  :class="dark ? 'text-gray-500' : 'text-gray-400'"
+                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
                 >
                   Carte personnelle prête à partager et télécharger
                 </p>
@@ -144,7 +144,7 @@
           <div class="mb-5">
             <label
               class="block text-xs font-medium mb-1.5"
-              :class="dark ? 'text-gray-400' : 'text-gray-500'"
+              :class="dark ? 'text-onyx-400' : 'text-onyx-500'"
             >
               {{ saveType === 'template' ? 'Nom du modèle' : 'Nom de la carte' }}
             </label>
@@ -156,8 +156,8 @@
               class="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-colors"
               :class="
                 dark
-                  ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600 focus:border-violet-500'
-                  : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
+                  ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500 focus:border-flame-500'
+                  : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'
               "
               @keydown.enter="onConfirm"
             />
@@ -172,15 +172,15 @@
                 isPublic
                   ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
                   : dark
-                    ? 'border-gray-700 hover:border-gray-500 text-gray-300'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                    ? 'border-onyx-700 hover:border-onyx-500 text-powder-300'
+                    : 'border-powder-200 hover:border-powder-300 text-onyx-700'
               "
             >
               <Globe v-if="isPublic" class="w-4 h-4 shrink-0 text-emerald-500" />
               <Lock
                 v-else
                 class="w-4 h-4 shrink-0"
-                :class="dark ? 'text-gray-500' : 'text-gray-400'"
+                :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
               />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold leading-tight">
@@ -188,7 +188,7 @@
                 </p>
                 <p
                   class="text-xs mt-0.5 leading-snug"
-                  :class="dark ? 'text-gray-500' : 'text-gray-400'"
+                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
                 >
                   <span v-if="isPublic"
                     >Visible dans la galerie Communauté — utilisez des informations fictives</span
@@ -248,8 +248,8 @@
               class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
               :class="
                 dark
-                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-onyx-800 text-powder-300 hover:bg-onyx-700'
+                  : 'bg-powder-100 text-onyx-600 hover:bg-powder-200'
               "
             >
               Annuler

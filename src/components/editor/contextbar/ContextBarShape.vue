@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <template v-if="sel">
     <!-- Size +/- for path shapes (motifs, decorations, graphiques) -->
     <template v-if="sel.shapeType === 'path'">
@@ -25,12 +25,12 @@
 
     <!-- Fill color (solid or gradient) -->
     <div class="flex items-center gap-1.5">
-      <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+      <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
       <button
         ref="triggerBtnRef"
         @click="onFillTriggerClick"
         class="relative w-6 h-6 rounded border overflow-hidden cursor-pointer hover:scale-110 transition-transform"
-        :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+        :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
         title="Couleur de remplissage"
       >
         <div
@@ -38,7 +38,7 @@
           :style="sel?.fillGradient?.from ? { background: `linear-gradient(${sel.fillGradient.angle}deg, ${sel.fillGradient.from} 0%, ${sel.fillGradient.to ?? sel.fillGradient.from} 100%)` } : { background: sel?.fill || 'transparent' }"
         />
       </button>
-      <span class="text-xs font-mono" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Fond</span>
+      <span class="text-xs font-mono" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Fond</span>
     </div>
 
     <!-- Border color -->
@@ -58,7 +58,7 @@
       </div>
       <span
         class="text-xs font-mono"
-        :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+        :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         >Bordure</span
       >
     </label>
@@ -67,7 +67,7 @@
 
     <!-- Stroke width -->
     <div class="flex items-center gap-1.5">
-      <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         >Ep.</span
       >
       <input
@@ -116,15 +116,15 @@ const triggerBtnRef = ref(null)
 
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
 const inputCls = computed(() =>
   themeStore.darkMode
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
-    : 'bg-white border-gray-200 text-gray-800',
+    ? 'bg-onyx-800 border-onyx-700 text-powder-200'
+    : 'bg-white border-powder-200 text-onyx-800',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 
 function update(key, value) {
   if (!sel.value) return

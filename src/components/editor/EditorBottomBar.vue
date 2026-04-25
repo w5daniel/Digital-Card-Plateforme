@@ -1,11 +1,11 @@
 <template>
   <footer
     class="flex items-center justify-between px-4 h-10 shrink-0 border-t z-10"
-    :class="themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'"
+    :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'"
   >
     <!-- Left: element count -->
     <div class="flex items-center gap-2 text-xs">
-      <span :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+      <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
         {{ editorStore.currentElements.length }} élément{{
           editorStore.currentElements.length !== 1 ? 's' : ''
         }}
@@ -17,7 +17,7 @@
       <!-- Dimensions display -->
       <span
         class="text-xs font-mono"
-        :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+        :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         :title="`${cardMm.w} × ${cardMm.h} mm`"
       >
         {{ editorStore.cardWidth }} × {{ editorStore.cardHeight }} px
@@ -29,8 +29,8 @@
         class="flex items-center gap-1.5 text-xs px-2 py-0.5 rounded border transition-colors"
         :class="
           themeStore.darkMode
-            ? 'border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-            : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+            ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-800 hover:text-powder-200'
+            : 'border-powder-200 text-onyx-500 hover:bg-powder-50 hover:text-onyx-700'
         "
         :title="editorStore.orientation === 'portrait' ? 'Passer en paysage' : 'Passer en portrait'"
       >
@@ -49,8 +49,8 @@
           class="flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors"
           :class="
             themeStore.darkMode
-              ? 'border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-              : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+              ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-800 hover:text-powder-200'
+              : 'border-powder-200 text-onyx-500 hover:bg-powder-50 hover:text-onyx-700'
           "
           title="Arrondi des coins"
         >
@@ -64,11 +64,11 @@
         <div
           v-if="radiusOpen"
           class="absolute bottom-full mb-1 right-0 w-48 rounded-xl border shadow-xl p-3 z-50"
-          :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
+          :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
         >
           <p
             class="text-[10px] font-semibold uppercase tracking-wider mb-2"
-            :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+            :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
           >
             Arrondi des coins
           </p>
@@ -79,11 +79,11 @@
               max="50"
               step="1"
               v-model.number="editorStore.cardBorderRadius"
-              class="flex-1 h-1 rounded-full accent-violet-500 cursor-pointer"
+              class="flex-1 h-1 rounded-full accent-flame-500 cursor-pointer"
             />
             <span
               class="text-xs font-mono w-10 text-right"
-              :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-600'"
+              :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-600'"
             >{{ editorStore.cardBorderRadius }}px</span>
           </div>
           <!-- Presets -->
@@ -96,11 +96,11 @@
               :class="[
                 editorStore.cardBorderRadius === preset
                   ? themeStore.darkMode
-                    ? 'bg-violet-900/50 border-violet-500 text-violet-300'
-                    : 'bg-violet-50 border-violet-400 text-violet-700'
+                    ? 'bg-flame-900/50 border-flame-500 text-flame-300'
+                    : 'bg-flame-50 border-flame-400 text-flame-700'
                   : themeStore.darkMode
-                    ? 'border-gray-700 text-gray-400 hover:bg-gray-700'
-                    : 'border-gray-200 text-gray-500 hover:bg-gray-50',
+                    ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-700'
+                    : 'border-powder-200 text-onyx-500 hover:bg-powder-50',
               ]"
             >{{ preset }}</button>
           </div>
@@ -114,8 +114,8 @@
           class="flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors"
           :class="
             themeStore.darkMode
-              ? 'border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-              : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+              ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-800 hover:text-powder-200'
+              : 'border-powder-200 text-onyx-500 hover:bg-powder-50 hover:text-onyx-700'
           "
           title="Choisir un format"
         >
@@ -129,15 +129,15 @@
         <div
           v-if="formatOpen"
           class="absolute bottom-full mb-1 right-0 w-52 rounded-xl border shadow-xl overflow-hidden z-50"
-          :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
+          :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
         >
           <div
             class="px-3 py-2 border-b"
-            :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-100'"
+            :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-100'"
           >
             <p
               class="text-[10px] font-semibold uppercase tracking-wider"
-              :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >
               Formats carte de visite
             </p>
@@ -151,23 +151,23 @@
               :class="[
                 isCurrentFormat(fmt)
                   ? themeStore.darkMode
-                    ? 'bg-violet-900/40 text-violet-300'
-                    : 'bg-violet-50 text-violet-700'
+                    ? 'bg-flame-900/40 text-flame-300'
+                    : 'bg-flame-50 text-flame-700'
                   : themeStore.darkMode
-                    ? 'text-gray-300 hover:bg-gray-700'
-                    : 'text-gray-700 hover:bg-gray-50',
+                    ? 'text-powder-300 hover:bg-onyx-700'
+                    : 'text-onyx-700 hover:bg-powder-50',
               ]"
             >
               <div class="flex items-center gap-2">
-                <div v-if="isCurrentFormat(fmt)" class="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                <div v-if="isCurrentFormat(fmt)" class="w-1.5 h-1.5 rounded-full bg-flame-500" />
                 <div
                   v-else
                   class="w-1.5 h-1.5 rounded-full"
-                  :class="themeStore.darkMode ? 'bg-gray-600' : 'bg-gray-300'"
+                  :class="themeStore.darkMode ? 'bg-onyx-600' : 'bg-powder-300'"
                 />
                 <span class="font-medium">{{ fmt.label }}</span>
               </div>
-              <span :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+              <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
                 {{ fmt.mm }}
               </span>
             </button>
@@ -183,8 +183,8 @@
         class="p-1 rounded transition-colors"
         :class="
           themeStore.darkMode
-            ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            : 'text-gray-500 hover:bg-gray-100'
+            ? 'text-onyx-400 hover:bg-onyx-800 hover:text-powder-50'
+            : 'text-onyx-500 hover:bg-powder-100'
         "
         title="Zoom arrière (Ctrl+-)"
       >
@@ -198,8 +198,8 @@
           class="text-xs font-medium w-14 text-center rounded py-0.5 transition-colors"
           :class="
             themeStore.darkMode
-              ? 'text-gray-300 hover:bg-gray-800'
-              : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-powder-300 hover:bg-onyx-800'
+              : 'text-onyx-600 hover:bg-powder-100'
           "
           title="Présets de zoom"
         >
@@ -209,7 +209,7 @@
         <div
           v-if="zoomOpen"
           class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-36 rounded-xl border shadow-xl overflow-hidden z-50"
-          :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
+          :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'"
         >
           <button
             v-for="pct in ZOOM_PRESETS"
@@ -219,30 +219,30 @@
             :class="[
               Math.round(editorStore.zoom * 100) === pct
                 ? themeStore.darkMode
-                  ? 'bg-violet-900/40 text-violet-300'
-                  : 'bg-violet-50 text-violet-700'
+                  ? 'bg-flame-900/40 text-flame-300'
+                  : 'bg-flame-50 text-flame-700'
                 : themeStore.darkMode
-                  ? 'text-gray-300 hover:bg-gray-700'
-                  : 'text-gray-700 hover:bg-gray-50',
+                  ? 'text-powder-300 hover:bg-onyx-700'
+                  : 'text-onyx-700 hover:bg-powder-50',
             ]"
           >
             <span>{{ pct }}%</span>
             <span
               v-if="Math.round(editorStore.zoom * 100) === pct"
-              class="w-1.5 h-1.5 rounded-full bg-violet-500"
+              class="w-1.5 h-1.5 rounded-full bg-flame-500"
             />
           </button>
           <div
             class="border-t"
-            :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-100'"
+            :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-100'"
           />
           <button
             @click="editorStore.zoomFit(); zoomOpen = false"
             class="w-full text-left px-3 py-1.5 text-xs transition-colors"
             :class="
               themeStore.darkMode
-                ? 'text-gray-300 hover:bg-gray-700'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'text-powder-300 hover:bg-onyx-700'
+                : 'text-onyx-700 hover:bg-powder-50'
             "
           >
             Ajuster à l'écran
@@ -255,22 +255,22 @@
         class="p-1 rounded transition-colors"
         :class="
           themeStore.darkMode
-            ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            : 'text-gray-500 hover:bg-gray-100'
+            ? 'text-onyx-400 hover:bg-onyx-800 hover:text-powder-50'
+            : 'text-onyx-500 hover:bg-powder-100'
         "
         title="Zoom avant (Ctrl++)"
       >
         <Plus class="w-3.5 h-3.5" />
       </button>
 
-      <div class="w-px h-4 mx-1" :class="themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'" />
+      <div class="w-px h-4 mx-1" :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'" />
       <button
         @click="editorStore.zoomFit()"
         class="p-1 rounded transition-colors"
         :class="
           themeStore.darkMode
-            ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            : 'text-gray-500 hover:bg-gray-100'
+            ? 'text-onyx-400 hover:bg-onyx-800 hover:text-powder-50'
+            : 'text-onyx-500 hover:bg-powder-100'
         "
         title="Ajuster à l'écran"
       >

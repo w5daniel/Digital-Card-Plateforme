@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div
       v-if="open"
@@ -6,27 +6,27 @@
       @mousedown.stop
       :style="popoverStyle"
       class="w-52 rounded-xl border shadow-2xl p-3"
-      :class="themeStore.darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'"
+      :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-700' : 'bg-white border-powder-200'"
     >
       <!-- Tabs Uni / Dégradé -->
       <div
         class="relative flex rounded-lg p-0.5 mb-3 text-xs"
-        :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'"
+        :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'"
       >
         <div
           class="absolute top-0.5 bottom-0.5 w-[calc(50%-2px)] rounded-md shadow-sm transition-all duration-300 ease-out"
-          :class="themeStore.darkMode ? 'bg-gray-700' : 'bg-white'"
+          :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-white'"
           :style="{ left: fillMode === 'solid' ? '2px' : '50%' }"
         />
         <button
           @click="emit('update:fillMode', 'solid')"
           class="relative z-10 flex-1 py-1 rounded-md font-medium transition-colors"
-          :class="fillMode === 'solid' ? (themeStore.darkMode ? 'text-gray-100' : 'text-gray-800') : (themeStore.darkMode ? 'text-gray-500' : 'text-gray-400')"
+          :class="fillMode === 'solid' ? (themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800') : (themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400')"
         >Uni</button>
         <button
           @click="emit('update:fillMode', 'gradient')"
           class="relative z-10 flex-1 py-1 rounded-md font-medium transition-colors"
-          :class="fillMode === 'gradient' ? (themeStore.darkMode ? 'text-gray-100' : 'text-gray-800') : (themeStore.darkMode ? 'text-gray-500' : 'text-gray-400')"
+          :class="fillMode === 'gradient' ? (themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800') : (themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400')"
         >Dégradé</button>
       </div>
 
@@ -35,7 +35,7 @@
         <div class="flex items-center gap-2 overflow-hidden">
           <label
             class="relative w-8 h-8 rounded-lg border overflow-hidden cursor-pointer flex-shrink-0"
-            :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-200'"
+            :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'"
             :style="{ background: currentFill || '#3B82F6' }"
           >
             <input type="color" :value="currentFill || '#3B82F6'" @input="emit('solidInput', $event.target.value)" @change="emit('solidChange', $event.target.value)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
@@ -45,7 +45,7 @@
             :value="currentFill || ''"
             @change="emit('solidChange', $event.target.value)"
             class="flex-1 min-w-0 text-xs px-2 py-1.5 rounded border font-mono outline-none"
-            :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-white border-gray-200 text-gray-800'"
+            :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200' : 'bg-white border-powder-200 text-onyx-800'"
             placeholder="#3B82F6"
           />
         </div>
@@ -53,32 +53,32 @@
 
       <!-- Gradient mode -->
       <template v-else>
-        <p class="text-[10px] mb-1.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Direction</p>
+        <p class="text-[10px] mb-1.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Direction</p>
         <div class="grid grid-cols-4 gap-1 mb-2">
           <button
             v-for="dir in [{ a: 0, icon: '↑' }, { a: 45, icon: '↗' }, { a: 90, icon: '→' }, { a: 135, icon: '↘' }, { a: 180, icon: '↓' }, { a: 225, icon: '↙' }, { a: 270, icon: '←' }, { a: 315, icon: '↖' }]"
             :key="dir.a"
             @click="emit('update:gradAngle', dir.a); emit('gradChange')"
             class="py-0.5 rounded text-sm font-bold transition-all"
-            :class="gradAngle === dir.a ? 'bg-violet-500 text-white' : themeStore.darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            :class="gradAngle === dir.a ? 'bg-flame-500 text-white' : themeStore.darkMode ? 'bg-onyx-700 text-powder-300 hover:bg-onyx-600' : 'bg-powder-100 text-onyx-600 hover:bg-powder-200'"
           >{{ dir.icon }}</button>
         </div>
         <div class="flex gap-2 mb-2">
           <div class="flex-1">
-            <p class="text-[9px] mb-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Début</p>
+            <p class="text-[9px] mb-0.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Début</p>
             <label
               class="relative h-7 w-full rounded border overflow-hidden cursor-pointer block"
-              :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-200'"
+              :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'"
               :style="{ background: gradFrom }"
             >
               <input type="color" :value="gradFrom" @input="emit('update:gradFrom', $event.target.value); emit('gradInput')" @change="emit('gradChange')" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
             </label>
           </div>
           <div class="flex-1">
-            <p class="text-[9px] mb-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">Fin</p>
+            <p class="text-[9px] mb-0.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Fin</p>
             <label
               class="relative h-7 w-full rounded border overflow-hidden cursor-pointer block"
-              :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-200'"
+              :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'"
               :style="{ background: gradTo }"
             >
               <input type="color" :value="gradTo" @input="emit('update:gradTo', $event.target.value); emit('gradInput')" @change="emit('gradChange')" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />

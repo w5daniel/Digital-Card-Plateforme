@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <template v-if="editorStore.selectedIds.length === 1 && sel && !sel.locked">
     <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
 
@@ -6,7 +6,7 @@
     <div class="flex items-center gap-1">
       <span
         class="text-[10px] font-semibold w-3 shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >X</span
       >
       <input
@@ -21,7 +21,7 @@
     <div class="flex items-center gap-1 ml-1">
       <span
         class="text-[10px] font-semibold w-3 shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >Y</span
       >
       <input
@@ -40,7 +40,7 @@
     <div class="flex items-center gap-1">
       <span
         class="text-[10px] font-semibold w-3 shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >L</span
       >
       <input
@@ -59,8 +59,8 @@
       :class="
         lockRatio
           ? themeStore.darkMode
-            ? 'text-violet-400 bg-violet-900/40'
-            : 'text-violet-600 bg-violet-50'
+            ? 'text-flame-400 bg-violet-900/40'
+            : 'text-flame-600 bg-flame-50'
           : btnCls
       "
       title="Verrouiller les proportions"
@@ -70,7 +70,7 @@
     <div class="flex items-center gap-1">
       <span
         class="text-[10px] font-semibold w-3 shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >H</span
       >
       <input
@@ -90,7 +90,7 @@
     <div class="flex items-center gap-1">
       <RotateCw
         class="w-3 h-3 shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         title="Rotation"
       />
       <input
@@ -105,7 +105,7 @@
       />
       <span
         class="text-[10px] shrink-0"
-        :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >°</span
       >
     </div>
@@ -116,7 +116,7 @@
     <div class="flex items-center gap-1.5">
       <Layers
         class="w-3.5 h-3.5"
-        :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+        :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
       />
       <input
         type="range"
@@ -125,11 +125,11 @@
         @change="commit('opacity', +$event.target.value / 100)"
         min="0"
         max="100"
-        class="w-20 accent-violet-500"
+        class="w-20 accent-flame-500"
       />
       <span
         class="text-xs w-7 shrink-0 text-right"
-        :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+        :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
       >
         {{ Math.round((sel?.opacity ?? 1) * 100) }}%
       </span>
@@ -197,14 +197,14 @@ const lockRatio = ref(false)
 
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 const inputCls = computed(() =>
   themeStore.darkMode
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
-    : 'bg-white border-gray-200 text-gray-800',
+    ? 'bg-onyx-800 border-onyx-700 text-powder-200'
+    : 'bg-white border-powder-200 text-onyx-800',
 )
 
 function update(key, value) {

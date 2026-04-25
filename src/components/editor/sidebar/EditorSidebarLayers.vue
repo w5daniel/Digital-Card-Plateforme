@@ -1,8 +1,8 @@
-<template>
+﻿<template>
   <div class="flex flex-col h-full">
     <!-- Header bar -->
-    <div class="px-3 py-2 flex items-center justify-between border-b shrink-0" :class="themeStore.darkMode ? 'border-gray-800' : 'border-gray-100'">
-      <span class="text-xs font-semibold" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+    <div class="px-3 py-2 flex items-center justify-between border-b shrink-0" :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'">
+      <span class="text-xs font-semibold" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
         Page : {{ editorStore.activePage === 'recto' ? 'Recto' : 'Verso' }}
       </span>
       <div class="flex items-center gap-2">
@@ -15,7 +15,7 @@
           <LockOpen class="w-3 h-3" />
           Tout déverrouiller
         </button>
-        <span class="text-[10px]" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">
+        <span class="text-[10px]" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'">
           {{ editorStore.currentElements.length }} élément{{ editorStore.currentElements.length !== 1 ? 's' : '' }}
         </span>
       </div>
@@ -25,7 +25,7 @@
     <div ref="listRef" class="flex-1 overflow-y-auto py-1 px-1">
       <div v-if="editorStore.currentElements.length === 0" class="flex flex-col items-center justify-center h-32 gap-2">
         <Layers class="w-8 h-8 opacity-20" />
-        <p class="text-xs text-center" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">Aucun élément sur cette page</p>
+        <p class="text-xs text-center" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'">Aucun élément sur cette page</p>
       </div>
 
       <div
@@ -41,8 +41,8 @@
         class="group flex items-center gap-1.5 px-1.5 py-1 rounded-lg cursor-pointer transition-all"
         :class="[
           editorStore.selectedIds.includes(el.id)
-            ? themeStore.darkMode ? 'bg-violet-900/40 ring-1 ring-violet-700' : 'bg-violet-50 ring-1 ring-violet-200'
-            : themeStore.darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50',
+            ? themeStore.darkMode ? 'bg-violet-900/40 ring-1 ring-violet-700' : 'bg-flame-50 ring-1 ring-violet-200'
+            : themeStore.darkMode ? 'hover:bg-onyx-800' : 'hover:bg-powder-50',
           layerDragOver === rIdx && layerDragIdx !== rIdx && 'ring-1 ring-violet-400',
           !el.visible && 'opacity-40',
         ]"
@@ -51,45 +51,45 @@
         <button
           @click.stop="editorStore.updateElementCommit(el.id, { visible: el.visible === false ? true : false })"
           class="p-0.5 rounded shrink-0 transition-colors"
-          :class="themeStore.darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'"
+          :class="themeStore.darkMode ? 'hover:bg-onyx-700' : 'hover:bg-powder-200'"
           :title="el.visible !== false ? 'Masquer' : 'Afficher'"
         >
-          <Eye v-if="el.visible !== false" class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
-          <EyeOff v-else class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'" />
+          <Eye v-if="el.visible !== false" class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
+          <EyeOff v-else class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'" />
         </button>
 
         <!-- Lock toggle -->
         <button
           @click.stop="editorStore.toggleLock(el.id)"
           class="p-0.5 rounded shrink-0 transition-colors"
-          :class="themeStore.darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'"
+          :class="themeStore.darkMode ? 'hover:bg-onyx-700' : 'hover:bg-powder-200'"
           :title="el.locked ? 'Déverrouiller' : 'Verrouiller'"
         >
           <Lock v-if="el.locked" class="w-3.5 h-3.5 text-amber-500" />
-          <LockOpen v-else class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'" />
+          <LockOpen v-else class="w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'" />
         </button>
 
         <!-- Color swatch / thumbnail -->
         <div class="w-5 h-5 rounded shrink-0 flex items-center justify-center text-[9px] font-bold overflow-hidden" :style="layerThumbnailStyle(el)">
-          <span v-if="el.type === 'text'" class="text-gray-600">T</span>
-          <span v-else-if="el.type === 'image'" class="text-gray-400 text-[8px]">IMG</span>
+          <span v-if="el.type === 'text'" class="text-onyx-600">T</span>
+          <span v-else-if="el.type === 'image'" class="text-onyx-400 text-[8px]">IMG</span>
           <span v-else-if="el.type === 'qr'" class="text-white text-[8px]">QR</span>
         </div>
 
         <!-- Label + info -->
         <div class="flex-1 min-w-0">
-          <span class="block text-xs truncate" :class="themeStore.darkMode ? 'text-gray-300' : 'text-gray-700'">{{ layerLabel(el) }}</span>
+          <span class="block text-xs truncate" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-700'">{{ layerLabel(el) }}</span>
           <span
             v-if="editorStore.selectedIds.includes(el.id)"
             class="block text-[10px] truncate"
-            :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+            :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
           >{{ Math.round(el.width) }}×{{ Math.round(el.height) }} px · {{ Math.round(el.x) }},{{ Math.round(el.y) }}</span>
         </div>
 
         <!-- Delete -->
         <button
           @click.stop="editorStore.selectedIds = [el.id]; editorStore.deleteSelected()"
-          class="p-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-colors text-gray-400 hover:text-red-500"
+          class="p-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-colors text-onyx-400 hover:text-red-500"
           title="Supprimer"
         >
           <Trash2 class="w-3 h-3" />

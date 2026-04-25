@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div
       v-if="visible"
       class="fixed z-[9999] min-w-[204px] rounded-xl shadow-2xl border overflow-visible py-1 select-none"
-      :class="dark ? 'bg-gray-900 border-gray-700 text-gray-200' : 'bg-white border-gray-200 text-gray-800'"
+      :class="dark ? 'bg-onyx-900 border-onyx-700 text-powder-200' : 'bg-white border-powder-200 text-onyx-800'"
       :style="{ left: safeX + 'px', top: safeY + 'px' }"
       @mousedown.stop
       @contextmenu.prevent
@@ -76,7 +76,7 @@
             class="absolute left-full top-0 min-w-[186px] rounded-xl shadow-2xl border py-1
                    invisible pointer-events-none
                    group-hover/align:visible group-hover/align:pointer-events-auto"
-            :class="dark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'"
+            :class="dark ? 'bg-onyx-900 border-onyx-700' : 'bg-white border-powder-200'"
             style="margin-left:3px"
           >
             <p :class="lblCls">Horizontal</p>
@@ -154,10 +154,10 @@ const safeY = computed(() => Math.min(props.y, (window?.innerHeight ?? 600) - ME
 // Shared class helpers (non-reactive — depend only on dark prop which triggers recompute via parent)
 const btnCls  = computed(() => [
   'w-full flex items-center gap-2.5 px-3 py-1.5 text-sm transition-colors',
-  props.dark ? 'hover:bg-gray-800 text-gray-200' : 'hover:bg-gray-50 text-gray-700',
+  props.dark ? 'hover:bg-onyx-800 text-powder-200' : 'hover:bg-powder-50 text-onyx-700',
 ])
 const icoCls  = 'w-3.5 h-3.5 shrink-0 opacity-70'
-const divCls  = computed(() => ['my-1 mx-2 h-px', props.dark ? 'bg-gray-700' : 'bg-gray-100'])
-const kbdCls  = computed(() => ['text-[10px] font-mono ml-auto shrink-0 pl-3', props.dark ? 'text-gray-500' : 'text-gray-400'])
-const lblCls  = computed(() => ['px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider', props.dark ? 'text-gray-500' : 'text-gray-400'])
+const divCls  = computed(() => ['my-1 mx-2 h-px', props.dark ? 'bg-onyx-700' : 'bg-powder-100'])
+const kbdCls  = computed(() => ['text-[10px] font-mono ml-auto shrink-0 pl-3', props.dark ? 'text-onyx-500' : 'text-onyx-400'])
+const lblCls  = computed(() => ['px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider', props.dark ? 'text-onyx-500' : 'text-onyx-400'])
 </script>

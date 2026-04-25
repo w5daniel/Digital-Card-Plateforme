@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <template v-if="sel">
     <!-- Foreground color -->
     <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur avant-plan QR">
-      <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+      <Palette class="w-4 h-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
       <div
         class="relative w-6 h-6 rounded border overflow-hidden"
-        :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+        :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
       >
         <div class="absolute inset-0" :style="{ background: sel.qrForeground || '#000000' }" />
         <input
@@ -16,7 +16,7 @@
           class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
       </div>
-      <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         >QR</span
       >
     </label>
@@ -27,7 +27,7 @@
     <label class="flex items-center gap-1.5 cursor-pointer" title="Couleur arrière-plan QR">
       <div
         class="relative w-6 h-6 rounded border overflow-hidden"
-        :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+        :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
       >
         <div class="absolute inset-0" :style="{ background: sel.qrBackground || '#ffffff' }" />
         <input
@@ -38,7 +38,7 @@
           class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
       </div>
-      <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         >Fond</span
       >
     </label>
@@ -57,10 +57,10 @@
         class="text-[10px] px-2 py-0.5 rounded border transition-colors"
         :class="
           (sel.qrMode || 'standard') === m.v
-            ? 'border-violet-500 bg-violet-500/20 text-violet-400 font-semibold'
+            ? 'border-flame-500 bg-flame-500/20 text-flame-400 font-semibold'
             : themeStore.darkMode
-              ? 'border-gray-600 text-gray-400 hover:border-gray-500'
-              : 'border-gray-300 text-gray-500 hover:border-gray-400'
+              ? 'border-onyx-600 text-onyx-400 hover:border-onyx-500'
+              : 'border-powder-300 text-onyx-500 hover:border-powder-400'
         "
       >
         {{ m.l }}
@@ -80,7 +80,7 @@ const themeStore = useThemeStore()
 
 const sel = computed(() => editorStore.singleSelected)
 
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 
 function update(key, value) {
   if (!sel.value) return

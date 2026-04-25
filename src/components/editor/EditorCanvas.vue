@@ -386,7 +386,7 @@
       v-for="ov in lockedOverlays"
       :key="'lk-' + ov.id"
       class="absolute pointer-events-none flex items-center justify-center rounded"
-      :class="themeStore.darkMode ? 'bg-gray-900/80 text-amber-400' : 'bg-white/80 text-amber-500'"
+      :class="themeStore.darkMode ? 'bg-onyx-900/80 text-amber-400' : 'bg-white/80 text-amber-500'"
       :style="{
         left: ov.x + 'px',
         top: ov.y + 'px',
@@ -402,7 +402,7 @@
     <!-- ── Zoom hint ──────────────────────────────────────────────────── -->
     <div
       class="absolute bottom-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-xs pointer-events-none opacity-50"
-      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
     >
       Molette pour zoomer · Double-clic sur texte pour éditer
     </div>

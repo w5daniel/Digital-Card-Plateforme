@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pb-4">
     <!-- Standard contact fields -->
     <div class="px-3 pt-3 flex flex-col gap-3">
@@ -18,16 +18,16 @@
               class="text-[11px] font-medium px-1 rounded outline-none border transition-colors w-full"
               :class="
                 themeStore.darkMode
-                  ? 'bg-gray-800 border-gray-600 text-gray-200'
-                  : 'bg-white border-gray-300 text-gray-800'
+                  ? 'bg-onyx-800 border-onyx-600 text-powder-200'
+                  : 'bg-white border-powder-300 text-onyx-800'
               "
               autofocus
             />
             <label
               v-else
               @dblclick="editingStandardLabel = field.role"
-              class="text-[11px] font-medium flex items-center cursor-pointer group-hover/field:text-violet-500 transition-colors"
-              :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+              class="text-[11px] font-medium flex items-center cursor-pointer group-hover/field:text-flame-500 transition-colors"
+              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
               title="Double-cliquez pour renommer"
             >
               {{ field.label }}
@@ -38,7 +38,7 @@
           </div>
           <button
             @click="removeStandardField(field.role)"
-            class="p-0.5 rounded opacity-0 group-hover/field:opacity-100 transition-all text-gray-400 hover:text-red-500"
+            class="p-0.5 rounded opacity-0 group-hover/field:opacity-100 transition-all text-onyx-400 hover:text-red-500"
             title="Supprimer ce champ"
           >
             <Trash2 class="w-3 h-3" />
@@ -55,11 +55,11 @@
             fieldErrors[field.role]
               ? 'border-red-400 dark:border-red-500'
               : themeStore.darkMode
-                ? 'border-gray-700 focus:border-violet-500'
-                : 'border-gray-200 focus:border-violet-400',
+                ? 'border-onyx-700 focus:border-flame-500'
+                : 'border-powder-200 focus:border-flame-400',
             themeStore.darkMode
-              ? 'bg-gray-800 text-gray-200 placeholder-gray-600'
-              : 'bg-white text-gray-800 placeholder-gray-400',
+              ? 'bg-onyx-800 text-powder-200 placeholder-onyx-500'
+              : 'bg-white text-onyx-800 placeholder-onyx-400',
           ]"
         />
         <p
@@ -72,7 +72,7 @@
     <!-- Divider -->
     <div
       class="mx-3 h-px my-4"
-      :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-gray-100'"
+      :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'"
     />
 
     <!-- Custom fields header -->
@@ -80,7 +80,7 @@
       <div class="flex items-center justify-between mb-2">
         <p
           class="text-xs font-medium"
-          :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+          :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
         >
           Champs supplémentaires
         </p>
@@ -92,8 +92,8 @@
             showAddCustom
               ? 'bg-violet-100 text-violet-700'
               : themeStore.darkMode
-                ? 'text-violet-400 hover:bg-gray-800'
-                : 'text-violet-600 hover:bg-violet-50'
+                ? 'text-flame-400 hover:bg-onyx-800'
+                : 'text-flame-600 hover:bg-flame-50'
           "
         >
           <PlusIcon class="w-3 h-3" />
@@ -126,16 +126,16 @@
               class="text-[10px] font-medium px-1 rounded outline-none border transition-colors w-full"
               :class="
                 themeStore.darkMode
-                  ? 'bg-gray-800 border-gray-600 text-gray-200'
-                  : 'bg-white border-gray-300 text-gray-800'
+                  ? 'bg-onyx-800 border-onyx-600 text-powder-200'
+                  : 'bg-white border-powder-300 text-onyx-800'
               "
               autofocus
             />
             <span
               v-else
               @dblclick="editingCustomLabel = cf.id"
-              class="text-[10px] font-medium cursor-pointer group-hover/custom:text-violet-500 transition-colors"
-              :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+              class="text-[10px] font-medium cursor-pointer group-hover/custom:text-flame-500 transition-colors"
+              :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
               title="Double-cliquez pour renommer"
               >{{ cf.label }}</span
             >
@@ -145,8 +145,8 @@
             class="p-0.5 rounded opacity-0 group-hover/custom:opacity-100 transition-colors"
             :class="
               themeStore.darkMode
-                ? 'text-gray-600 hover:text-red-400'
-                : 'text-gray-400 hover:text-red-500'
+                ? 'text-onyx-600 hover:text-red-400'
+                : 'text-onyx-400 hover:text-red-500'
             "
             title="Supprimer ce champ"
           >
@@ -161,8 +161,8 @@
           class="w-full text-xs px-2.5 py-1.5 rounded-lg border outline-none transition-colors"
           :class="
             themeStore.darkMode
-              ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-600 focus:border-violet-500'
-              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
+              ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500 focus:border-flame-500'
+              : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'
           "
         />
       </div>
@@ -172,13 +172,13 @@
         v-if="showAddCustom"
         class="rounded-lg border p-3 mt-1"
         :class="
-          themeStore.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
+          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
         "
       >
         <div class="mb-2">
           <label
             class="text-[10px] font-medium mb-1 block"
-            :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+            :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >Libellé du champ</label
           >
           <input
@@ -188,8 +188,8 @@
             class="w-full text-xs px-2.5 py-1.5 rounded border outline-none transition-colors"
             :class="
               themeStore.darkMode
-                ? 'bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-500 focus:border-violet-500'
-                : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
+                ? 'bg-onyx-700 border-onyx-600 text-powder-200 placeholder-onyx-400 focus:border-flame-500'
+                : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'
             "
             @keydown.enter.prevent="confirmAddCustom"
           />
@@ -197,7 +197,7 @@
         <div class="mb-3">
           <label
             class="text-[10px] font-medium mb-1 block"
-            :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+            :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
             >Valeur</label
           >
           <input
@@ -207,8 +207,8 @@
             class="w-full text-xs px-2.5 py-1.5 rounded border outline-none transition-colors"
             :class="
               themeStore.darkMode
-                ? 'bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-500 focus:border-violet-500'
-                : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-violet-400'
+                ? 'bg-onyx-700 border-onyx-600 text-powder-200 placeholder-onyx-400 focus:border-flame-500'
+                : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'
             "
             @keydown.enter.prevent="confirmAddCustom"
           />
@@ -216,7 +216,7 @@
         <div class="flex gap-2">
           <button
             @click="confirmAddCustom"
-            class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+            class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-flame-600 text-white hover:bg-violet-700 transition-colors"
           >
             Confirmer
           </button>
@@ -225,8 +225,8 @@
             class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
             :class="
               themeStore.darkMode
-                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
+                ? 'bg-onyx-700 text-powder-300 hover:bg-onyx-600'
+                : 'bg-white border border-powder-200 text-onyx-600 hover:bg-powder-100'
             "
           >
             Annuler
@@ -238,11 +238,11 @@
       <div
         v-if="availableStandardFields.length > 0 && !showAddCustom"
         class="mt-4 border-t pt-3"
-        :class="themeStore.darkMode ? 'border-gray-800' : 'border-gray-100'"
+        :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'"
       >
         <p
           class="text-[10px] uppercase font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'"
+          :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
         >
           Réajouter un champ standard
         </p>
@@ -251,11 +251,11 @@
             v-for="sf in availableStandardFields"
             :key="sf.role"
             @click="addStandardField(sf)"
-            class="text-[10px] px-2 py-1 border rounded-lg transition-colors hover:text-violet-500 hover:border-violet-500"
+            class="text-[10px] px-2 py-1 border rounded-lg transition-colors hover:text-flame-500 hover:border-flame-500"
             :class="
               themeStore.darkMode
-                ? 'border-gray-700 text-gray-400'
-                : 'border-gray-200 text-gray-500'
+                ? 'border-onyx-700 text-onyx-400'
+                : 'border-powder-200 text-onyx-500'
             "
           >
             + {{ sf.label }}
@@ -267,7 +267,7 @@
       <p
         v-if="!editorStore.contactExtra.length && !showAddCustom"
         class="text-[10px] mt-2 leading-relaxed"
-        :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'"
+        :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'"
       >
         Ajoutez des champs supplémentaires (LinkedIn, Skype, etc.) qui seront inclus dans
         l'export JSON et le QR code.

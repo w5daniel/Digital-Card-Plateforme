@@ -1,36 +1,36 @@
-<template>
+﻿<template>
   <div class="p-3 flex flex-col gap-3">
     <!-- Drop zone -->
     <div
       class="relative border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-3 transition-colors cursor-pointer"
-      :class="isDragOver ? 'border-violet-500 bg-violet-50' : themeStore.darkMode ? 'border-gray-700 hover:border-gray-600 bg-gray-800' : 'border-gray-300 hover:border-gray-400 bg-gray-50'"
+      :class="isDragOver ? 'border-flame-500 bg-flame-50' : themeStore.darkMode ? 'border-onyx-700 hover:border-onyx-600 bg-onyx-800' : 'border-powder-300 hover:border-powder-400 bg-powder-50'"
       @dragover.prevent="isDragOver = true"
       @dragleave="isDragOver = false"
       @drop.prevent="onFileDrop"
       @click="fileInputRef?.click()"
     >
-      <div class="p-3 rounded-full" :class="themeStore.darkMode ? 'bg-gray-700' : 'bg-white shadow-sm'">
-        <Upload class="w-6 h-6" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-400'" />
+      <div class="p-3 rounded-full" :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-white shadow-sm'">
+        <Upload class="w-6 h-6" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-400'" />
       </div>
       <div class="text-center">
-        <p class="text-sm font-medium" :class="themeStore.darkMode ? 'text-gray-200' : 'text-gray-700'">Glissez vos fichiers ici</p>
-        <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">ou cliquez pour sélectionner</p>
+        <p class="text-sm font-medium" :class="themeStore.darkMode ? 'text-powder-200' : 'text-onyx-700'">Glissez vos fichiers ici</p>
+        <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">ou cliquez pour sélectionner</p>
       </div>
-      <p class="text-[10px]" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">PNG, JPG, SVG, WebP — max 5 Mo</p>
+      <p class="text-[10px]" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'">PNG, JPG, SVG, WebP — max 5 Mo</p>
       <input ref="fileInputRef" type="file" accept="image/*" multiple class="hidden" @change="onFileInput" />
     </div>
 
     <!-- Imported files -->
     <div v-if="importedImages.length">
-      <p class="text-xs font-medium mb-2" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Médias importés</p>
+      <p class="text-xs font-medium mb-2" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Médias importés</p>
       <div class="grid grid-cols-2 gap-2">
         <div v-for="(img, i) in importedImages" :key="i" class="relative group flex flex-col gap-1">
           <div
             @click="insertImage(img)"
             draggable="true"
             @dragstart="onImageDragStart($event, img)"
-            class="aspect-video rounded-lg overflow-hidden border-2 transition-all hover:scale-105 hover:border-violet-400 cursor-pointer relative"
-            :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+            class="aspect-video rounded-lg overflow-hidden border-2 transition-all hover:scale-105 hover:border-flame-400 cursor-pointer relative"
+            :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
             title="Cliquer pour insérer"
           >
             <img :src="img.dataUrl" :alt="img.name" class="w-full h-full object-cover" />
@@ -41,7 +41,7 @@
           <button @click.stop="removeImportedImage(i)" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Supprimer">
             <X class="w-3 h-3" />
           </button>
-          <select v-model="img.label" class="w-full text-[10px] rounded border px-1 py-0.5 outline-none" :class="themeStore.darkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'">
+          <select v-model="img.label" class="w-full text-[10px] rounded border px-1 py-0.5 outline-none" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-300' : 'bg-white border-powder-200 text-onyx-700'">
             <option value="logo">Logo</option>
             <option value="avatar">Photo</option>
             <option value="background">Arrière-plan</option>
@@ -51,9 +51,9 @@
     </div>
 
     <!-- Tips -->
-    <div class="rounded-lg p-3" :class="themeStore.darkMode ? 'bg-gray-800' : 'bg-blue-50'">
+    <div class="rounded-lg p-3" :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-blue-50'">
       <p class="text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-blue-300' : 'text-blue-700'">Conseils</p>
-      <ul class="text-xs space-y-1 list-disc list-inside" :class="themeStore.darkMode ? 'text-gray-400' : 'text-blue-600'">
+      <ul class="text-xs space-y-1 list-disc list-inside" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-blue-600'">
         <li>Utilisez des PNG transparents pour les logos</li>
         <li>Préférez les images haute résolution</li>
         <li>Format recommandé : 300 DPI minimum</li>

@@ -1,14 +1,14 @@
-<template>
+﻿<template>
   <!-- Text color (solid or gradient) -->
   <div class="flex items-center gap-1">
-    <Type class="w-4 h-4 shrink-0" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'" />
+    <Type class="w-4 h-4 shrink-0" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
 
     <!-- Solid mode: direct color picker -->
     <label
       v-if="props.fillMode !== 'gradient'"
       @mousedown.prevent
       class="relative w-6 h-6 rounded border overflow-hidden cursor-pointer"
-      :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+      :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
       title="Couleur du texte"
     >
       <div class="absolute inset-0" :style="{ background: sel.fill || '#000' }" />
@@ -27,7 +27,7 @@
       ref="localFillBtnRef"
       @click="emit('open-fill', localFillBtnRef.value)"
       class="w-6 h-6 rounded border overflow-hidden shrink-0"
-      :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+      :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
       title="Dégradé texte"
       :style="{ background: `linear-gradient(${props.gradAngle}deg, ${props.gradFrom}, ${props.gradTo})` }"
     />
@@ -37,7 +37,7 @@
       @click="emit('toggle-gradient')"
       class="w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0"
       :class="props.fillMode === 'gradient'
-        ? (themeStore.darkMode ? 'bg-violet-900/50 text-violet-400' : 'bg-violet-50 text-violet-600')
+        ? (themeStore.darkMode ? 'bg-violet-900/50 text-flame-400' : 'bg-flame-50 text-flame-600')
         : btnCls"
       title="Basculer en dégradé"
     >
@@ -52,11 +52,11 @@
   <!-- Gradient controls (inline when active) -->
   <template v-if="props.fillMode === 'gradient'">
     <div class="flex items-center gap-1">
-      <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'" title="Couleur début">
+      <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'" title="Couleur début">
         <div class="absolute inset-0" :style="{ background: props.gradFrom }" />
         <input type="color" :value="props.gradFrom" @input="emit('update:gradFrom', $event.target.value); emit('update-gradient')" @change="emit('commit-gradient')" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
       </label>
-      <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'" title="Couleur fin">
+      <label class="relative w-5 h-5 rounded border overflow-hidden cursor-pointer shrink-0" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'" title="Couleur fin">
         <div class="absolute inset-0" :style="{ background: props.gradTo }" />
         <input type="color" :value="props.gradTo" @input="emit('update:gradTo', $event.target.value); emit('update-gradient')" @change="emit('commit-gradient')" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
       </label>
@@ -65,7 +65,7 @@
         <button v-for="dir in [{a:0,icon:'↑'},{a:90,icon:'→'},{a:135,icon:'↘'},{a:180,icon:'↓'}]" :key="dir.a"
           @click="emit('update:gradAngle', dir.a); emit('commit-gradient')"
           class="w-5 h-5 rounded text-xs flex items-center justify-center transition-colors"
-          :class="props.gradAngle === dir.a ? 'bg-violet-500 text-white' : btnCls"
+          :class="props.gradAngle === dir.a ? 'bg-flame-500 text-white' : btnCls"
         >{{ dir.icon }}</button>
       </div>
     </div>
@@ -137,7 +137,7 @@
     v-if="isUnderline"
     @mousedown.prevent
     class="relative w-5 h-5 rounded cursor-pointer border overflow-hidden shrink-0"
-    :class="themeStore.darkMode ? 'border-gray-600' : 'border-gray-300'"
+    :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-300'"
     title="Couleur du soulignement"
   >
     <div
@@ -190,7 +190,7 @@
   >
     <MoveHorizontal
       class="w-3.5 h-3.5"
-      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
     />
     <input
       type="range"
@@ -200,12 +200,12 @@
       min="-5"
       max="20"
       step="0.5"
-      class="w-20 accent-violet-500"
+      class="w-20 accent-flame-500"
       :disabled="isStyledText"
     />
     <span
       class="text-xs w-5 shrink-0"
-      :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'"
+      :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
     >
       {{ sel.letterSpacing ?? 0 }}
     </span>
@@ -262,18 +262,18 @@ const localFillBtnRef = ref(null)
 
 const inputCls = computed(() =>
   themeStore.darkMode
-    ? 'bg-gray-800 border-gray-700 text-gray-200'
-    : 'bg-white border-gray-200 text-gray-800',
+    ? 'bg-onyx-800 border-onyx-700 text-powder-200'
+    : 'bg-white border-powder-200 text-onyx-800',
 )
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
 const activeBtnCls = computed(() =>
   themeStore.darkMode ? 'bg-violet-700 text-white' : 'bg-violet-100 text-violet-700',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 
 function update(key, value) {
   if (!sel.value) return

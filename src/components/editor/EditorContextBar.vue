@@ -4,7 +4,7 @@
     v-if="editorStore.selectedIds.length > 0"
     class="flex items-center gap-1 px-3 h-11 shrink-0 border-b overflow-x-auto"
     :class="
-      themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'
+      themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'
     "
   >
     <!-- ── LOCK / UNLOCK BUTTON ──────────────────────────────────────── -->
@@ -14,7 +14,7 @@
         class="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors shrink-0"
         :class="isSelectionLocked
           ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
-          : (themeStore.darkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900')"
+          : (themeStore.darkMode ? 'text-onyx-400 hover:bg-onyx-800 hover:text-powder-50' : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900')"
         :title="isSelectionLocked ? 'Déverrouiller (Alt+L)' : 'Verrouiller (Alt+L)'"
       >
         <Lock v-if="isSelectionLocked" class="w-3.5 h-3.5 shrink-0" />
@@ -103,10 +103,10 @@
   <div
     v-else
     class="flex items-center gap-2 px-4 h-11 shrink-0 border-b"
-    :class="themeStore.darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'"
+    :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'"
   >
     <RectangleHorizontal class="w-3.5 h-3.5 opacity-30" />
-    <span class="text-xs" :class="themeStore.darkMode ? 'text-gray-600' : 'text-gray-400'">
+    <span class="text-xs" :class="themeStore.darkMode ? 'text-onyx-600' : 'text-onyx-400'">
       Cliquez sur un élément pour le modifier
     </span>
   </div>
@@ -145,7 +145,7 @@ const isSelectionLocked = computed(() => {
 
 const hasAnyLocked = computed(() => editorStore.currentElements.some((el) => el.locked))
 
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 
 // ── Shape fill mode (solid / gradient) ────────────────────────────────────
 const shapeFillMode = ref('solid')
@@ -173,7 +173,7 @@ watch(sel, (el, prevEl) => {
 function _withRunColorsCleaned(patch) {
   const el = sel.value
   if ((el.type === 'text' || el.type === 'contact') && el.runs?.some((r) => 'color' in r)) {
-    patch.runs = normalizeRuns(el.runs.map(({ color: _c, ...rest }) => rest))
+    patch.runs = normalizeRuns(el.runs.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => k !== 'color'))))
   }
   return patch
 }

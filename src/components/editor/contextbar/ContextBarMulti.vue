@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <template v-if="editorStore.selectedIds.length >= 2">
-    <span class="text-xs mr-1" :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">
+    <span class="text-xs mr-1" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
       {{ editorStore.selectedIds.length }} éléments
     </span>
     <div class="w-px h-5 shrink-0 mx-1" :class="divCls" />
@@ -113,8 +113,8 @@ const themeStore = useThemeStore()
 
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 </script>

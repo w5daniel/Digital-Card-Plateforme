@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[9998] flex items-center justify-center p-4">
       <!-- Backdrop -->
@@ -7,25 +7,25 @@
       <!-- Panel -->
       <div
         class="relative flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-        :class="themeStore.darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'"
+        :class="themeStore.darkMode ? 'bg-onyx-900 text-white' : 'bg-white text-onyx-900'"
         style="max-width: 720px; width: 100%"
       >
         <!-- Header -->
         <div
           class="flex items-center justify-between px-5 py-3 border-b"
-          :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
         >
           <h3 class="font-semibold text-sm">Recadrer l'image</h3>
           <div class="flex items-center gap-3">
             <!-- Lock ratio toggle -->
             <label class="flex items-center gap-1.5 text-xs cursor-pointer select-none">
               <input type="checkbox" v-model="lockRatio" class="accent-violet-500" />
-              <span :class="themeStore.darkMode ? 'text-gray-400' : 'text-gray-500'">Ratio verrouillé</span>
+              <span :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Ratio verrouillé</span>
             </label>
             <button
               @click="$emit('cancel')"
               class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
-              :class="themeStore.darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'"
+              :class="themeStore.darkMode ? 'hover:bg-onyx-700 text-onyx-400' : 'hover:bg-powder-100 text-onyx-500'"
             >
               <X class="w-4 h-4" />
             </button>
@@ -119,7 +119,7 @@
               <div
                 v-for="h in handles"
                 :key="h.type"
-                class="absolute w-3 h-3 bg-white border border-gray-400 rounded-sm shadow-sm"
+                class="absolute w-3 h-3 bg-white border border-powder-400 rounded-sm shadow-sm"
                 :style="h.style"
                 :class="h.cursor"
                 @mousedown.prevent.stop="startDrag(h.type, $event)"
@@ -132,21 +132,21 @@
         <!-- Footer -->
         <div
           class="flex items-center justify-between px-5 py-3 border-t text-xs"
-          :class="themeStore.darkMode ? 'border-gray-700' : 'border-gray-200'"
+          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
         >
-          <span :class="themeStore.darkMode ? 'text-gray-500' : 'text-gray-400'">
+          <span :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
             {{ Math.round(cropW / scale) }} × {{ Math.round(cropH / scale) }} px
           </span>
           <div class="flex gap-2">
             <button
               @click="resetCrop"
               class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              :class="themeStore.darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'"
+              :class="themeStore.darkMode ? 'bg-onyx-700 hover:bg-onyx-600 text-powder-300' : 'bg-powder-100 hover:bg-powder-200 text-onyx-600'"
             >Réinitialiser</button>
             <button
               @click="$emit('cancel')"
               class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              :class="themeStore.darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'"
+              :class="themeStore.darkMode ? 'bg-onyx-700 hover:bg-onyx-600 text-powder-300' : 'bg-powder-100 hover:bg-powder-200 text-onyx-600'"
             >Annuler</button>
             <button
               @click="confirmCrop"

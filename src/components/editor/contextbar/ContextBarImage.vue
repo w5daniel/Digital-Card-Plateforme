@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <template v-if="sel">
     <button
       @click="showCropModal = true"
@@ -13,7 +13,7 @@
     <button
       @click="toggleImageShape"
       class="flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors"
-      :class="[btnCls, sel.shape === 'circle' ? (themeStore.darkMode ? 'text-violet-400' : 'text-violet-600') : '']"
+      :class="[btnCls, sel.shape === 'circle' ? (themeStore.darkMode ? 'text-flame-400' : 'text-flame-600') : '']"
       :title="sel.shape === 'circle' ? 'Rendre rectangulaire' : 'Rendre circulaire'"
     >
       <CircleDashed class="w-3.5 h-3.5" />
@@ -59,10 +59,10 @@ const sel = computed(() => editorStore.singleSelected)
 
 const btnCls = computed(() =>
   themeStore.darkMode
-    ? 'text-gray-400 hover:bg-gray-800 hover:text-white transition-colors'
-    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors',
+    ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white transition-colors'
+    : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900 transition-colors',
 )
-const divCls = computed(() => (themeStore.darkMode ? 'bg-gray-700' : 'bg-gray-200'))
+const divCls = computed(() => (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'))
 
 const showCropModal = ref(false)
 
