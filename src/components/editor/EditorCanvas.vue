@@ -3408,6 +3408,8 @@ const textareaStyle = computed(() => {
     lineHeight: el.lineHeight || 1.25,
     letterSpacing: (el.letterSpacing || 0) * z + 'px',
     textDecoration: activeRuns ? 'none' : (el.textDecoration || 'none'),
+    transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
+    transformOrigin: '0 0',
   }
 })
 
