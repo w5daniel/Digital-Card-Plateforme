@@ -21,7 +21,7 @@
                   ? 'Sélectionnez au moins une carte'
                   : `Exporter ${selectedCardIds.size} carte(s)`
               "
-              class="btn-secondary flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              class="btn-secondary flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-onyx-800"
             >
               <Download class="w-5 h-5" />
               <span
@@ -30,9 +30,9 @@
             </button>
             <label
               v-if="authStore.isPremium || authStore.isAdmin"
-              class="btn-secondary flex items-center space-x-2 cursor-pointer"
+              class="btn-secondary flex items-center space-x-2 cursor-pointer dark:bg-onyx-800"
             >
-              <Plus class="w-5 h-5" />
+              <Plus class="w-5 h-5 " />
               <span>Importer</span>
               <input type="file" accept=".json" @change="importCards" class="hidden" />
             </label>
@@ -69,9 +69,9 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12 ">
         <div
-          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-onyx-800"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -89,11 +89,11 @@
         </div>
 
         <div
-          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-onyx-800"
         >
           <div class="flex items-center justify-between mb-4">
             <div
-              class="w-12 h-12 bg-onyx-100 dark:bg-onyx-800/50 rounded-xl flex items-center justify-center"
+              class="w-12 h-12 bg-onyx-100 dark:bg-onyx-900/50 rounded-xl flex items-center justify-center"
             >
               <Eye class="w-6 h-6 text-onyx-500" />
             </div>
@@ -107,7 +107,7 @@
         </div>
 
         <div
-          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-onyx-800"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -127,7 +127,7 @@
         </div>
 
         <div
-          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-onyx-800"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -147,7 +147,7 @@
         </div>
 
         <div
-          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="card p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-onyx-800"
         >
           <div class="flex items-center justify-between mb-4">
             <div
@@ -351,7 +351,7 @@
                 </button>
               </div>
 
-              <div class="p-4 flex flex-col flex-1">
+              <div class="p-4 flex flex-col flex-1 dark:bg-onyx-800">
                 <h3 class="font-bold text-base text-onyx-900 dark:text-powder-100 mb-1 truncate">
                   {{ tpl.name }}
                 </h3>
@@ -574,11 +574,11 @@
               </div>
 
               <!-- Card Details (hidden by default, shown on hover) -->
-              <div class="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-in-out">
+              <div class="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300 ease-in-out dark:bg-onyx-900">
               <div class="overflow-hidden">
               <div class="p-8">
                 <div class="mb-6">
-                  <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-start justify-between mb-3 ">
                     <div>
                       <!-- Card label (name given by user) -->
                       <p

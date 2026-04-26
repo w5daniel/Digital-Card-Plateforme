@@ -22,9 +22,9 @@
   --color-primary-content: oklch(100% 0 0);
   --color-neutral:         oklch(22% 0.03 155);   /* onyx-900 #1c2a24 */
   --color-neutral-content: oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
-  --color-base-100:        oklch(10% 0.02 155);   /* onyx-950 #0a100d */
-  --color-base-200:        oklch(22% 0.03 155);   /* onyx-900 #1c2a24 */
-  --color-base-300:        oklch(28% 0.035 155);  /* onyx-800 #2b3d37 */
+  --color-base-100:        oklab(27.954% -0.03214 0.01501);  /* onyx-800 #2b3d37 — card/surface */
+  --color-base-200:        oklch(22% 0.03 155);   /* onyx-900 #1c2a24 — page bg */
+  --color-base-300:        oklch(35% 0.04 155);   /* onyx-700 #354c43 — borders */
   --color-base-content:    oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
 }
 

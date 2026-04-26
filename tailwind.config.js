@@ -145,9 +145,9 @@ export default {
           'accent-content':  '#ffffff',
           neutral:           '#1c2a24', // onyx-900
           'neutral-content': '#f9f6f5', // powder-100
-          'base-100':        '#0a100d', // onyx-950
-          'base-200':        '#1c2a24', // onyx-900
-          'base-300':        '#2b3d37', // onyx-800
+          'base-100':        '#2b3d37', // onyx-800 — card/surface
+          'base-200':        '#1c2a24', // onyx-900 — page bg
+          'base-300':        '#354c43', // onyx-700 — borders
           'base-content':    '#f9f6f5', // powder-100
           info:              '#36bffa',
           'info-content':    '#0c4a6e',

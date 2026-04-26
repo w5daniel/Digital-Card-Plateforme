@@ -68,7 +68,7 @@
             <!-- Notification Panel -->
             <div
               v-if="notifPanelOpen"
-              class="absolute right-0 top-14 w-80 rounded-xl shadow-xl border overflow-hidden z-50 bg-base-100 border-base-300"
+              class="absolute right-0 top-14 w-80 rounded-xl shadow-xl border overflow-hidden z-50 bg-base-100 border-base-300 dark:bg-onyx-900"
             >
               <!-- Panel Header -->
               <div
@@ -183,7 +183,7 @@
             <!-- Dropdown Panel -->
             <div
               v-if="dropdownOpen"
-              class="absolute right-0 top-14 w-56 rounded-xl shadow-xl border overflow-hidden z-50 bg-base-100 border-base-300"
+              class="absolute right-0 top-14 w-56 rounded-xl shadow-xl border overflow-hidden z-50 bg-base-100 border-base-300 dark:bg-onyx-900"
             >
               <!-- User Info Header -->
               <div class="px-4 py-3 border-b border-base-300 bg-base-200/40">

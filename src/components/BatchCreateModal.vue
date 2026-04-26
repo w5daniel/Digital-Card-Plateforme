@@ -1,10 +1,10 @@
 <template>
   <Teleport to="body">
     <Transition name="modal-fade">
-      <div v-if="visible" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <div v-if="visible" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 ">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="$emit('close')"></div>
         <div
-          class="relative w-full max-w-2xl bg-base-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          class="relative w-full max-w-2xl bg-base-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] dark:bg-onyx-900"
         >
           <!-- Header -->
           <div
