@@ -4,7 +4,7 @@
     :class="
       hideLayout
         ? 'h-screen overflow-hidden'
-        : 'min-h-screen flex flex-col bg-base-100 text-base-content transition-colors duration-200'
+        : 'min-h-screen flex flex-col bg-powder-50 dark:bg-onyx-950 text-onyx-900 dark:text-powder-100 transition-colors duration-200'
     "
   >
     <NavBar v-if="!hideLayout" />
@@ -35,7 +35,7 @@ const hideLayout = computed(() => !!route.meta?.hideLayout)
 const hideFooter = computed(() => !!route.meta?.hideLayout || !!route.meta?.hideFooter)
 
 onMounted(() => {
-  themeStore.applyTheme()
+  themeStore.initTheme()
 })
 </script>
 

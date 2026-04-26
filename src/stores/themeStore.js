@@ -21,10 +21,10 @@ export const useThemeStore = defineStore('theme', () => {
   const applyTheme = () => {
     if (darkMode.value) {
       document.documentElement.classList.add('dark')
-      document.documentElement.setAttribute('data-theme', 'ecodev-dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark')
-      document.documentElement.setAttribute('data-theme', 'ecodev-light')
+      document.documentElement.setAttribute('data-theme', 'light')
     }
   }
 

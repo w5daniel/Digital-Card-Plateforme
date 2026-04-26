@@ -4,6 +4,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── DaisyUI 5 theme override — force flame/onyx/powder palette ── */
+:root,
+[data-theme="light"] {
+  --color-primary:         oklch(55% 0.22 30);   /* flame-500 #e83800 */
+  --color-primary-content: oklch(100% 0 0);       /* white */
+  --color-neutral:         oklch(35% 0.04 155);   /* onyx-700 #354c43 */
+  --color-neutral-content: oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
+  --color-base-100:        oklch(99% 0.003 60);   /* powder-50 #fdfcfb */
+  --color-base-200:        oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
+  --color-base-300:        oklch(94% 0.01 50);    /* powder-200 #f2ece9 */
+  --color-base-content:    oklch(22% 0.03 155);   /* onyx-900 #1c2a24 */
+}
+
+[data-theme="dark"] {
+  --color-primary:         oklch(55% 0.22 30);   /* flame-500 #e83800 */
+  --color-primary-content: oklch(100% 0 0);
+  --color-neutral:         oklch(22% 0.03 155);   /* onyx-900 #1c2a24 */
+  --color-neutral-content: oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
+  --color-base-100:        oklch(10% 0.02 155);   /* onyx-950 #0a100d */
+  --color-base-200:        oklch(22% 0.03 155);   /* onyx-900 #1c2a24 */
+  --color-base-300:        oklch(28% 0.035 155);  /* onyx-800 #2b3d37 */
+  --color-base-content:    oklch(97% 0.005 60);   /* powder-100 #f9f6f5 */
+}
+
 @layer base {
   body {
     @apply bg-base-100 text-base-content font-sans transition-colors duration-200;

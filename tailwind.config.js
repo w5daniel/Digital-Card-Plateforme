@@ -5,6 +5,30 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: {
+          50: '#fef2f3',
+          100: '#fde6e7',
+          200: '#fbd0d5',
+          300: '#f7aab2',
+          400: '#f27a8a',
+          500: '#e63950',
+          600: '#d31f3c',
+          700: '#b01530',
+          800: '#94152d',
+          900: '#7d152a',
+        },
+        secondary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#b9e6fe',
+          300: '#7cd4fd',
+          400: '#36bffa',
+          500: '#0ba5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
         accent: {
           50: '#fefce8',
           100: '#fef9c3',
@@ -88,7 +112,7 @@ export default {
   daisyui: {
     themes: [
       {
-        'ecodev-light': {
+        light: {
           primary:           '#e83800', // flame-500
           'primary-content': '#ffffff',
           secondary:         '#0ba5e9', // secondary-500
@@ -112,7 +136,7 @@ export default {
         },
       },
       {
-        'ecodev-dark': {
+        dark: {
           primary:           '#e83800', // flame-500
           'primary-content': '#ffffff',
           secondary:         '#0369a1', // secondary-700
@@ -136,7 +160,7 @@ export default {
         },
       },
     ],
-    darkTheme: 'ecodev-dark',
+    darkTheme: 'dark',
     base: true,
     styled: true,
     utils: true,
