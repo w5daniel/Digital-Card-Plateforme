@@ -4,25 +4,18 @@
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <Search
-          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-          :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"
         />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Nom, slug, catégorie..."
-          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
-          :class="
-            themeStore.darkMode
-              ? 'bg-onyx-800 border-onyx-700 text-white placeholder-onyx-500'
-              : 'bg-powder-100 border-onyx-200 text-onyx-900 placeholder-onyx-400'
-          "
+          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500 bg-base-100 border-base-300 text-base-content placeholder:text-base-content/40"
         />
       </div>
       <div class="flex items-center justify-between gap-3">
         <p
-          class="text-xs whitespace-nowrap"
-          :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+          class="text-xs whitespace-nowrap text-base-content/40"
         >
           {{ filteredTemplates.length }} modèle(s)
           <span v-if="filteredTemplates.length !== cardsStore.getAllTemplates.length">
@@ -59,10 +52,7 @@
       <div
         v-for="(tmpl, idx) in filteredTemplates"
         :key="tmpl.slug"
-        class="rounded-xl border overflow-hidden hover:shadow-md transition-shadow"
-        :class="
-          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
-        "
+        class="rounded-xl border overflow-hidden hover:shadow-md transition-shadow bg-base-100 border-base-300"
       >
         <!-- ── Live preview — adaptive aspect ratio, centred card, dot-grid backdrop ── -->
         <!--
@@ -101,12 +91,11 @@
         <div class="p-3">
           <div class="mb-1">
             <h3
-              class="font-semibold text-sm"
-              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
+              class="font-semibold text-sm text-base-content"
             >
               {{ tmpl.name }}
             </h3>
-            <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+            <p class="text-xs text-base-content/40">
               {{ tmpl.slug }} · {{ tmpl.category }}
             </p>
           </div>
@@ -116,7 +105,7 @@
               SELECT COUNT(*) FROM cards WHERE template_slug = :slug
             Pour l'instant la valeur est toujours 0 (non trackée côté front)
           -->
-          <p class="text-xs mb-3" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+          <p class="text-xs mb-3 text-base-content/40">
             Utilisé {{ getUsageCount(tmpl.slug) }} fois
           </p>
 
@@ -134,9 +123,7 @@
               :class="
                 tmpl.isPremium
                   ? 'border-yellow-500/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10'
-                  : themeStore.darkMode
-                    ? 'border-onyx-600 text-onyx-400 hover:bg-onyx-700'
-                    : 'border-onyx-200 text-onyx-500 hover:bg-powder-100'
+                  : 'border-base-300 text-base-content/50 hover:bg-base-200'
               "
             >
               {{ tmpl.isPremium ? 'Retirer Premium' : 'Marquer Premium' }}
@@ -150,12 +137,7 @@
             -->
             <button
               @click="router.push('/editor?admin-edit=' + tmpl.slug)"
-              class="p-1.5 rounded-lg transition-colors"
-              :class="
-                themeStore.darkMode
-                  ? 'text-onyx-400 hover:bg-onyx-700'
-                  : 'text-onyx-400 hover:bg-powder-100'
-              "
+              class="p-1.5 rounded-lg transition-colors text-base-content/40 hover:bg-base-200"
               title="Modifier dans l'éditeur"
             >
               <Pencil class="w-4 h-4" />
@@ -182,8 +164,7 @@
       <!-- État vide -->
       <div
         v-if="filteredTemplates.length === 0"
-        class="col-span-3 text-center py-12"
-        :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+        class="col-span-3 text-center py-12 text-base-content/40"
       >
         <p class="text-sm">
           {{
@@ -212,33 +193,22 @@
       ref="deleteModalRef"
     >
       <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="
-          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-powder-200'
-        "
+        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
       >
-        <h3
-          class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
-        >
+        <h3 class="font-semibold mb-2 text-base-content">
           Supprimer le modèle
         </h3>
-        <p class="text-sm mb-1" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
+        <p class="text-sm mb-1 text-base-content/50">
           Supprimer <strong>{{ templateToDelete.name }}</strong> ?
         </p>
-        <p class="text-xs mb-4" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+        <p class="text-xs mb-4 text-base-content/40">
           Le modèle sera retiré de la galerie. Les cartes déjà créées depuis ce modèle ne seront pas
           affectées.
         </p>
         <div class="flex space-x-3">
           <button
             @click="templateToDelete = null"
-            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
-            :class="
-              themeStore.darkMode
-                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
-                : 'border-onyx-200 text-onyx-700 hover:bg-powder-100'
-            "
+            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors border-base-300 text-base-content/80 hover:bg-base-200"
           >
             Annuler
           </button>

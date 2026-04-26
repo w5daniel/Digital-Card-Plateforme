@@ -7,39 +7,31 @@
 
         <!-- Modal -->
         <div
-          class="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-          :class="dark ? 'bg-gray-900 border border-gray-700' : 'bg-white'"
+          class="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] bg-base-100 border border-base-300"
           @click.stop
         >
           <!-- Header -->
           <div
-            class="px-6 py-4 flex items-center justify-between border-b"
-            :class="dark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-gray-50/50'"
+            class="px-6 py-4 flex items-center justify-between border-b border-base-300 bg-base-200/40"
           >
             <div class="flex items-center gap-3">
               <div
-                class="w-10 h-10 rounded-xl flex items-center justify-center"
-                :class="dark ? 'bg-flame-900/30 text-flame-400' : 'bg-flame-100 text-flame-600'"
+                class="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary"
               >
                 <Plus class="w-5 h-5" />
               </div>
               <div>
-                <h2 class="text-lg font-bold" :class="dark ? 'text-white' : 'text-gray-900'">
+                <h2 class="text-lg font-bold text-base-content">
                   Créer une carte
                 </h2>
-                <p class="text-xs" :class="dark ? 'text-gray-400' : 'text-gray-500'">
+                <p class="text-xs text-base-content/40">
                   Depuis le modèle <span class="font-semibold">{{ templateModel.name }}</span>
                 </p>
               </div>
             </div>
             <button
               @click="$emit('close')"
-              class="p-2 rounded-lg transition-colors"
-              :class="
-                dark
-                  ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                  : 'text-gray-500 hover:bg-gray-200'
-              "
+              class="p-2 rounded-lg transition-colors text-base-content/40 hover:bg-base-200 hover:text-base-content"
             >
               <X class="w-5 h-5" />
             </button>
@@ -50,8 +42,7 @@
             <!-- Nom de la carte -->
             <div class="mb-5">
               <label
-                class="block text-sm font-medium mb-1.5"
-                :class="dark ? 'text-gray-300' : 'text-gray-700'"
+                class="block text-sm font-medium mb-1.5 text-base-content/70"
                 >Nom de la carte</label
               >
               <input
@@ -60,9 +51,9 @@
                 class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors outline-none"
                 :class="[
                   formErrors._cardName
-                    ? 'border-red-400 dark:border-red-500'
-                    : dark ? 'border-gray-700 focus:border-flame-500' : 'border-gray-200 focus:border-flame-500',
-                  dark ? 'bg-gray-800 text-white placeholder-gray-500' : 'bg-white text-gray-900',
+                    ? 'border-error'
+                    : 'border-base-300 focus:border-primary',
+                  'bg-base-100 text-base-content placeholder:text-base-content/40',
                 ]"
                 placeholder="Ex. Carte de Jean"
                 @blur="formErrors._cardName = validateField('cardName', cardName)"
@@ -71,18 +62,17 @@
             </div>
 
             <!-- Diviseur -->
-            <div class="border-t my-6" :class="dark ? 'border-gray-800' : 'border-gray-100'"></div>
+            <div class="border-t my-6 border-base-300"></div>
 
             <!-- Champs configurés -->
-            <h3 class="text-sm font-bold mb-4" :class="dark ? 'text-gray-200' : 'text-gray-800'">
+            <h3 class="text-sm font-bold mb-4 text-base-content/90">
               Informations de contact
             </h3>
 
             <div class="space-y-4">
               <div v-for="f in fieldsFromTemplate" :key="f.role">
                 <label
-                  class="block text-sm font-medium mb-1.5"
-                  :class="dark ? 'text-gray-300' : 'text-gray-700'"
+                  class="block text-sm font-medium mb-1.5 text-base-content/70"
                 >
                   {{ f.label }} <span class="text-red-400">*</span>
                 </label>
@@ -93,9 +83,9 @@
                   class="w-full px-3 py-2.5 rounded-xl border text-sm transition-colors outline-none"
                   :class="[
                     formErrors[f.role]
-                      ? 'border-red-400 dark:border-red-500'
-                      : dark ? 'border-gray-700 focus:border-flame-500' : 'border-gray-200 focus:border-flame-500',
-                    dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900',
+                      ? 'border-error'
+                      : 'border-base-300 focus:border-primary',
+                    'bg-base-100 text-base-content',
                   ]"
                   @blur="validateFormField(f.role, formData[f.role])"
                 />
@@ -106,17 +96,11 @@
 
           <!-- Footer -->
           <div
-            class="px-6 py-4 flex gap-3 border-t"
-            :class="dark ? 'border-gray-800 bg-gray-900/80' : 'border-gray-100 bg-gray-50/80'"
+            class="px-6 py-4 flex gap-3 border-t border-base-300 bg-base-200/50"
           >
             <button
               @click="$emit('close')"
-              class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              :class="
-                dark
-                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-              "
+              class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors bg-base-200 text-base-content/70 hover:bg-base-300"
             >
               Annuler
             </button>

@@ -4,24 +4,21 @@
       <div v-if="visible" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="$emit('close')"></div>
         <div
-          class="relative w-full max-w-2xl bg-white dark:bg-onyx-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          class="relative w-full max-w-2xl bg-base-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
           <!-- Header -->
           <div
-            class="px-6 py-4 border-b flex justify-between items-center"
-            :class="dark ? 'border-onyx-800' : 'border-gray-200'"
+            class="px-6 py-4 border-b flex justify-between items-center border-base-300"
           >
             <h3
-              class="text-xl font-bold flex items-center gap-2"
-              :class="dark ? 'text-white' : 'text-gray-900'"
+              class="text-xl font-bold flex items-center gap-2 text-base-content"
             >
               <Users class="w-5 h-5 text-flame-500" />
               Génération en lot
             </h3>
             <button
               @click="$emit('close')"
-              class="p-1 rounded-lg transition-colors"
-              :class="dark ? 'text-gray-400 hover:bg-onyx-800' : 'text-gray-500 hover:bg-gray-100'"
+              class="p-1 rounded-lg transition-colors text-base-content/40 hover:bg-base-200"
             >
               <X class="w-5 h-5" />
             </button>
@@ -30,18 +27,14 @@
           <!-- Steps indicator -->
           <div class="px-6 pt-4 flex items-center gap-2 text-xs font-medium">
             <template v-for="(label, i) in stepLabels" :key="i">
-              <span v-if="i > 0" class="text-gray-300 dark:text-gray-600">/</span>
+              <span v-if="i > 0" class="text-base-content/40">/</span>
               <span
                 :class="[
                   i === step
-                    ? 'text-flame-500 font-bold'
+                    ? 'text-primary font-bold'
                     : i < step
-                      ? dark
-                        ? 'text-gray-300'
-                        : 'text-gray-500'
-                      : dark
-                        ? 'text-gray-600'
-                        : 'text-gray-400',
+                      ? 'text-base-content/60'
+                      : 'text-base-content/40',
                 ]"
                 >{{ i + 1 }}. {{ label }}</span
               >
@@ -53,8 +46,7 @@
             <!-- ═══ STEP 0 — Upload ═══ -->
             <template v-if="step === 0">
               <p
-                class="text-sm mb-6 leading-relaxed"
-                :class="dark ? 'text-gray-300' : 'text-gray-600'"
+                class="text-sm mb-6 leading-relaxed text-base-content/60"
               >
                 Importez un fichier Excel ou CSV contenant les données de vos contacts.
               </p>
@@ -62,12 +54,7 @@
               <div class="mb-4">
                 <button
                   @click="downloadTemplate"
-                  class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-all"
-                  :class="
-                    dark
-                      ? 'bg-onyx-800 border-onyx-700 text-white hover:bg-onyx-700'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  "
+                  class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-all bg-base-200 border-base-300 text-base-content hover:bg-base-300"
                 >
                   <Download class="w-4 h-4" />
                   Télécharger le modèle (.xlsx)
@@ -77,14 +64,12 @@
               <label
                 class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all"
                 :class="
-                  dark
-                    ? 'bg-onyx-800/50 border-onyx-700 hover:border-flame-500 hover:bg-onyx-800'
-                    : 'bg-gray-50 border-gray-300 hover:border-flame-500 hover:bg-gray-100'
+                  'bg-base-200/50 border-base-300 hover:border-primary hover:bg-base-200'
                 "
               >
                 <div class="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload class="w-8 h-8 mb-2 text-gray-400" />
-                  <p class="text-sm mb-1" :class="dark ? 'text-gray-300' : 'text-gray-600'">
+                  <p class="text-sm mb-1 text-base-content/60">
                     <span class="font-semibold text-flame-500">Cliquez pour ajouter</span> ou
                     glissez-déposez
                   </p>
@@ -101,16 +86,15 @@
 
               <div
                 v-if="parsedData.length > 0"
-                class="mt-4 p-4 rounded-xl border"
-                :class="dark ? 'bg-onyx-800 border-onyx-700' : 'bg-gray-50 border-gray-200'"
+                class="mt-4 p-4 rounded-xl border bg-base-200 border-base-300"
               >
                 <div class="flex items-center gap-3">
                   <CheckCircle2 class="w-6 h-6 text-emerald-500" />
                   <div>
-                    <h4 class="text-sm font-bold" :class="dark ? 'text-white' : 'text-gray-900'">
+                    <h4 class="text-sm font-bold text-base-content">
                       Fichier prêt !
                     </h4>
-                    <p class="text-xs" :class="dark ? 'text-gray-400' : 'text-gray-500'">
+                    <p class="text-xs text-base-content/40">
                       {{ parsedData.length }} contact(s) — {{ excelHeaders.length }} colonne(s)
                       détectée(s).
                     </p>
@@ -122,8 +106,7 @@
             <!-- ═══ STEP 1 — Mapping ═══ -->
             <template v-if="step === 1">
               <p
-                class="text-sm mb-4 leading-relaxed"
-                :class="dark ? 'text-gray-300' : 'text-gray-600'"
+                class="text-sm mb-4 leading-relaxed text-base-content/60"
               >
                 Associez chaque colonne de votre fichier à un champ du modèle. La détection
                 automatique est appliquée — ajustez si nécessaire.
@@ -132,20 +115,14 @@
               <div class="space-y-3">
                 <div v-for="header in excelHeaders" :key="header" class="flex items-center gap-3">
                   <span
-                    class="w-36 truncate text-sm font-medium shrink-0"
-                    :class="dark ? 'text-gray-200' : 'text-gray-700'"
+                    class="w-36 truncate text-sm font-medium shrink-0 text-base-content/80"
                     :title="header"
                     >{{ header }}</span
                   >
                   <ArrowRight class="w-4 h-4 shrink-0 text-gray-400" />
                   <select
                     v-model="columnMapping[header]"
-                    class="flex-1 text-sm rounded-lg px-3 py-2 border"
-                    :class="
-                      dark
-                        ? 'bg-onyx-800 border-onyx-700 text-white'
-                        : 'bg-white border-gray-300 text-gray-700'
-                    "
+                    class="flex-1 text-sm rounded-lg px-3 py-2 border bg-base-100 border-base-300 text-base-content"
                   >
                     <option value="">— Ignorer —</option>
                     <option v-for="f in templateFields" :key="f.role" :value="f.role">
@@ -163,31 +140,27 @@
             <!-- ═══ STEP 2 — Preview ═══ -->
             <template v-if="step === 2">
               <p
-                class="text-sm mb-4 leading-relaxed"
-                :class="dark ? 'text-gray-300' : 'text-gray-600'"
+                class="text-sm mb-4 leading-relaxed text-base-content/60"
               >
                 Aperçu des {{ previewRows.length }} première(s) carte(s) sur
                 {{ parsedData.length }} :
               </p>
 
               <div
-                class="overflow-x-auto rounded-lg border"
-                :class="dark ? 'border-onyx-700' : 'border-gray-200'"
+                class="overflow-x-auto rounded-lg border border-base-300"
               >
                 <table class="w-full text-xs">
                   <thead>
-                    <tr :class="dark ? 'bg-onyx-800' : 'bg-gray-50'">
+                    <tr class="bg-base-200">
                       <th
-                        class="px-3 py-2 text-left font-semibold"
-                        :class="dark ? 'text-gray-300' : 'text-gray-600'"
+                        class="px-3 py-2 text-left font-semibold text-base-content/60"
                       >
                         #
                       </th>
                       <th
                         v-for="f in mappedFields"
                         :key="f.role"
-                        class="px-3 py-2 text-left font-semibold"
-                        :class="dark ? 'text-gray-300' : 'text-gray-600'"
+                        class="px-3 py-2 text-left font-semibold text-base-content/60"
                       >
                         {{ f.label }}
                       </th>
@@ -197,17 +170,15 @@
                     <tr
                       v-for="(row, idx) in previewRows"
                       :key="idx"
-                      class="border-t"
-                      :class="dark ? 'border-onyx-700' : 'border-gray-100'"
+                      class="border-t border-base-300"
                     >
-                      <td class="px-3 py-2" :class="dark ? 'text-gray-400' : 'text-gray-500'">
+                      <td class="px-3 py-2 text-base-content/40">
                         {{ idx + 1 }}
                       </td>
                       <td
                         v-for="f in mappedFields"
                         :key="f.role"
-                        class="px-3 py-2"
-                        :class="dark ? 'text-gray-200' : 'text-gray-700'"
+                        class="px-3 py-2 text-base-content/80"
                       >
                         {{ getRowValue(row, f.role) || '—' }}
                       </td>
@@ -217,8 +188,7 @@
               </div>
               <p
                 v-if="parsedData.length > 5"
-                class="text-xs mt-2"
-                :class="dark ? 'text-gray-500' : 'text-gray-400'"
+                class="text-xs mt-2 text-base-content/40"
               >
                 ...et {{ parsedData.length - 5 }} autres contacts.
               </p>
@@ -228,14 +198,14 @@
             <template v-if="step === 3">
               <div v-if="isProcessing" class="flex flex-col items-center justify-center py-8">
                 <Loader2 class="w-10 h-10 text-flame-500 animate-spin mb-3" />
-                <span class="text-sm" :class="dark ? 'text-gray-400' : 'text-gray-500'">
+                <span class="text-sm text-base-content/40">
                   Génération en cours... ({{ processedCount }} / {{ parsedData.length }})
                 </span>
               </div>
 
               <div v-else-if="generationResult" class="flex flex-col items-center py-8 gap-3">
                 <CheckCircle2 class="w-12 h-12 text-emerald-500" />
-                <h4 class="text-lg font-bold" :class="dark ? 'text-white' : 'text-gray-900'">
+                <h4 class="text-lg font-bold text-base-content">
                   {{ generationResult.created }} carte(s) créée(s)
                 </h4>
                 <p
@@ -253,14 +223,12 @@
 
           <!-- Actions -->
           <div
-            class="px-6 py-4 border-t flex justify-between gap-3"
-            :class="dark ? 'border-onyx-800 bg-onyx-900/50' : 'border-gray-200 bg-gray-50'"
+            class="px-6 py-4 border-t flex justify-between gap-3 border-base-300 bg-base-200/50"
           >
             <button
               v-if="step > 0 && step < 3"
               @click="step--"
-              class="px-4 py-2 font-medium rounded-lg text-sm transition-colors"
-              :class="dark ? 'text-gray-300 hover:bg-onyx-800' : 'text-gray-600 hover:bg-gray-200'"
+              class="px-4 py-2 font-medium rounded-lg text-sm transition-colors text-base-content/60 hover:bg-base-200"
             >
               Retour
             </button>
@@ -270,10 +238,7 @@
               <button
                 @click="$emit('close')"
                 :disabled="isProcessing"
-                class="px-4 py-2 font-medium rounded-lg text-sm transition-colors disabled:opacity-50"
-                :class="
-                  dark ? 'text-gray-300 hover:bg-onyx-800' : 'text-gray-600 hover:bg-gray-200'
-                "
+                class="px-4 py-2 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 text-base-content/60 hover:bg-base-200"
               >
                 {{ step === 3 && !isProcessing ? 'Fermer' : 'Annuler' }}
               </button>

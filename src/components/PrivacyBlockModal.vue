@@ -4,8 +4,7 @@
       <div v-if="visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="$emit('close')" />
         <div
-          class="relative w-full max-w-md rounded-2xl shadow-2xl p-6"
-          :class="dark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-orange-100'"
+          class="relative w-full max-w-md rounded-2xl shadow-2xl p-6 bg-base-100 border border-orange-200/50"
         >
           <!-- Icon + Title -->
           <div class="flex items-center gap-3 mb-4">
@@ -14,17 +13,17 @@
             >
               🛡️
             </div>
-            <h2 class="text-base font-bold" :class="dark ? 'text-white' : 'text-gray-900'">
+            <h2 class="text-base font-bold text-base-content">
               Protection des données
             </h2>
           </div>
 
           <!-- Body -->
-          <p class="text-sm mb-2" :class="dark ? 'text-gray-300' : 'text-gray-600'">
+          <p class="text-sm mb-2 text-base-content/60">
             Ce modèle contient du <strong>texte stylé</strong> (gras, couleur…) dans des champs
             personnels (nom, email, téléphone…).
           </p>
-          <p class="text-sm mb-5" :class="dark ? 'text-gray-400' : 'text-gray-500'">
+          <p class="text-sm mb-5 text-base-content/50">
             Pour protéger la confidentialité des données, ces champs ne peuvent pas être publiés
             avec du style. Retirez la mise en forme de ces champs ou conservez le modèle en mode
             privé.
@@ -34,12 +33,7 @@
           <div class="flex gap-3">
             <button
               @click="$emit('close')"
-              class="flex-1 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
-              :class="
-                dark
-                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-              "
+              class="flex-1 px-4 py-2 rounded-xl text-sm font-semibold transition-colors bg-base-200 hover:bg-base-300 text-base-content/80"
             >
               Fermer
             </button>

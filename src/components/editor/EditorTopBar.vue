@@ -1,9 +1,6 @@
 <template>
   <header
-    class="flex items-center justify-between px-3 h-14 shrink-0 border-b z-20"
-    :class="
-      themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200 shadow-sm'
-    "
+    class="flex items-center justify-between px-3 h-14 shrink-0 border-b z-20 bg-base-100 border-base-300 shadow-sm"
   >
     <!-- Left: back + file name -->
     <div class="flex items-center gap-2 min-w-0">
@@ -20,8 +17,7 @@
       <img src="/logo-ECODEV.png" alt="ECODEV" class="h-7 w-auto flex-shrink-0" />
 
       <div
-        class="w-px h-5 flex-shrink-0"
-        :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'"
+        class="w-px h-5 flex-shrink-0 bg-base-300"
       />
 
       <!-- Editable file name -->
@@ -38,10 +34,8 @@
           class="bg-transparent font-medium text-sm outline-none rounded px-1.5 py-0.5 truncate max-w-48 transition-colors"
           :class="[
             editorStore.validationErrors.includes('cardName')
-              ? 'ring-1 ring-red-500 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400'
-              : themeStore.darkMode
-                ? 'text-powder-100 hover:bg-onyx-800 focus:bg-onyx-800'
-                : 'text-onyx-800 hover:bg-powder-100 focus:bg-powder-100',
+              ? 'ring-1 ring-red-500 bg-red-50 text-red-600'
+              : 'text-base-content hover:bg-base-200 focus:bg-base-200',
           ]"
           :style="{ width: nameWidth }"
           :placeholder="editorStore.validationErrors.includes('cardName') ? 'Nom requis…' : ''"
@@ -77,20 +71,15 @@
 
     <!-- Center: Recto / Verso toggle -->
     <div
-      class="flex items-center rounded-lg p-0.5 text-xs font-medium gap-0.5"
-      :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'"
+      class="flex items-center rounded-lg p-0.5 text-xs font-medium gap-0.5 bg-base-200"
     >
       <button
         @click="editorStore.setPage('recto')"
         class="px-3 py-1.5 rounded-md transition-all"
         :class="
           editorStore.activePage === 'recto'
-            ? themeStore.darkMode
-              ? 'bg-onyx-700 text-powder-50 shadow-sm'
-              : 'bg-powder-50 text-onyx-900 shadow-sm'
-            : themeStore.darkMode
-              ? 'text-onyx-400 hover:text-powder-200'
-              : 'text-onyx-500 hover:text-onyx-800'
+            ? 'bg-base-100 text-base-content shadow-sm'
+            : 'text-base-content/40 hover:text-base-content'
         "
       >
         Recto
@@ -100,12 +89,8 @@
         class="px-3 py-1.5 rounded-md transition-all"
         :class="
           editorStore.activePage === 'verso'
-            ? themeStore.darkMode
-              ? 'bg-onyx-700 text-powder-50 shadow-sm'
-              : 'bg-powder-50 text-onyx-900 shadow-sm'
-            : themeStore.darkMode
-              ? 'text-onyx-400 hover:text-powder-200'
-              : 'text-onyx-500 hover:text-onyx-800'
+            ? 'bg-base-100 text-base-content shadow-sm'
+            : 'text-base-content/40 hover:text-base-content'
         "
       >
         Verso
@@ -117,19 +102,14 @@
       <!-- Dark/Light toggle -->
       <button
         @click="themeStore.toggleDarkMode()"
-        class="btn-icon"
-        :class="
-          themeStore.darkMode
-            ? 'text-amber-400 hover:bg-onyx-800'
-            : 'text-onyx-500 hover:bg-powder-100 hover:text-onyx-900'
-        "
+        class="btn-icon-light"
         :title="themeStore.darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'"
       >
         <Sun v-if="themeStore.darkMode" class="w-4 h-4" />
         <Moon v-else class="w-4 h-4" />
       </button>
 
-      <div class="w-px h-5 mx-1" :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-200'" />
+      <div class="w-px h-5 mx-1 bg-base-300" />
 
       <!-- Share -->
       <button
@@ -147,11 +127,6 @@
           @click="exportOpen = !exportOpen"
           :disabled="isCardBlank"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium btn-outline disabled:opacity-40 disabled:cursor-not-allowed"
-          :class="
-            themeStore.darkMode
-              ? 'border-onyx-700 bg-onyx-800 text-powder-200 hover:bg-onyx-700'
-              : 'border-powder-200 bg-powder-50 text-onyx-700 hover:bg-powder-100 shadow-sm'
-          "
           :title="isCardBlank ? 'Ajoutez des éléments avant d\'exporter' : 'Télécharger'"
         >
           <Download class="w-4 h-4" />
@@ -161,19 +136,13 @@
 
         <div
           v-if="exportOpen"
-          class="absolute right-0 top-full mt-1 w-44 rounded-xl shadow-xl border overflow-hidden z-50"
-          :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-700' : 'bg-powder-50 border-powder-200'"
+          class="absolute right-0 top-full mt-1 w-44 rounded-xl shadow-xl border overflow-hidden z-50 bg-base-100 border-base-300"
         >
           <button
             v-for="fmt in exportFormats"
             :key="fmt.label"
             @click="exportCard(fmt.type)"
-            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm btn-ghost-neutral"
-            :class="
-              themeStore.darkMode
-                ? 'text-powder-200'
-                : 'text-onyx-700'
-            "
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm btn-ghost-neutral text-base-content/80"
           >
             <component :is="fmt.icon" class="w-4 h-4 opacity-60" />
             {{ fmt.label }}
@@ -197,9 +166,7 @@
               ? 'bg-green-500 text-white shadow-md shadow-green-500/30'
               : editorStore.isDirty
                 ? 'bg-flame-600 hover:bg-flame-700 text-white shadow-md shadow-flame-500/30'
-                : themeStore.darkMode
-                  ? 'bg-onyx-800 text-onyx-400 opacity-40'
-                  : 'bg-powder-100 text-onyx-400 opacity-40'
+                : 'bg-base-200 text-base-content/40 opacity-40'
           "
         >
           <Check v-if="savedRecently" class="w-4 h-4" />
@@ -236,27 +203,23 @@
         @click.self="showGalleryMetaModal = false"
       >
         <div
-          class="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
-          :class="themeStore.darkMode ? 'bg-onyx-900 border border-onyx-700' : 'bg-powder-50 border border-powder-200'"
+          class="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden bg-base-100 border border-base-300"
         >
           <!-- Header -->
           <div
-            class="flex items-center justify-between px-5 py-4 border-b"
-            :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-100'"
+            class="flex items-center justify-between px-5 py-4 border-b border-base-300"
           >
             <div>
               <h2
-                class="font-bold text-base"
-                :class="themeStore.darkMode ? 'text-powder-50' : 'text-onyx-900'"
+                class="font-bold text-base text-base-content"
               >Informations du modèle</h2>
-              <p class="text-xs mt-0.5" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
+              <p class="text-xs mt-0.5 text-base-content/40">
                 Ces infos apparaissent dans la galerie
               </p>
             </div>
             <button
               @click="showGalleryMetaModal = false"
-              class="p-1.5 rounded-lg transition-colors"
-              :class="themeStore.darkMode ? 'text-onyx-400 hover:bg-onyx-800' : 'text-onyx-400 hover:bg-powder-100'"
+              class="p-1.5 rounded-lg transition-colors text-base-content/40 hover:bg-base-200"
             ><X class="w-4 h-4" /></button>
           </div>
 
@@ -264,21 +227,20 @@
           <div class="px-5 py-4 space-y-4">
             <!-- Nom (éditable) -->
             <div>
-              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-700'">
+              <label class="block text-xs font-medium mb-1 text-base-content/70">
                 Nom du modèle
               </label>
               <input
                 v-model="galleryMetaName"
                 type="text"
                 placeholder="Nom du modèle…"
-                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
-                :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-50 placeholder-onyx-400' : 'bg-powder-50 border-powder-200 text-onyx-900 placeholder-onyx-400'"
+                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 text-base-content placeholder:text-base-content/40"
               />
             </div>
 
             <!-- Catégorie (combobox libre) -->
             <div>
-              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-700'">
+              <label class="block text-xs font-medium mb-1 text-base-content/70">
                 Catégorie
               </label>
               <input
@@ -286,8 +248,7 @@
                 list="gallery-categories"
                 type="text"
                 placeholder="Choisir ou saisir une catégorie…"
-                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
-                :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-50 placeholder-onyx-400' : 'bg-powder-50 border-powder-200 text-onyx-900 placeholder-onyx-400'"
+                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 text-base-content placeholder:text-base-content/40"
               />
               <datalist id="gallery-categories">
                 <option v-for="cat in TEMPLATE_CATEGORIES" :key="cat" :value="cat" />
@@ -296,7 +257,7 @@
 
             <!-- Description -->
             <div>
-              <label class="block text-xs font-medium mb-1" :class="themeStore.darkMode ? 'text-powder-300' : 'text-onyx-700'">
+              <label class="block text-xs font-medium mb-1 text-base-content/70">
                 Description
                 <span class="font-normal opacity-60">(optionnelle)</span>
               </label>
@@ -304,21 +265,20 @@
                 v-model="galleryMetaDescription"
                 rows="3"
                 placeholder="Décrivez ce modèle en quelques mots…"
-                class="w-full px-3 py-2 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-flame-500"
-                :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-50 placeholder-onyx-400' : 'bg-powder-50 border-powder-200 text-onyx-900 placeholder-onyx-400'"
+                class="w-full px-3 py-2 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 text-base-content placeholder:text-base-content/40"
               />
             </div>
 
             <!-- Premium toggle -->
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium" :class="themeStore.darkMode ? 'text-powder-200' : 'text-onyx-800'">Modèle Premium</p>
-                <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Réservé aux abonnés premium</p>
+                <p class="text-sm font-medium text-base-content">Modèle Premium</p>
+                <p class="text-xs text-base-content/50">Réservé aux abonnés premium</p>
               </div>
               <button
                 @click="galleryMetaIsPremium = !galleryMetaIsPremium"
                 class="relative inline-flex h-6 w-11 rounded-full transition-colors duration-200"
-                :class="galleryMetaIsPremium ? 'bg-yellow-500' : (themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-300')"
+                :class="galleryMetaIsPremium ? 'bg-yellow-500' : 'bg-base-300'"
               >
                 <span
                   class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
@@ -334,8 +294,7 @@
           >
             <button
               @click="showGalleryMetaModal = false"
-              class="flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors"
-              :class="themeStore.darkMode ? 'border-onyx-700 text-powder-300 hover:bg-onyx-800' : 'border-powder-200 text-onyx-700 hover:bg-powder-50'"
+              class="flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors border-base-300 text-base-content/70 hover:bg-base-200"
             >Annuler</button>
             <button
               @click="confirmGalleryMeta"

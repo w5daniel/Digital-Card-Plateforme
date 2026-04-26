@@ -12,17 +12,12 @@
     <!-- ── Filtres ── -->
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400" />
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
         <input
           v-model="search"
           type="text"
           placeholder="Nom de carte, propriétaire..."
-          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
-          :class="
-            themeStore.darkMode
-              ? 'bg-onyx-800 border-onyx-700 text-white placeholder-onyx-500'
-              : 'bg-powder-100 border-onyx-200 text-onyx-900 placeholder-onyx-400'
-          "
+          class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500 bg-base-100 border-base-300 text-base-content placeholder:text-base-content/40"
         />
       </div>
       <div class="flex items-center space-x-2">
@@ -34,9 +29,7 @@
           :class="
             activeFilter === f.value
               ? 'bg-flame-500 border-flame-500 text-white'
-              : themeStore.darkMode
-                ? 'border-onyx-700 text-onyx-400 hover:bg-onyx-800'
-                : 'border-onyx-200 text-onyx-600 hover:bg-powder-50'
+              : 'border-base-300 text-base-content/50 hover:bg-base-200'
           "
         >
           {{ f.label }}
@@ -52,7 +45,7 @@
       TODO backend : le total et les vues globales viennent du serveur :
         SELECT COUNT(*) AS total, SUM(views) AS total_views FROM cards WHERE deleted_at IS NULL
     -->
-    <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
+    <p class="text-xs text-base-content/40">
       {{ filteredCards.length }} carte(s)
       <span v-if="filteredCards.length !== allCards.length">
         sur {{ allCards.length }} au total
@@ -62,16 +55,13 @@
 
     <!-- ── Table ── -->
     <div
-      class="rounded-xl border overflow-hidden"
-      :class="themeStore.darkMode ? 'border-onyx-700' : 'border-onyx-200'"
+      class="rounded-xl border overflow-hidden border-base-300"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr
-              :class="
-                themeStore.darkMode ? 'bg-onyx-800 text-onyx-400' : 'bg-powder-50 text-onyx-500'
-              "
+              class="bg-base-200 text-base-content/50"
             >
               <th class="text-left px-4 py-3 font-medium">Carte</th>
               <th class="text-left px-4 py-3 font-medium hidden sm:table-cell">Propriétaire</th>
@@ -83,28 +73,21 @@
             </tr>
           </thead>
           <tbody
-            class="divide-y"
-            :class="themeStore.darkMode ? 'divide-onyx-700' : 'divide-powder-100'"
+            class="divide-y divide-base-300"
           >
             <tr
               v-for="card in filteredCards"
               :key="card.id"
-              :class="
-                themeStore.darkMode
-                  ? 'bg-onyx-900 hover:bg-onyx-800'
-                  : 'bg-powder-50 hover:bg-powder-100'
-              "
+              class="bg-base-100 hover:bg-base-200"
             >
               <!-- Nom + icône -->
               <td class="px-4 py-3">
                 <div class="flex items-center space-x-2">
                   <CreditCard
-                    class="w-4 h-4 flex-shrink-0"
-                    :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+                    class="w-4 h-4 flex-shrink-0 text-base-content/40"
                   />
                   <p
-                    class="font-medium truncate max-w-[140px]"
-                    :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
+                    class="font-medium truncate max-w-[140px] text-base-content"
                   >
                     {{ card.name || 'Sans titre' }}
                   </p>
@@ -118,14 +101,12 @@
               <td class="px-4 py-3 hidden sm:table-cell">
                 <div class="min-w-0">
                   <p
-                    class="text-sm truncate"
-                    :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'"
+                    class="text-sm truncate text-base-content/80"
                   >
                     {{ card.ownerName }}
                   </p>
                   <p
-                    class="text-xs truncate"
-                    :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+                    class="text-xs truncate text-base-content/40"
                   >
                     {{ card.ownerEmail }}
                   </p>
@@ -135,8 +116,7 @@
               <!-- Modèle -->
               <td class="px-4 py-3 hidden md:table-cell">
                 <span
-                  class="text-xs"
-                  :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+                  class="text-xs text-base-content/40"
                 >
                   {{ card.template || '—' }}
                 </span>
@@ -152,9 +132,7 @@
                   :class="
                     card.isPublic
                       ? 'bg-blue-500/10 text-blue-500'
-                      : themeStore.darkMode
-                        ? 'bg-onyx-700 text-onyx-400'
-                        : 'bg-powder-100 text-onyx-500'
+                      : 'bg-base-200 text-base-content/50'
                   "
                 >
                   {{ card.isPublic ? 'Publique' : 'Privée' }}
@@ -168,10 +146,9 @@
               <td class="px-4 py-3 hidden lg:table-cell">
                 <div class="flex items-center space-x-1">
                   <Eye
-                    class="w-3.5 h-3.5"
-                    :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+                    class="w-3.5 h-3.5 text-base-content/40"
                   />
-                  <span :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'">
+                  <span class="text-base-content/80">
                     {{ card.views || 0 }}
                   </span>
                 </div>
@@ -180,8 +157,7 @@
               <!-- Date -->
               <td class="px-4 py-3 hidden lg:table-cell">
                 <span
-                  class="text-xs"
-                  :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+                  class="text-xs text-base-content/40"
                 >
                   {{ formatDate(card.createdAt) }}
                 </span>
@@ -203,9 +179,7 @@
                     :class="
                       card.isPublic
                         ? 'text-blue-500 hover:bg-blue-500/10'
-                        : themeStore.darkMode
-                          ? 'text-onyx-400 hover:bg-onyx-700'
-                          : 'text-onyx-400 hover:bg-powder-100'
+                        : 'text-base-content/40 hover:bg-base-200'
                     "
                     :title="card.isPublic ? 'Rendre privée' : 'Rendre publique'"
                   >
@@ -235,8 +209,7 @@
             <tr v-if="filteredCards.length === 0">
               <td
                 colspan="7"
-                class="px-4 py-12 text-center text-sm"
-                :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+                class="px-4 py-12 text-center text-sm text-base-content/40"
               >
                 <p>
                   {{
@@ -269,23 +242,17 @@
       ref="deleteModalRef"
     >
       <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="
-          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-onyx-200'
-        "
+        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
       >
-        <h3
-          class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
-        >
+        <h3 class="font-semibold mb-2 text-base-content">
           Supprimer la carte
         </h3>
-        <p class="text-sm mb-1" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
+        <p class="text-sm mb-1 text-base-content/50">
           Supprimer définitivement
           <strong>"{{ cardToDelete.name || 'Sans titre' }}"</strong>
           de {{ cardToDelete.ownerName }} ?
         </p>
-        <p class="text-xs mb-4" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+        <p class="text-xs mb-4 text-base-content/40">
           Cette action est irréversible. Le lien de partage sera désactivé.
           <!--
             TODO backend : ajouter un avertissement si la carte est liée à un QR code imprimé
@@ -295,12 +262,7 @@
         <div class="flex space-x-3">
           <button
             @click="cardToDelete = null"
-            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
-            :class="
-              themeStore.darkMode
-                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
-                : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'
-            "
+            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors border-base-300 text-base-content/80 hover:bg-base-200"
           >
             Annuler
           </button>
@@ -323,18 +285,12 @@
       ref="toggleModalRef"
     >
       <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="
-          themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-onyx-200'
-        "
+        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
       >
-        <h3
-          class="font-semibold mb-2"
-          :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
-        >
+        <h3 class="font-semibold mb-2 text-base-content">
           {{ cardToToggle.isPublic ? 'Rendre privée' : 'Rendre publique' }}
         </h3>
-        <p class="text-sm mb-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
+        <p class="text-sm mb-4 text-base-content/50">
           {{
             cardToToggle.isPublic
               ? 'Retirer de la galerie communauté'
@@ -346,12 +302,7 @@
         <div class="flex space-x-3">
           <button
             @click="cardToToggle = null"
-            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
-            :class="
-              themeStore.darkMode
-                ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700'
-                : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'
-            "
+            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors border-base-300 text-base-content/80 hover:bg-base-200"
           >
             Annuler
           </button>

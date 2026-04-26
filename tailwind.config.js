@@ -5,30 +5,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fef2f3',
-          100: '#fde6e7',
-          200: '#fbd0d5',
-          300: '#f7aab2',
-          400: '#f27a8a',
-          500: '#e63950',
-          600: '#d31f3c',
-          700: '#b01530',
-          800: '#94152d',
-          900: '#7d152a',
-        },
-        secondary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#b9e6fe',
-          300: '#7cd4fd',
-          400: '#36bffa',
-          500: '#0ba5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-        },
         accent: {
           50: '#fefce8',
           100: '#fef9c3',
@@ -109,4 +85,61 @@ export default {
     },
   },
   plugins: [require('daisyui')],
+  daisyui: {
+    themes: [
+      {
+        'ecodev-light': {
+          primary:           '#e83800', // flame-500
+          'primary-content': '#ffffff',
+          secondary:         '#0ba5e9', // secondary-500
+          'secondary-content': '#ffffff',
+          accent:            '#eab308', // accent-500
+          'accent-content':  '#ffffff',
+          neutral:           '#354c43', // onyx-700
+          'neutral-content': '#f9f6f5', // powder-100
+          'base-100':        '#fdfcfb', // powder-50
+          'base-200':        '#f9f6f5', // powder-100
+          'base-300':        '#f2ece9', // powder-200
+          'base-content':    '#1c2a24', // onyx-900
+          info:              '#0ba5e9',
+          'info-content':    '#ffffff',
+          success:           '#10b981',
+          'success-content': '#ffffff',
+          warning:           '#f59e0b',
+          'warning-content': '#ffffff',
+          error:             '#ef4444',
+          'error-content':   '#ffffff',
+        },
+      },
+      {
+        'ecodev-dark': {
+          primary:           '#e83800', // flame-500
+          'primary-content': '#ffffff',
+          secondary:         '#0369a1', // secondary-700
+          'secondary-content': '#ffffff',
+          accent:            '#ca8a04', // accent-600
+          'accent-content':  '#ffffff',
+          neutral:           '#1c2a24', // onyx-900
+          'neutral-content': '#f9f6f5', // powder-100
+          'base-100':        '#0a100d', // onyx-950
+          'base-200':        '#1c2a24', // onyx-900
+          'base-300':        '#2b3d37', // onyx-800
+          'base-content':    '#f9f6f5', // powder-100
+          info:              '#36bffa',
+          'info-content':    '#0c4a6e',
+          success:           '#10b981',
+          'success-content': '#ffffff',
+          warning:           '#f59e0b',
+          'warning-content': '#000000',
+          error:             '#f87171',
+          'error-content':   '#ffffff',
+        },
+      },
+    ],
+    darkTheme: 'ecodev-dark',
+    base: true,
+    styled: true,
+    utils: true,
+    logs: false,
+  },
 }

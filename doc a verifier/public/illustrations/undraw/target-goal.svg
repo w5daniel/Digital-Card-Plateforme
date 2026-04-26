@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Target stand -->
+  <rect x="94" y="145" width="12" height="30" rx="2" fill="#CBD5E1"/>
+  <rect x="76" y="170" width="48" height="6" rx="3" fill="#94A3B8"/>
+  <!-- Outer ring -->
+  <circle cx="100" cy="90" r="58" fill="#FCA5A5"/>
+  <!-- Middle ring -->
+  <circle cx="100" cy="90" r="42" fill="white"/>
+  <circle cx="100" cy="90" r="42" fill="#F87171"/>
+  <!-- Inner ring -->
+  <circle cx="100" cy="90" r="26" fill="white"/>
+  <circle cx="100" cy="90" r="26" fill="#FCA5A5"/>
+  <!-- Bullseye -->
+  <circle cx="100" cy="90" r="12" fill="#EF4444"/>
+  <!-- Arrow shaft -->
+  <line x1="42" y1="42" x2="96" y2="86" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Arrow head -->
+  <polygon points="100,90 88,78 82,86" fill="#1E293B"/>
+  <!-- Arrow fletching -->
+  <line x1="42" y1="42" x2="36" y2="50" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="42" y1="42" x2="50" y2="36" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Impact lines -->
+  <line x1="108" y1="80" x2="116" y2="72" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+  <line x1="112" y1="88" x2="122" y2="84" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+  <line x1="106" y1="76" x2="110" y2="66" stroke="#F87171" stroke-width="2" stroke-linecap="round"/>
+</svg>

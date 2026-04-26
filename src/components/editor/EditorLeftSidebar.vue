@@ -2,8 +2,7 @@
   <aside class="flex shrink-0 h-full">
     <!-- Icon rail (56px) -->
     <div
-      class="flex flex-col items-center py-2 gap-0.5 w-14 shrink-0 border-r h-full"
-      :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'"
+      class="flex flex-col items-center py-2 gap-0.5 w-14 shrink-0 border-r h-full bg-base-100 border-base-300"
     >
       <button
         v-for="tab in tabs"
@@ -11,19 +10,14 @@
         @click="toggleTab(tab.id)"
         class="relative flex flex-col items-center gap-0.5 p-2 rounded-lg w-11 transition-all"
         :class="activeTab === tab.id
-          ? themeStore.darkMode
-            ? 'bg-flame-500/15 text-flame-400'
-            : 'bg-flame-50 text-flame-600'
-          : themeStore.darkMode
-            ? 'text-onyx-400 hover:bg-onyx-800 hover:text-powder-300'
-            : 'text-onyx-400 hover:bg-powder-50 hover:text-onyx-700'"
+          ? 'bg-primary/10 text-primary'
+          : 'text-base-content/40 hover:bg-base-200 hover:text-base-content'"
         :title="tab.label"
       >
         <!-- Active left-border indicator -->
         <span
           v-if="activeTab === tab.id"
-          class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full"
-          :class="themeStore.darkMode ? 'bg-flame-400' : 'bg-flame-500'"
+          class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-primary"
         />
         <component :is="tab.icon" class="w-[18px] h-[18px]" />
         <span class="text-[8px] font-medium leading-none">{{ tab.label }}</span>
@@ -41,35 +35,31 @@
     >
       <div
         v-if="activeTab"
-        class="w-72 shrink-0 flex flex-col border-r overflow-hidden"
-        :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'"
+        class="w-72 shrink-0 flex flex-col border-r overflow-hidden bg-base-100 border-base-300"
       >
         <!-- Panel header -->
         <div
-          class="flex items-center justify-between px-4 py-2.5 border-b shrink-0"
-          :class="themeStore.darkMode ? 'border-onyx-800' : 'border-powder-100'"
+          class="flex items-center justify-between px-4 py-2.5 border-b shrink-0 border-base-300"
         >
           <!-- Elements: category detail → show back button -->
           <div v-if="activeTab === 'elements' && activeCategory" class="flex items-center gap-1.5">
             <button
               @click="elementsView = 'browse'; elementsQuery = ''"
-              class="p-1 rounded"
-              :class="themeStore.darkMode ? 'text-onyx-400 hover:bg-onyx-800' : 'text-onyx-400 hover:bg-powder-100'"
+              class="p-1 rounded text-base-content/40 hover:bg-base-200"
             >
               <ArrowLeft class="w-4 h-4" />
             </button>
-            <h3 class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800'">
+            <h3 class="font-semibold text-sm text-base-content">
               {{ activeCategory.name }}
             </h3>
           </div>
           <!-- Default header -->
-          <h3 v-else class="font-semibold text-sm" :class="themeStore.darkMode ? 'text-powder-100' : 'text-onyx-800'">
+          <h3 v-else class="font-semibold text-sm text-base-content">
             {{ currentTab?.label }}
           </h3>
           <button
             @click="activeTab = null"
-            class="p-1 rounded"
-            :class="themeStore.darkMode ? 'text-onyx-400 hover:bg-onyx-800' : 'text-onyx-400 hover:bg-powder-100'"
+            class="p-1 rounded text-base-content/40 hover:bg-base-200"
           >
             <X class="w-4 h-4" />
           </button>

@@ -3,22 +3,17 @@
 
     <!-- ── Barre de recherche ── -->
     <div class="relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400" />
+      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
       <input
         v-model="search"
         type="text"
         placeholder="Nom du modèle, propriétaire..."
-        class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
-        :class="
-          themeStore.darkMode
-            ? 'bg-onyx-800 border-onyx-700 text-white placeholder-onyx-500'
-            : 'bg-powder-100 border-onyx-200 text-onyx-900 placeholder-onyx-400'
-        "
+        class="w-full pl-10 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500 bg-base-100 border-base-300 text-base-content placeholder:text-base-content/40"
       />
     </div>
 
     <!-- Compteur -->
-    <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
+    <p class="text-xs text-base-content/40">
       {{ filteredCommunity.length }} modèle(s) partagé(s) par les utilisateurs
       <span v-if="filteredCommunity.length !== communityTemplates.length">
         sur {{ communityTemplates.length }}
@@ -30,14 +25,12 @@
       <div
         v-for="tpl in filteredCommunity"
         :key="tpl.id"
-        class="rounded-xl border overflow-hidden flex flex-col"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-white border-onyx-200'"
+        class="rounded-xl border overflow-hidden flex flex-col bg-base-100 border-base-300"
       >
         <!-- Aperçu BusinessCard -->
         <div
-          class="relative overflow-hidden"
+          class="relative overflow-hidden bg-base-200"
           style="aspect-ratio: 4/3"
-          :class="themeStore.darkMode ? 'bg-onyx-700' : 'bg-powder-100'"
         >
           <div :style="previewInnerStyle(tpl)">
             <BusinessCard :card="buildPreviewCard(tpl)" :isFlipped="false" />
@@ -50,20 +43,19 @@
 
         <!-- Infos + actions -->
         <div class="p-3 flex-1 flex flex-col gap-2">
-          <p class="font-medium text-sm truncate" :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'">
+          <p class="font-medium text-sm truncate text-base-content">
             {{ tpl.name || 'Sans titre' }}
           </p>
-          <p class="text-xs truncate" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">
+          <p class="text-xs truncate text-base-content/40">
             {{ tpl.ownerEmail || tpl.ownerId || '—' }}
           </p>
-          <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+          <p class="text-xs text-base-content/40">
             {{ formatDate(tpl.updatedAt || tpl.createdAt) }}
           </p>
           <div class="flex items-center gap-2 mt-auto pt-1">
             <router-link
               to="/gallery?tab=community"
-              class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-colors flex-1 justify-center border"
-              :class="themeStore.darkMode ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700' : 'border-onyx-200 text-onyx-600 hover:bg-powder-100'"
+              class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-colors flex-1 justify-center border border-base-300 text-base-content/80 hover:bg-base-200"
             >
               <ExternalLink class="w-3 h-3" />
               <span>Voir</span>
@@ -83,14 +75,13 @@
     <!-- État vide -->
     <div
       v-else
-      class="rounded-xl border p-12 text-center"
-      :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-onyx-200'"
+      class="rounded-xl border p-12 text-center bg-base-100 border-base-300"
     >
-      <Globe class="w-10 h-10 mx-auto mb-3 opacity-30" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-400'" />
-      <p class="text-sm font-medium mb-1" :class="themeStore.darkMode ? 'text-onyx-300' : 'text-onyx-700'">
+      <Globe class="w-10 h-10 mx-auto mb-3 opacity-30 text-base-content/40" />
+      <p class="text-sm font-medium mb-1 text-base-content/80">
         Aucun modèle dans la galerie communauté
       </p>
-      <p class="text-xs" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+      <p class="text-xs text-base-content/40">
         {{ search ? 'Aucun modèle ne correspond à la recherche.' : 'Les modèles apparaissent ici quand les utilisateurs activent "Public" depuis leur dashboard.' }}
       </p>
       <button v-if="search" @click="search = ''" class="mt-2 text-flame-500 hover:underline text-xs">
@@ -107,23 +98,21 @@
       tabindex="-1"
     >
       <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border"
-        :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700' : 'bg-powder-50 border-onyx-200'"
+        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
       >
-        <h3 class="font-semibold mb-2" :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'">
+        <h3 class="font-semibold mb-2 text-base-content">
           Retirer de la galerie communauté
         </h3>
-        <p class="text-sm mb-1" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-600'">
+        <p class="text-sm mb-1 text-base-content/50">
           Retirer définitivement <strong>"{{ templateToDelete.name || 'Sans titre' }}"</strong> de {{ templateToDelete.ownerName || templateToDelete.ownerEmail || templateToDelete.ownerId }} ?
         </p>
-        <p class="text-xs mb-4" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+        <p class="text-xs mb-4 text-base-content/40">
           Le modèle restera dans le dashboard de l'utilisateur mais ne sera plus visible publiquement.
         </p>
         <div class="flex space-x-3">
           <button
             @click="templateToDelete = null"
-            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors"
-            :class="themeStore.darkMode ? 'border-onyx-600 text-onyx-300 hover:bg-onyx-700' : 'border-onyx-200 text-onyx-700 hover:bg-powder-50'"
+            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors border-base-300 text-base-content/80 hover:bg-base-200"
           >
             Annuler
           </button>

@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Arvo:wght@400;700&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Crimson+Text:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=Dancing+Script:wght@400;600;700&family=EB+Garamond:wght@400;500;600;700&family=Exo+2:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Josefin+Sans:wght@400;600;700&family=Kalam:wght@400;700&family=Karla:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Lobster&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;500;600;700;800&family=Mulish:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Pacifico&family=Philosopher:wght@400;700&family=Playfair+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Questrial&family=Raleway:wght@400;500;600;700&family=Righteous&family=Roboto+Mono:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&family=Sacramento&family=Satisfy&family=Source+Code+Pro:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Urbanist:wght@400;500;600;700&family=Zilla+Slab:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base-100 text-base-content font-sans transition-colors duration-200;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-base-content;
+  }
+}
+
+@layer components {
+  /* ────── BUTTON SYSTEM — DaisyUI powered ─────────────────── */
+
+  .btn-primary {
+    @apply btn btn-primary font-semibold rounded-xl px-6 py-3
+           shadow-sm hover:shadow-md hover:scale-105
+           active:scale-95 transition-all duration-200 ease-out;
+  }
+
+  .btn-secondary {
+    @apply btn btn-neutral font-semibold rounded-xl px-6 py-3
+           shadow-sm hover:shadow-md hover:scale-105
+           active:scale-95 transition-all duration-200 ease-out;
+  }
+
+  /* btn-icon : @apply btn-ghost évité (même nom DaisyUI → ref circulaire) */
+  .btn-icon {
+    @apply btn btn-sm border-transparent bg-transparent
+           p-2 rounded-lg
+           transition-all duration-200 ease-out
+           hover:scale-110 active:scale-95;
+  }
+
+  .btn-icon-light {
+    @apply btn-icon text-base-content/70 hover:bg-base-200 hover:text-base-content;
+  }
+
+  .btn-icon-flame {
+    @apply btn-icon text-primary hover:bg-primary/10 hover:text-primary;
+  }
+
+  .btn-icon-red {
+    @apply btn-icon text-error hover:bg-error/10 hover:text-error;
+  }
+
+  .btn-outline {
+    @apply btn btn-outline btn-sm rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:scale-105 active:scale-95;
+  }
+
+  .btn-outline-primary {
+    @apply btn-outline btn-primary;
+  }
+
+  /* btn-ghost custom : utilise btn + transparent pour éviter ref circulaire avec .btn-ghost DaisyUI */
+  .btn-ghost {
+    @apply btn btn-sm border-transparent bg-transparent text-base-content/80
+           rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:bg-base-200 hover:scale-105 active:scale-95;
+  }
+
+  .btn-ghost-primary {
+    @apply btn btn-sm border-transparent bg-transparent text-primary
+           rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:bg-primary/10 hover:scale-105 active:scale-95;
+  }
+
+  .btn-ghost-neutral {
+    @apply btn btn-sm border-transparent bg-transparent text-base-content/80
+           rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:bg-base-200 hover:scale-105 active:scale-95;
+  }
+
+  .btn-link {
+    @apply btn btn-link text-primary transition-colors duration-200;
+  }
+
+  /* ────── END BUTTON SYSTEM ────────────────────────────────── */
+
+  .card {
+    @apply bg-base-100 border border-base-300
+           rounded-2xl shadow-sm hover:shadow-md
+           transition-all duration-300 overflow-hidden;
+  }
+
+  .card-hover {
+    @apply transform hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .input-field {
+    @apply input input-bordered w-full rounded-xl
+           bg-base-200 text-base-content
+           placeholder:text-base-content/40
+           focus:border-primary focus:outline-primary
+           transition-all duration-200;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, theme('colors.flame.500'), theme('colors.flame.300'));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .section-title {
+    @apply text-4xl md:text-5xl font-bold mb-4 text-base-content;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}

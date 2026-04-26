@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Ground -->
+  <rect x="0" y="175" width="200" height="25" fill="#F1F5F9"/>
+  <!-- Main building -->
+  <rect x="55" y="35" width="90" height="140" rx="4" fill="#94A3B8"/>
+  <!-- Building face -->
+  <rect x="60" y="40" width="80" height="135" fill="#CBD5E1"/>
+  <!-- Windows grid -->
+  <rect x="70" y="50" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="92" y="50" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="114" y="50" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="70" y="72" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="92" y="72" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="114" y="72" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="70" y="94" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="92" y="94" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="114" y="94" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="70" y="116" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="92" y="116" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.7"/>
+  <rect x="114" y="116" width="16" height="14" rx="2" fill="#0EA5E9" opacity="0.5"/>
+  <!-- Door -->
+  <rect x="88" y="145" width="24" height="30" rx="3" fill="#64748B"/>
+  <circle cx="108" cy="162" r="2" fill="#94A3B8"/>
+  <!-- Roof detail -->
+  <rect x="60" y="35" width="80" height="6" fill="#64748B"/>
+  <!-- Side building left -->
+  <rect x="20" y="90" width="40" height="85" fill="#94A3B8"/>
+  <rect x="28" y="100" width="10" height="10" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="42" y="100" width="10" height="10" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="28" y="118" width="10" height="10" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="42" y="118" width="10" height="10" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <!-- Side building right -->
+  <rect x="140" y="110" width="35" height="65" fill="#64748B"/>
+  <rect x="148" y="120" width="8" height="8" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="160" y="120" width="8" height="8" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="148" y="134" width="8" height="8" rx="1" fill="#0EA5E9" opacity="0.5"/>
+  <rect x="160" y="134" width="8" height="8" rx="1" fill="#0EA5E9" opacity="0.5"/>
+</svg>

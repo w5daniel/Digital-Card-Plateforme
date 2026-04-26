@@ -1,7 +1,6 @@
 <template>
   <div
-    class="flex h-screen overflow-hidden"
-    :class="themeStore.darkMode ? 'bg-onyx-950 text-white' : 'bg-powder-50 text-onyx-900'"
+    class="flex h-screen overflow-hidden bg-base-100 text-base-content"
   >
     <!-- Overlay mobile -->
     <div
@@ -15,20 +14,18 @@
       class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 transition-transform duration-300 border-r"
       :class="[
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        themeStore.darkMode ? 'bg-onyx-900 border-onyx-700/60' : 'bg-powder-50 border-powder-200',
+        'bg-base-100 border-base-300',
       ]"
     >
       <!-- Logo + badge admin -->
       <div
-        class="flex items-center justify-between px-3 py-3 border-b"
-        :class="themeStore.darkMode ? 'border-onyx-700/60' : 'border-powder-200'"
+        class="flex items-center justify-between px-3 py-3 border-b border-base-300"
       >
         <div class="flex items-center space-x-2 min-w-0">
           <img src="/logo-ECODEV.png" alt="ECODEV" class="h-7 w-auto flex-shrink-0" />
           <div class="min-w-0">
             <p
-              class="text-xs font-medium leading-tight truncate"
-              :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+              class="text-xs font-medium leading-tight truncate text-base-content/40"
             >
               Administration
             </p>
@@ -41,7 +38,7 @@
           </div>
         </div>
         <button class="lg:hidden p-1 rounded flex-shrink-0" @click="sidebarOpen = false">
-          <X class="w-4 h-4" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'" />
+          <X class="w-4 h-4 text-base-content/40" />
         </button>
       </div>
 
@@ -56,9 +53,7 @@
           :class="
             isActive(item.to)
               ? 'bg-flame-500/10 text-flame-600 dark:text-flame-400 border border-flame-500/20'
-              : themeStore.darkMode
-                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
-                : 'text-onyx-600 hover:bg-powder-100 hover:text-onyx-900'
+              : 'text-base-content/50 hover:bg-base-200 hover:text-base-content'
           "
         >
           <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
@@ -74,12 +69,10 @@
 
         <!-- Séparateur -->
         <div
-          class="pt-3 mt-3 border-t"
-          :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
+          class="pt-3 mt-3 border-t border-base-300"
         >
           <p
-            class="px-3 text-[10px] font-semibold uppercase tracking-wider mb-2"
-            :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'"
+            class="px-3 text-[10px] font-semibold uppercase tracking-wider mb-2 text-base-content/40"
           >
             Navigation
           </p>
@@ -87,9 +80,7 @@
             to="/"
             class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             :class="
-              themeStore.darkMode
-                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
-                : 'text-onyx-600 hover:bg-powder-100'
+              'text-base-content/50 hover:bg-base-200 hover:text-base-content'
             "
           >
             <ExternalLink class="w-4 h-4" />
@@ -99,9 +90,7 @@
             to="/dashboard"
             class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             :class="
-              themeStore.darkMode
-                ? 'text-onyx-400 hover:bg-onyx-800 hover:text-white'
-                : 'text-onyx-600 hover:bg-powder-100'
+              'text-base-content/50 hover:bg-base-200 hover:text-base-content'
             "
           >
             <LayoutDashboard class="w-4 h-4" />
@@ -112,8 +101,7 @@
 
       <!-- Pied de sidebar : user info + déco/dark -->
       <div
-        class="px-3 py-3 border-t space-y-1"
-        :class="themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'"
+        class="px-3 py-3 border-t border-base-300 space-y-1"
       >
         <!-- Theme toggle -->
         <button
@@ -121,8 +109,8 @@
           class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors"
           :class="
             themeStore.darkMode
-              ? 'text-yellow-400 hover:bg-onyx-800'
-              : 'text-onyx-500 hover:bg-powder-100'
+              ? 'text-yellow-400 hover:bg-base-200'
+              : 'text-base-content/40 hover:bg-base-200'
           "
         >
           <Sun v-if="themeStore.darkMode" class="w-4 h-4" />
@@ -131,8 +119,7 @@
         </button>
         <!-- User + logout -->
         <div
-          class="flex items-center justify-between px-3 py-2 rounded-lg"
-          :class="themeStore.darkMode ? 'bg-onyx-800' : 'bg-powder-100'"
+          class="flex items-center justify-between px-3 py-2 rounded-lg bg-base-200"
         >
           <div class="flex items-center space-x-2 min-w-0">
             <div
@@ -142,14 +129,12 @@
             </div>
             <div class="min-w-0">
               <p
-                class="text-xs font-medium truncate"
-                :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
+                class="text-xs font-medium truncate text-base-content"
               >
                 {{ authStore.user?.name }}
               </p>
               <p
-                class="text-[10px] truncate"
-                :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'"
+                class="text-[10px] truncate text-base-content/40"
               >
                 {{ authStore.user?.email }}
               </p>
@@ -159,9 +144,7 @@
             @click="handleLogout"
             class="p-1.5 rounded transition-colors flex-shrink-0"
             :class="
-              themeStore.darkMode
-                ? 'text-onyx-400 hover:text-red-400 hover:bg-onyx-700'
-                : 'text-onyx-500 hover:text-red-500 hover:bg-red-50'
+              'text-base-content/40 hover:text-red-500 hover:bg-red-50'
             "
             title="Déconnexion"
           >
@@ -177,9 +160,7 @@
       <header
         class="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 h-14 border-b backdrop-blur-md flex-shrink-0"
         :class="
-          themeStore.darkMode
-            ? 'bg-onyx-950/80 border-onyx-700/60'
-            : 'bg-white/80 border-powder-200'
+          'bg-base-100/80 border-base-300'
         "
       >
         <!-- Gauche : hamburger mobile + fil d'ariane -->
@@ -187,9 +168,7 @@
           <button
             class="lg:hidden p-2 rounded-lg transition-colors"
             :class="
-              themeStore.darkMode
-                ? 'text-onyx-300 hover:bg-onyx-800'
-                : 'text-onyx-600 hover:bg-powder-100'
+              'text-base-content/80 hover:bg-base-200'
             "
             @click="sidebarOpen = true"
           >
@@ -197,12 +176,11 @@
           </button>
           <div>
             <p
-              class="font-semibold text-sm"
-              :class="themeStore.darkMode ? 'text-white' : 'text-onyx-900'"
+              class="font-semibold text-sm text-base-content"
             >
               {{ currentPageTitle }}
             </p>
-            <p class="text-[11px]" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">
+            <p class="text-[11px] text-base-content/40">
               Administration ECODEV
             </p>
           </div>
@@ -221,9 +199,7 @@
             v-if="!maintenanceMode"
             class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
             :class="
-              themeStore.darkMode
-                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                : 'bg-green-50 text-green-600 border border-green-200'
+              'bg-green-500/10 text-green-500 border border-green-500/20'
             "
           >
             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />

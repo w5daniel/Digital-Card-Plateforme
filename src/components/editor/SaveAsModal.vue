@@ -7,27 +7,21 @@
 
         <!-- Modal -->
         <div
-          class="relative w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all"
-          :class="dark ? 'bg-onyx-900 border border-onyx-700' : 'bg-white'"
+          class="relative w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all bg-base-100 border border-base-300"
         >
           <!-- Close -->
           <button
             @click="$emit('cancel')"
-            class="absolute top-4 right-4 p-1.5 rounded-lg transition-colors"
-            :class="
-              dark
-                ? 'text-onyx-500 hover:bg-onyx-800 hover:text-powder-300'
-                : 'text-onyx-400 hover:bg-powder-100'
-            "
+            class="absolute top-4 right-4 p-1.5 rounded-lg transition-colors text-base-content/40 hover:bg-base-200 hover:text-base-content"
           >
             <X class="w-4 h-4" />
           </button>
 
           <!-- Title -->
-          <h2 class="text-lg font-bold mb-1" :class="dark ? 'text-white' : 'text-onyx-900'">
+          <h2 class="text-lg font-bold mb-1 text-base-content">
             Enregistrer comme…
           </h2>
-          <p class="text-xs mb-6" :class="dark ? 'text-onyx-500' : 'text-onyx-400'">
+          <p class="text-xs mb-6 text-base-content/40">
             Choisissez le type d'enregistrement
           </p>
 
@@ -40,9 +34,7 @@
               :class="[
                 saveType === 'template'
                   ? 'border-violet-500 bg-violet-500/10 shadow-md shadow-violet-500/10'
-                  : dark
-                    ? 'border-onyx-700 hover:border-violet-500/50 hover:bg-onyx-800/50'
-                    : 'border-powder-200 hover:border-violet-300 hover:bg-violet-50/50',
+                  : 'border-base-300 hover:border-violet-400/60 hover:bg-violet-50/30',
               ]"
             >
               <!-- Check indicator -->
@@ -57,9 +49,7 @@
                 :class="
                   saveType === 'template'
                     ? 'bg-violet-500/20 text-violet-500'
-                    : dark
-                      ? 'bg-onyx-800 text-onyx-400 group-hover:text-violet-400'
-                      : 'bg-powder-100 text-onyx-400 group-hover:text-violet-500'
+                    : 'bg-base-200 text-base-content/40 group-hover:text-violet-500'
                 "
               >
                 <LayoutTemplate class="w-6 h-6" />
@@ -70,16 +60,13 @@
                   :class="
                     saveType === 'template'
                       ? 'text-violet-500'
-                      : dark
-                        ? 'text-powder-200'
-                        : 'text-onyx-700'
+                      : 'text-base-content/80'
                   "
                 >
                   Modèle
                 </p>
                 <p
-                  class="text-[10px] leading-relaxed"
-                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
+                  class="text-[10px] leading-relaxed text-base-content/40"
                 >
                   Design réutilisable pour créer plusieurs cartes
                 </p>
@@ -93,9 +80,7 @@
               :class="[
                 saveType === 'card'
                   ? 'border-emerald-500 bg-emerald-500/10 shadow-md shadow-emerald-500/10'
-                  : dark
-                    ? 'border-onyx-700 hover:border-emerald-500/50 hover:bg-onyx-800/50'
-                    : 'border-powder-200 hover:border-emerald-300 hover:bg-emerald-50/50',
+                  : 'border-base-300 hover:border-emerald-400/60 hover:bg-emerald-50/30',
               ]"
             >
               <!-- Check indicator -->
@@ -110,9 +95,7 @@
                 :class="
                   saveType === 'card'
                     ? 'bg-emerald-500/20 text-emerald-500'
-                    : dark
-                      ? 'bg-onyx-800 text-onyx-400 group-hover:text-emerald-400'
-                      : 'bg-powder-100 text-onyx-400 group-hover:text-emerald-500'
+                    : 'bg-base-200 text-base-content/40 group-hover:text-emerald-500'
                 "
               >
                 <CreditCard class="w-6 h-6" />
@@ -123,16 +106,13 @@
                   :class="
                     saveType === 'card'
                       ? 'text-emerald-500'
-                      : dark
-                        ? 'text-powder-200'
-                        : 'text-onyx-700'
+                      : 'text-base-content/80'
                   "
                 >
                   Carte
                 </p>
                 <p
-                  class="text-[10px] leading-relaxed"
-                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
+                  class="text-[10px] leading-relaxed text-base-content/40"
                 >
                   Carte personnelle prête à partager et télécharger
                 </p>
@@ -143,8 +123,7 @@
           <!-- Name input -->
           <div class="mb-5">
             <label
-              class="block text-xs font-medium mb-1.5"
-              :class="dark ? 'text-onyx-400' : 'text-onyx-500'"
+              class="block text-xs font-medium mb-1.5 text-base-content/40"
             >
               {{ saveType === 'template' ? 'Nom du modèle' : 'Nom de la carte' }}
             </label>
@@ -153,12 +132,7 @@
               v-model="name"
               type="text"
               :placeholder="saveType === 'template' ? 'Mon modèle corporate' : 'Ma carte de visite'"
-              class="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-colors"
-              :class="
-                dark
-                  ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500 focus:border-flame-500'
-                  : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'
-              "
+              class="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-colors bg-base-100 border-base-300 text-base-content placeholder:text-base-content/40 focus:border-primary"
               @keydown.enter="onConfirm"
             />
           </div>
@@ -170,25 +144,21 @@
               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-200"
               :class="
                 isPublic
-                  ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                  : dark
-                    ? 'border-onyx-700 hover:border-onyx-500 text-powder-300'
-                    : 'border-powder-200 hover:border-powder-300 text-onyx-700'
+                  ? 'border-success bg-success/10 text-success'
+                  : 'border-base-300 hover:border-base-content/30 text-base-content/70'
               "
             >
               <Globe v-if="isPublic" class="w-4 h-4 shrink-0 text-emerald-500" />
               <Lock
                 v-else
-                class="w-4 h-4 shrink-0"
-                :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
+                class="w-4 h-4 shrink-0 text-base-content/40"
               />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold leading-tight">
                   {{ isPublic ? 'Public' : 'Privé' }}
                 </p>
                 <p
-                  class="text-xs mt-0.5 leading-snug"
-                  :class="dark ? 'text-onyx-500' : 'text-onyx-400'"
+                  class="text-xs mt-0.5 leading-snug text-base-content/40"
                 >
                   <span v-if="isPublic"
                     >Visible dans la galerie Communauté — utilisez des informations fictives</span
@@ -199,8 +169,7 @@
             </button>
             <p
               v-if="!canPublish"
-              class="text-[11px] px-1"
-              :class="dark ? 'text-amber-400' : 'text-amber-600'"
+              class="text-[11px] px-1 text-warning"
             >
               La publication dans la Communauté est réservée au plan Premium.
             </p>
@@ -209,8 +178,7 @@
           <!-- Limit warning -->
           <div
             v-if="saveType === 'template' && !canCreateTemplate"
-            class="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4 text-xs"
-            :class="dark ? 'bg-amber-900/20 text-amber-400' : 'bg-amber-50 text-amber-700'"
+            class="flex items-start gap-2 px-3 py-2.5 rounded-xl mb-4 text-xs bg-warning/10 text-warning"
           >
             <AlertTriangle class="w-4 h-4 shrink-0 mt-0.5" />
             <span>
@@ -231,8 +199,8 @@
               v-if="saveType === 'template' && isPublic && privacyConflict"
               :class="[
                 'mb-4 px-4 py-3 rounded-xl border text-xs leading-snug',
-                'border-orange-300/60 bg-orange-50/80 dark:bg-orange-900/20 dark:border-orange-700/40',
-                'text-orange-700 dark:text-orange-300',
+                'border-orange-300/60 bg-orange-50/80',
+                'text-orange-700',
                 { 'animate-shake': shaking },
               ]"
             >
@@ -245,12 +213,7 @@
           <div class="flex gap-2">
             <button
               @click="$emit('cancel')"
-              class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              :class="
-                dark
-                  ? 'bg-onyx-800 text-powder-300 hover:bg-onyx-700'
-                  : 'bg-powder-100 text-onyx-600 hover:bg-powder-200'
-              "
+              class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors bg-base-200 text-base-content/70 hover:bg-base-300"
             >
               Annuler
             </button>

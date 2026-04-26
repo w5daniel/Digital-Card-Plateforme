@@ -6,125 +6,128 @@
 
 @layer base {
   body {
-    @apply bg-powder-50 dark:bg-onyx-950;
-    @apply text-onyx-800 dark:text-powder-100;
-    @apply font-sans;
-    @apply transition-colors duration-200;
+    @apply bg-base-100 text-base-content font-sans transition-colors duration-200;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-display text-onyx-950 dark:text-powder-50;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-base-content;
   }
 }
 
 @layer components {
-  /* ────── BUTTON SYSTEM — UNIFIED HOVER FEEDBACK ────────────── */
+  /*
+   * DaisyUI 5 button variants set internal CSS vars (--btn-color, --btn-fg, etc.).
+   * We cannot use @apply with class names that match our own classes (circular dep),
+   * nor with Tailwind color utilities whose names conflict with user-defined scales
+   * (primary, secondary, accent). We use CSS vars directly instead.
+   */
 
-  /* Bouton principal — Blazing Flame 500, 10% de la palette */
+  /* ────── BUTTON SYSTEM ────────────────────────────────────── */
+
   .btn-primary {
-    @apply px-6 py-3 bg-flame-500 text-white font-semibold rounded-xl
-           shadow-sm
-           transition-all duration-200 ease-out
-           hover:bg-flame-600 hover:shadow-md hover:scale-105
-           active:bg-flame-700 active:scale-95;
+    @apply btn font-semibold rounded-xl px-6 py-3
+           shadow-sm hover:shadow-md hover:scale-105
+           active:scale-95 transition-all duration-200 ease-out;
+    --btn-color: var(--color-primary);
+    --btn-fg: var(--color-primary-content);
   }
 
-  /* Bouton secondaire — fond blanc, bordure onyx légère */
   .btn-secondary {
-    @apply px-6 py-3 bg-white dark:bg-onyx-900
-           text-onyx-800 dark:text-powder-200
-           font-semibold rounded-xl
-           border border-onyx-200 dark:border-onyx-700
-           shadow-sm
-           transition-all duration-200 ease-out
-           hover:border-onyx-300 dark:hover:border-onyx-600
-           hover:bg-powder-50 dark:hover:bg-onyx-800
-           hover:shadow-md hover:scale-105
-           active:scale-95;
+    @apply btn font-semibold rounded-xl px-6 py-3
+           shadow-sm hover:shadow-md hover:scale-105
+           active:scale-95 transition-all duration-200 ease-out;
+    --btn-color: var(--color-neutral);
+    --btn-fg: var(--color-neutral-content);
   }
 
-  /* Icon button — small, circular, no padding */
+  /* btn-icon : avoid @apply btn-ghost (same name as DaisyUI → circular) */
   .btn-icon {
-    @apply p-2 rounded-lg
+    @apply btn btn-sm border-transparent bg-transparent
+           p-2 rounded-lg
            transition-all duration-200 ease-out
-           hover:scale-110
-           active:scale-95;
+           hover:scale-110 active:scale-95;
   }
 
   .btn-icon-light {
-    @apply btn-icon
-           text-onyx-600 hover:bg-powder-100 hover:text-onyx-900
-           dark:text-powder-400 dark:hover:bg-onyx-800 dark:hover:text-powder-200;
+    @apply btn-icon hover:bg-base-200 hover:text-base-content;
+    color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
   }
 
   .btn-icon-flame {
-    @apply btn-icon
-           text-flame-500 hover:bg-flame-50 dark:hover:bg-flame-950/30
-           hover:text-flame-600 dark:hover:text-flame-400;
+    @apply btn-icon;
+    color: var(--color-primary);
+  }
+  .btn-icon-flame:hover {
+    color: var(--color-primary);
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
   }
 
   .btn-icon-red {
-    @apply btn-icon
-           text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20
-           hover:text-red-600 dark:hover:text-red-400;
+    @apply btn-icon text-error hover:text-error;
+  }
+  .btn-icon-red:hover {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
   }
 
-  /* Outline button — bordered style */
   .btn-outline {
-    @apply px-4 py-2 rounded-lg border
+    @apply btn btn-sm rounded-lg text-sm font-medium
            transition-all duration-200 ease-out
-           hover:scale-105
-           active:scale-95
-           text-sm font-medium;
+           hover:scale-105 active:scale-95;
+    background-color: transparent;
+    color: var(--btn-color, var(--color-base-content));
+    border-color: var(--btn-color, var(--color-base-content));
+  }
+  .btn-outline:hover {
+    background-color: var(--btn-color, var(--color-base-content));
+    color: var(--btn-fg, var(--color-base-100));
   }
 
   .btn-outline-primary {
-    @apply btn-outline
-           border-flame-300 dark:border-flame-700
-           text-flame-600 dark:text-flame-400
-           hover:bg-flame-50 dark:hover:bg-flame-950/30
-           hover:border-flame-400 dark:hover:border-flame-600;
+    @apply btn-outline;
+    --btn-color: var(--color-primary);
+    --btn-fg: var(--color-primary-content);
   }
 
-  /* Ghost button — minimal style */
   .btn-ghost {
-    @apply px-3 py-2 rounded-lg
+    @apply btn btn-sm border-transparent bg-transparent
+           rounded-lg text-sm font-medium
            transition-all duration-200 ease-out
-           hover:scale-105
-           active:scale-95
-           text-sm font-medium;
+           hover:bg-base-200 hover:scale-105 active:scale-95;
+    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
   }
 
   .btn-ghost-primary {
-    @apply btn-ghost
-           text-flame-600 dark:text-flame-400
-           hover:bg-flame-50/60 dark:hover:bg-flame-950/20;
+    @apply btn btn-sm border-transparent bg-transparent
+           rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:scale-105 active:scale-95;
+    color: var(--color-primary);
+  }
+  .btn-ghost-primary:hover {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
   }
 
   .btn-ghost-neutral {
-    @apply btn-ghost
-           text-onyx-700 dark:text-powder-300
-           hover:bg-powder-100 dark:hover:bg-onyx-800;
+    @apply btn btn-sm border-transparent bg-transparent
+           rounded-lg text-sm font-medium
+           transition-all duration-200 ease-out
+           hover:bg-base-200 hover:scale-105 active:scale-95;
+    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
   }
 
-  /* Link button — text-only with underline */
   .btn-link {
-    @apply text-flame-600 dark:text-flame-400
-           transition-colors duration-200
-           hover:text-flame-700 dark:hover:text-flame-300;
+    @apply btn transition-colors duration-200;
+    --btn-border: transparent;
+    --btn-bg: transparent;
+    --btn-noise: none;
+    text-decoration-line: underline;
+    color: var(--color-primary);
   }
 
   /* ────── END BUTTON SYSTEM ────────────────────────────────── */
 
-  /* Carte — fond blanc, bordure powder-200 */
   .card {
-    @apply bg-white dark:bg-onyx-900
-           border border-powder-200 dark:border-onyx-800
+    @apply bg-base-100 border border-base-300
            rounded-2xl shadow-sm hover:shadow-md
            transition-all duration-300 overflow-hidden;
   }
@@ -133,27 +136,29 @@
     @apply transform hover:-translate-y-1 transition-all duration-300;
   }
 
-  /* Champ de formulaire */
   .input-field {
-    @apply w-full px-4 py-3
-           border border-powder-200 dark:border-onyx-700
-           rounded-xl
-           focus:border-flame-400 focus:ring-2 focus:ring-flame-100 dark:focus:ring-flame-900/30
-           outline-none transition-all duration-200
-           bg-powder-100 dark:bg-onyx-800
-           text-onyx-900 dark:text-powder-100
-           placeholder-onyx-400 dark:placeholder-onyx-500;
+    @apply input input-bordered w-full rounded-xl
+           bg-base-200 text-base-content
+           transition-all duration-200;
+  }
+  .input-field:focus {
+    border-color: var(--color-primary);
+    outline-color: var(--color-primary);
+  }
+  .input-field::placeholder {
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
   }
 
-  /* Texte accent — flame au lieu de dégradé coloré */
   .gradient-text {
-    @apply text-flame-500;
-    @apply bg-gradient-to-br from-flame-500 via-flame-500 to-orange-300 bg-clip-text text-transparent;
+    background: linear-gradient(135deg, theme('colors.flame.500'), theme('colors.flame.300'));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
   }
 
-  /* Titre de section */
   .section-title {
-    @apply text-4xl md:text-5xl font-bold mb-4 text-onyx-950 dark:text-powder-50;
+    @apply text-4xl md:text-5xl font-bold mb-4 text-base-content;
   }
 }
 
