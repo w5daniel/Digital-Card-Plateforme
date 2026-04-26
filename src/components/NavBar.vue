@@ -18,7 +18,7 @@
         <div ref="navContainerRef" class="hidden md:flex items-center space-x-1 relative">
           <!-- Sliding active pill -->
           <div
-            class="absolute inset-y-0 rounded-lg bg-primary/10 transition-all duration-300 ease-out pointer-events-none"
+            class="absolute inset-y-0 rounded-lg bg-flame-500/15 ring-1 ring-flame-500/40 transition-all duration-300 ease-out pointer-events-none"
             :style="navPillStyle"
           ></div>
           <router-link
@@ -28,7 +28,7 @@
             class="relative px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
             :class="[
               isActive(item.path)
-                ? 'text-primary nav-link-active'
+                ? 'text-flame-500 font-semibold nav-link-active'
                 : 'text-base-content/60 hover:text-base-content',
             ]"
           >
@@ -317,7 +317,7 @@
           class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200"
           :class="
             isActive(item.path)
-              ? 'bg-primary/10 text-primary'
+              ? 'bg-flame-500/15 text-flame-500 font-semibold ring-1 ring-flame-500/40'
               : 'text-base-content/60 hover:bg-base-200'
           "
         >

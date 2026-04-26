@@ -25,7 +25,7 @@
               clics. Format vCard, QR codes, et bien plus encore.
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex flex-col sm:flex-row gap-4 ">
               <router-link to="/editor" class="btn-primary text-center">
                 Commencer gratuitement
                 <ArrowRight class="w-5 h-5 inline ml-2" />

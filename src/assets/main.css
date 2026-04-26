@@ -60,8 +60,16 @@
     @apply btn font-semibold rounded-xl px-6 py-3
            shadow-sm hover:shadow-md hover:scale-105
            active:scale-95 transition-all duration-200 ease-out;
-    --btn-color: var(--color-neutral);
-    --btn-fg: var(--color-neutral-content);
+    --btn-color: color-mix(in oklch, var(--color-base-content) 18%, var(--color-base-100));
+    --btn-fg: var(--color-base-content);
+    background-color: color-mix(in oklch, var(--color-base-content) 18%, var(--color-base-100));
+    color: var(--color-base-content);
+    border-color: color-mix(in oklch, var(--color-base-content) 18%, var(--color-base-100));
+  }
+  .btn-secondary:hover {
+    background-color: color-mix(in oklch, var(--color-base-content) 28%, var(--color-base-100));
+    border-color: color-mix(in oklch, var(--color-base-content) 28%, var(--color-base-100));
+    color: var(--color-base-content);
   }
 
   /* btn-icon : avoid @apply btn-ghost (same name as DaisyUI → circular) */

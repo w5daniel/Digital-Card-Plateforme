@@ -89,21 +89,21 @@ const iconBg = computed(() => ({
   'bg-red-100 dark:bg-red-900/30': props.variant === 'danger',
   'bg-amber-100 dark:bg-amber-900/30': props.variant === 'warning',
   'bg-blue-100 dark:bg-blue-900/30': props.variant === 'info',
-  'bg-base-200': props.variant === 'logout',
+  'bg-flame-500/15': props.variant === 'logout',
 }))
 
 const iconColor = computed(() => ({
   'text-red-500': props.variant === 'danger',
   'text-amber-500': props.variant === 'warning',
   'text-blue-500': props.variant === 'info',
-  'text-base-content/60': props.variant === 'logout',
+  'text-flame-500': props.variant === 'logout',
 }))
 
 const confirmBtnClass = computed(() => ({
   'bg-red-500 hover:bg-red-600': props.variant === 'danger',
   'bg-amber-500 hover:bg-amber-600': props.variant === 'warning',
   'bg-blue-500 hover:bg-blue-600': props.variant === 'info',
-  'bg-base-300 hover:bg-neutral text-base-content': props.variant === 'logout',
+  'bg-flame-500 hover:bg-flame-600 text-white': props.variant === 'logout',
 }))
 </script>
 

@@ -2,7 +2,7 @@
   <aside class="flex shrink-0 h-full">
     <!-- Icon rail (56px) -->
     <div
-      class="flex flex-col items-center py-2 gap-0.5 w-14 shrink-0 border-r h-full bg-base-100 border-base-300"
+      class="flex flex-col items-center py-2 gap-0.5 w-14 shrink-0 border-r h-full bg-base-100 border-base-300 dark:bg-onyx-900"
     >
       <button
         v-for="tab in tabs"
@@ -10,17 +10,17 @@
         @click="toggleTab(tab.id)"
         class="relative flex flex-col items-center gap-0.5 p-2 rounded-lg w-11 transition-all"
         :class="activeTab === tab.id
-          ? 'bg-primary/10 text-primary'
+          ? 'bg-flame-500/15 text-flame-400 ring-1 ring-flame-500/60'
           : 'text-base-content/40 hover:bg-base-200 hover:text-base-content'"
         :title="tab.label"
       >
         <!-- Active left-border indicator -->
         <span
           v-if="activeTab === tab.id"
-          class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-primary"
+          class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-flame-500"
         />
-        <component :is="tab.icon" class="w-[18px] h-[18px]" />
-        <span class="text-[8px] font-medium leading-none">{{ tab.label }}</span>
+        <component :is="tab.icon" :class="activeTab === tab.id ? 'w-5 h-5' : 'w-[18px] h-[18px]'" />
+        <span :class="activeTab === tab.id ? 'text-[8px] font-semibold leading-none' : 'text-[8px] font-medium leading-none'">{{ tab.label }}</span>
       </button>
     </div>
 
@@ -39,7 +39,7 @@
       >
         <!-- Panel header -->
         <div
-          class="flex items-center justify-between px-4 py-2.5 border-b shrink-0 border-base-300"
+          class="flex items-center justify-between px-4 py-2.5 border-b shrink-0 border-base-300 dark:bg-onyx-900"
         >
           <!-- Elements: category detail → show back button -->
           <div v-if="activeTab === 'elements' && activeCategory" class="flex items-center gap-1.5">
@@ -75,7 +75,7 @@
           leave-to-class="opacity-0 -translate-x-2"
           mode="out-in"
         >
-          <div :key="activeTab" class="flex-1 overflow-y-auto" data-sidebar-panel>
+          <div :key="activeTab" class="flex-1 overflow-y-auto dark:bg-onyx-900" data-sidebar-panel>
             <EditorSidebarInfo v-if="activeTab === 'info'" />
             <EditorSidebarDesign v-else-if="activeTab === 'design'" />
             <EditorSidebarElements

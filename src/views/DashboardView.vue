@@ -361,7 +361,7 @@
 
                 <div class="mb-4">
                   <span
-                    class="badge badge-ghost text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis block w-full"
+                    class="badge badge-ghost text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis block w-full dark:bg-onyx-800"
                   >
                     {{ templatesStore.getCardsCountForTemplate(tpl.id) }} carte(s) liée(s)
                   </span>

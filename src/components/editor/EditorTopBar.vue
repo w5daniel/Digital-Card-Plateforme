@@ -1,6 +1,6 @@
 <template>
   <header
-    class="flex items-center justify-between px-3 h-14 shrink-0 border-b z-20 bg-base-100 border-base-300 shadow-sm"
+    class="flex items-center justify-between px-3 h-14 shrink-0 border-b z-20 bg-base-100 border-base-300 shadow-sm dark:bg-onyx-800"
   >
     <!-- Left: back + file name -->
     <div class="flex items-center gap-2 min-w-0">
@@ -126,7 +126,7 @@
         <button
           @click="exportOpen = !exportOpen"
           :disabled="isCardBlank"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium btn-outline disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium btn-ghost-neutral disabled:opacity-40 disabled:cursor-not-allowed"
           :title="isCardBlank ? 'Ajoutez des éléments avant d\'exporter' : 'Télécharger'"
         >
           <Download class="w-4 h-4" />

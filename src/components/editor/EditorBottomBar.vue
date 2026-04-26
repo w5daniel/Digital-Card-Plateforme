@@ -1,6 +1,6 @@
 <template>
   <footer
-    class="flex items-center justify-between px-4 h-10 shrink-0 border-t z-10"
+    class="flex items-center justify-between px-4 h-10 shrink-0 border-t z-10 dark:bg-onyx-800"
     :class="themeStore.darkMode ? 'bg-onyx-900 border-onyx-800' : 'bg-powder-50 border-powder-200'"
   >
     <!-- Left: element count -->
