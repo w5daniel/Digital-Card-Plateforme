@@ -135,7 +135,6 @@ import { validateField, roleToValidationType } from '@/utils/validators'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
-  dark: { type: Boolean, default: false },
   templateModel: { type: Object, required: true },
 })
 

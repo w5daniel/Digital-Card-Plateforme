@@ -369,10 +369,8 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { Search, Star, UserX, UserCheck, Trash2, CheckCircle } from 'lucide-vue-next'
-import { useThemeStore } from '../../stores/themeStore'
 import { useAuthStore } from '../../stores/authStore'
 
-const themeStore = useThemeStore()
 
 /*
  * Source de données : authStore.getAllUsersWithStats

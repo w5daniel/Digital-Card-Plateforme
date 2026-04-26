@@ -986,7 +986,6 @@
     <BatchCreateModal
       v-if="showBatchModal && activeTemplateForBatch"
       :visible="showBatchModal"
-      :dark="themeStore.darkMode"
       :template-model="activeTemplateForBatch"
       @close="showBatchModal = false; activeTemplateForBatch = null"
       @generated="onBatchGenerated"
@@ -1040,7 +1039,6 @@
     <CreateCardFromTemplateModal
       v-if="showCreateCardModal && selectedTemplateForCard"
       :visible="showCreateCardModal"
-      :dark="themeStore.darkMode"
       :template-model="selectedTemplateForCard"
       @close="showCreateCardModal = false; selectedTemplateForCard = null"
       @generated="onCardFromTemplateCreated"
@@ -1267,7 +1265,7 @@ const onDeleteSelectedTemplatesConfirmed = async () => {
   for (const id of ids) {
     try {
       await templatesStore.deleteTemplate(id)
-    } catch {}
+    } catch (_e) {}
   }
   selectedTemplateIds.value = new Set()
   notificationStore.success(`${count} modèle(s) supprimé(s)`)

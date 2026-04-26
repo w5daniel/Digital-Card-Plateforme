@@ -601,7 +601,7 @@ const elemStyle = (el) => {
     top: `${el.y}%`,
     width: useAutoWidth ? 'max-content' : `${el.w}%`,
     maxWidth: useAutoWidth ? '88%' : undefined,
-    height: el.h ? `${el.h}%` : el.type === 'text' || el.type === 'contact' ? 'auto' : `${el.h}%`,
+    height: el.h > 0 ? `${el.h}%` : (el.type === 'text' || el.type === 'contact') ? 'auto' : undefined,
     zIndex: el.zIndex ?? 1,
   }
   if (el.visible === false) {

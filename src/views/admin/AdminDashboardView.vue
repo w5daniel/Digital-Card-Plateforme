@@ -233,12 +233,9 @@
 <script setup>
 import { computed } from 'vue'
 import { Users, CreditCard, Layers, Eye, Globe, UserX, Settings, Plus, AlertTriangle } from 'lucide-vue-next'
-import { useThemeStore } from '../../stores/themeStore'
 import { useAuthStore } from '../../stores/authStore'
 import { useCardsStore } from '../../stores/cards'
 import { useAdminStore } from '../../stores/adminStore'
-
-const themeStore = useThemeStore()
 
 /*
  * Sources de données réelles :

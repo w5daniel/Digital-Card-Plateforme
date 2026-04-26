@@ -120,7 +120,6 @@ import {
   Sparkles,
 } from 'lucide-vue-next'
 import { useEditorStore } from '@/stores/useEditorStore'
-import { useThemeStore } from '@/stores/themeStore'
 import { ELEMENT_CATEGORIES } from '@/data/elementLibrary'
 
 import EditorSidebarInfo from './sidebar/EditorSidebarInfo.vue'
@@ -134,7 +133,6 @@ import EditorSidebarQR from './sidebar/EditorSidebarQR.vue'
 import EditorSidebarTools from './sidebar/EditorSidebarTools.vue'
 
 const editorStore = useEditorStore()
-const themeStore = useThemeStore()
 
 // ── Tab state ────────────────────────────────────────────────────────────────
 const activeTab = ref(null)

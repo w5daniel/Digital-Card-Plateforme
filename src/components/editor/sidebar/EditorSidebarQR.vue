@@ -215,9 +215,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { ROLE_LABELS } from '@/utils/cardElements'
 
-const props = defineProps({
-  qrConfig: { type: Object, required: true },
-})
+const qrConfig = defineModel('qrConfig', { type: Object, required: true })
 
 const emit = defineEmits(['insert-qr'])
 
@@ -266,7 +264,7 @@ function handleQRLogoUpload(e) {
   const file = e.target.files?.[0]
   if (!file) return
   const reader = new FileReader()
-  reader.onload = (ev) => { props.qrConfig.qrLogoSrc = ev.target.result }
+  reader.onload = (ev) => { qrConfig.value.qrLogoSrc = ev.target.result }
   reader.readAsDataURL(file)
   e.target.value = ''
 }

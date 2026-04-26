@@ -547,7 +547,7 @@ const buildPreviewCard = (template, idx = null) => {
 const PREVIEW_PAD = 0.08 // 8% padding on all 4 sides
 
 // Container: ratio fixe 16/9 pour uniformité de la grille (portrait et paysage alignés)
-const previewContainerStyle = (template) => {
+const previewContainerStyle = (_template) => {
   const dark = themeStore.darkMode
   return {
     aspectRatio: '16 / 9',

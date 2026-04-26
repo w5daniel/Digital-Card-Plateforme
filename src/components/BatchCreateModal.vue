@@ -292,7 +292,6 @@ import { konvaToCardEl } from '@/utils/cardElements'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
-  dark: { type: Boolean, default: false },
   templateModel: { type: Object, required: true },
 })
 const emit = defineEmits(['close', 'generated'])
