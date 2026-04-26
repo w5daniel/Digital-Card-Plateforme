@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="min-h-screen bg-powder-50 dark:bg-onyx-900">
     <!-- ══════════════════════════ HERO ══════════════════════════ -->
     <section class="relative">
       <!-- Animated bg -->
@@ -75,7 +75,7 @@
         >
           <path
             d="M0,30 C480,60 960,0 1440,30 L1440,60 L0,60 Z"
-            class="fill-base-100"
+            class="fill-powder-50 dark:fill-onyx-900"
           />
         </svg>
       </div>
@@ -86,23 +86,23 @@
       <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
         <!-- Search -->
         <div class="relative flex-1 min-w-0 w-full md:w-auto">
-          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400 dark:text-onyx-500" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher un modèle..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-base-300 bg-base-100 text-base-content placeholder:text-base-content/40 focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-800 text-onyx-900 dark:text-powder-100 placeholder:text-onyx-400 dark:placeholder:text-onyx-500 focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
           />
         </div>
 
         <!-- Category pills -->
         <div
           ref="tabGroupRef"
-          class="relative flex bg-base-200 rounded-xl p-1 gap-1 flex-shrink-0"
+          class="relative flex bg-powder-100 dark:bg-onyx-800 rounded-xl p-1 gap-1 flex-shrink-0"
         >
           <!-- Sliding pill indicator -->
           <div
-            class="absolute top-1 bottom-1 bg-base-100 rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none"
+            class="absolute top-1 bottom-1 bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none"
             :style="filterPillStyle"
           ></div>
           <button
@@ -112,8 +112,8 @@
             class="relative z-10 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 whitespace-nowrap"
             :class="
               activeFilter === tab.value
-                ? 'text-base-content filter-tab-active'
-                : 'text-base-content/50 hover:text-base-content/80'
+                ? 'text-onyx-900 dark:text-powder-100 filter-tab-active'
+                : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-powder-300'
             "
           >
             {{ tab.label }}
@@ -124,7 +124,7 @@
         <!-- Sort -->
         <select
           v-model="sortBy"
-          class="px-4 py-2.5 rounded-xl border border-base-300 bg-base-100 text-base-content text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary flex-shrink-0 transition-all"
+          class="px-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-800 text-onyx-900 dark:text-powder-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary flex-shrink-0 transition-all"
         >
           <option value="popular">Populaires</option>
           <option value="newest">Plus récents</option>
@@ -135,8 +135,8 @@
       </div>
 
       <!-- Results info -->
-      <p class="mt-5 text-sm text-base-content/50">
-        <span class="font-semibold text-base-content">{{
+      <p class="mt-5 text-sm text-onyx-500 dark:text-powder-400">
+        <span class="font-semibold text-onyx-900 dark:text-powder-100">{{
           activeFilter === 'community' ? communityCards.length : filteredTemplates.length
         }}</span>
         {{ activeFilter === 'community' ? 'création' : 'modèle'
@@ -306,7 +306,7 @@
         >
           <!-- Preview container — fixed 4/3, card fit-inside centered -->
           <div
-            class="relative bg-base-200"
+            class="relative bg-powder-100 dark:bg-onyx-800"
             style="aspect-ratio: 4/3; overflow: hidden"
           >
             <div :style="commInnerStyle(card)">
@@ -369,14 +369,14 @@
         class="text-center py-24"
       >
         <div
-          class="w-20 h-20 mx-auto mb-6 bg-base-200 rounded-full flex items-center justify-center"
+          class="w-20 h-20 mx-auto mb-6 bg-powder-100 dark:bg-onyx-800 rounded-full flex items-center justify-center"
         >
-          <Users class="w-10 h-10 text-base-content/40" />
+          <Users class="w-10 h-10 text-onyx-400 dark:text-onyx-500" />
         </div>
-        <h3 class="text-xl font-bold text-base-content mb-2">
+        <h3 class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-2">
           Aucune création communautaire
         </h3>
-        <p class="text-base-content/50 text-sm mb-6">
+        <p class="text-onyx-500 dark:text-powder-400 text-sm mb-6">
           Soyez le premier à partager vos créations ! Activez l'option « Public » lors de la
           sauvegarde dans l'éditeur.
         </p>
@@ -388,14 +388,14 @@
         class="text-center py-24"
       >
         <div
-          class="w-20 h-20 mx-auto mb-6 bg-base-200 rounded-full flex items-center justify-center"
+          class="w-20 h-20 mx-auto mb-6 bg-powder-100 dark:bg-onyx-800 rounded-full flex items-center justify-center"
         >
-          <Layout class="w-10 h-10 text-base-content/40" />
+          <Layout class="w-10 h-10 text-onyx-400 dark:text-onyx-500" />
         </div>
-        <h3 class="text-xl font-bold text-base-content mb-2">
+        <h3 class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-2">
           Aucun modèle trouvé
         </h3>
-        <p class="text-base-content/50 text-sm mb-6">
+        <p class="text-onyx-500 dark:text-powder-400 text-sm mb-6">
           Essayez un autre terme ou réinitialisez les filtres
         </p>
         <button

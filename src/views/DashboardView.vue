@@ -1,14 +1,14 @@
 <template>
-  <div class="dashboard-view min-h-screen bg-base-200 py-12">
+  <div class="dashboard-view min-h-screen bg-powder-50 dark:bg-onyx-900 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header Section -->
       <div class="mb-12">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-3 text-base-content">
+            <h1 class="text-4xl md:text-5xl font-bold mb-3 text-onyx-900 dark:text-powder-100">
               Mon tableau de bord
             </h1>
-            <p class="text-lg text-base-content/70">
+            <p class="text-lg text-onyx-600 dark:text-powder-400">
               Gérez toutes vos cartes de visite en un seul endroit
             </p>
           </div>
@@ -84,8 +84,8 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-base-content">{{ stats.totalCards }}</div>
-          <p class="text-xs text-base-content/60 mt-2">Cartes créées</p>
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">{{ stats.totalCards }}</div>
+          <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Cartes créées</p>
         </div>
 
         <div
@@ -102,8 +102,8 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-base-content">{{ stats.totalViews }}</div>
-          <p class="text-xs text-base-content/60 mt-2">Vues totales</p>
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">{{ stats.totalViews }}</div>
+          <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Vues totales</p>
         </div>
 
         <div
@@ -120,10 +120,10 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-base-content">
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
             {{ stats.totalDownloads }}
           </div>
-          <p class="text-xs text-base-content/60 mt-2">Téléchargements</p>
+          <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Téléchargements</p>
         </div>
 
         <div
@@ -140,10 +140,10 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-base-content">
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
             {{ stats.totalQRScans }}
           </div>
-          <p class="text-xs text-base-content/60 mt-2">Scans QR</p>
+          <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Scans QR</p>
         </div>
 
         <div
@@ -160,10 +160,10 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-base-content">
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
             {{ stats.totalShares }}
           </div>
-          <p class="text-xs text-base-content/60 mt-2">Partages</p>
+          <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Partages</p>
         </div>
       </div>
 
@@ -181,7 +181,7 @@
           :class="
             dashboardTab === 'templates'
               ? 'text-onyx-900 dark:text-powder-50'
-              : 'text-base-content/50 hover:text-onyx-700 dark:hover:text-onyx-200'
+              : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
           "
         >
           Modèles ({{ displayedTemplates.length }})
@@ -192,7 +192,7 @@
           :class="
             dashboardTab === 'cards'
               ? 'text-onyx-900 dark:text-powder-50'
-              : 'text-base-content/50 hover:text-onyx-700 dark:hover:text-onyx-200'
+              : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
           "
         >
           Cartes ({{ store.userCards.length }})
@@ -200,7 +200,7 @@
       </div>
 
       <!-- Preview quality notice -->
-      <div class="flex items-center gap-2 mb-8 px-3 py-2 rounded-lg bg-base-200 border border-base-300 max-w-md">
+      <div class="flex items-center gap-2 mb-8 px-3 py-2 rounded-lg bg-powder-100 dark:bg-onyx-800 border border-powder-200 dark:border-onyx-700 max-w-md">
         <svg xmlns="http://www.w3.org/2000/svg" class="shrink-0 w-3 h-3 text-onyx-400 dark:text-onyx-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
         </svg>
@@ -214,13 +214,13 @@
       <Transition name="tab-fade" mode="out-in">
         <div v-if="dashboardTab === 'templates'" class="mb-12" key="templates">
           <div class="mb-6 flex items-center justify-between">
-            <h2 class="text-2xl md:text-3xl font-bold text-base-content">
+            <h2 class="text-2xl md:text-3xl font-bold text-onyx-900 dark:text-powder-100">
               Mes Modèles
             </h2>
             <div class="flex items-center space-x-3">
               <button
                 @click="toggleTemplateSort"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-base-content/60"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-500 dark:text-powder-400"
                 :title="
                   templateSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'
                 "
@@ -229,7 +229,7 @@
                 <span>{{ templateSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
               </button>
               <label
-                class="flex items-center space-x-2 text-sm text-base-content/60 cursor-pointer"
+                class="flex items-center space-x-2 text-sm text-onyx-500 dark:text-powder-400 cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -277,7 +277,7 @@
               <button
                 v-else
                 @click="router.push('/pricing')"
-                class="px-4 py-2 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-base-content/50 font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
+                class="px-4 py-2 bg-powder-200/60 dark:bg-onyx-700/60 hover:bg-powder-300/80 dark:hover:bg-onyx-600/80 text-onyx-400 dark:text-onyx-500 font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center space-x-2 text-sm"
                 :title="`Limite de ${MAX_FREE_TEMPLATES} modèles atteinte`"
               >
                 <Plus class="w-4 h-4" />
@@ -299,7 +299,7 @@
             >
               <!-- Preview using BusinessCard (pass the editorData transformed to a fake card) -->
               <div
-                class="relative overflow-hidden bg-base-200 h-44 flex items-center justify-center p-2"
+                class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-44 flex items-center justify-center p-2"
               >
                 <!-- Checkbox -->
                 <button
@@ -352,10 +352,10 @@
               </div>
 
               <div class="p-4 flex flex-col flex-1">
-                <h3 class="font-bold text-base text-base-content mb-1 truncate">
+                <h3 class="font-bold text-base text-onyx-900 dark:text-powder-100 mb-1 truncate">
                   {{ tpl.name }}
                 </h3>
-                <p class="text-[10px] text-base-content/50 mb-3">
+                <p class="text-[10px] text-onyx-400 dark:text-onyx-500 mb-3">
                   Modifié le {{ formatDate(tpl.updatedAt) }}
                 </p>
 
@@ -370,7 +370,7 @@
                 <div class="mt-auto grid grid-cols-2 gap-2">
                   <router-link
                     :to="`/editor/${tpl.id}?mode=edit-template`"
-                    class="btn btn-ghost btn-sm flex items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-base-200 hover:bg-base-300 text-base-content transition-colors"
+                    class="btn btn-ghost btn-sm flex items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-powder-100 dark:bg-onyx-800 hover:bg-powder-200 dark:hover:bg-onyx-700 text-onyx-900 dark:text-powder-100 transition-colors"
                   >
                     <Edit class="w-3.5 h-3.5" />
                     <span>Modifier</span>
@@ -441,7 +441,7 @@
             >
               <Copy class="w-8 h-8 text-onyx-400" />
             </div>
-            <p class="text-base-content/60 font-medium max-w-sm">
+            <p class="text-onyx-500 dark:text-powder-400 font-medium max-w-sm">
               Aucun modèle créé. Les modèles vous permettent de centraliser le design de plusieurs
               cartes.
             </p>
@@ -454,12 +454,12 @@
         <div v-if="dashboardTab === 'cards'" key="cards">
           <div class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <h2 class="text-2xl md:text-3xl font-bold text-base-content">
+              <h2 class="text-2xl md:text-3xl font-bold text-onyx-900 dark:text-powder-100">
                 Mes cartes de visite
               </h2>
               <button
                 @click="toggleCardSort"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-base-content/60"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-powder-300 dark:border-onyx-600 hover:bg-powder-100 dark:hover:bg-onyx-700 transition-colors text-xs font-medium text-onyx-500 dark:text-powder-400"
                 :title="
                   cardSortOrder === 'newest' ? 'Plus récent d\'abord' : 'Plus ancien d\'abord'
                 "
@@ -532,7 +532,7 @@
 
               <!-- Card Preview Section -->
               <div
-                class="relative overflow-hidden bg-base-200 h-64 flex items-center justify-center"
+                class="relative overflow-hidden bg-powder-100 dark:bg-onyx-800 h-64 flex items-center justify-center"
               >
                 <div :style="{ width: cardPreviewWidth(card, 220) + 'px' }">
                   <BusinessCard :card="card" :isFlipped="flippedCards.has(card.id)" />
@@ -586,15 +586,15 @@
                       >
                         {{ card.name }}
                       </p>
-                      <h3 class="text-xl md:text-2xl font-bold text-base-content">
+                      <h3 class="text-xl md:text-2xl font-bold text-onyx-900 dark:text-powder-100">
                         {{ getFullName(card) }}
                       </h3>
-                      <p class="text-sm text-base-content/50 mt-1">
+                      <p class="text-sm text-onyx-400 dark:text-onyx-500 mt-1">
                         {{ cardSubtitle(card) }}
                       </p>
                     </div>
                   </div>
-                  <p class="text-xs text-base-content/50">
+                  <p class="text-xs text-onyx-400 dark:text-onyx-500">
                     Créée le {{ formatDate(card.createdAt) }}
                   </p>
                 </div>
@@ -605,41 +605,41 @@
                 >
                   <div>
                     <p
-                      class="text-xs text-base-content/50 uppercase tracking-wide mb-1"
+                      class="text-xs text-onyx-400 dark:text-onyx-500 uppercase tracking-wide mb-1"
                     >
                       {{ getFieldLabel(card, 'email') }}
                     </p>
-                    <p class="text-sm font-semibold text-base-content truncate">
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100 truncate">
                       {{ getElemText(card, 'email') || '-' }}
                     </p>
                   </div>
                   <div>
                     <p
-                      class="text-xs text-base-content/50 uppercase tracking-wide mb-1"
+                      class="text-xs text-onyx-400 dark:text-onyx-500 uppercase tracking-wide mb-1"
                     >
                       {{ getFieldLabel(card, 'phone') }}
                     </p>
-                    <p class="text-sm font-semibold text-base-content truncate">
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100 truncate">
                       {{ getElemText(card, 'phone') || '-' }}
                     </p>
                   </div>
                   <div v-if="getElemText(card, 'website')" class="col-span-2">
                     <p
-                      class="text-xs text-base-content/50 uppercase tracking-wide mb-1"
+                      class="text-xs text-onyx-400 dark:text-onyx-500 uppercase tracking-wide mb-1"
                     >
                       {{ getFieldLabel(card, 'website') }}
                     </p>
-                    <p class="text-sm font-semibold text-base-content truncate">
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100 truncate">
                       {{ getElemText(card, 'website') }}
                     </p>
                   </div>
                   <div class="col-span-2">
                     <p
-                      class="text-xs text-base-content/50 uppercase tracking-wide mb-1"
+                      class="text-xs text-onyx-400 dark:text-onyx-500 uppercase tracking-wide mb-1"
                     >
                       {{ getFieldLabel(card, 'address') }}
                     </p>
-                    <p class="text-sm font-semibold text-base-content truncate">
+                    <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100 truncate">
                       {{ getElemText(card, 'address') || '-' }}
                     </p>
                   </div>
@@ -651,11 +651,11 @@
                       :class="cf.value && cf.value.length > 30 ? 'col-span-2' : ''"
                     >
                       <p
-                        class="text-xs text-base-content/50 uppercase tracking-wide mb-1"
+                        class="text-xs text-onyx-400 dark:text-onyx-500 uppercase tracking-wide mb-1"
                       >
                         {{ cf.label }}
                       </p>
-                      <p class="text-sm font-semibold text-base-content truncate">
+                      <p class="text-sm font-semibold text-onyx-900 dark:text-powder-100 truncate">
                         {{ cf.value || '-' }}
                       </p>
                     </div>
@@ -832,14 +832,14 @@
           <!-- Empty State -->
           <div v-else class="text-center py-24">
             <div
-              class="w-32 h-32 mx-auto mb-8 bg-base-200 rounded-3xl flex items-center justify-center"
+              class="w-32 h-32 mx-auto mb-8 bg-powder-100 dark:bg-onyx-800 rounded-3xl flex items-center justify-center"
             >
               <CreditCard class="w-16 h-16 text-onyx-400 dark:text-onyx-500" />
             </div>
-            <h3 class="text-3xl font-bold text-base-content mb-3">
+            <h3 class="text-3xl font-bold text-onyx-900 dark:text-powder-100 mb-3">
               Aucune carte créée
             </h3>
-            <p class="text-base-content/60 mb-8 text-lg max-w-md mx-auto">
+            <p class="text-onyx-500 dark:text-powder-400 mb-8 text-lg max-w-md mx-auto">
               Commencez par créer votre première carte de visite professionnelle
             </p>
             <router-link
@@ -868,7 +868,7 @@
             <!-- Header -->
             <div class="flex items-center justify-between mb-5">
               <div>
-                <h3 class="font-bold text-base-content text-lg">Partager la carte</h3>
+                <h3 class="font-bold text-onyx-900 dark:text-powder-100 text-lg">Partager la carte</h3>
                 <p class="text-xs text-onyx-400 mt-0.5">
                   {{ getFullName(activeShareCard) || activeShareCard?.name }}
                 </p>
@@ -883,7 +883,7 @@
 
             <!-- Share link -->
             <div class="mb-5">
-              <label class="block text-xs font-medium text-base-content/50 mb-2"
+              <label class="block text-xs font-medium text-onyx-400 dark:text-onyx-500 mb-2"
                 >Lien de partage</label
               >
               <div class="flex gap-2">
