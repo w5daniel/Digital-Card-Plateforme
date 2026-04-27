@@ -10,6 +10,7 @@ export const MAX_FREE_CARDS = 3
 // Snapshot public accessible à tous (pas de préfixe email).
 // TODO backend : remplacer par GET /api/cards/public/:id
 const PUBLIC_LS_PREFIX = 'digitalcard_public_'
+const PUBLIC_INDEX_KEY = 'digitalcard_public_index'
 // Surcharges admin : { [slug]: { isPremium: bool } }
 // TODO backend : persister dans la table `templates` via PUT /api/admin/templates/:slug
 const ADMIN_OVERRIDES_LS_KEY = 'digitalcard_adminTemplateOverrides'
@@ -112,13 +113,37 @@ export const useCardsStore = defineStore('cards', () => {
     userCards.value = []
   }
 
+  // Watcher de persistence — démarré au login, arrêté au logout
+  let _stopPersistWatch = null
+
+  function _startPersistWatch() {
+    if (_stopPersistWatch) return
+    _stopPersistWatch = watch(
+      userCards,
+      (val) => {
+        const key = _lsKey()
+        if (key) localStorage.setItem(key, JSON.stringify(val))
+      },
+      { deep: true },
+    )
+  }
+
+  function _stopPersistWatcher() {
+    if (_stopPersistWatch) {
+      _stopPersistWatch()
+      _stopPersistWatch = null
+    }
+  }
+
   // Réagir aux changements d'utilisateur (login / logout / restoreSession)
   watch(
     () => authStore.user?.email,
     (email) => {
       if (email) {
         loadUserCards()
+        _startPersistWatch()
       } else {
+        _stopPersistWatcher()
         clearCards()
       }
     },
@@ -255,6 +280,15 @@ export const useCardsStore = defineStore('cards', () => {
 
   // ===== PARTAGE PUBLIC =====
 
+  function _readPublicIndex() {
+    try { return new Set(JSON.parse(localStorage.getItem(PUBLIC_INDEX_KEY)) ?? []) }
+    catch { return new Set() }
+  }
+
+  function _writePublicIndex(set) {
+    try { localStorage.setItem(PUBLIC_INDEX_KEY, JSON.stringify([...set])) } catch {}
+  }
+
   /**
    * Écrit un snapshot public de la carte (sans préfixe email).
    * Accessible à tout visiteur via getPublicCard().
@@ -263,6 +297,11 @@ export const useCardsStore = defineStore('cards', () => {
   function _publishSnapshot(card) {
     try {
       localStorage.setItem(PUBLIC_LS_PREFIX + card.id, JSON.stringify(card))
+      if (card.isPublic) {
+        const idx = _readPublicIndex()
+        idx.add(card.id)
+        _writePublicIndex(idx)
+      }
     } catch {
       // quota dépassé — non bloquant
     }
@@ -274,6 +313,9 @@ export const useCardsStore = defineStore('cards', () => {
    */
   function _unpublishSnapshot(cardId) {
     localStorage.removeItem(PUBLIC_LS_PREFIX + cardId)
+    const idx = _readPublicIndex()
+    idx.delete(cardId)
+    _writePublicIndex(idx)
   }
 
   /**
@@ -302,11 +344,11 @@ export const useCardsStore = defineStore('cards', () => {
   function getAllCommunityCards() {
     const cards = []
     const currentEmail = authStore.user?.email
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (!key.startsWith(PUBLIC_LS_PREFIX)) continue
+    for (const id of _readPublicIndex()) {
       try {
-        const card = JSON.parse(localStorage.getItem(key))
+        const raw = localStorage.getItem(PUBLIC_LS_PREFIX + id)
+        if (!raw) continue
+        const card = JSON.parse(raw)
         if (card && card.isPublic) {
           cards.push({ ...card, _isOwn: card.ownerId === currentEmail })
         }
@@ -640,37 +682,6 @@ export const useCardsStore = defineStore('cards', () => {
     adminCardsVersion.value++
   }
 
-  /**
-   * Bascule la visibilité (public/privé) d'une carte appartenant à n'importe quel utilisateur (admin).
-   *
-   * TODO backend : PATCH /api/admin/cards/:id { isPublic }
-   *   → middleware `requireAdmin` obligatoire
-   *   → UPDATE cards SET is_public=?, updated_at=NOW() WHERE id=:id
-   *   → si passage à privé : retirer le snapshot public de la CDN / cache
-   *   → si passage à public : mettre à jour la CDN / galerie communauté
-   *   → logguer dans admin_audit_log
-   */
-  function adminToggleCardVisibility(cardId, ownerEmail) {
-    if (!authStore.isAdmin) return
-    try {
-      const raw = localStorage.getItem(LS_PREFIX + ownerEmail)
-      if (!raw) return
-      const cards = JSON.parse(raw)
-      const card = cards.find((c) => c.id === cardId)
-      if (!card) return
-      card.isPublic = !card.isPublic
-      localStorage.setItem(LS_PREFIX + ownerEmail, JSON.stringify(cards))
-      _publishSnapshot(card)
-      // Sync si c'est la carte de l'utilisateur courant
-      if (ownerEmail === authStore.user?.email) {
-        const own = getCardById(cardId)
-        if (own) own.isPublic = card.isPublic
-      }
-    } catch {
-      /* données corrompues — non bloquant */
-    }
-    adminCardsVersion.value++
-  }
 
   // ── Admin : templates officiels (CRUD) ────────────────────────────────────
 
@@ -754,15 +765,6 @@ export const useCardsStore = defineStore('cards', () => {
     return tmpl
   }
 
-  // Auto-persist vers la clé localStorage de l'utilisateur courant
-  watch(
-    userCards,
-    (val) => {
-      const key = _lsKey()
-      if (key) localStorage.setItem(key, JSON.stringify(val))
-    },
-    { deep: true },
-  )
 
   return {
     // State
@@ -806,7 +808,6 @@ export const useCardsStore = defineStore('cards', () => {
     // Admin — gestion cross-utilisateurs
     getAllCardsAdmin,
     adminDeleteCard,
-    adminToggleCardVisibility,
     // Admin — gestion templates officiels
     addOfficialTemplate,
     updateOfficialTemplate,

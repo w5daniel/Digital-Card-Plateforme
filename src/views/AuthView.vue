@@ -427,11 +427,11 @@ const switchTo = (mode) => {
   if (mode === 'login' && isRegister.value) {
     slideDir.value = 'slide-right'
     isRegister.value = false
-    history.replaceState(null, '', '/login')
+    router.replace({ name: 'login' })
   } else if (mode === 'register' && !isRegister.value) {
     slideDir.value = 'slide-left'
     isRegister.value = true
-    history.replaceState(null, '', '/register')
+    router.replace({ name: 'login', query: { mode: 'register' } })
   }
 }
 

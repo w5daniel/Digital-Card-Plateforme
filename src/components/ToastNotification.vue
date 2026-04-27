@@ -10,9 +10,13 @@
         <!-- Success Toast -->
         <div
           v-if="notification.type === 'success'"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           class="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg px-4 py-3 shadow-lg backdrop-blur-sm"
         >
           <svg
+            aria-hidden="true"
             class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -28,9 +32,10 @@
           </p>
           <button
             @click="notificationStore.removeNotification(notification.id)"
+            aria-label="Fermer la notification"
             class="ml-auto text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -43,9 +48,13 @@
         <!-- Error Toast -->
         <div
           v-else-if="notification.type === 'error'"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
           class="flex items-center gap-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3 shadow-lg backdrop-blur-sm"
         >
           <svg
+            aria-hidden="true"
             class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -61,9 +70,10 @@
           </p>
           <button
             @click="notificationStore.removeNotification(notification.id)"
+            aria-label="Fermer la notification"
             class="ml-auto text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -76,9 +86,13 @@
         <!-- Warning Toast -->
         <div
           v-else-if="notification.type === 'warning'"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-3 shadow-lg backdrop-blur-sm"
         >
           <svg
+            aria-hidden="true"
             class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -94,9 +108,10 @@
           </p>
           <button
             @click="notificationStore.removeNotification(notification.id)"
+            aria-label="Fermer la notification"
             class="ml-auto text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -109,9 +124,13 @@
         <!-- Info Toast -->
         <div
           v-else
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           class="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3 shadow-lg backdrop-blur-sm"
         >
           <svg
+            aria-hidden="true"
             class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -127,9 +146,10 @@
           </p>
           <button
             @click="notificationStore.removeNotification(notification.id)"
+            aria-label="Fermer la notification"
             class="ml-auto text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"

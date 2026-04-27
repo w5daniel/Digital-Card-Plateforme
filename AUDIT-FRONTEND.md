@@ -7,32 +7,32 @@
 
 ## 🔴 CRITIQUES (Production-breaking) — 9 problèmes
 
-**C1. `src/stores/userTemplatesStore.js` ~ligne 420**
-`adminRemoveCommunityTemplate()` définie APRÈS le `return { ... }` du store → jamais accessible via l'instance du store. Bug silencieux.
+**C1. `src/stores/userTemplatesStore.js` ~ligne 420** ✅ CORRIGÉ (2026-04-27)
+`adminRemoveCommunityTemplate()` était définie APRÈS le `return { ... }` du store. Déplacée avant le `return` pour garantir la cohérence et éliminer le risque de `undefined` si jamais la déclaration est refactorisée en arrow function.
 
-**C2. `src/stores/cards.js` ~lignes 758-765**
+**C2. `src/stores/cards.js` ~lignes 758-765** ✅ CORRIGÉ (2026-04-27)
 `watch(userCards, ...)` non nettoyé après logout → continue d'écrire en localStorage sans user actif. Fuite mémoire et écriture orpheline.
 
-**C3. `src/stores/useEditorStore.js` ~lignes 128-131**
+**C3. `src/stores/useEditorStore.js` ~lignes 128-131** ✅ CORRIGÉ (2026-04-27)
 `historyIndex` non incrémenté quand MAX_HISTORY est dépassé (path `.shift()`) → index désynchronisé avec `history.length` → undo/redo cassé après 50 actions.
 
-**C4. Duplication vues Auth**
-`src/views/LoginView.vue` + `src/views/RegisterView.vue` + `src/views/AuthView.vue` → 3 implémentations du même formulaire avec des styles différents (DaisyUI vs classes custom). Supprimer LoginView et RegisterView, ne garder qu'AuthView.
+**C4. Duplication vues Auth** ✅ CORRIGÉ (2026-04-27)
+`src/views/LoginView.vue` + `src/views/RegisterView.vue` + `src/views/AuthView.vue` → 3 implémentations du même formulaire avec des styles différents (DaisyUI vs classes custom). LoginView et RegisterView supprimées — seule AuthView reste. Le router pointait déjà sur AuthView pour `/login` et `/register` redirige vers `/login?mode=register` (query param lu par AuthView).
 
-**C5. `src/router/index.js` ~ligne 23**
-Redirect `/register → { name: 'login', query: { mode: 'register' } }` inutilisée car AuthView ne lit pas ce query param au chargement.
+**C5. `src/views/AuthView.vue` ~ligne 425** ✅ CORRIGÉ (2026-04-27)
+`switchTo()` utilisait `history.replaceState()` pour mettre à jour l'URL sans passer par Vue Router → désync entre l'URL affichée et l'état interne du router → navigation back/forward imprévisible. Remplacé par `router.replace({ name: 'login' })` / `router.replace({ name: 'login', query: { mode: 'register' } })` pour garder Vue Router en sync.
 
-**C6. `src/stores/notificationStore.js` ~lignes 20-22**
-`setTimeout()` créé pour chaque toast, jamais annulé si l'user logout avant expiration → timeouts persistent en mémoire après logout.
+**C6. `src/stores/notificationStore.js` ~lignes 20-22** ✅ CORRIGÉ (2026-04-27)
+`setTimeout()` créé pour chaque toast, jamais annulé si l'user logout avant expiration → timeouts persistent en mémoire après logout. Timer ID stocké dans l'objet notification ; `removeNotification()` annule le timer via `clearTimeout()` ; `clearAllToasts()` ajouté et appelé dans `authStore.logout()`.
 
-**C7. `src/stores/cards.js` ~lignes 305-317**
-`getAllCommunityCards()` itère sur TOUTES les clés localStorage à chaque appel (O(n)) → performance catastrophique au-delà de quelques centaines de clés.
+**C7. `src/stores/cards.js` ~lignes 305-317** ✅ CORRIGÉ (2026-04-27)
+`getAllCommunityCards()` itérait sur TOUTES les clés localStorage (O(n)). Un index `digitalcard_public_index` maintenu par `_publishSnapshot`/`_unpublishSnapshot` réduit la recherche à O(k) (k = nb de cartes publiques). Bonus : `adminToggleCardVisibility()` supprimée du store et le bouton Globe/Lock retiré de `AdminCardsView.vue` — seul le propriétaire peut décider de la visibilité de sa carte.
 
-**C8. `src/stores/adminStore.js` ~ligne 27-29**
-`localStorage.setItem()` dans `saveToLS()` sans try/catch → `QuotaExceededError` non capturé = crash silencieux (mode privé ou quota dépassé).
+**C8. `src/stores/adminStore.js` ~ligne 27-29** ✅ CORRIGÉ (2026-04-27)
+`saveToLS()` wrappée dans try/catch : `QuotaExceededError` loggée via `console.warn` explicite au lieu de remonter silencieusement dans les appelants. Message compte bloqué mis à jour dans `authStore.js:166` pour inclure `contact@ecodev.dev`.
 
-**C9. `src/components/ToastNotification.vue`**
-Pas de `role="status"`, `aria-live="polite"`, `aria-atomic="true"` → utilisateurs avec lecteurs d'écran jamais notifiés des toasts.
+**C9. `src/components/ToastNotification.vue`** ✅ CORRIGÉ (2026-04-27)
+Ajout de `role="status"` + `aria-live="polite"` + `aria-atomic="true"` sur les toasts success/warning/info ; `role="alert"` + `aria-live="assertive"` + `aria-atomic="true"` sur les toasts error (interruption immédiate). Boutons fermer dotés de `aria-label="Fermer la notification"` ; SVG décoratifs marqués `aria-hidden="true"`.
 
 ---
 

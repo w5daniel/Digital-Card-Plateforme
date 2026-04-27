@@ -12,12 +12,13 @@ export const useNotificationStore = defineStore('notification', () => {
       message,
       type, // 'success', 'error', 'info', 'warning'
       duration,
+      timerId: null,
     }
 
     notifications.value.push(notification)
 
     if (duration > 0) {
-      setTimeout(() => {
+      notification.timerId = setTimeout(() => {
         removeNotification(id)
       }, duration)
     }
@@ -29,7 +30,14 @@ export const useNotificationStore = defineStore('notification', () => {
   }
 
   const removeNotification = (id) => {
+    const notif = notifications.value.find((n) => n.id === id)
+    if (notif?.timerId) clearTimeout(notif.timerId)
     notifications.value = notifications.value.filter((n) => n.id !== id)
+  }
+
+  const clearAllToasts = () => {
+    notifications.value.forEach((n) => { if (n.timerId) clearTimeout(n.timerId) })
+    notifications.value = []
   }
 
   const success = (message, duration) => addNotification(message, 'success', duration ?? 3000)
@@ -72,6 +80,7 @@ export const useNotificationStore = defineStore('notification', () => {
     notifications,
     addNotification,
     removeNotification,
+    clearAllToasts,
     success,
     error,
     info,

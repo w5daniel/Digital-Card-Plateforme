@@ -25,7 +25,15 @@ function loadFromLS(key, seed) {
 }
 
 function saveToLS(key, data) {
-  localStorage.setItem(key, JSON.stringify(data))
+  try {
+    localStorage.setItem(key, JSON.stringify(data))
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+      console.warn('[adminStore] localStorage quota dépassé — données non sauvegardées pour', key)
+    } else {
+      console.warn('[adminStore] Erreur localStorage :', e)
+    }
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────

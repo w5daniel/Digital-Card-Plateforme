@@ -167,27 +167,6 @@
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end space-x-1">
                   <!--
-                    Toggle visibilité Public / Privé.
-                    TODO backend : PATCH /api/admin/cards/:id { isPublic }
-                      → UPDATE cards SET is_public=?, updated_at=NOW() WHERE id=:id
-                      → si passage à privé : retirer de la CDN / galerie communauté
-                      → logguer dans admin_audit_log
-                  -->
-                  <button
-                    @click="cardToToggle = card"
-                    class="p-1.5 rounded-lg transition-colors"
-                    :class="
-                      card.isPublic
-                        ? 'text-blue-500 hover:bg-blue-500/10'
-                        : 'text-base-content/40 hover:bg-base-200'
-                    "
-                    :title="card.isPublic ? 'Rendre privée' : 'Rendre publique'"
-                  >
-                    <Globe v-if="card.isPublic" class="w-4 h-4" />
-                    <Lock v-else class="w-4 h-4" />
-                  </button>
-
-                  <!--
                     Supprimer.
                     TODO backend : DELETE /api/admin/cards/:id
                       → soft-delete : UPDATE cards SET deleted_at=NOW()
@@ -275,52 +254,6 @@
         </div>
       </div>
     </div>
-    <!-- ── Modal confirmation visibilité ── -->
-    <div
-      v-if="cardToToggle"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      @click.self="cardToToggle = null"
-      @keydown.escape="cardToToggle = null"
-      tabindex="-1"
-      ref="toggleModalRef"
-    >
-      <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
-      >
-        <h3 class="font-semibold mb-2 text-base-content">
-          {{ cardToToggle.isPublic ? 'Rendre privée' : 'Rendre publique' }}
-        </h3>
-        <p class="text-sm mb-4 text-base-content/50">
-          {{
-            cardToToggle.isPublic
-              ? 'Retirer de la galerie communauté'
-              : 'Publier dans la galerie communauté'
-          }}
-          la carte <strong>"{{ cardToToggle.name || 'Sans titre' }}"</strong> de
-          {{ cardToToggle.ownerName }} ?
-        </p>
-        <div class="flex space-x-3">
-          <button
-            @click="cardToToggle = null"
-            class="flex-1 px-4 py-2 rounded-lg border text-sm transition-colors border-base-300 text-base-content/80 hover:bg-base-200"
-          >
-            Annuler
-          </button>
-          <button
-            @click="doToggle"
-            class="flex-1 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors"
-            :class="
-              cardToToggle.isPublic
-                ? 'bg-orange-500 hover:bg-orange-600'
-                : 'bg-blue-500 hover:bg-blue-600'
-            "
-          >
-            {{ cardToToggle.isPublic ? 'Rendre privée' : 'Rendre publique' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Toast notification -->
     <Transition name="toast">
       <div
@@ -336,7 +269,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { Search, CreditCard, Eye, Globe, Lock, Trash2, CheckCircle } from 'lucide-vue-next'
+import { Search, CreditCard, Eye, Trash2, CheckCircle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useCardsStore } from '../../stores/cards'
 
@@ -359,9 +292,7 @@ const cardsStore = useCardsStore()
 const search = ref('')
 const activeFilter = ref('all')
 const cardToDelete = ref(null)
-const cardToToggle = ref(null)
 const deleteModalRef = ref(null)
-const toggleModalRef = ref(null)
 const toast = ref(null)
 let toastTimer = null
 
@@ -375,9 +306,6 @@ function showToast(msg) {
 
 watch(cardToDelete, (v) => {
   if (v) nextTick(() => deleteModalRef.value?.focus())
-})
-watch(cardToToggle, (v) => {
-  if (v) nextTick(() => toggleModalRef.value?.focus())
 })
 
 // Liste complète — dépend de adminCardsVersion + authStore.allUsers (réactif automatiquement)
@@ -421,15 +349,6 @@ function doDelete() {
   cardsStore.adminDeleteCard(cardToDelete.value.id, cardToDelete.value.ownerEmail)
   cardToDelete.value = null
   showToast(`"${name}" supprimée`)
-}
-
-function doToggle() {
-  if (!cardToToggle.value) return
-  const wasPublic = cardToToggle.value.isPublic
-  const name = cardToToggle.value.name || 'Sans titre'
-  cardsStore.adminToggleCardVisibility(cardToToggle.value.id, cardToToggle.value.ownerEmail)
-  cardToToggle.value = null
-  showToast(wasPublic ? `"${name}" est maintenant privée` : `"${name}" est maintenant publique`)
 }
 
 const formatDate = (iso) =>

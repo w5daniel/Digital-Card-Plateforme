@@ -389,6 +389,27 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     return result
   }
 
+  function adminRemoveCommunityTemplate(templateId) {
+    let ownerEmail = null
+    let templateName = null
+    try {
+      const raw = localStorage.getItem(LS_PUBLIC_PREFIX + templateId)
+      if (raw) {
+        const tpl = JSON.parse(raw)
+        ownerEmail = tpl.ownerEmail || null
+        templateName = tpl.name || null
+      }
+    } catch { /* ignore */ }
+
+    localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
+
+    if (ownerEmail) {
+      _writePendingNotification(ownerEmail, templateName)
+    }
+
+    communityVersion.value++
+  }
+
   return {
     // State
     userTemplates,
@@ -415,31 +436,6 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     createCardsFromTemplate,
     getAllCommunityTemplates,
     adminRemoveCommunityTemplate,
-  }
-
-  function adminRemoveCommunityTemplate(templateId) {
-    // Lire le snapshot avant suppression pour récupérer les infos (nom, propriétaire)
-    let ownerEmail = null
-    let templateName = null
-    try {
-      const raw = localStorage.getItem(LS_PUBLIC_PREFIX + templateId)
-      if (raw) {
-        const tpl = JSON.parse(raw)
-        ownerEmail = tpl.ownerEmail || null
-        templateName = tpl.name || null
-      }
-    } catch { /* ignore */ }
-
-    // Supprimer le snapshot public
-    localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
-
-    // Écrire une notification en attente pour le propriétaire du modèle
-    if (ownerEmail) {
-      _writePendingNotification(ownerEmail, templateName)
-    }
-
-    // Forcer le recalcul du computed getAllCommunityTemplates
-    communityVersion.value++
   }
 
   function _writePendingNotification(ownerEmail, templateName) {

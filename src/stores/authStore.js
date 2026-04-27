@@ -163,7 +163,7 @@ export const useAuthStore = defineStore('auth', () => {
       // TODO backend : cette vérification sera faite par le serveur (HTTP 403)
       const existing = allUsers.value.find((u) => u.email.toLowerCase() === email.toLowerCase())
       if (existing?.status === 'blocked') {
-        throw new Error("Ce compte a été bloqué. Contactez l'administrateur.")
+        throw new Error("Ce compte a été bloqué. Contactez l'administrateur : contact@ecodev.dev")
       }
 
       const role = email.toLowerCase() === ADMIN_EMAIL ? 'admin' : 'user'
@@ -282,7 +282,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user')
     // Vider l'inbox pour éviter que les notifications d'un utilisateur
     // soient visibles par le suivant (le store Pinia persiste en mémoire)
-    useNotificationStore().clearInbox()
+    const notificationStore = useNotificationStore()
+    notificationStore.clearAllToasts()
+    notificationStore.clearInbox()
   }
 
   /**
