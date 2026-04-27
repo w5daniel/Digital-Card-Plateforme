@@ -208,14 +208,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, toRef } from 'vue'
 import { QrCode } from 'lucide-vue-next'
 import { useEditorStore } from '@/stores/useEditorStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { ROLE_LABELS } from '@/utils/cardElements'
 
-const qrConfig = defineModel('qrConfig', { type: Object, required: true })
+const props = defineProps({ qrConfig: { type: Object, required: true } })
+const qrConfig = toRef(props, 'qrConfig')
 
 const emit = defineEmits(['insert-qr'])
 
