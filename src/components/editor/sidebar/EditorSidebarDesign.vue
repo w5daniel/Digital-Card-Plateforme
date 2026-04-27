@@ -20,9 +20,9 @@
       <template v-if="bgMode === 'solid'">
         <div class="flex items-center gap-2 mb-2">
           <label class="relative w-8 h-8 rounded-lg overflow-hidden border-2 cursor-pointer flex-shrink-0 transition-all hover:scale-105" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'" :style="{ background: editorStore.currentBackground }">
-            <input type="color" :value="editorStore.currentBackground?.startsWith('linear-gradient') ? '#6366f1' : (editorStore.currentBackground || '#ffffff')" @input="editorStore.setBackground($event.target.value)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+            <input type="color" :value="editorStore.currentBackground?.startsWith('linear-gradient') ? '#6366f1' : (editorStore.currentBackground || '#ffffff')" @input="editorStore.setBackground($event.target.value)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Choisir la couleur de fond" />
           </label>
-          <input type="text" :value="editorStore.currentBackground?.startsWith('linear-gradient') ? '' : (editorStore.currentBackground || '')" @change="editorStore.setBackground($event.target.value)" class="flex-1 text-xs px-2 py-1.5 rounded border font-mono outline-none" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200' : 'bg-white border-powder-200 text-onyx-800'" placeholder="#FFFFFF" />
+          <input type="text" :value="editorStore.currentBackground?.startsWith('linear-gradient') ? '' : (editorStore.currentBackground || '')" @change="editorStore.setBackground($event.target.value)" class="flex-1 text-xs px-2 py-1.5 rounded border font-mono outline-none" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200' : 'bg-white border-powder-200 text-onyx-800'" placeholder="#FFFFFF" aria-label="Valeur hexadécimale de la couleur de fond" />
         </div>
         <div class="grid grid-cols-8 gap-1 mb-3">
           <button v-for="c in bgPresets" :key="c" @click="editorStore.setBackground(c)" class="aspect-square rounded border-2 transition-all hover:scale-110" :style="{ backgroundColor: c }" :class="editorStore.currentBackground === c ? 'border-flame-500 scale-110' : themeStore.darkMode ? 'border-onyx-700' : 'border-powder-200'" />
@@ -41,13 +41,13 @@
           <div class="flex-1">
             <p class="text-[10px] mb-1" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Début</p>
             <label class="relative w-full h-7 rounded border overflow-hidden cursor-pointer block" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'" :style="{ background: bgGradFrom }">
-              <input type="color" :value="bgGradFrom" @input="bgGradFrom = $event.target.value; applyBgGradient()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              <input type="color" :value="bgGradFrom" @input="bgGradFrom = $event.target.value; applyBgGradient()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Couleur de début du dégradé" />
             </label>
           </div>
           <div class="flex-1">
             <p class="text-[10px] mb-1" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Fin</p>
             <label class="relative w-full h-7 rounded border overflow-hidden cursor-pointer block" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'" :style="{ background: bgGradTo }">
-              <input type="color" :value="bgGradTo" @input="bgGradTo = $event.target.value; applyBgGradient()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              <input type="color" :value="bgGradTo" @input="bgGradTo = $event.target.value; applyBgGradient()" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Couleur de fin du dégradé" />
             </label>
           </div>
         </div>
@@ -65,7 +65,7 @@
         <button v-for="color in allDocColors" :key="color" @click="applyDocumentColor(color)" class="w-6 h-6 rounded border-2 transition-all duration-150 hover:scale-110 hover:shadow-sm" :style="{ background: color }" :class="[themeStore.darkMode ? 'border-onyx-700 hover:border-onyx-500' : 'border-powder-200 hover:border-powder-400', editorStore.selectedIds.length === 0 ? 'opacity-50 cursor-default' : 'cursor-pointer']" :title="editorStore.selectedIds.length > 0 ? `Appliquer aux éléments sélectionnés : ${color}` : color" />
         <label class="w-6 h-6 rounded border-2 border-dashed flex items-center justify-center cursor-pointer transition-all duration-150 hover:scale-110" :class="themeStore.darkMode ? 'border-onyx-600 text-onyx-500 hover:border-flame-500 hover:text-flame-400' : 'border-powder-300 text-onyx-400 hover:border-flame-400 hover:text-flame-500'" title="Ajouter une couleur">
           <Plus class="w-3 h-3" />
-          <input type="color" class="hidden" @change="addDocColor($event.target.value)" />
+          <input type="color" class="hidden" @change="addDocColor($event.target.value)" aria-label="Ajouter une couleur personnalisée" />
         </label>
         <button @click="showDocGradientPicker = !showDocGradientPicker" class="w-6 h-6 rounded border-2 border-dashed flex items-center justify-center cursor-pointer transition-all duration-150 hover:scale-110 text-[9px] font-bold" :class="showDocGradientPicker ? 'border-flame-500 text-flame-500' : themeStore.darkMode ? 'border-onyx-600 text-onyx-500 hover:border-flame-500 hover:text-flame-400' : 'border-powder-300 text-onyx-400 hover:border-flame-400 hover:text-flame-500'" title="Ajouter un dégradé">▲▼</button>
       </div>
@@ -74,13 +74,13 @@
           <label class="flex-1 block">
             <span class="text-[9px]" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Du</span>
             <div class="relative h-6 rounded border overflow-hidden mt-0.5" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'" :style="{ background: docGradFrom }">
-              <input type="color" :value="docGradFrom" @input="docGradFrom = $event.target.value" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              <input type="color" :value="docGradFrom" @input="docGradFrom = $event.target.value" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Couleur de début du dégradé du fond" />
             </div>
           </label>
           <label class="flex-1 block">
             <span class="text-[9px]" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'">Au</span>
             <div class="relative h-6 rounded border overflow-hidden mt-0.5" :class="themeStore.darkMode ? 'border-onyx-600' : 'border-powder-200'" :style="{ background: docGradTo }">
-              <input type="color" :value="docGradTo" @input="docGradTo = $event.target.value" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              <input type="color" :value="docGradTo" @input="docGradTo = $event.target.value" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" aria-label="Couleur de fin du dégradé du fond" />
             </div>
           </label>
         </div>
@@ -97,7 +97,7 @@
       <p class="text-xs font-medium mb-2" :class="themeStore.darkMode ? 'text-onyx-400' : 'text-onyx-500'">Modèles</p>
       <div class="relative mb-2">
         <Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" :class="themeStore.darkMode ? 'text-onyx-500' : 'text-onyx-400'" />
-        <input v-model="designQuery" type="text" placeholder="Rechercher un modèle…" class="w-full text-xs pl-7 pr-7 py-1.5 rounded-lg border outline-none transition-colors" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500 focus:border-flame-500' : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'" />
+        <input v-model="designQuery" type="text" placeholder="Rechercher un modèle…" class="w-full text-xs pl-7 pr-7 py-1.5 rounded-lg border outline-none transition-colors" :class="themeStore.darkMode ? 'bg-onyx-800 border-onyx-700 text-powder-200 placeholder-onyx-500 focus:border-flame-500' : 'bg-white border-powder-200 text-onyx-800 placeholder-onyx-400 focus:border-flame-400'" aria-label="Rechercher un modèle de carte" />
         <button v-if="designQuery" @click="designQuery = ''" class="absolute right-2 top-1/2 -translate-y-1/2" :class="themeStore.darkMode ? 'text-onyx-500 hover:text-powder-300' : 'text-onyx-400 hover:text-onyx-600'">
           <X class="w-3.5 h-3.5" />
         </button>

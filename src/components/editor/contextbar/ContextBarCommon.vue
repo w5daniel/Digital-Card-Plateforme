@@ -16,6 +16,7 @@
         class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
         :class="inputCls"
         title="Position X (px)"
+        aria-label="Position X en pixels"
       />
     </div>
     <div class="flex items-center gap-1 ml-1">
@@ -31,6 +32,7 @@
         class="w-[52px] text-center text-xs rounded px-1 py-0.5 outline-none border"
         :class="inputCls"
         title="Position Y (px)"
+        aria-label="Position Y en pixels"
       />
     </div>
 
@@ -51,6 +53,7 @@
         :class="inputCls"
         min="1"
         title="Largeur (px)"
+        aria-label="Largeur en pixels"
       />
     </div>
     <button
@@ -81,6 +84,7 @@
         :class="inputCls"
         min="1"
         title="Hauteur (px)"
+        aria-label="Hauteur en pixels"
       />
     </div>
 
@@ -102,6 +106,7 @@
         min="-180"
         max="180"
         title="Rotation (°)"
+        aria-label="Rotation en degrés"
       />
       <span
         class="text-[10px] shrink-0"
@@ -126,6 +131,7 @@
         min="0"
         max="100"
         class="w-20 accent-flame-500"
+        aria-label="Opacité"
       />
       <span
         class="text-xs w-7 shrink-0 text-right"

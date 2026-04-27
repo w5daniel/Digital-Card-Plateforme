@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useAdminStore } from '@/stores/adminStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -148,12 +149,14 @@ router.beforeEach((to, from, next) => {
   const adminSettings = useAdminStore().settings
 
   // Mode maintenance : seuls les admins peuvent naviguer
-  if (adminSettings?.maintenanceMode && !isAdmin && to.name !== 'maintenance' && to.name !== 'login') {
+  // /share reste accessible : les visiteurs doivent pouvoir voir une carte partagée même en maintenance
+  if (adminSettings?.maintenanceMode && !isAdmin && to.name !== 'maintenance' && to.name !== 'login' && to.name !== 'share') {
     return next('/maintenance')
   }
 
   // Galerie fermée par l'admin
   if (to.name === 'gallery' && adminSettings?.allowGallery === false && !isAdmin) {
+    useNotificationStore().warning('La galerie est temporairement indisponible.')
     return next('/')
   }
 

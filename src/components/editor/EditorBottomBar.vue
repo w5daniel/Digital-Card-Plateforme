@@ -61,6 +61,7 @@
         </button>
 
         <!-- Radius popover -->
+        <Transition name="dropdown-fade">
         <div
           v-if="radiusOpen"
           class="absolute bottom-full mb-1 right-0 w-48 rounded-xl border shadow-xl p-3 z-50"
@@ -105,6 +106,7 @@
             >{{ preset }}</button>
           </div>
         </div>
+        </Transition>
       </div>
 
       <!-- Format dropdown trigger -->
@@ -126,6 +128,7 @@
         </button>
 
         <!-- Dropdown -->
+        <Transition name="dropdown-fade">
         <div
           v-if="formatOpen"
           class="absolute bottom-full mb-1 right-0 w-52 rounded-xl border shadow-xl overflow-hidden z-50"
@@ -173,6 +176,7 @@
             </button>
           </div>
         </div>
+        </Transition>
       </div>
     </div>
 
@@ -206,6 +210,7 @@
           {{ Math.round(editorStore.zoom * 100) }}%
         </button>
         <!-- Zoom dropdown -->
+        <Transition name="dropdown-fade">
         <div
           v-if="zoomOpen"
           class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-36 rounded-xl border shadow-xl overflow-hidden z-50"
@@ -248,6 +253,7 @@
             Ajuster à l'écran
           </button>
         </div>
+        </Transition>
       </div>
 
       <button

@@ -90,7 +90,7 @@ export const useAdminStore = defineStore('admin', () => {
 
   // ── Gestion Utilisateurs ───────────────────────────────────────────────────
   // TODO: remplacer par `await api.patch(`/admin/users/${id}`, { status: 'blocked' })`
-  const blockUser = async (id) => {
+  const blockUser = (id) => {
     error.value = null
     try {
       const u = users.value.find((u) => u.id === id)
@@ -103,7 +103,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const unblockUser = async (id) => {
+  const unblockUser = (id) => {
     error.value = null
     try {
       const u = users.value.find((u) => u.id === id)
@@ -116,7 +116,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const toggleUserRole = async (id) => {
+  const toggleUserRole = (id) => {
     error.value = null
     try {
       const u = users.value.find((u) => u.id === id)
@@ -129,7 +129,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const toggleUserPremium = async (id) => {
+  const toggleUserPremium = (id) => {
     error.value = null
     try {
       const u = users.value.find((u) => u.id === id)
@@ -142,7 +142,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const deleteUser = async (id) => {
+  const deleteUser = (id) => {
     error.value = null
     try {
       // TODO: remplacer par `await api.delete(`/admin/users/${id}`)`
@@ -154,7 +154,7 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   // ── Gestion Cartes ─────────────────────────────────────────────────────────
-  const approveCard = async (id) => {
+  const approveCard = (id) => {
     error.value = null
     try {
       const c = cards.value.find((c) => c.id === id)
@@ -168,7 +168,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const flagCard = async (id) => {
+  const flagCard = (id) => {
     error.value = null
     try {
       const c = cards.value.find((c) => c.id === id)
@@ -181,7 +181,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const deleteCard = async (id) => {
+  const deleteCard = (id) => {
     error.value = null
     try {
       // TODO: remplacer par `await api.delete(`/admin/cards/${id}`)`
@@ -193,7 +193,7 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   // ── Gestion Templates ──────────────────────────────────────────────────────
-  const addTemplate = async (template) => {
+  const addTemplate = (template) => {
     error.value = null
     try {
       // TODO: remplacer par `const res = await api.post('/admin/templates', template)`
@@ -212,7 +212,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const updateTemplate = async (id, patch) => {
+  const updateTemplate = (id, patch) => {
     error.value = null
     try {
       const t = templates.value.find((t) => t.id === id)
@@ -225,7 +225,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const deleteTemplate = async (id) => {
+  const deleteTemplate = (id) => {
     error.value = null
     try {
       templates.value = templates.value.filter((t) => t.id !== id)
@@ -235,7 +235,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const toggleTemplatePremium = async (id) => {
+  const toggleTemplatePremium = (id) => {
     error.value = null
     try {
       const t = templates.value.find((t) => t.id === id)
@@ -249,7 +249,7 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   // ── Paramètres système ─────────────────────────────────────────────────────
-  const updateSettings = async (patch) => {
+  const updateSettings = (patch) => {
     error.value = null
     try {
       // TODO: remplacer par `await api.put('/admin/settings', patch)`
@@ -260,7 +260,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const resetSettings = async () => {
+  const resetSettings = () => {
     error.value = null
     try {
       settings.value = { ...SEED_SETTINGS }
@@ -274,8 +274,11 @@ export const useAdminStore = defineStore('admin', () => {
   const withLoading = async (fn) => {
     isLoading.value = true
     await new Promise((r) => setTimeout(r, 300))
-    fn()
-    isLoading.value = false
+    try {
+      await fn()
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

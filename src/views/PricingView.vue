@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-powder-100 dark:bg-onyx-950 py-12">
+  <div class="min-h-screen bg-powder-100 dark:bg-onyx-900 py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12">
@@ -13,7 +13,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <!-- Free Plan -->
         <div
-          class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8"
+          class="bg-powder-50 dark:bg-onyx-800 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8"
         >
           <div class="mb-6">
             <h2 class="text-2xl font-bold mb-2 text-onyx-950 dark:text-powder-50">Plan Gratuit</h2>
@@ -81,7 +81,7 @@
 
         <!-- Premium Plan -->
         <div
-          class="bg-powder-50 dark:bg-onyx-900 border-2 border-flame-500 rounded-2xl p-8 relative shadow-md"
+          class="bg-powder-50 dark:bg-onyx-800 border-2 border-flame-500 rounded-2xl p-8 relative shadow-md"
         >
           <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
             <span class="bg-flame-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
@@ -170,7 +170,7 @@
 
       <!-- Features Comparison -->
       <div
-        class="bg-powder-50 dark:bg-onyx-900 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8"
+        class="bg-powder-50 dark:bg-onyx-800 border border-powder-200 dark:border-onyx-800 rounded-2xl p-8"
       >
         <h3 class="text-2xl font-bold mb-6 text-onyx-950 dark:text-powder-50">
           Comparaison détaillée
@@ -178,7 +178,7 @@
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b border-powder-200 dark:border-onyx-800">
+              <tr class="border-b border-powder-200 dark:border-onyx-900">
                 <th class="text-left py-3 font-semibold text-onyx-950 dark:text-powder-50">
                   Fonctionnalité
                 </th>
@@ -190,7 +190,7 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-powder-200 dark:divide-onyx-800">
+            <tbody class="divide-y divide-powder-200 dark:divide-onyx-900">
               <tr>
                 <td class="py-3 text-onyx-900 dark:text-powder-100">Nombre de cartes</td>
                 <td class="text-center text-onyx-900 dark:text-powder-100">3</td>

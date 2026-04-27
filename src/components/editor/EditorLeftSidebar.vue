@@ -89,12 +89,11 @@
             <EditorSidebarImport v-else-if="activeTab === 'import'" />
             <EditorSidebarQR
               v-else-if="activeTab === 'qr'"
-              :qrConfig="qrConfig"
+              v-model:qrConfig="qrConfig"
               @insert-qr="insertQR"
             />
             <EditorSidebarTools
               v-else-if="activeTab === 'tools'"
-              :qrConfig="qrConfig"
               @insert-qr="insertQR"
             />
           </div>

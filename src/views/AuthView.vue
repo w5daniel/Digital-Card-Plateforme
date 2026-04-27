@@ -200,8 +200,10 @@
                     />
                     <span class="text-onyx-600 dark:text-powder-400">Se souvenir</span>
                   </label>
+                  <!-- TODO (backend): remplacer @click par l'appel à l'API forgot-password -->
                   <button
                     type="button"
+                    @click="showForgotModal = true"
                     class="text-flame-600 dark:text-flame-400 hover:underline font-medium"
                   >
                     Mot de passe oublié ?
@@ -233,6 +235,16 @@
               <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
                 Créez votre compte ECODEV CARD PRO gratuitement
               </p>
+              <!-- Inscriptions fermées par l'admin -->
+              <div
+                v-if="adminStore.settings?.allowRegistration === false"
+                class="flex items-center space-x-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-4"
+              >
+                <AlertCircle class="w-4 h-4 text-amber-500 flex-shrink-0" />
+                <span class="text-sm text-amber-700 dark:text-amber-400">
+                  Les inscriptions sont temporairement fermées. Revenez bientôt.
+                </span>
+              </div>
               <form @submit.prevent="handleRegister" class="space-y-4">
                 <!-- Full name -->
                 <div>
@@ -371,7 +383,11 @@
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" :disabled="authStore.isLoading" class="auth-submit-btn mt-2">
+                <button
+                  type="submit"
+                  :disabled="authStore.isLoading || adminStore.settings?.allowRegistration === false"
+                  class="auth-submit-btn mt-2"
+                >
                   <span v-if="authStore.isLoading" class="auth-spinner"></span>
                   <UserPlus v-else class="w-4 h-4" />
                   <span>{{ authStore.isLoading ? 'Création…' : 'Créer mon compte' }}</span>
@@ -390,13 +406,77 @@
         </div>
       </div>
     </div>
-  </div>
+    <!--
+      TODO (backend): Remplacer ce modal par un vrai flow de réinitialisation :
+      1. Afficher un champ email dans le modal
+      2. Appeler POST /api/auth/forgot-password { email }
+      3. L'API envoie un email avec un lien signé (token JWT court durée, ex. 15 min)
+      4. Créer la route /reset-password?token=... qui appelle POST /api/auth/reset-password { token, newPassword }
+      5. Supprimer le lien mailto: et le message "disponible prochainement"
+    -->
+    <Transition name="panel-fade">
+      <div
+        v-if="showForgotModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      @click.self="showForgotModal = false"
+      @keydown="onForgotKeydown"
+    >
+      <div
+        class="bg-powder-50 dark:bg-onyx-900 rounded-2xl shadow-2xl ring-1 ring-black/10 w-full max-w-sm p-8 space-y-5"
+      >
+        <div class="flex items-start justify-between">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-flame-100 dark:bg-flame-900/30 flex items-center justify-center flex-shrink-0"
+            >
+              <Lock class="w-5 h-5 text-flame-600 dark:text-flame-400" />
+            </div>
+            <h2 class="text-base font-bold text-onyx-900 dark:text-white">Mot de passe oublié</h2>
+          </div>
+          <button
+            type="button"
+            @click="showForgotModal = false"
+            class="text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
+            aria-label="Fermer"
+          >
+            <XCircle class="w-5 h-5" />
+          </button>
+        </div>
+
+        <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
+          La réinitialisation de mot de passe par email sera disponible prochainement.
+        </p>
+        <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
+          En attendant, contactez-nous directement et nous réinitialiserons votre mot de passe
+          manuellement :
+        </p>
+
+        <a
+          href="mailto:contact@ecodev.dev"
+          class="flex items-center justify-center space-x-2 w-full py-2.5 rounded-xl bg-flame-500 hover:bg-flame-600 text-white font-semibold text-sm transition-colors"
+        >
+          <Mail class="w-4 h-4" />
+          <span>contact@ecodev.dev</span>
+        </a>
+
+        <button
+          type="button"
+          @click="showForgotModal = false"
+          class="w-full py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 text-onyx-600 dark:text-powder-400 text-sm font-medium hover:bg-powder-100 dark:hover:bg-onyx-800 transition-colors"
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </Transition>
+</div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useAdminStore } from '@/stores/adminStore'
 import {
   Mail,
   Lock,
@@ -415,6 +495,13 @@ import { validateField } from '@/utils/validators'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const adminStore = useAdminStore()
+
+// ── Forgot password modal ─────────────────────────────────────────────
+const showForgotModal = ref(false)
+function onForgotKeydown(e) {
+  if (e.key === 'Escape') showForgotModal.value = false
+}
 
 // ── Mode ──────────────────────────────────────────────────────────────
 // Use a local ref so switching tabs never remounts the component (no router push).

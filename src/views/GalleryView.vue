@@ -153,7 +153,19 @@
     </div>
 
     <!-- ══════════════════════════ GRID ══════════════════════════ -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="rounded-2xl animate-pulse bg-powder-200 dark:bg-onyx-800"
+          style="aspect-ratio: 16/9"
+        />
+      </div>
+    </div>
+
+    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
       <!-- ── Templates grid (Tous / Gratuits / Premium) ── -->
       <div
         v-if="activeFilter !== 'community'"
@@ -439,6 +451,7 @@ const themeStore = useThemeStore()
 const templatesStore = useUserTemplatesStore()
 
 // ── UI state ──────────────────────────────────────────────────────────
+const isLoading = ref(true)
 const VALID_TABS = ['all', 'free', 'premium', 'community']
 const activeFilter = ref(VALID_TABS.includes(route.query.tab) ? route.query.tab : 'all')
 const tabGroupRef = ref(null)
@@ -741,7 +754,10 @@ onMounted(() => {
   computeScale()
   ro = new ResizeObserver(computeScale)
   if (cardsGridRef.value) ro.observe(cardsGridRef.value)
-  nextTick(updateFilterPill)
+  nextTick(() => {
+    updateFilterPill()
+    isLoading.value = false
+  })
 })
 
 onBeforeUnmount(() => ro?.disconnect())

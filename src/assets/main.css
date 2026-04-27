@@ -205,3 +205,14 @@
     -webkit-backdrop-filter: blur(10px);
   }
 }
+
+/* ── Vue Transition — dropdown/popover fade + slide ── */
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}

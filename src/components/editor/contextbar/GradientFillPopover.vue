@@ -1,5 +1,6 @@
 ﻿<template>
   <Teleport to="body">
+    <Transition name="dropdown-fade">
     <div
       v-if="open"
       ref="popoverDivRef"
@@ -91,6 +92,7 @@
         />
       </template>
     </div>
+    </Transition>
   </Teleport>
 </template>
 

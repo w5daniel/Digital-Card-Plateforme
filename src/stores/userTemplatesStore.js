@@ -58,6 +58,21 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     userTemplates.value = []
   }
 
+  // Persist watcher — démarré au login, arrêté au logout
+  let _stopPersistWatch = null
+
+  function _startPersistWatch() {
+    if (_stopPersistWatch) return
+    _stopPersistWatch = watch(userTemplates, () => _save(), { deep: true })
+  }
+
+  function _stopPersistWatcher() {
+    if (_stopPersistWatch) {
+      _stopPersistWatch()
+      _stopPersistWatch = null
+    }
+  }
+
   // React to user changes (login / logout)
   watch(
     () => authStore.user?.email,
@@ -65,15 +80,14 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       if (email) {
         loadUserTemplates()
         _deliverPendingNotifications(email)
+        _startPersistWatch()
       } else {
+        _stopPersistWatcher()
         clearTemplates()
       }
     },
     { immediate: true },
   )
-
-  // Auto-persist
-  watch(userTemplates, () => _save(), { deep: true })
 
   // ── Getters ───────────────────────────────────────────────────────────────
 

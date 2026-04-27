@@ -84,7 +84,10 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">{{ stats.totalCards }}</div>
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
+            <div v-if="!statsReady" class="h-8 w-12 bg-onyx-200 dark:bg-onyx-700 animate-pulse rounded" />
+            <template v-else>{{ stats.totalCards }}</template>
+          </div>
           <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Cartes créées</p>
         </div>
 
@@ -102,7 +105,10 @@
               >Total</span
             >
           </div>
-          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">{{ stats.totalViews }}</div>
+          <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
+            <div v-if="!statsReady" class="h-8 w-12 bg-onyx-200 dark:bg-onyx-700 animate-pulse rounded" />
+            <template v-else>{{ stats.totalViews }}</template>
+          </div>
           <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Vues totales</p>
         </div>
 
@@ -121,7 +127,8 @@
             >
           </div>
           <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
-            {{ stats.totalDownloads }}
+            <div v-if="!statsReady" class="h-8 w-12 bg-onyx-200 dark:bg-onyx-700 animate-pulse rounded" />
+            <template v-else>{{ stats.totalDownloads }}</template>
           </div>
           <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Téléchargements</p>
         </div>
@@ -141,7 +148,8 @@
             >
           </div>
           <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
-            {{ stats.totalQRScans }}
+            <div v-if="!statsReady" class="h-8 w-12 bg-onyx-200 dark:bg-onyx-700 animate-pulse rounded" />
+            <template v-else>{{ stats.totalQRScans }}</template>
           </div>
           <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Scans QR</p>
         </div>
@@ -161,7 +169,8 @@
             >
           </div>
           <div class="text-3xl font-bold text-onyx-900 dark:text-powder-100">
-            {{ stats.totalShares }}
+            <div v-if="!statsReady" class="h-8 w-12 bg-onyx-200 dark:bg-onyx-700 animate-pulse rounded" />
+            <template v-else>{{ stats.totalShares }}</template>
           </div>
           <p class="text-xs text-onyx-500 dark:text-powder-400 mt-2">Partages</p>
         </div>
@@ -1047,7 +1056,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCardsStore, MAX_FREE_CARDS } from '@/stores/cards'
 import { useUserTemplatesStore, MAX_FREE_TEMPLATES } from '@/stores/userTemplatesStore'
@@ -1318,6 +1327,23 @@ const confettiCanvas = ref(null)
 let confettiFrame = null
 
 const stats = computed(() => store.getGlobalStats())
+const statsReady = ref(false)
+
+// Chargement déterministe — s'exécute dans setup(), avant le premier rendu
+watch(
+  () => authStore.user?.email,
+  (email) => {
+    if (email) {
+      store.loadUserCards()
+      templatesStore.loadUserTemplates()
+    }
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  nextTick(() => { statsReady.value = true })
+})
 
 const currentShareLink = computed(() => {
   if (activeShareCard.value?.id) {

@@ -3,8 +3,14 @@
     class="min-h-screen bg-gradient-to-br from-powder-100 to-powder-100 dark:from-onyx-900 dark:to-onyx-800 py-12"
   >
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Loading -->
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-24 gap-4">
+        <span class="loading loading-spinner loading-lg text-flame-500"></span>
+        <p class="text-sm text-onyx-400 dark:text-onyx-500">Chargement de la carte…</p>
+      </div>
+
       <!-- Card Found -->
-      <div v-if="card" class="space-y-8">
+      <div v-else-if="card" class="space-y-8">
         <!-- Header -->
         <div class="text-center mb-8">
           <h1 class="text-4xl font-bold mb-2">{{ card.name }}</h1>
@@ -19,7 +25,17 @@
               class="lg:col-span-1 lg:row-span-2 flex flex-col items-center justify-center gap-3"
             >
               <div class="w-full flex justify-center">
-                <BusinessCard :card="card" class="w-full" />
+                <BusinessCard
+                  v-if="card.data?.elements?.length || card.data?.versoElements?.length"
+                  :card="card"
+                  class="w-full"
+                />
+                <div
+                  v-else
+                  class="w-full flex items-center justify-center rounded-xl bg-powder-100 dark:bg-onyx-800 text-onyx-400 dark:text-onyx-500 text-sm py-16 px-4 text-center"
+                >
+                  Cette carte ne contient aucun élément visuel
+                </div>
               </div>
               <!-- Scan QR button (shown only if card has QR elements) -->
               <button
@@ -218,6 +234,7 @@ const ensureProtocol = (url) => {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`
 }
 
+const isLoading = ref(true)
 const card = ref(null)
 const qrModalOpen = ref(false)
 
@@ -257,9 +274,9 @@ onMounted(() => {
 
   if (foundCard) {
     card.value = foundCard
-    // Incrémenter les vues
     store.incrementCardViews(cardId)
   }
+  isLoading.value = false
 })
 
 const downloadVCard = () => {

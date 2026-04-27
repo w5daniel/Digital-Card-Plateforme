@@ -799,9 +799,6 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   // ── Contact data (extracted from text elements by role) ─────────────────
-  // Returns a stable object — only changes when actual text values change
-  let _prevContactKey = ''
-  let _prevContactData = {}
   const contactData = computed(() => {
     const data = {}
     const allEls = [...(elements.value.recto || []), ...(elements.value.verso || [])]
@@ -810,10 +807,6 @@ export const useEditorStore = defineStore('editor', () => {
         data[el.role] = el.text || ''
       }
     }
-    const key = JSON.stringify(data)
-    if (key === _prevContactKey) return _prevContactData
-    _prevContactKey = key
-    _prevContactData = data
     return data
   })
 
