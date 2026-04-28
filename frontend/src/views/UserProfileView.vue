@@ -1009,7 +1009,7 @@ onMounted(() => {
   loadPreferences()
 })
 
-const handlePhotoUpload = (e) => {
+const handlePhotoUpload = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
   if (!file.type.startsWith('image/')) {
@@ -1020,17 +1020,21 @@ const handlePhotoUpload = (e) => {
     notify.error('La photo dépasse la limite de 5 Mo')
     return
   }
-  const reader = new FileReader()
-  reader.onload = (ev) => {
-    authStore.setProfilePhoto(ev.target.result)
+  try {
+    await authStore.setProfilePhoto(file)
     notify.success('Photo de profil mise à jour')
+  } catch {
+    notify.error('Erreur lors du téléchargement de la photo')
   }
-  reader.readAsDataURL(file)
 }
 
-const removePhoto = () => {
-  authStore.removeProfilePhoto()
-  notify.success('Photo supprimée')
+const removePhoto = async () => {
+  try {
+    await authStore.removeProfilePhoto()
+    notify.success('Photo supprimée')
+  } catch {
+    notify.error('Erreur lors de la suppression de la photo')
+  }
 }
 
 // ── Profile form ────────────────────────────────────────────────
@@ -1044,7 +1048,6 @@ const profileForm = reactive({
 
 const profileErrors = reactive({ name: '', email: '', title: '' })
 
-// TODO backend : valider name, email, title, bio côté serveur (PUT /api/users/me)
 const saveProfile = async () => {
   profileErrors.name = validateField('fullName', profileForm.name)
   profileErrors.email = validateField('email', profileForm.email)
@@ -1057,16 +1060,21 @@ const saveProfile = async () => {
     return
   }
   profileLoading.value = true
-  await new Promise((r) => setTimeout(r, 700))
-  if (authStore.user) {
-    authStore.user.name = profileForm.name.trim()
-    authStore.user.email = profileForm.email.trim()
-    authStore.user.title = profileForm.title.trim()
-    authStore.user.bio = profileForm.bio.trim()
-    localStorage.setItem('user', JSON.stringify(authStore.user))
+  try {
+    await authStore.updateProfile({
+      name: profileForm.name.trim(),
+      email: profileForm.email.trim(),
+      title: profileForm.title.trim() || null,
+      bio: profileForm.bio.trim() || null,
+    })
+    notify.success('Profil mis à jour avec succès')
+  } catch (err) {
+    const errors = err.response?.data?.errors
+    const firstError = errors ? Object.values(errors)[0]?.[0] : null
+    notify.error(firstError || 'Erreur lors de la mise à jour du profil')
+  } finally {
+    profileLoading.value = false
   }
-  profileLoading.value = false
-  notify.success('Profil mis à jour avec succès')
 }
 
 const showDeleteAccountConfirm = ref(false)
@@ -1119,12 +1127,19 @@ const canChangePassword = computed(
 const changePassword = async () => {
   if (!canChangePassword.value) return
   passwordLoading.value = true
-  await new Promise((r) => setTimeout(r, 900))
-  passwordForm.current = ''
-  passwordForm.new = ''
-  passwordForm.confirm = ''
-  passwordLoading.value = false
-  notify.success('Mot de passe mis à jour avec succès')
+  try {
+    await authStore.changePassword(passwordForm.current, passwordForm.new, passwordForm.confirm)
+    passwordForm.current = ''
+    passwordForm.new = ''
+    passwordForm.confirm = ''
+    notify.success('Mot de passe mis à jour avec succès')
+  } catch (err) {
+    const errors = err.response?.data?.errors
+    const firstError = errors ? Object.values(errors)[0]?.[0] : null
+    notify.error(firstError || err.response?.data?.message || 'Erreur lors du changement de mot de passe')
+  } finally {
+    passwordLoading.value = false
+  }
 }
 
 // ── Preferences ─────────────────────────────────────────────────

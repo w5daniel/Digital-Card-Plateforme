@@ -15,30 +15,31 @@ const app = createApp(App)
 
 app.use(createPinia())
 
-// Initialiser le thème et restaurer la session avant le montage
-const themeStore = useThemeStore()
-themeStore.initTheme()
+async function bootstrap() {
+  const themeStore = useThemeStore()
+  themeStore.initTheme()
 
-const authStore = useAuthStore()
-authStore.restoreSession()
+  // Await session restore so the router guard has user state before first navigation
+  const authStore = useAuthStore()
+  await authStore.restoreSession()
 
-// Pre-load popular Google Fonts + user-specific custom fonts
-const fontStore = useFontStore()
-fontStore.init()
+  const fontStore = useFontStore()
+  fontStore.init()
 
-// Reload user-specific stores when user changes (login / logout / switch account)
-const brandKitStore = useBrandKitStore()
-brandKitStore.loadForUser()
+  const brandKitStore = useBrandKitStore()
+  brandKitStore.loadForUser()
 
-watch(
-  () => authStore.user?.email,
-  () => {
-    fontStore.reloadUserFonts()
-    brandKitStore.loadForUser()
-  },
-)
+  watch(
+    () => authStore.user?.email,
+    () => {
+      fontStore.reloadUserFonts()
+      brandKitStore.loadForUser()
+    },
+  )
 
-app.use(router)
-app.use(VueKonva)
+  app.use(router)
+  app.use(VueKonva)
+  app.mount('#app')
+}
 
-app.mount('#app')
+bootstrap()

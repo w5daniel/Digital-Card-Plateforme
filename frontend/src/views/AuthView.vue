@@ -200,10 +200,9 @@
                     />
                     <span class="text-onyx-600 dark:text-powder-400">Se souvenir</span>
                   </label>
-                  <!-- TODO (backend): remplacer @click par l'appel à l'API forgot-password -->
                   <button
                     type="button"
-                    @click="showForgotModal = true"
+                    @click="openForgotModal()"
                     class="text-flame-600 dark:text-flame-400 hover:underline font-medium"
                   >
                     Mot de passe oublié ?
@@ -406,69 +405,89 @@
         </div>
       </div>
     </div>
-    <!--
-      TODO (backend): Remplacer ce modal par un vrai flow de réinitialisation :
-      1. Afficher un champ email dans le modal
-      2. Appeler POST /api/auth/forgot-password { email }
-      3. L'API envoie un email avec un lien signé (token JWT court durée, ex. 15 min)
-      4. Créer la route /reset-password?token=... qui appelle POST /api/auth/reset-password { token, newPassword }
-      5. Supprimer le lien mailto: et le message "disponible prochainement"
-    -->
     <Transition name="panel-fade">
       <div
         v-if="showForgotModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
-      @click.self="showForgotModal = false"
-      @keydown="onForgotKeydown"
-    >
-      <div
-        class="bg-powder-50 dark:bg-onyx-900 rounded-2xl shadow-2xl ring-1 ring-black/10 w-full max-w-sm p-8 space-y-5"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+        @click.self="showForgotModal = false"
+        @keydown="onForgotKeydown"
       >
-        <div class="flex items-start justify-between">
-          <div class="flex items-center space-x-3">
-            <div
-              class="w-10 h-10 rounded-xl bg-flame-100 dark:bg-flame-900/30 flex items-center justify-center flex-shrink-0"
-            >
-              <Lock class="w-5 h-5 text-flame-600 dark:text-flame-400" />
+        <div
+          class="bg-powder-50 dark:bg-onyx-900 rounded-2xl shadow-2xl ring-1 ring-black/10 w-full max-w-sm p-8 space-y-5"
+        >
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-flame-100 dark:bg-flame-900/30 flex items-center justify-center flex-shrink-0"
+              >
+                <Lock class="w-5 h-5 text-flame-600 dark:text-flame-400" />
+              </div>
+              <h2 class="text-base font-bold text-onyx-900 dark:text-white">Mot de passe oublié</h2>
             </div>
-            <h2 class="text-base font-bold text-onyx-900 dark:text-white">Mot de passe oublié</h2>
+            <button
+              type="button"
+              @click="showForgotModal = false"
+              class="text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
+              aria-label="Fermer"
+            >
+              <XCircle class="w-5 h-5" />
+            </button>
           </div>
-          <button
-            type="button"
-            @click="showForgotModal = false"
-            class="text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
-            aria-label="Fermer"
-          >
-            <XCircle class="w-5 h-5" />
-          </button>
+
+          <!-- Envoyé avec succès -->
+          <div v-if="forgotSent" class="text-center space-y-4">
+            <div
+              class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto"
+            >
+              <CheckCircle class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
+              Si cet email est enregistré, vous recevrez un lien de réinitialisation dans quelques
+              minutes. Vérifiez aussi vos spams.
+            </p>
+            <button
+              type="button"
+              @click="showForgotModal = false"
+              class="w-full py-2.5 rounded-xl bg-flame-500 hover:bg-flame-600 text-white font-semibold text-sm transition-colors"
+            >
+              Compris
+            </button>
+          </div>
+
+          <!-- Formulaire email -->
+          <form v-else @submit.prevent="handleForgotPassword" class="space-y-4">
+            <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
+              Saisissez votre email et nous vous enverrons un lien pour réinitialiser votre mot de
+              passe.
+            </p>
+            <div>
+              <input
+                v-model="forgotEmail"
+                type="email"
+                placeholder="votre@email.com"
+                autocomplete="email"
+                class="w-full px-4 py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 bg-white dark:bg-onyx-800 text-onyx-900 dark:text-powder-100 text-sm focus:outline-none focus:ring-2 focus:ring-flame-500"
+              />
+              <p v-if="forgotError" class="mt-1.5 text-xs text-red-500">{{ forgotError }}</p>
+            </div>
+            <button
+              type="submit"
+              :disabled="forgotLoading"
+              class="w-full py-2.5 rounded-xl bg-flame-500 hover:bg-flame-600 disabled:opacity-60 text-white font-semibold text-sm transition-colors"
+            >
+              {{ forgotLoading ? 'Envoi en cours...' : 'Envoyer le lien' }}
+            </button>
+            <button
+              type="button"
+              @click="showForgotModal = false"
+              class="w-full py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 text-onyx-600 dark:text-powder-400 text-sm font-medium hover:bg-powder-100 dark:hover:bg-onyx-800 transition-colors"
+            >
+              Annuler
+            </button>
+          </form>
         </div>
-
-        <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
-          La réinitialisation de mot de passe par email sera disponible prochainement.
-        </p>
-        <p class="text-sm text-onyx-600 dark:text-powder-400 leading-relaxed">
-          En attendant, contactez-nous directement et nous réinitialiserons votre mot de passe
-          manuellement :
-        </p>
-
-        <a
-          href="mailto:contact@ecodev.dev"
-          class="flex items-center justify-center space-x-2 w-full py-2.5 rounded-xl bg-flame-500 hover:bg-flame-600 text-white font-semibold text-sm transition-colors"
-        >
-          <Mail class="w-4 h-4" />
-          <span>contact@ecodev.dev</span>
-        </a>
-
-        <button
-          type="button"
-          @click="showForgotModal = false"
-          class="w-full py-2.5 rounded-xl border border-powder-200 dark:border-onyx-700 text-onyx-600 dark:text-powder-400 text-sm font-medium hover:bg-powder-100 dark:hover:bg-onyx-800 transition-colors"
-        >
-          Fermer
-        </button>
       </div>
-    </div>
-  </Transition>
+    </Transition>
 </div>
 </template>
 
@@ -499,8 +518,38 @@ const adminStore = useAdminStore()
 
 // ── Forgot password modal ─────────────────────────────────────────────
 const showForgotModal = ref(false)
+const forgotEmail = ref('')
+const forgotSent = ref(false)
+const forgotLoading = ref(false)
+const forgotError = ref('')
+
+function openForgotModal() {
+  forgotEmail.value = ''
+  forgotSent.value = false
+  forgotLoading.value = false
+  forgotError.value = ''
+  showForgotModal.value = true
+}
+
 function onForgotKeydown(e) {
   if (e.key === 'Escape') showForgotModal.value = false
+}
+
+const handleForgotPassword = async () => {
+  if (!forgotEmail.value.trim()) {
+    forgotError.value = 'Veuillez saisir votre email'
+    return
+  }
+  forgotLoading.value = true
+  forgotError.value = ''
+  try {
+    await authStore.forgotPassword(forgotEmail.value.trim())
+    forgotSent.value = true
+  } catch {
+    forgotError.value = "Erreur lors de l'envoi. Veuillez réessayer."
+  } finally {
+    forgotLoading.value = false
+  }
 }
 
 // ── Mode ──────────────────────────────────────────────────────────────
@@ -553,7 +602,7 @@ function validateLogin() {
 const handleLogin = async () => {
   if (!validateLogin()) return
   try {
-    await authStore.login(loginEmail.value, loginPassword.value)
+    await authStore.login(loginEmail.value, loginPassword.value, rememberMe.value)
     router.push('/dashboard')
   } catch {
     // error set in store
