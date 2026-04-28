@@ -838,7 +838,7 @@ const handleLogin = async () => {
   if (!validateLogin()) return
   try {
     await authStore.login(loginEmail.value, loginPassword.value, rememberMe.value)
-    router.push('/dashboard')
+    router.push(authStore.isAdmin ? '/admin' : '/dashboard')
   } catch {
     // error set in store
   }
@@ -886,7 +886,7 @@ const handleRegister = async () => {
   if (!validateRegister()) return
   try {
     await authStore.register(regEmail.value, regPassword.value, regConfirm.value, regFullName.value)
-    router.push('/dashboard')
+    router.push(authStore.isAdmin ? '/admin' : '/dashboard')
   } catch {
     // error set in store
   }

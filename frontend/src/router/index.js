@@ -142,12 +142,12 @@ const router = createRouter({
 // TODO backend : la vérification du statut bloqué sera faite par le serveur
 //   (middleware auth → GET /auth/me → 403 si blocked → front déconnecte)
 //   Le guard front reste un best-effort pour l'UX (message immédiat).
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
   // Restore session on app load
   if (!authStore.user && !from.name) {
-    authStore.restoreSession()
+    await authStore.restoreSession()
   }
 
   const isAuthenticated = authStore.isAuthenticated
