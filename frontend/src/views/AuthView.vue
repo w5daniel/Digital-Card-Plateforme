@@ -44,7 +44,15 @@
         <!-- Center — switches on mode change -->
         <div class="relative flex-1 flex flex-col justify-center py-10">
           <Transition name="panel-fade" mode="out-in">
-            <div v-if="!isRegister" key="login-panel" class="space-y-4">
+            <div v-if="isResetMode" key="reset-panel" class="space-y-4">
+              <h2 class="text-4xl font-extrabold text-white leading-tight">
+                Nouveau<br />mot de passe
+              </h2>
+              <p class="text-white/65 text-sm leading-relaxed">
+                Choisissez un mot de passe fort pour sécuriser votre compte ECODEV CARD PRO.
+              </p>
+            </div>
+            <div v-else-if="!isRegister" key="login-panel" class="space-y-4">
               <h2 class="text-4xl font-extrabold text-white leading-tight">
                 Bon retour<br />parmi nous !
               </h2>
@@ -92,7 +100,7 @@
         </div>
 
         <!-- Tab switcher -->
-        <div class="px-8 pt-10 pb-6">
+        <div v-if="!isResetMode" class="px-8 pt-10 pb-6">
           <div class="relative flex bg-powder-100 dark:bg-onyx-800 rounded-2xl p-1.5">
             <!-- Sliding pill -->
             <div
@@ -129,8 +137,174 @@
         <!-- Form area -->
         <div class="flex-1 overflow-hidden px-8 pb-10">
           <Transition :name="slideDir" mode="out-in">
+            <!-- ── Reset Password Form ── -->
+            <div v-if="isResetMode" key="reset-form">
+              <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
+                Choisissez un nouveau mot de passe pour votre compte.
+              </p>
+
+              <!-- Success -->
+              <div v-if="resetSuccess" class="text-center space-y-5 py-4">
+                <div
+                  class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto"
+                >
+                  <CheckCircle class="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div class="space-y-2">
+                  <p class="font-semibold text-onyx-900 dark:text-white">Mot de passe mis à jour !</p>
+                  <p class="text-sm text-onyx-500 dark:text-powder-500">
+                    Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+                  </p>
+                </div>
+                <button type="button" @click="router.push('/login')" class="auth-submit-btn">
+                  <LogIn class="w-4 h-4" />
+                  <span>Se connecter</span>
+                </button>
+              </div>
+
+              <!-- Form -->
+              <form v-else @submit.prevent="handleResetPassword" class="space-y-5">
+                <!-- Email readonly -->
+                <div>
+                  <label
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
+                  >
+                    Email
+                  </label>
+                  <div class="relative">
+                    <Mail
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
+                    />
+                    <input
+                      :value="resetEmail"
+                      type="email"
+                      class="auth-input pl-10 pr-3.5 opacity-70 cursor-not-allowed"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <!-- New password -->
+                <div>
+                  <label
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
+                  >
+                    Nouveau mot de passe
+                    <span class="ml-1 text-xs text-onyx-400 font-normal">(6 caractères minimum)</span>
+                  </label>
+                  <div class="relative">
+                    <Lock
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
+                    />
+                    <input
+                      v-model="resetPass"
+                      :type="showResetPassword ? 'text' : 'password'"
+                      placeholder="••••••••"
+                      class="auth-input pl-10 pr-10"
+                      :class="resetErrors.password ? 'border-red-400 dark:border-red-500' : ''"
+                      required
+                    />
+                    <button
+                      type="button"
+                      @click="showResetPassword = !showResetPassword"
+                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-onyx-400 hover:text-onyx-600 dark:hover:text-powder-200 transition-colors"
+                    >
+                      <Eye v-if="!showResetPassword" class="w-4 h-4" />
+                      <EyeOff v-else class="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div v-if="resetPass" class="mt-1.5 flex space-x-1">
+                    <div
+                      v-for="i in 4"
+                      :key="i"
+                      class="h-1 flex-1 rounded-full transition-colors duration-300"
+                      :class="i <= resetStrength ? resetStrengthColor : 'bg-powder-200 dark:bg-onyx-700'"
+                    ></div>
+                  </div>
+                  <p v-if="resetErrors.password" class="text-[11px] text-red-500 mt-1">
+                    {{ resetErrors.password }}
+                  </p>
+                </div>
+
+                <!-- Confirm password -->
+                <div>
+                  <label
+                    class="block text-sm font-semibold text-onyx-700 dark:text-powder-300 mb-1.5"
+                  >
+                    Confirmer le mot de passe
+                  </label>
+                  <div class="relative">
+                    <Lock
+                      class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-onyx-400"
+                    />
+                    <input
+                      v-model="resetConfirm"
+                      :type="showResetPassword ? 'text' : 'password'"
+                      placeholder="••••••••"
+                      class="auth-input pl-10 pr-10"
+                      :class="
+                        resetConfirm && resetConfirm !== resetPass
+                          ? 'border-red-400 dark:border-red-500'
+                          : ''
+                      "
+                      required
+                    />
+                    <div v-if="resetConfirm" class="absolute right-3.5 top-1/2 -translate-y-1/2">
+                      <CheckCircle
+                        v-if="resetConfirm === resetPass"
+                        class="w-4 h-4 text-green-500"
+                      />
+                      <XCircle v-else class="w-4 h-4 text-red-400" />
+                    </div>
+                  </div>
+                  <p v-if="resetErrors.confirm" class="text-[11px] text-red-500 mt-1">
+                    {{ resetErrors.confirm }}
+                  </p>
+                </div>
+
+                <!-- No token warning -->
+                <div
+                  v-if="!route.query.token"
+                  class="flex items-center space-x-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+                >
+                  <AlertCircle class="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <span class="text-sm text-amber-700 dark:text-amber-400">
+                    Lien invalide. Demandez un nouveau lien de réinitialisation.
+                  </span>
+                </div>
+
+                <!-- Error -->
+                <div
+                  v-if="resetError"
+                  class="flex items-center space-x-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+                >
+                  <AlertCircle class="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <span class="text-sm text-red-600 dark:text-red-400">{{ resetError }}</span>
+                </div>
+
+                <!-- Submit -->
+                <button
+                  type="submit"
+                  :disabled="resetLoading || !route.query.token"
+                  class="auth-submit-btn"
+                >
+                  <span v-if="resetLoading" class="auth-spinner"></span>
+                  <Lock v-else class="w-4 h-4" />
+                  <span>{{ resetLoading ? 'Mise à jour…' : 'Définir le nouveau mot de passe' }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  @click="router.push('/login')"
+                  class="w-full text-center text-sm text-onyx-500 dark:text-powder-500 hover:text-flame-600 dark:hover:text-flame-400 transition-colors"
+                >
+                  Retour à la connexion
+                </button>
+              </form>
+            </div>
+
             <!-- ── Login Form ── -->
-            <div v-if="!isRegister" key="login-form">
+            <div v-else-if="!isRegister" key="login-form">
               <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
                 Connectez-vous à votre compte ECODEV CARD PRO
               </p>
@@ -492,7 +666,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useAdminStore } from '@/stores/adminStore'
@@ -515,6 +689,67 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const adminStore = useAdminStore()
+
+// ── Reset password (from email link) ─────────────────────────────────
+const isResetMode = computed(() => route.name === 'reset-password')
+const resetEmail = ref('')
+const resetPass = ref('')
+const resetConfirm = ref('')
+const showResetPassword = ref(false)
+const resetLoading = ref(false)
+const resetSuccess = ref(false)
+const resetError = ref('')
+const resetErrors = reactive({ password: '', confirm: '' })
+
+onMounted(() => {
+  if (route.query.email) resetEmail.value = route.query.email
+})
+
+const resetStrength = computed(() => {
+  const p = resetPass.value
+  if (!p) return 0
+  let score = 0
+  if (p.length >= 6) score++
+  if (p.length >= 10) score++
+  if (/[A-Z]/.test(p) && /[0-9]/.test(p)) score++
+  if (/[^A-Za-z0-9]/.test(p)) score++
+  return score
+})
+
+const resetStrengthColor = computed(() => {
+  const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500']
+  return colors[resetStrength.value - 1] || 'bg-red-400'
+})
+
+function validateReset() {
+  resetErrors.password = validateField('password', resetPass.value)
+  resetErrors.confirm = ''
+  if (!resetPass.value) resetErrors.password = 'Mot de passe requis'
+  if (resetPass.value && resetConfirm.value && resetPass.value !== resetConfirm.value)
+    resetErrors.confirm = 'Les mots de passe ne correspondent pas'
+  if (!resetConfirm.value) resetErrors.confirm = 'Confirmation requise'
+  return !resetErrors.password && !resetErrors.confirm
+}
+
+const handleResetPassword = async () => {
+  if (!validateReset()) return
+  resetLoading.value = true
+  resetError.value = ''
+  try {
+    await authStore.resetPassword(
+      route.query.token,
+      resetEmail.value,
+      resetPass.value,
+      resetConfirm.value,
+    )
+    resetSuccess.value = true
+  } catch (err) {
+    resetError.value =
+      err?.response?.data?.message || 'Lien invalide ou expiré. Demandez un nouveau lien.'
+  } finally {
+    resetLoading.value = false
+  }
+}
 
 // ── Forgot password modal ─────────────────────────────────────────────
 const showForgotModal = ref(false)

@@ -25,6 +25,12 @@ const router = createRouter({
       meta: { requiresAuth: false, hideLayout: true, guestOnly: true },
     },
     {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('../views/AuthView.vue'),
+      meta: { requiresAuth: false, hideLayout: true },
+    },
+    {
       path: '/gallery',
       name: 'gallery',
       component: () => import('../views/GalleryView.vue'),
