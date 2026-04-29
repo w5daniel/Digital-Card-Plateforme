@@ -26,7 +26,7 @@
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 ">
-              <router-link to="/editor" class="btn-primary text-center">
+              <router-link to="/editor" class="btn-primary text-center bg-flame-500">
                 Commencer gratuitement
                 <ArrowRight class="w-5 h-5 inline ml-2" />
               </router-link>

@@ -281,7 +281,7 @@
             >
               Se connecter
             </router-link>
-            <router-link to="/register" class="btn-primary flex items-center space-x-2 text-sm">
+            <router-link to="/register" class="btn-primary flex items-center space-x-2 text-sm bg-flame-500">
               <Plus class="w-4 h-4" />
               <span>S'inscrire</span>
             </router-link>
@@ -291,7 +291,7 @@
           <router-link
             v-if="authStore.isAuthenticated && !isOnEditorOrDashboard"
             to="/editor"
-            class="btn-primary flex items-center space-x-2 text-sm"
+            class="btn-primary flex items-center space-x-2 text-sm bg-flame-600"
           >
             <Plus class="w-4 h-4" />
             <span>Créer une carte</span>

@@ -49,7 +49,7 @@
             <router-link
               v-if="store.canCreateCard"
               to="/editor"
-              class="btn-primary flex items-center space-x-2"
+              class="btn-primary flex items-center space-x-2 bg-flame-500"
             >
               <Plus class="w-5 h-5" />
               <span>Créer une carte</span>
