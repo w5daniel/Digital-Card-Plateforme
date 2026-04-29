@@ -472,7 +472,8 @@ const sortBy = ref('popular')
 const hoveredId = ref(null)
 const cardsGridRef = ref(null)
 const cardScale = ref(0.72) // kept for potential future use — not directly referenced in template
-const communityRefreshKey = ref(0) // incremented on mount to force communityCards recompute
+const communityRefreshKey = ref(0) // kept for compat
+const _rawCommunityTemplates = ref([])
 
 // ── Sample persons for live previews ──────────────────────────────────
 const samplePersons = [
@@ -622,9 +623,7 @@ const filterTabs = computed(() => [
 // ── Community cards (public cards from other users) ──────────────────
 
 const communityCards = computed(() => {
-  void communityRefreshKey.value // dépendance réactive — force recalcul au montage
-  // Modèles publiés en public par les utilisateurs (les cartes sont toujours privées)
-  const communityTemplates = templatesStore.getAllCommunityTemplates()
+  const communityTemplates = _rawCommunityTemplates.value
   let cards = communityTemplates.map((tpl) => {
     const cw = tpl.editorData?.cardWidth || 680
     const ch = tpl.editorData?.cardHeight || 429
@@ -749,8 +748,8 @@ const commInnerStyle = (card) => {
   }
 }
 
-onMounted(() => {
-  communityRefreshKey.value++
+onMounted(async () => {
+  _rawCommunityTemplates.value = await templatesStore.getAllCommunityTemplates()
   computeScale()
   ro = new ResizeObserver(computeScale)
   if (cardsGridRef.value) ro.observe(cardsGridRef.value)

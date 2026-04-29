@@ -43,6 +43,11 @@ class User extends Authenticatable
         return $this->hasMany(Card::class);
     }
 
+    public function templates(): HasMany
+    {
+        return $this->hasMany(Template::class);
+    }
+
     // Returns the full public URL so the frontend never constructs storage paths itself
     protected function avatarUrl(): Attribute
     {

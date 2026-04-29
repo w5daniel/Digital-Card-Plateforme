@@ -69,7 +69,7 @@ const fontStore = useFontStore()
 const shellRef = ref(null)
 
 // ── Init ──────────────────────────────────────────────────────────────────
-onMounted(() => {
+onMounted(async () => {
   const rawId = route.params.id
   const qMode = route.query.mode // 'edit-template', 'edit-card', 'new'
   const fromTemplate = route.query['from-template']
@@ -79,7 +79,7 @@ onMounted(() => {
     const tplId = isNaN(rawId) ? rawId : Number(rawId)
     // Needs userTemplatesStore to be imported and used
     const userTemplatesStore = useUserTemplatesStore()
-    const tpl = userTemplatesStore.getTemplateById(tplId)
+    const tpl = await userTemplatesStore.getTemplateById(tplId)
 
     if (tpl) {
       editorStore.initEditor(tpl.editorData || {})
@@ -159,7 +159,7 @@ onMounted(() => {
     // ── New card created from an existing User Template ────────────────────
     const tplId = isNaN(fromTemplate) ? fromTemplate : Number(fromTemplate)
     const userTemplatesStore = useUserTemplatesStore()
-    const tpl = userTemplatesStore.getTemplateById(tplId)
+    const tpl = await userTemplatesStore.getTemplateById(tplId)
 
     if (tpl) {
       editorStore.initEditor(tpl.editorData || {})
@@ -210,6 +210,7 @@ onMounted(() => {
       editorStore.editMode = 'new'
       const slug = route.query.template || cardsStore.currentTemplate || null
       const communityId = route.query.community || null
+      const userTemplatesStore = useUserTemplatesStore()
       const t = slug ? cardsStore.getTemplateBySlug(slug) : null
 
       if (t) {
@@ -245,14 +246,9 @@ onMounted(() => {
         let sourceCard = null
         if (communityId.startsWith('tpl_')) {
           const tplId = communityId.replace('tpl_', '')
-          try {
-            const raw = localStorage.getItem(`digitalcard_publicTemplate_${tplId}`)
-            if (raw) {
-              const tpl = JSON.parse(raw)
-              sourceCard = { name: tpl.name, data: { editorData: tpl.editorData } }
-            }
-          } catch {
-            /* ignore corrupt entry */
+          const tpl = await userTemplatesStore.getTemplateById(tplId)
+          if (tpl) {
+            sourceCard = { name: tpl.name, data: { editorData: tpl.editorData } }
           }
         } else {
           sourceCard = cardsStore.getPublicCard(Number(communityId))

@@ -2,13 +2,9 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useAuthStore } from './authStore'
 import { useCardsStore } from './cards'
-import { useNotificationStore } from './notificationStore'
-import { ADMIN_EMAIL } from '../data/mockData'
-import { konvaToCardEl, CONTACT_ROLES, hasStyledInfoFields } from '@/utils/cardElements'
-
-const LS_PREFIX = 'digitalcard_userTemplates_'
-const LS_PUBLIC_PREFIX = 'digitalcard_publicTemplate_'
-const LS_PENDING_NOTIF_PREFIX = 'digitalcard_pendingNotifications_'
+import { hasStyledInfoFields } from '@/utils/cardElements'
+import { konvaToCardEl } from '@/utils/cardElements'
+import templatesApi from '@/api/templates'
 
 export const MAX_FREE_TEMPLATES = 2
 
@@ -19,38 +15,44 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   const userTemplates = ref([])
   const isLoading = ref(false)
   const error = ref(null)
-  // Compteur réactif incrémenté à chaque modification des snapshots communauté
-  const communityVersion = ref(0)
+  const communityVersion = ref(0) // kept for backwards compat with GalleryView
 
-  // ── localStorage key for current user ─────────────────────────────────────
-  function _lsKey() {
-    const email = authStore.user?.email
-    return email ? LS_PREFIX + email : null
-  }
+  // ── Normalization ─────────────────────────────────────────────────────────
 
-  function _save() {
-    const key = _lsKey()
-    if (key) {
-      try {
-        localStorage.setItem(key, JSON.stringify(userTemplates.value))
-      } catch {
-        /* quota — non-blocking */
-      }
+  function _normalizeTemplate(apiTpl) {
+    return {
+      id:           apiTpl.id,
+      name:         apiTpl.name,
+      isAuto:       apiTpl.is_auto    ?? false,
+      isPublic:     apiTpl.is_public  ?? false,
+      isGallery:    apiTpl.is_gallery ?? false,
+      isPremium:    apiTpl.is_premium ?? false,
+      category:     apiTpl.category   ?? null,
+      slug:         apiTpl.slug       ?? null,
+      createdAt:    apiTpl.created_at,
+      updatedAt:    apiTpl.updated_at,
+      ownerId:      apiTpl.user_id,
+      ownerName:    apiTpl.user?.name  ?? null,
+      ownerEmail:   apiTpl.user?.email ?? null,
+      editorData:   apiTpl.meta        ?? {},
+      fieldConfig:  apiTpl.field_config ?? { activeStandardFields: [], customFields: [] },
+      templateSlug: apiTpl.meta?.templateSlug ?? null,
     }
   }
 
   // ── Load / clear ──────────────────────────────────────────────────────────
-  function loadUserTemplates() {
-    const key = _lsKey()
-    if (!key) {
-      userTemplates.value = []
-      return
-    }
+
+  async function loadUserTemplates() {
+    if (!authStore.user) return
+    isLoading.value = true
+    error.value = null
     try {
-      const raw = localStorage.getItem(key)
-      userTemplates.value = raw ? JSON.parse(raw) : []
-    } catch {
-      userTemplates.value = []
+      const { data } = await templatesApi.list()
+      userTemplates.value = data.templates.map(_normalizeTemplate)
+    } catch (err) {
+      error.value = err.message || 'Erreur lors du chargement des modèles'
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -58,68 +60,40 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     userTemplates.value = []
   }
 
-  // Persist watcher — démarré au login, arrêté au logout
-  let _stopPersistWatch = null
-
-  function _startPersistWatch() {
-    if (_stopPersistWatch) return
-    _stopPersistWatch = watch(userTemplates, () => _save(), { deep: true })
-  }
-
-  function _stopPersistWatcher() {
-    if (_stopPersistWatch) {
-      _stopPersistWatch()
-      _stopPersistWatch = null
-    }
-  }
-
-  // React to user changes (login / logout)
   watch(
     () => authStore.user?.email,
     (email) => {
-      if (email) {
-        loadUserTemplates()
-        _deliverPendingNotifications(email)
-        _startPersistWatch()
-      } else {
-        _stopPersistWatcher()
-        clearTemplates()
-      }
+      if (email) loadUserTemplates()
+      else clearTemplates()
     },
     { immediate: true },
   )
 
   // ── Getters ───────────────────────────────────────────────────────────────
 
-  /** All templates (including auto-generated) */
   const allTemplates = computed(() => userTemplates.value)
 
-  /** Only manually created templates (visible by default in dashboard) */
   const visibleTemplates = computed(() => userTemplates.value.filter((t) => !t.isAuto))
 
-  /** Only auto-generated templates (hidden by default) */
   const autoTemplates = computed(() => userTemplates.value.filter((t) => t.isAuto))
 
-  /** Total count (excluding auto) for limit checks */
   const manualCount = computed(() => visibleTemplates.value.length)
 
-  /** Can the user create a new template? */
   const canCreateTemplate = computed(() => {
     if (authStore.isPremium || authStore.isAdmin) return true
-    // Auto-generated templates don't count toward the Free limit
     return manualCount.value < MAX_FREE_TEMPLATES
   })
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
 
   /**
-   * Create a new user template (model).
-   * @param {Object} data - Template data
-   * @param {string} data.name - Template name
-   * @param {Object} data.editorData - Full editor state snapshot
-   * @param {Object} data.fieldConfig - Active fields configuration
-   * @param {string} [data.templateSlug] - Base gallery template slug
-   * @param {boolean} [data.isAuto=false] - Auto-generated (hidden by default)
+   * Create a new user template.
+   * @param {Object} data
+   * @param {string} data.name
+   * @param {Object} data.editorData
+   * @param {Object} data.fieldConfig
+   * @param {string} [data.templateSlug]
+   * @param {boolean} [data.isAuto=false]
    * @returns {Object} The created template
    */
   async function addTemplate(data) {
@@ -127,29 +101,26 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     error.value = null
 
     try {
-      // Check limit for manual templates
       if (!data.isAuto && !canCreateTemplate.value) {
         throw new Error(
           `Limite atteinte (${MAX_FREE_TEMPLATES} modèles). Passez au plan Premium pour créer plus de modèles.`,
         )
       }
 
-      const template = {
-        id: crypto.randomUUID(),
-        name: data.name || 'Mon modèle',
-        isAuto: data.isAuto || false,
-        isPublic: data.isPublic || false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        editorData: JSON.parse(JSON.stringify(data.editorData)),
-        fieldConfig: JSON.parse(
-          JSON.stringify(data.fieldConfig || { activeStandardFields: [], customFields: [] }),
-        ),
-        templateSlug: data.templateSlug || null,
-      }
+      const meta = data.editorData
+        ? { ...JSON.parse(JSON.stringify(data.editorData)), templateSlug: data.templateSlug || null }
+        : { templateSlug: data.templateSlug || null }
 
+      const { data: res } = await templatesApi.create({
+        name:         data.name || 'Mon modèle',
+        meta,
+        field_config: data.fieldConfig || { activeStandardFields: [], customFields: [] },
+        is_public:    data.isPublic  || false,
+        is_auto:      data.isAuto    || false,
+      })
+
+      const template = _normalizeTemplate(res.template)
       userTemplates.value.push(template)
-      _syncPublicSnapshot(template)
       return template
     } catch (err) {
       error.value = err.message || 'Erreur lors de la création du modèle'
@@ -170,20 +141,25 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       const idx = userTemplates.value.findIndex((t) => t.id === templateId)
       if (idx === -1) throw new Error('Modèle introuvable')
 
-      userTemplates.value[idx] = {
-        ...userTemplates.value[idx],
-        ...updates,
-        updatedAt: new Date().toISOString(),
+      const payload = {}
+      if (updates.name !== undefined) payload.name = updates.name
+      if (updates.isPublic !== undefined) payload.is_public = updates.isPublic
+      if (updates.isAuto !== undefined)   payload.is_auto   = updates.isAuto
+      if (updates.editorData !== undefined) {
+        const existing = userTemplates.value[idx]
+        payload.meta = {
+          ...JSON.parse(JSON.stringify(updates.editorData)),
+          templateSlug: existing.templateSlug ?? null,
+        }
       }
-      // Deep-clone editorData/fieldConfig if present
-      if (updates.editorData) {
-        userTemplates.value[idx].editorData = JSON.parse(JSON.stringify(updates.editorData))
+      if (updates.fieldConfig !== undefined) {
+        payload.field_config = JSON.parse(JSON.stringify(updates.fieldConfig))
       }
-      if (updates.fieldConfig) {
-        userTemplates.value[idx].fieldConfig = JSON.parse(JSON.stringify(updates.fieldConfig))
-      }
-      _syncPublicSnapshot(userTemplates.value[idx])
-      return userTemplates.value[idx]
+
+      const { data: res } = await templatesApi.update(templateId, payload)
+      const updated = _normalizeTemplate(res.template)
+      userTemplates.value[idx] = updated
+      return updated
     } catch (err) {
       error.value = err.message || 'Erreur lors de la mise à jour du modèle'
       throw err
@@ -194,8 +170,6 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
 
   /**
    * Toggle a template's public/private visibility.
-   * If made public, writes the community snapshot.
-   * If made private, removes the community snapshot.
    */
   async function toggleTemplateVisibility(templateId) {
     const tpl = userTemplates.value.find((t) => t.id === templateId)
@@ -211,7 +185,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       ]
       if (hasStyledInfoFields(allEls)) {
         throw new Error(
-          'Confidentialité : Les modèles comportant des textes stylés dans les champs d\'informations (nom, email, etc.) ne peuvent pas être publiés. Veuillez retirer le style de ces champs ou enregistrer le modèle en mode privé.'
+          "Confidentialité : Les modèles comportant des textes stylés dans les champs d'informations (nom, email, etc.) ne peuvent pas être publiés. Veuillez retirer le style de ces champs ou enregistrer le modèle en mode privé.",
         )
       }
     }
@@ -228,7 +202,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     try {
       const idx = userTemplates.value.findIndex((t) => t.id === templateId)
       if (idx === -1) throw new Error('Modèle introuvable')
-      _unpublishSnapshot(templateId)
+      await templatesApi.remove(templateId)
       userTemplates.value.splice(idx, 1)
       return true
     } catch (err) {
@@ -240,15 +214,22 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   }
 
   /**
-   * Get a template by its ID.
+   * Get a template by ID. Checks local store first, then fetches from API.
+   * Supports both own templates and public/community templates.
    */
-  function getTemplateById(templateId) {
-    return userTemplates.value.find((t) => t.id === templateId) || null
+  async function getTemplateById(templateId) {
+    const local = userTemplates.value.find((t) => t.id === templateId)
+    if (local) return local
+    try {
+      const { data } = await templatesApi.get(templateId)
+      return _normalizeTemplate(data.template)
+    } catch {
+      return null
+    }
   }
 
   /**
    * Count cards created from a template.
-   * Reads from the current user's cards in localStorage.
    */
   function getCardsCountForTemplate(templateId) {
     const cardsStore = useCardsStore()
@@ -257,13 +238,9 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
 
   /**
    * Batch-create cards from a template using a list of contacts.
-   * @param {number} templateId - ID of the source template
-   * @param {Array<Object>} contactsList - Array of { firstName, lastName, ... } objects
-   * @returns {{ created: number, errors: string[] }}
-   * TODO backend : valider chaque contact de contactsList (email, phone, name formats) côté serveur
    */
   async function createCardsFromTemplate(templateId, contactsList) {
-    const template = getTemplateById(templateId)
+    const template = await getTemplateById(templateId)
     if (!template) throw new Error('Modèle introuvable')
 
     const cardsStore = useCardsStore()
@@ -275,7 +252,6 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       try {
         const editorData = JSON.parse(JSON.stringify(editorDataBase))
 
-        // Inject contact values into text elements matching roles
         const fillElements = (elements) => {
           if (!elements) return
           for (const el of elements) {
@@ -283,7 +259,6 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
             if (el.role && contact[el.role] !== undefined) {
               el.text = String(contact[el.role])
             }
-            // Custom fields: role = 'custom_{id}'
             if (el.role?.startsWith('custom_')) {
               const cfId = el.role.replace('custom_', '')
               const cf = template.fieldConfig?.customFields?.find((c) => c.id === cfId)
@@ -305,7 +280,6 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
         const rawRectoEls = editorData.elements?.recto || []
         const rawVersoEls = editorData.elements?.verso || []
 
-        // Convert Konva px → BusinessCard % format (like CreateCardFromTemplateModal)
         const cw = editorData.cardWidth || 680
         const ch = editorData.cardHeight || 429
         const rectoEls = rawRectoEls.map((el, i) => konvaToCardEl(el, cw, ch, i)).filter(Boolean)
@@ -330,9 +304,7 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
             contactExtra,
             editorData,
             showQR: [...rawRectoEls, ...rawVersoEls].some((e) => e.type === 'qr'),
-            orientation:
-              editorData.orientation ||
-              (ch > cw ? 'portrait' : 'landscape'),
+            orientation: editorData.orientation || (ch > cw ? 'portrait' : 'landscape'),
             cardWidth: cw,
             cardHeight: ch,
           },
@@ -346,82 +318,26 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     return { created: created.length, errors }
   }
 
-  // ── Public snapshots (community) ────────────────────────────────────────
+  // ── Community templates ───────────────────────────────────────────────────
 
-  function _syncPublicSnapshot(tpl) {
-    const key = LS_PUBLIC_PREFIX + tpl.id
-    // Les modèles admin ne vont jamais dans la communauté (ils sont officiels)
-    if (tpl.isPublic && (authStore.isPremium || authStore.isAdmin)) {
-      try {
-        const snapshot = {
-          ...JSON.parse(JSON.stringify(tpl)),
-          ownerEmail: authStore.user?.email || 'unknown',
-          ownerName: authStore.user?.name || authStore.user?.email || 'Anonyme',
-          ownerRole: authStore.user?.role || 'user',
-        }
-        localStorage.setItem(key, JSON.stringify(snapshot))
-        communityVersion.value++
-      } catch {
-        const notifStore = useNotificationStore()
-        notifStore.error('Espace de stockage insuffisant — le modèle ne peut pas être publié dans la communauté.')
-      }
-    } else {
-      localStorage.removeItem(key)
-      communityVersion.value++
+  /**
+   * Fetch all community templates (is_public=true, is_gallery=false) from the API.
+   */
+  async function getAllCommunityTemplates() {
+    try {
+      const { data } = await templatesApi.community()
+      return data.templates.map(_normalizeTemplate)
+    } catch {
+      return []
     }
-  }
-
-  function _unpublishSnapshot(templateId) {
-    localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
-    communityVersion.value++
   }
 
   /**
-   * Scan localStorage for public templates from OTHER users.
+   * ⚠️ Phase 4.5 — Admin moderation endpoint not yet implemented.
+   * Will call DELETE /api/admin/templates/{id} once Phase 4.5 is complete.
    */
-  function getAllCommunityTemplates() {
-    void communityVersion.value // dépendance réactive — force recalcul après suppression
-    const result = []
-    const keysToScan = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key?.startsWith(LS_PUBLIC_PREFIX)) keysToScan.push(key)
-    }
-    for (const key of keysToScan) {
-      try {
-        const tpl = JSON.parse(localStorage.getItem(key))
-        if (!tpl || !tpl.isPublic) continue
-        // Exclure les modèles créés par un admin (ils sont officiels, pas communauté)
-        const isAdminSnapshot = tpl.ownerRole === 'admin' || tpl.ownerEmail === ADMIN_EMAIL
-        if (isAdminSnapshot) {
-          localStorage.removeItem(key)
-          continue
-        }
-        result.push(tpl)
-      } catch { /* skip corrupt entries */ }
-    }
-    return result
-  }
-
   function adminRemoveCommunityTemplate(templateId) {
-    let ownerEmail = null
-    let templateName = null
-    try {
-      const raw = localStorage.getItem(LS_PUBLIC_PREFIX + templateId)
-      if (raw) {
-        const tpl = JSON.parse(raw)
-        ownerEmail = tpl.ownerEmail || null
-        templateName = tpl.name || null
-      }
-    } catch { /* ignore */ }
-
-    localStorage.removeItem(LS_PUBLIC_PREFIX + templateId)
-
-    if (ownerEmail) {
-      _writePendingNotification(ownerEmail, templateName)
-    }
-
-    communityVersion.value++
+    console.warn(`[Phase 4.5] adminRemoveCommunityTemplate(${templateId}) — not yet migrated to API`)
   }
 
   return {
@@ -450,34 +366,5 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
     createCardsFromTemplate,
     getAllCommunityTemplates,
     adminRemoveCommunityTemplate,
-  }
-
-  function _writePendingNotification(ownerEmail, templateName) {
-    const key = LS_PENDING_NOTIF_PREFIX + ownerEmail
-    try {
-      const existing = JSON.parse(localStorage.getItem(key) || '[]')
-      existing.push({
-        id: Date.now(),
-        type: 'warning',
-        message: templateName
-          ? `Votre modèle "${templateName}" a été retiré de la galerie communauté par un administrateur.`
-          : `Un de vos modèles a été retiré de la galerie communauté par un administrateur.`,
-        timestamp: new Date().toISOString(),
-      })
-      localStorage.setItem(key, JSON.stringify(existing))
-    } catch { /* quota */ }
-  }
-
-  function _deliverPendingNotifications(email) {
-    const key = LS_PENDING_NOTIF_PREFIX + email
-    try {
-      const pending = JSON.parse(localStorage.getItem(key) || '[]')
-      if (!pending.length) return
-      const notifStore = useNotificationStore()
-      for (const n of pending) {
-        notifStore.warning(n.message, 6000)
-      }
-      localStorage.removeItem(key)
-    } catch { /* ignore */ }
   }
 })

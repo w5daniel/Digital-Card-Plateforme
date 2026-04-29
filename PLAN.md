@@ -1,5 +1,5 @@
 # Plan — Migration Full-Stack (Vue 3 + Laravel + MySQL)
-## État au 2026-04-28
+## État au 2026-04-29
 
 ---
 
@@ -70,26 +70,27 @@ MAIL_MAILER=log
 - `ShareView.vue` — `onMounted` async + `await getPublicCard()`
 - `DashboardView.vue` — `reader.onload` async pour `importCardsFromJSON`
 
+### Phase 4.3 — Templates + Galerie ✅ COMPLET
+**Backend**
+- Migration : colonnes `meta`, `field_config`, `is_auto` ajoutées à `templates` ; `elements`/`backgrounds` rendus nullable
+- `Template.php` model — `HasUuids`, casts json/boolean, relation `belongsTo(User)`
+- `User.php` — relation `hasMany(Template)` ajoutée
+- `TemplateController.php` — index, store, show, update, destroy, community
+- `GalleryController.php` — index, show
+- Routes : `GET /api/templates/community` (public, avant apiResource) + `apiResource('templates')` + `GET /api/gallery` + `GET /api/gallery/{slug}`
+
+**Frontend**
+- `frontend/src/api/templates.js` — module axios dédié
+- `frontend/src/stores/userTemplatesStore.js` — 100% migré localStorage → API Sanctum
+  - `_normalizeTemplate()` : mapping `meta→editorData`, `field_config→fieldConfig`
+  - `getAllCommunityTemplates()` devient async → `GET /api/templates/community`
+  - `adminRemoveCommunityTemplate()` → stub no-op (⚠️ Phase 4.5)
+- `frontend/src/views/GalleryView.vue` — `communityCards` ref async (onMounted) au lieu de computed synchrone
+- `frontend/src/views/EditorView.vue` — `onMounted` async + chargement community template via API
+
+**Note stockage** : colonnes `elements`/`backgrounds` restent NULL intentionnellement — toutes les données vivent dans la colonne `meta` (full `editorData` blob).
+
 ## 🔲 Phases suivantes
-
-**Shape carte attendu par le frontend :**
-```json
-{
-  "id": "uuid",
-  "user_id": 1,
-  "title": "Ma carte",
-  "elements": { "recto": [...], "verso": [...] },
-  "backgrounds": { "recto": {...}, "verso": {...} },
-  "is_public": false,
-  "share_slug": null,
-  "created_at": "...",
-  "updated_at": "..."
-}
-```
-
-### Phase 4.3 — Templates + Galerie
-- `TemplateController` CRUD + `GalleryController` (routes publiques `/api/gallery`)
-- Migrer `frontend/src/stores/userTemplatesStore.js`
 
 ### Phase 4.4 — Brand Kit
 - `BrandKitController` (get/update + upload logo)
@@ -130,8 +131,9 @@ Cards
   GET/PUT/DELETE /api/cards/{id}    (auth:sanctum)
 
 Templates
-  GET/POST       /api/templates     (auth:sanctum)
-  PUT/DELETE     /api/templates/{id}(auth:sanctum)
+  GET/POST            /api/templates              (auth:sanctum)
+  GET/PUT/DELETE      /api/templates/{id}         (auth:sanctum)
+  GET                 /api/templates/community    (public)
 
 Galerie publique
   GET  /api/gallery
@@ -160,3 +162,7 @@ Admin
 | `frontend/src/api/axios.js` | Instance axios Sanctum |
 | `frontend/src/stores/authStore.js` | Auth store (API) |
 | `frontend/src/router/index.js` | Guard async |
+| `backend/app/Http/Controllers/TemplateController.php` | Templates CRUD + community |
+| `backend/app/Http/Controllers/GalleryController.php` | Galerie officielle |
+| `frontend/src/api/templates.js` | Module axios templates |
+| `frontend/src/stores/userTemplatesStore.js` | Templates store (API) |

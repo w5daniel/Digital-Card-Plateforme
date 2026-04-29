@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', fn () => response()->json(['status' => 'ok', 'app' => config('app.name')]));
@@ -22,10 +24,19 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+// IMPORTANT: community avant apiResource pour éviter que Laravel matche {id}=community
+Route::get('/templates/community', [TemplateController::class, 'community']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cards', CardController::class);
     Route::post('/cards/{card}/stats', [CardController::class, 'incrementStat']);
+
+    Route::apiResource('templates', TemplateController::class);
 });
 
 // Public — accessible sans authentification
 Route::get('/share/{id}', [CardController::class, 'publicShow']);
+
+// Galerie officielle
+Route::get('/gallery',        [GalleryController::class, 'index']);
+Route::get('/gallery/{slug}', [GalleryController::class, 'show']);
