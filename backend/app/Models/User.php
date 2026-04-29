@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -46,6 +47,11 @@ class User extends Authenticatable
     public function templates(): HasMany
     {
         return $this->hasMany(Template::class);
+    }
+
+    public function brandKit(): HasOne
+    {
+        return $this->hasOne(BrandKit::class);
     }
 
     // Returns the full public URL so the frontend never constructs storage paths itself

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BrandKitController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\TemplateController;
@@ -32,6 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cards/{card}/stats', [CardController::class, 'incrementStat']);
 
     Route::apiResource('templates', TemplateController::class);
+
+    Route::get('/brand-kit',         [BrandKitController::class, 'show']);
+    Route::put('/brand-kit',         [BrandKitController::class, 'update']);
+    Route::post('/brand-kit/logo',   [BrandKitController::class, 'uploadLogo']);
+    Route::delete('/brand-kit/logo', [BrandKitController::class, 'deleteLogo']);
 });
 
 // Public — accessible sans authentification

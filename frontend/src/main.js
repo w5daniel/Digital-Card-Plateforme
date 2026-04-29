@@ -27,13 +27,13 @@ async function bootstrap() {
   fontStore.init()
 
   const brandKitStore = useBrandKitStore()
-  brandKitStore.loadForUser()
+  await brandKitStore.loadForUser()
 
   watch(
     () => authStore.user?.email,
-    () => {
+    async () => {
       fontStore.reloadUserFonts()
-      brandKitStore.loadForUser()
+      await brandKitStore.loadForUser()
     },
   )
 
