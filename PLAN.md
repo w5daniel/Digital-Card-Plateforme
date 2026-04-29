@@ -50,13 +50,27 @@ MAIL_MAILER=log
 
 ---
 
-## 🔲 Phases suivantes
+### Phase 4.2 — Cards ✅ COMPLET
+**Backend**
+- Migration : colonnes `is_public`, `views`, `downloads`, `qr_scans`, `shares`, `meta` ajoutées à `cards`
+- `Card.php` model — `HasUuids`, casts json/boolean/integer, relation `belongsTo(User)`
+- `User.php` — relation `hasMany(Card)` ajoutée
+- `CardController.php` — index, store, show, update, destroy, publicShow, incrementStat
+- `StoreCardRequest`, `UpdateCardRequest` — validation FR, pas de `is_public`
+- Routes : `apiResource('cards')` + `/cards/{card}/stats` + `/share/{id}` (public)
 
-### Phase 4.2 — Cards (prochaine étape)
-1. Analyser `frontend/src/stores/cards.js` + `frontend/src/views/DashboardView.vue`
-2. Créer `backend/app/Http/Controllers/CardController.php` (index, store, show, update, destroy)
-3. Ajouter routes `/api/cards/*` dans `backend/routes/api.php`
-4. Migrer `frontend/src/stores/cards.js` localStorage → API
+**Frontend**
+- `frontend/src/api/cards.js` — module axios dédié
+- `frontend/src/stores/cards.js` — 100% migré localStorage → API Sanctum
+  - `_normalizeCard()` : mapping `title→name`, `meta→data`, `qr_scans→qrScans`
+  - `getPublicCard()` devient async
+  - Stats counters : mise à jour optimiste + fire-and-forget API
+  - `toggleCardVisibility` → no-op (cartes toujours privées)
+  - Fonctions admin restent en localStorage (⚠️ Phase 4.5)
+- `ShareView.vue` — `onMounted` async + `await getPublicCard()`
+- `DashboardView.vue` — `reader.onload` async pour `importCardsFromJSON`
+
+## 🔲 Phases suivantes
 
 **Shape carte attendu par le frontend :**
 ```json

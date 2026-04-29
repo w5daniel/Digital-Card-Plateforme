@@ -1673,11 +1673,11 @@ const importCards = (event) => {
   if (!file) return
   event.target.value = ''
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const jsonString = e.target?.result
       if (typeof jsonString !== 'string') return
-      const result = store.importCardsFromJSON(jsonString)
+      const result = await store.importCardsFromJSON(jsonString)
       if (result.success) {
         notificationStore.success(`${result.count} carte(s) importée(s) avec succès`)
       } else {

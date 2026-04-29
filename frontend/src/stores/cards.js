@@ -3,32 +3,26 @@ import { ref, computed, watch } from 'vue'
 import { CARD_TEMPLATES } from '../data/mockData'
 import { useAuthStore } from './authStore'
 import { useAdminStore } from './adminStore'
+import cardsApi from '@/api/cards'
 
+// ⚠️ PHASE 4.5 — ces constantes restent pour les fonctions admin (cross-utilisateurs)
+// getAllCardsAdmin et adminDeleteCard lisent encore localStorage jusqu'à la Phase 4.5
 const LS_PREFIX = 'digitalcard_userCards_'
 
-export const MAX_FREE_CARDS = 3
-// Snapshot public accessible à tous (pas de préfixe email).
-// TODO backend : remplacer par GET /api/cards/public/:id
-const PUBLIC_LS_PREFIX = 'digitalcard_public_'
-const PUBLIC_INDEX_KEY = 'digitalcard_public_index'
-// Surcharges admin : { [slug]: { isPremium: bool } }
-// TODO backend : persister dans la table `templates` via PUT /api/admin/templates/:slug
+// Surcharges admin — TODO Phase 4.5 : migrer vers API
 const ADMIN_OVERRIDES_LS_KEY = 'digitalcard_adminTemplateOverrides'
-// Slugs des templates supprimés par l'admin
-// TODO backend : soft-delete dans la table `templates` via DELETE /api/admin/templates/:slug
 const ADMIN_REMOVED_LS_KEY = 'digitalcard_adminRemovedTemplates'
-// Modèles officiels créés/modifiés par l'admin (editorData stocké séparément)
 const ADMIN_CUSTOM_TEMPLATES_KEY = 'digitalcard_adminCustomTemplates'
+
+export const MAX_FREE_CARDS = 3
 
 export const useCardsStore = defineStore('cards', () => {
   const authStore = useAuthStore()
 
   // Templates prédéfinis
-  // TODO backend : GET /api/admin/templates renvoie la liste complète (avec isPremium, usageCount…)
+  // TODO backend Phase 4.3 : GET /api/admin/templates
   const templates = ref([...CARD_TEMPLATES])
 
-  // Appliquer les surcharges admin conservées en localStorage (prémium + suppressions)
-  // TODO backend : les surcharges proviendront directement du serveur dans la liste ci-dessus
   ;(function _applyTemplateOverrides() {
     try {
       const removedRaw = localStorage.getItem(ADMIN_REMOVED_LS_KEY)
@@ -36,21 +30,16 @@ export const useCardsStore = defineStore('cards', () => {
       if (removedSlugs.length > 0) {
         templates.value = templates.value.filter((t) => !removedSlugs.includes(t.slug))
       }
-    } catch {
-      /* ignore */
-    }
+    } catch { /* ignore */ }
     try {
       const overridesRaw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
       const overrides = overridesRaw ? JSON.parse(overridesRaw) : {}
       templates.value = templates.value.map((t) =>
         overrides[t.slug] ? { ...t, ...overrides[t.slug] } : t,
       )
-    } catch {
-      /* ignore */
-    }
+    } catch { /* ignore */ }
   })()
 
-  // Charger les modèles officiels créés par l'admin (pas dans CARD_TEMPLATES)
   ;(function _loadAdminCustomTemplates() {
     try {
       const raw = localStorage.getItem(ADMIN_CUSTOM_TEMPLATES_KEY)
@@ -61,7 +50,6 @@ export const useCardsStore = defineStore('cards', () => {
           if (existingIdx === -1) {
             templates.value.push(t)
           } else {
-            // Template officiel modifié par l'admin — remplacer par la version custom
             templates.value[existingIdx] = t
           }
         }
@@ -69,83 +57,38 @@ export const useCardsStore = defineStore('cards', () => {
     } catch { /* ignore */ }
   })()
 
-  // Cartes de l'utilisateur courant
   const userCards = ref([])
-
-  // Template actuellement sélectionné
   const currentTemplate = ref(null)
-
-  // État de chargement partagé
   const isLoading = ref(false)
   const error = ref(null)
 
-  // ===== ISOLATION PAR UTILISATEUR =====
+  // ===== NORMALISATION API → FRONTEND =====
 
-  /** Clé localStorage pour l'utilisateur courant (basée sur l'email, stable) */
-  function _lsKey() {
-    const email = authStore.user?.email
-    return email ? LS_PREFIX + email : null
-  }
-
-  /** Charge les cartes de l'utilisateur courant depuis localStorage */
-  function loadUserCards() {
-    const key = _lsKey()
-    if (!key) {
-      userCards.value = []
-      return
-    }
-    try {
-      const saved = localStorage.getItem(key)
-      userCards.value = saved ? JSON.parse(saved) : []
-      // Publier un snapshot pour les cartes existantes qui n'en ont pas encore
-      userCards.value.forEach((card) => {
-        if (!localStorage.getItem(PUBLIC_LS_PREFIX + card.id)) {
-          _publishSnapshot(card)
-        }
-      })
-    } catch {
-      userCards.value = []
+  function _normalizeCard(apiCard) {
+    return {
+      id:              apiCard.id,
+      name:            apiCard.title,
+      templateModelId: apiCard.meta?.templateModelId || null,
+      ownerId:         apiCard.user_id,
+      createdAt:       apiCard.created_at,
+      updatedAt:       apiCard.updated_at,
+      isPublic:        false,
+      shareSlug:       apiCard.share_slug,
+      views:           apiCard.views     || 0,
+      downloads:       apiCard.downloads || 0,
+      qrScans:         apiCard.qr_scans  || 0,
+      shares:          apiCard.shares    || 0,
+      data:            apiCard.meta      || {},
     }
   }
 
-  /** Vide les cartes en mémoire (appelé au logout) */
-  function clearCards() {
-    userCards.value = []
-  }
+  // ===== AUTH WATCHER =====
 
-  // Watcher de persistence — démarré au login, arrêté au logout
-  let _stopPersistWatch = null
-
-  function _startPersistWatch() {
-    if (_stopPersistWatch) return
-    _stopPersistWatch = watch(
-      userCards,
-      (val) => {
-        const key = _lsKey()
-        if (key) localStorage.setItem(key, JSON.stringify(val))
-      },
-      { deep: true },
-    )
-  }
-
-  function _stopPersistWatcher() {
-    if (_stopPersistWatch) {
-      _stopPersistWatch()
-      _stopPersistWatch = null
-    }
-  }
-
-  // Réagir aux changements d'utilisateur (login / logout / restoreSession)
   watch(
     () => authStore.user?.email,
     (email) => {
-      if (email) {
-        loadUserCards()
-        _startPersistWatch()
-      } else {
-        _stopPersistWatcher()
-        clearCards()
-      }
+      if (email) loadUserCards()
+      else clearCards()
     },
     { immediate: true },
   )
@@ -153,14 +96,10 @@ export const useCardsStore = defineStore('cards', () => {
   // ===== GETTERS =====
 
   const getAllTemplates = computed(() => templates.value)
-
   const getFreeTemplates = computed(() => templates.value.filter((t) => !t.isPremium))
-
   const getPremiumTemplates = computed(() => templates.value.filter((t) => t.isPremium))
-
   const getUserCardsCount = computed(() => userCards.value.length)
 
-  /** Vérifie si l'utilisateur peut créer une nouvelle carte (limite configurable via admin) */
   const canCreateCard = computed(() => {
     if (authStore.isAdmin) return true
     const adminStore = useAdminStore()
@@ -170,365 +109,190 @@ export const useCardsStore = defineStore('cards', () => {
     return userCards.value.length < limit
   })
 
-  /**
-   * Filter cards linked to a given user template model.
-   */
   function getCardsByTemplateModel(templateModelId) {
     return userCards.value.filter((c) => c.templateModelId === templateModelId)
   }
 
   // ===== METHODS =====
 
-  /**
-   * Récupère un template par son slug
-   */
+  async function loadUserCards() {
+    if (!authStore.user) {
+      userCards.value = []
+      return
+    }
+    isLoading.value = true
+    error.value = null
+    try {
+      const { data } = await cardsApi.list()
+      userCards.value = data.cards.map(_normalizeCard)
+    } catch (err) {
+      error.value = err.message
+      userCards.value = []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function clearCards() {
+    userCards.value = []
+  }
+
   function getTemplateBySlug(slug) {
     return templates.value.find((t) => t.slug === slug)
   }
 
-  /**
-   * Bascule le statut Premium d'un template (admin).
-   * Persiste la surcharge dans localStorage pour survivre au rechargement.
-   * TODO backend : PUT /api/admin/templates/:slug { isPremium }
-   *   → mettre à jour la colonne `is_premium` de la table `templates`
-   *   → invalider le cache public de la gallery (CDN / Redis)
-   */
-  function toggleTemplatePremium(slug) {
-    const tmpl = templates.value.find((t) => t.slug === slug)
-    if (!tmpl) return
-    tmpl.isPremium = !tmpl.isPremium
-    try {
-      const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
-      const overrides = raw ? JSON.parse(raw) : {}
-      overrides[slug] = { ...overrides[slug], isPremium: tmpl.isPremium }
-      localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
-    } catch {
-      /* quota dépassé — non bloquant */
-    }
-  }
-
-  /**
-   * Supprime un template de la liste active (admin).
-   * Persiste le slug supprimé pour survivre au rechargement.
-   * TODO backend : DELETE /api/admin/templates/:slug
-   *   → soft-delete : colonne `deleted_at` dans `templates`
-   *   → retirer le template de la gallery publique côté API
-   *   → les cartes existantes basées sur ce template restent intactes
-   */
-  function removeTemplate(slug) {
-    const index = templates.value.findIndex((t) => t.slug === slug)
-    if (index === -1) return
-    templates.value.splice(index, 1)
-    try {
-      const raw = localStorage.getItem(ADMIN_REMOVED_LS_KEY)
-      const removed = raw ? JSON.parse(raw) : []
-      if (!removed.includes(slug)) {
-        removed.push(slug)
-        localStorage.setItem(ADMIN_REMOVED_LS_KEY, JSON.stringify(removed))
-      }
-    } catch {
-      /* quota dépassé — non bloquant */
-    }
-  }
-
-  /**
-   * Ajoute une nouvelle carte
-   * TODO backend : valider card.name (min 2 chars), card.data.contact (email, phone, name formats) côt�� serveur
-   */
   async function addCard(card) {
     isLoading.value = true
     error.value = null
-
     try {
-      // Vérifier la limite de cartes pour les comptes gratuits
       if (!canCreateCard.value) {
         const adminS = useAdminStore()
-        const limit = authStore.isPremium ? (adminS.settings?.maxCardsPerPremium ?? 50) : (adminS.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
+        const limit = authStore.isPremium
+          ? (adminS.settings?.maxCardsPerPremium ?? 50)
+          : (adminS.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
         throw new Error(
           `Limite atteinte (${limit} cartes). ${authStore.isPremium ? '' : 'Passez au plan Premium pour créer plus de cartes.'}`,
         )
       }
-      const newCard = {
-        id: crypto.randomUUID(),
-        ...card,
-        templateModelId: card.templateModelId || null,
-        ownerId: authStore.user?.email || 'anonymous',
-        createdAt: new Date().toISOString(),
-        views: 0,
-        downloads: 0,
-        qrScans: 0,
-        shares: 0,
-        isPublic: card.isPublic ?? false,
-      }
+      const { data } = await cardsApi.create({
+        name:        card.name,
+        elements:    card.data?.editorData?.elements    ?? { recto: [], verso: [] },
+        backgrounds: card.data?.editorData?.backgrounds ?? { recto: '#FFFFFF', verso: '#1E293B' },
+        meta:        { ...card.data, templateModelId: card.templateModelId ?? null },
+      })
+      const newCard = _normalizeCard(data.card)
       userCards.value.push(newCard)
-      _publishSnapshot(newCard)
       return newCard
     } catch (err) {
-      error.value = err.message || 'Erreur lors de la création'
+      error.value = err.response?.data?.message || err.message || 'Erreur lors de la création'
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  /**
-   * Récupère une carte par son ID
-   */
   function getCardById(cardId) {
     return userCards.value.find((c) => c.id === cardId)
   }
 
-  // ===== PARTAGE PUBLIC =====
-
-  function _readPublicIndex() {
-    try { return new Set(JSON.parse(localStorage.getItem(PUBLIC_INDEX_KEY)) ?? []) }
-    catch { return new Set() }
-  }
-
-  function _writePublicIndex(set) {
-    try { localStorage.setItem(PUBLIC_INDEX_KEY, JSON.stringify([...set])) } catch {}
-  }
-
-  /**
-   * Écrit un snapshot public de la carte (sans préfixe email).
-   * Accessible à tout visiteur via getPublicCard().
-   * TODO backend : POST/PUT /api/cards/:id/publish
-   */
-  function _publishSnapshot(card) {
-    try {
-      localStorage.setItem(PUBLIC_LS_PREFIX + card.id, JSON.stringify(card))
-      if (card.isPublic) {
-        const idx = _readPublicIndex()
-        idx.add(card.id)
-        _writePublicIndex(idx)
-      }
-    } catch {
-      // quota dépassé — non bloquant
-    }
-  }
-
-  /**
-   * Supprime le snapshot public d'une carte (appelé à la suppression).
-   * TODO backend : DELETE /api/cards/:id/publish
-   */
-  function _unpublishSnapshot(cardId) {
-    localStorage.removeItem(PUBLIC_LS_PREFIX + cardId)
-    const idx = _readPublicIndex()
-    idx.delete(cardId)
-    _writePublicIndex(idx)
-  }
-
-  /**
-   * Lit une carte par son ID desde le snapshot public (cross-user).
-   * Fallback si l'utilisateur courant est le propriétaire.
-   * TODO backend : remplacer par await api.get(`/cards/public/${cardId}`)
-   */
-  function getPublicCard(cardId) {
-    // L'utilisateur courant est propriétaire → retourner directement
-    const owned = getCardById(cardId)
-    if (owned) return owned
-    // Sinon lire le snapshot public (partagé via localStorage)
-    try {
-      const raw = localStorage.getItem(PUBLIC_LS_PREFIX + cardId)
-      return raw ? JSON.parse(raw) : null
-    } catch {
-      return null
-    }
-  }
-
-  /**
-   * Renvoie toutes les cartes publiques (Communauté) depuis les snapshots localStorage.
-   * Inclut les cartes du propriétaire courant (avec flag isOwn pour le badge UI).
-   * TODO backend : remplacer par await api.get('/cards/community')
-   */
-  function getAllCommunityCards() {
-    const cards = []
-    const currentEmail = authStore.user?.email
-    for (const id of _readPublicIndex()) {
-      try {
-        const raw = localStorage.getItem(PUBLIC_LS_PREFIX + id)
-        if (!raw) continue
-        const card = JSON.parse(raw)
-        if (card && card.isPublic) {
-          cards.push({ ...card, _isOwn: card.ownerId === currentEmail })
-        }
-      } catch {
-        // skip corrupt entries
-      }
-    }
-    return cards
-  }
-
-  /**
-   * Met à jour une carte existante
-   * TODO backend : valider updates.name, updates.data.contact côté serveur (PUT /api/cards/:id)
-   */
   async function updateCard(cardId, updates) {
     isLoading.value = true
     error.value = null
-
     try {
-      const card = getCardById(cardId)
-      if (card) {
-        Object.assign(card, updates)
-        _publishSnapshot(card)
-        return card
+      const payload = {}
+      if (updates.name        !== undefined) payload.name        = updates.name
+      if (updates.data        !== undefined) {
+        payload.elements    = updates.data?.editorData?.elements    ?? undefined
+        payload.backgrounds = updates.data?.editorData?.backgrounds ?? undefined
+        payload.meta        = { ...updates.data, templateModelId: updates.templateModelId ?? null }
       }
-      return null
+
+      const { data } = await cardsApi.update(cardId, payload)
+      const updatedCard = _normalizeCard(data.card)
+      const idx = userCards.value.findIndex((c) => c.id === cardId)
+      if (idx !== -1) userCards.value[idx] = updatedCard
+      return updatedCard
     } catch (err) {
-      error.value = err.message || 'Erreur lors de la mise à jour'
+      error.value = err.response?.data?.message || err.message || 'Erreur lors de la mise à jour'
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  /**
-   * Supprime une carte
-   */
   async function deleteCard(cardId) {
     isLoading.value = true
     error.value = null
-
     try {
+      await cardsApi.remove(cardId)
       const index = userCards.value.findIndex((c) => c.id === cardId)
-      if (index !== -1) {
-        userCards.value.splice(index, 1)
-        _unpublishSnapshot(cardId)
-        return true
-      }
-      return false
+      if (index !== -1) userCards.value.splice(index, 1)
+      return true
     } catch (err) {
-      error.value = err.message || 'Erreur lors de la suppression'
+      error.value = err.response?.data?.message || err.message || 'Erreur lors de la suppression'
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  /**
-   * Duplique une carte
-   */
   async function duplicateCard(cardId) {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      // Vérifier la limite de cartes pour les comptes gratuits
-      if (!canCreateCard.value) {
-        const adminS = useAdminStore()
-        const limit = authStore.isPremium ? (adminS.settings?.maxCardsPerPremium ?? 50) : (adminS.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
-        throw new Error(
-          `Limite atteinte (${limit} cartes). ${authStore.isPremium ? '' : 'Passez au plan Premium pour créer plus de cartes.'}`,
-        )
-      }
-
-      const original = getCardById(cardId)
-      if (original) {
-        const duplicate = JSON.parse(JSON.stringify(original))
-        duplicate.id = crypto.randomUUID()
-        duplicate.name = `${original.name} (Copie)`
-        duplicate.createdAt = new Date().toISOString()
-        duplicate.ownerId = authStore.user?.email || 'anonymous'
-        userCards.value.push(duplicate)
-        _publishSnapshot(duplicate)
-        return duplicate
-      }
-      return null
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la duplication'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
+    const original = getCardById(cardId)
+    if (!original) return null
+    const dup = JSON.parse(JSON.stringify(original))
+    delete dup.id
+    delete dup.createdAt
+    delete dup.updatedAt
+    dup.name = `${original.name} (Copie)`
+    dup.isPublic = false
+    return await addCard(dup)
   }
 
-  /**
-   * Change la visibilité d'une carte (publique/privée)
-   */
-  function toggleCardVisibility(cardId) {
-    const card = getCardById(cardId)
-    if (card) {
-      card.isPublic = !card.isPublic
-      _publishSnapshot(card)
-      return card
-    }
+  // Les cartes ne peuvent pas être rendues publiques — no-op conservé pour compatibilité
+  function toggleCardVisibility() {
     return null
   }
 
-  /**
-   * Génère un lien de partage pour une carte
-   */
   function generateShareLink(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      return `${window.location.origin}/share/${card.id}`
-    }
+    if (card) return `${window.location.origin}/share/${card.id}`
     return null
   }
 
-  /**
-   * Incrémente les vues d'une carte
-   */
+  // Vues incrémentées server-side dans publicShow — mise à jour locale optimiste seulement
   function incrementCardViews(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      card.views++
-      return card
-    }
+    if (card) { card.views++; return card }
     return null
   }
 
-  /**
-   * Incrémente les téléchargements d'une carte
-   */
-  function incrementCardDownloads(cardId) {
+  async function incrementCardDownloads(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      card.downloads++
-      return card
-    }
-    return null
+    if (card) card.downloads++
+    try { await cardsApi.incrementStat(cardId, 'downloads') } catch { /* non-bloquant */ }
+    return card || null
   }
 
-  /**
-   * Incrémente les scans du QR d'une carte
-   */
-  function incrementCardQRScans(cardId) {
+  async function incrementCardQRScans(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      card.qrScans = (card.qrScans || 0) + 1
-      return card
-    }
-    return null
+    if (card) card.qrScans = (card.qrScans || 0) + 1
+    try { await cardsApi.incrementStat(cardId, 'qr_scans') } catch { /* non-bloquant */ }
+    return card || null
   }
 
-  /**
-   * Incrémente les partages d'une carte
-   */
-  function incrementCardShares(cardId) {
+  async function incrementCardShares(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      card.shares = (card.shares || 0) + 1
-      return card
-    }
-    return null
+    if (card) card.shares = (card.shares || 0) + 1
+    try { await cardsApi.incrementStat(cardId, 'shares') } catch { /* non-bloquant */ }
+    return card || null
   }
 
-  /**
-   * Récupère des statistiques globales
-   */
+  async function getPublicCard(cardId) {
+    const owned = getCardById(cardId)
+    if (owned) return owned
+    try {
+      const { data } = await cardsApi.getPublic(cardId)
+      return _normalizeCard(data.card)
+    } catch {
+      return null
+    }
+  }
+
+  // TODO Phase 4.3 : GET /api/gallery (cartes publiques de la communauté)
+  function getAllCommunityCards() {
+    return []
+  }
+
   function getGlobalStats() {
     const totalCards = userCards.value.length
-    const totalViews = userCards.value.reduce((sum, card) => sum + (card.views || 0), 0)
-    const totalDownloads = userCards.value.reduce((sum, card) => sum + (card.downloads || 0), 0)
-    const totalQRScans = userCards.value.reduce((sum, card) => sum + (card.qrScans || 0), 0)
-    const totalShares = userCards.value.reduce((sum, card) => sum + (card.shares || 0), 0)
+    const totalViews = userCards.value.reduce((sum, c) => sum + (c.views || 0), 0)
+    const totalDownloads = userCards.value.reduce((sum, c) => sum + (c.downloads || 0), 0)
+    const totalQRScans = userCards.value.reduce((sum, c) => sum + (c.qrScans || 0), 0)
+    const totalShares = userCards.value.reduce((sum, c) => sum + (c.shares || 0), 0)
     const topCard = userCards.value.reduce(
-      (prev, current) => ((current.views || 0) > (prev.views || 0) ? current : prev),
+      (prev, cur) => ((cur.views || 0) > (prev.views || 0) ? cur : prev),
       userCards.value[0],
     )
-
     return {
       totalCards,
       totalViews,
@@ -540,101 +304,51 @@ export const useCardsStore = defineStore('cards', () => {
     }
   }
 
-  /**
-   * Récupère l'historique d'une carte
-   */
   function getCardStats(cardId) {
     const card = getCardById(cardId)
-    if (card) {
-      return {
-        views: card.views || 0,
-        downloads: card.downloads || 0,
-        createdAt: card.createdAt,
-        daysSinceCreation: Math.floor(
-          (new Date() - new Date(card.createdAt)) / (1000 * 60 * 60 * 24),
-        ),
-      }
+    if (!card) return null
+    return {
+      views: card.views || 0,
+      downloads: card.downloads || 0,
+      createdAt: card.createdAt,
+      daysSinceCreation: Math.floor(
+        (new Date() - new Date(card.createdAt)) / (1000 * 60 * 60 * 24),
+      ),
     }
-    return null
   }
 
-  /**
-   * Exporte les cartes fournies (ou toutes) en JSON
-   */
   function exportCardsAsJSON(cards) {
-    const data = {
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      cards: cards || userCards.value,
-    }
-    return JSON.stringify(data, null, 2)
+    return JSON.stringify(
+      { version: '1.0', exportedAt: new Date().toISOString(), cards: cards || userCards.value },
+      null, 2,
+    )
   }
 
-  /**
-   * Importe des cartes depuis un fichier JSON
-   */
-  function importCardsFromJSON(jsonString) {
+  async function importCardsFromJSON(jsonString) {
     try {
       const data = JSON.parse(jsonString)
-
-      if (!data.cards || !Array.isArray(data.cards)) {
-        throw new Error('Format JSON invalide')
-      }
-
+      if (!data.cards || !Array.isArray(data.cards)) throw new Error('Format JSON invalide')
       const importTimestamp = new Date().toISOString()
-      data.cards.forEach((card) => {
-        const importedCard = {
-          ...card,
-          id: crypto.randomUUID(),
-          ownerId: authStore.user?.email || 'anonymous',
-          createdAt: card.createdAt || importTimestamp,
-          importedAt: importTimestamp,
-        }
-        userCards.value.push(importedCard)
-        _publishSnapshot(importedCard)
-      })
-
-      return {
-        success: true,
-        count: data.cards.length,
+      let successCount = 0
+      for (const card of data.cards) {
+        try {
+          await addCard({ ...card, importedAt: importTimestamp })
+          successCount++
+        } catch { /* skip cards qui dépassent la limite */ }
       }
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      }
+      return { success: true, count: successCount }
+    } catch (err) {
+      return { success: false, error: err.message }
     }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // FONCTIONS ADMIN — Gestion de toutes les cartes (cross-utilisateurs)
+  // FONCTIONS ADMIN — ⚠️ EN ATTENTE PHASE 4.5 (restent en localStorage)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Compteur réactif : incrémenté à chaque mutation admin sur les cartes d'un autre utilisateur.
-  // Permet aux computed() des vues admin de se re-évaluer automatiquement.
-  // TODO backend : inutile — le serveur renvoie les données à jour à chaque GET
   const adminCardsVersion = ref(0)
 
-  /**
-   * Retourne toutes les cartes de tous les utilisateurs (admin uniquement).
-   * Scanne les clés localStorage `digitalcard_userCards_{email}` de chaque utilisateur inscrit.
-   * Enrichit chaque carte avec `ownerName` et `ownerEmail`.
-   *
-   * TODO backend : GET /api/admin/cards?page=1&limit=50&search=&visibility=&sort=createdAt
-   *   → réponse paginée : { data: Card[], total: number, page: number, pages: number }
-   *   → SQL :
-   *       SELECT c.*, u.name AS owner_name, u.email AS owner_email
-   *       FROM cards c
-   *       JOIN users u ON u.id = c.owner_id
-   *       WHERE c.deleted_at IS NULL
-   *       ORDER BY c.created_at DESC
-   *       LIMIT :limit OFFSET :offset
-   *   → filtres serveur : visibility (is_public), search (full-text sur name + owner email/name)
-   *   → ne pas charger toutes les cartes en mémoire : pagination côté SQL obligatoire
-   */
   function getAllCardsAdmin() {
-    // Dépendance réactive : re-évalue quand adminCardsVersion change (après mutations admin)
-
     adminCardsVersion.value
     const users = authStore.getAllUsersWithStats
     const allCards = []
@@ -645,24 +359,11 @@ export const useCardsStore = defineStore('cards', () => {
         for (const card of cards) {
           allCards.push({ ...card, ownerName: user.name, ownerEmail: user.email })
         }
-      } catch {
-        /* skip entrée corrompue */
-      }
+      } catch { /* skip entrée corrompue */ }
     }
-    // Tri par date de création décroissante
     return allCards.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   }
 
-  /**
-   * Supprime une carte appartenant à n'importe quel utilisateur (admin uniquement).
-   *
-   * TODO backend : DELETE /api/admin/cards/:id
-   *   → middleware `requireAdmin` obligatoire
-   *   → soft-delete : UPDATE cards SET deleted_at=NOW() WHERE id=:id
-   *   → retirer le snapshot public de la CDN / cache Redis
-   *   → logguer dans admin_audit_log (admin_id, 'card_deleted', card_id)
-   *   → NE PAS supprimer définitivement sans confirmation (RGPD — historique)
-   */
   function adminDeleteCard(cardId, ownerEmail) {
     if (!authStore.isAdmin) return
     try {
@@ -670,11 +371,7 @@ export const useCardsStore = defineStore('cards', () => {
       if (!raw) return
       const cards = JSON.parse(raw).filter((c) => c.id !== cardId)
       localStorage.setItem(LS_PREFIX + ownerEmail, JSON.stringify(cards))
-    } catch {
-      /* données corrompues — continuer le nettoyage */
-    }
-    _unpublishSnapshot(cardId)
-    // Si c'est la carte de l'utilisateur courant, mettre à jour userCards aussi
+    } catch { /* données corrompues */ }
     if (ownerEmail === authStore.user?.email) {
       const idx = userCards.value.findIndex((c) => c.id === cardId)
       if (idx !== -1) userCards.value.splice(idx, 1)
@@ -682,8 +379,7 @@ export const useCardsStore = defineStore('cards', () => {
     adminCardsVersion.value++
   }
 
-
-  // ── Admin : templates officiels (CRUD) ────────────────────────────────────
+  // ── Admin : templates officiels ────────────────────────────────────────────
 
   function _saveCustomTemplates() {
     try {
@@ -692,20 +388,38 @@ export const useCardsStore = defineStore('cards', () => {
     } catch { /* quota */ }
   }
 
-  /**
-   * Crée un nouveau modèle officiel dans la galerie (admin uniquement).
-   * Génère un slug unique — jamais de collision silencieuse.
-   */
+  function toggleTemplatePremium(slug) {
+    const tmpl = templates.value.find((t) => t.slug === slug)
+    if (!tmpl) return
+    tmpl.isPremium = !tmpl.isPremium
+    try {
+      const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
+      const overrides = raw ? JSON.parse(raw) : {}
+      overrides[slug] = { ...overrides[slug], isPremium: tmpl.isPremium }
+      localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
+    } catch { /* quota */ }
+  }
+
+  function removeTemplate(slug) {
+    const index = templates.value.findIndex((t) => t.slug === slug)
+    if (index === -1) return
+    templates.value.splice(index, 1)
+    try {
+      const raw = localStorage.getItem(ADMIN_REMOVED_LS_KEY)
+      const removed = raw ? JSON.parse(raw) : []
+      if (!removed.includes(slug)) {
+        removed.push(slug)
+        localStorage.setItem(ADMIN_REMOVED_LS_KEY, JSON.stringify(removed))
+      }
+    } catch { /* quota */ }
+  }
+
   function addOfficialTemplate(data) {
     if (!authStore.isAdmin) return null
-    // Generate unique slug — add numeric suffix if collision
     const base = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'modele'
     let slug = base
     let i = 2
-    while (templates.value.find((t) => t.slug === slug)) {
-      slug = `${base}-${i}`
-      i++
-    }
+    while (templates.value.find((t) => t.slug === slug)) { slug = `${base}-${i}`; i++ }
     const newTmpl = {
       id: crypto.randomUUID(),
       slug,
@@ -732,9 +446,6 @@ export const useCardsStore = defineStore('cards', () => {
     return newTmpl
   }
 
-  /**
-   * Met à jour un modèle officiel existant (admin uniquement).
-   */
   function updateOfficialTemplate(slug, updates) {
     if (!authStore.isAdmin) return null
     const tmpl = templates.value.find((t) => t.slug === slug)
@@ -745,7 +456,6 @@ export const useCardsStore = defineStore('cards', () => {
     if (updates.colors) tmpl.colors = updates.colors
     if (updates.editorData) tmpl.editorData = updates.editorData
     if (updates.isPremium !== undefined) tmpl.isPremium = updates.isPremium
-    // Preview data for gallery rendering
     if (updates.previewElements) tmpl.previewElements = updates.previewElements
     if (updates.previewVersoElements) tmpl.previewVersoElements = updates.previewVersoElements
     if (updates.previewBackgrounds) tmpl.previewBackgrounds = updates.previewBackgrounds
@@ -765,7 +475,6 @@ export const useCardsStore = defineStore('cards', () => {
     return tmpl
   }
 
-
   return {
     // State
     templates,
@@ -783,9 +492,9 @@ export const useCardsStore = defineStore('cards', () => {
     getCardsByTemplateModel,
 
     // Methods
+    loadUserCards,
+    clearCards,
     getTemplateBySlug,
-    toggleTemplatePremium,
-    removeTemplate,
     addCard,
     getCardById,
     getPublicCard,
@@ -803,12 +512,12 @@ export const useCardsStore = defineStore('cards', () => {
     getCardStats,
     exportCardsAsJSON,
     importCardsFromJSON,
-    loadUserCards,
-    clearCards,
-    // Admin — gestion cross-utilisateurs
+
+    // Admin — ⚠️ Phase 4.5
     getAllCardsAdmin,
     adminDeleteCard,
-    // Admin — gestion templates officiels
+    toggleTemplatePremium,
+    removeTemplate,
     addOfficialTemplate,
     updateOfficialTemplate,
   }

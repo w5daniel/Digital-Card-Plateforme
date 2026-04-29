@@ -265,12 +265,9 @@ watch(qrModalOpen, (v) => {
   if (!v) modalMounted = false
 })
 
-onMounted(() => {
+onMounted(async () => {
   const cardId = route.params.cardId
-  // getPublicCard lit d'abord les cartes de l'utilisateur courant,
-  // puis le snapshot public (accessible cross-user).
-  // TODO backend : remplacer par await api.get(`/cards/public/${cardId}`)
-  const foundCard = store.getPublicCard(cardId)
+  const foundCard = await store.getPublicCard(cardId)
 
   if (foundCard) {
     card.value = foundCard
