@@ -90,11 +90,26 @@ MAIL_MAILER=log
 
 **Note stockage** : colonnes `elements`/`backgrounds` restent NULL intentionnellement — toutes les données vivent dans la colonne `meta` (full `editorData` blob).
 
-## 🔲 Phases suivantes
+### Phase 4.4 — Brand Kit ✅ COMPLET
+**Backend**
+- `BrandKit.php` model — casts `colors→array`, `fonts→json`, accessor `logoUrl` → URL publique
+- `User.php` — relation `hasOne(BrandKit)` ajoutée
+- `BrandKitController.php` — show (firstOrCreate), update, uploadLogo, deleteLogo
+- Routes : `GET/PUT /api/brand-kit` + `POST/DELETE /api/brand-kit/logo` (auth:sanctum)
 
-### Phase 4.4 — Brand Kit
-- `BrandKitController` (get/update + upload logo)
-- Migrer `frontend/src/stores/brandKit.js`
+**Frontend**
+- `frontend/src/api/brandKit.js` — module axios dédié (getBrandKit, updateBrandKit, uploadLogo, deleteLogo)
+- `frontend/src/stores/brandKit.js` — 100% migré localStorage → API Sanctum
+  - `logo: null` ajouté au state
+  - `_normalize()` : mapping `fonts→font`, `logo_url→logo`
+  - `loadForUser()` devient async avec catch silencieux (boot sans auth)
+  - `addColor/removeColor/setFont/reset` → fire-and-forget PUT
+  - `uploadLogo/deleteLogo` → nouvelles actions
+- `frontend/src/main.js` — `loadForUser()` devient `await`-able dans bootstrap et watcher
+
+**Bug corrigé** : cast `'fonts' => 'json'` ajouté au modèle pour que Laravel encode la string en JSON valide avant insert MySQL (évite CONSTRAINT violation).
+
+## 🔲 Phases suivantes
 
 ### Phase 4.5 — Admin
 - `Admin/UserController`, `Admin/CardController`, `Admin/TemplateController`
