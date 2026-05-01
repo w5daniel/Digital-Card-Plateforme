@@ -84,6 +84,12 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
     {
+      path: '/verify-email',
+      name: 'verify-email',
+      component: () => import('../views/VerifyEmailView.vue'),
+      meta: { hideLayout: true },
+    },
+    {
       path: '/maintenance',
       name: 'maintenance',
       component: () => import('../views/MaintenanceView.vue'),

@@ -29,9 +29,9 @@ class AuthController extends Controller
             'password' => $request->password,
         ]);
 
-        Auth::login($user);
+        $user->sendEmailVerificationNotification();
 
-        return response()->json(['user' => $user]);
+        return response()->json(['emailPendingVerification' => true, 'email' => $user->email]);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -43,6 +43,15 @@ class AuthController extends Controller
         if (auth()->user()->is_banned) {
             Auth::guard('web')->logout();
             return response()->json(['message' => 'Votre compte a été suspendu.'], 403);
+        }
+
+        if (!auth()->user()->hasVerifiedEmail()) {
+            Auth::guard('web')->logout();
+            return response()->json([
+                'message'          => 'Veuillez confirmer votre adresse email avant de vous connecter.',
+                'emailNotVerified' => true,
+                'email'            => auth()->user()->email,
+            ], 403);
         }
 
         $request->session()->regenerate();

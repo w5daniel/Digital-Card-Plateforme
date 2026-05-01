@@ -61,7 +61,11 @@ export const useAuthStore = defineStore('auth', () => {
       useNotificationStore().loadFromApi()
       return user.value
     } catch (err) {
-      error.value = err.response?.data?.message || 'Identifiants incorrects'
+      const resData = err.response?.data
+      if (resData?.emailNotVerified) {
+        return { emailNotVerified: true, email: resData.email }
+      }
+      error.value = resData?.message || 'Identifiants incorrects'
       throw err
     } finally {
       isLoading.value = false
@@ -79,6 +83,9 @@ export const useAuthStore = defineStore('auth', () => {
         password,
         password_confirmation: confirmPassword,
       })
+      if (data.emailPendingVerification) {
+        return { emailPendingVerification: true, email: data.email }
+      }
       user.value = _normalize(data.user)
       return user.value
     } catch (err) {
@@ -88,6 +95,15 @@ export const useAuthStore = defineStore('auth', () => {
       throw err
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function resendVerificationEmail(email) {
+    try {
+      await api.post('/api/email/resend', { email })
+      useNotificationStore().success('Email renvoyé ! Vérifiez votre boîte mail.')
+    } catch {
+      useNotificationStore().error("Impossible d'envoyer l'email. Réessayez dans quelques instants.")
     }
   }
 
@@ -247,6 +263,7 @@ export const useAuthStore = defineStore('auth', () => {
     isPremium,
     login,
     register,
+    resendVerificationEmail,
     logout,
     restoreSession,
     updateProfile,

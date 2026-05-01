@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandKitController;
+use App\Http\Controllers\VerifyEmailController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\NotificationController;
@@ -80,6 +81,12 @@ Route::middleware(['auth:sanctum', 'maintenance'])->group(function () {
         Route::put('settings',                 [SettingsController::class, 'update']);
     });
 });
+
+// Vérification email — accessible sans authentification
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+    ->name('verification.verify');
+Route::post('/email/resend', [VerifyEmailController::class, 'resend'])
+    ->middleware('throttle:3,1');
 
 // Public — accessible sans authentification
 Route::get('/share/{id}', [CardController::class, 'publicShow']);

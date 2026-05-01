@@ -403,6 +403,48 @@
 
             </div>
 
+            <!-- ── Email Pending Verification ── -->
+            <div v-else-if="showVerifyPending" key="verify-pending">
+              <div class="flex flex-col items-center text-center space-y-5 py-4">
+                <div
+                  class="w-16 h-16 rounded-full bg-flame-100 dark:bg-flame-900/30 flex items-center justify-center"
+                >
+                  <Mail class="w-8 h-8 text-flame-600 dark:text-flame-400" />
+                </div>
+                <div class="space-y-2">
+                  <h3 class="text-lg font-bold text-onyx-900 dark:text-white">
+                    Vérifiez votre email
+                  </h3>
+                  <p class="text-sm text-onyx-500 dark:text-powder-400 leading-relaxed">
+                    Un lien de confirmation a été envoyé à<br />
+                    <span class="font-semibold text-onyx-700 dark:text-powder-200">
+                      {{ pendingEmail }}
+                    </span>
+                  </p>
+                  <p class="text-xs text-onyx-400 dark:text-powder-500">
+                    Cliquez sur le lien pour activer votre compte. Vérifiez aussi vos spams.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  :disabled="resendLoading"
+                  @click="handleResendVerification"
+                  class="auth-submit-btn"
+                >
+                  <span v-if="resendLoading" class="auth-spinner"></span>
+                  <Mail v-else class="w-4 h-4" />
+                  <span>{{ resendLoading ? 'Envoi en cours…' : 'Renvoyer l\'email' }}</span>
+                </button>
+                <button
+                  type="button"
+                  @click="switchTo('login')"
+                  class="text-sm text-onyx-500 dark:text-powder-500 hover:text-flame-600 dark:hover:text-flame-400 transition-colors"
+                >
+                  Retour à la connexion
+                </button>
+              </div>
+            </div>
+
             <!-- ── Register Form ── -->
             <div v-else key="register-form">
               <p class="text-onyx-500 dark:text-powder-500 text-sm mb-6">
@@ -837,7 +879,12 @@ function validateLogin() {
 const handleLogin = async () => {
   if (!validateLogin()) return
   try {
-    await authStore.login(loginEmail.value, loginPassword.value, rememberMe.value)
+    const result = await authStore.login(loginEmail.value, loginPassword.value, rememberMe.value)
+    if (result?.emailNotVerified) {
+      pendingEmail.value = result.email
+      showVerifyPending.value = true
+      return
+    }
     router.push(authStore.isAdmin ? '/admin' : '/dashboard')
   } catch {
     // error set in store
@@ -882,19 +929,36 @@ function validateRegister() {
   return !regErrors.fullName && !regErrors.email && !regErrors.password && !regErrors.confirm
 }
 
+// ── Email pending verification ────────────────────────────────────────
+const showVerifyPending = ref(false)
+const pendingEmail = ref('')
+const resendLoading = ref(false)
+
+const handleResendVerification = async () => {
+  resendLoading.value = true
+  await authStore.resendVerificationEmail(pendingEmail.value)
+  resendLoading.value = false
+}
+
 const handleRegister = async () => {
   if (!validateRegister()) return
   try {
-    await authStore.register(regEmail.value, regPassword.value, regConfirm.value, regFullName.value)
+    const result = await authStore.register(regEmail.value, regPassword.value, regConfirm.value, regFullName.value)
+    if (result?.emailPendingVerification) {
+      pendingEmail.value = result.email
+      showVerifyPending.value = true
+      return
+    }
     router.push(authStore.isAdmin ? '/admin' : '/dashboard')
   } catch {
     // error set in store
   }
 }
 
-// Clear errors when switching
+// Clear errors and pending state when switching tabs
 watch(isRegister, () => {
   authStore.error = null
+  showVerifyPending.value = false
 })
 </script>
 
