@@ -1,14 +1,5 @@
 <template>
   <div class="space-y-4">
-    <!--
-      TODO backend : cette vue lira ses données via GET /api/admin/cards
-        → pagination côté serveur (ne pas charger toutes les cartes en mémoire)
-        → filtres en query params : ?search=&visibility=&sort=createdAt&page=1&limit=50
-        → réponse : { data: Card[], total: number, page: number, pages: number }
-      Pour l'instant : scan de tous les localStorage digitalcard_userCards_{email}
-        via cardsStore.getAllCardsAdmin() — synchrone, sans pagination.
-    -->
-
     <!-- ── Filtres ── -->
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
@@ -41,40 +32,29 @@
     </div>
 
     <!-- Compteur + vues totales -->
-    <!--
-      TODO backend : le total et les vues globales viennent du serveur :
-        SELECT COUNT(*) AS total, SUM(views) AS total_views FROM cards WHERE deleted_at IS NULL
-    -->
     <p class="text-xs text-base-content/40">
       {{ filteredCards.length }} carte(s)
-      <span v-if="filteredCards.length !== allCards.length">
-        sur {{ allCards.length }} au total
+      <span v-if="filteredCards.length !== adminStore.cards.length">
+        sur {{ adminStore.cards.length }} au total
       </span>
       — {{ totalViews.toLocaleString('fr-FR') }} vues cumulées
     </p>
 
     <!-- ── Table ── -->
-    <div
-      class="rounded-xl border overflow-hidden border-base-300"
-    >
+    <div class="rounded-xl border overflow-hidden border-base-300">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr
-              class="bg-base-200 text-base-content/50"
-            >
+            <tr class="bg-base-200 text-base-content/50">
               <th class="text-left px-4 py-3 font-medium">Carte</th>
               <th class="text-left px-4 py-3 font-medium hidden sm:table-cell">Propriétaire</th>
-              <th class="text-left px-4 py-3 font-medium hidden md:table-cell">Modèle</th>
               <th class="text-left px-4 py-3 font-medium">Visibilité</th>
               <th class="text-left px-4 py-3 font-medium hidden lg:table-cell">Vues</th>
               <th class="text-left px-4 py-3 font-medium hidden lg:table-cell">Créée le</th>
               <th class="text-right px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody
-            class="divide-y divide-base-300"
-          >
+          <tbody class="divide-y divide-base-300">
             <tr
               v-for="card in filteredCards"
               :key="card.id"
@@ -83,97 +63,47 @@
               <!-- Nom + icône -->
               <td class="px-4 py-3">
                 <div class="flex items-center space-x-2">
-                  <CreditCard
-                    class="w-4 h-4 flex-shrink-0 text-base-content/40"
-                  />
-                  <p
-                    class="font-medium truncate max-w-[140px] text-base-content"
-                  >
+                  <CreditCard class="w-4 h-4 flex-shrink-0 text-base-content/40" />
+                  <p class="font-medium truncate max-w-[140px] text-base-content">
                     {{ card.name || 'Sans titre' }}
                   </p>
                 </div>
               </td>
 
               <!-- Propriétaire -->
-              <!--
-                TODO backend : ownerName + ownerEmail viennent du JOIN users côté SQL
-              -->
               <td class="px-4 py-3 hidden sm:table-cell">
                 <div class="min-w-0">
-                  <p
-                    class="text-sm truncate text-base-content/80"
-                  >
-                    {{ card.ownerName }}
-                  </p>
-                  <p
-                    class="text-xs truncate text-base-content/40"
-                  >
-                    {{ card.ownerEmail }}
-                  </p>
+                  <p class="text-sm truncate text-base-content/80">{{ card.ownerName }}</p>
+                  <p class="text-xs truncate text-base-content/40">{{ card.ownerEmail }}</p>
                 </div>
               </td>
 
-              <!-- Modèle -->
-              <td class="px-4 py-3 hidden md:table-cell">
-                <span
-                  class="text-xs text-base-content/40"
-                >
-                  {{ card.template || '—' }}
-                </span>
-              </td>
-
               <!-- Visibilité -->
-              <!--
-                TODO backend : is_public vient directement du champ `cards.is_public`
-              -->
               <td class="px-4 py-3">
                 <span
                   class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-                  :class="
-                    card.isPublic
-                      ? 'bg-blue-500/10 text-blue-500'
-                      : 'bg-base-200 text-base-content/50'
-                  "
+                  :class="card.isPublic ? 'bg-blue-500/10 text-blue-500' : 'bg-base-200 text-base-content/50'"
                 >
                   {{ card.isPublic ? 'Publique' : 'Privée' }}
                 </span>
               </td>
 
               <!-- Vues -->
-              <!--
-                TODO backend : views vient de la table `card_views` (COUNT ou colonne dénormalisée)
-              -->
               <td class="px-4 py-3 hidden lg:table-cell">
                 <div class="flex items-center space-x-1">
-                  <Eye
-                    class="w-3.5 h-3.5 text-base-content/40"
-                  />
-                  <span class="text-base-content/80">
-                    {{ card.views || 0 }}
-                  </span>
+                  <Eye class="w-3.5 h-3.5 text-base-content/40" />
+                  <span class="text-base-content/80">{{ card.views || 0 }}</span>
                 </div>
               </td>
 
               <!-- Date -->
               <td class="px-4 py-3 hidden lg:table-cell">
-                <span
-                  class="text-xs text-base-content/40"
-                >
-                  {{ formatDate(card.createdAt) }}
-                </span>
+                <span class="text-xs text-base-content/40">{{ formatDate(card.createdAt) }}</span>
               </td>
 
               <!-- Actions -->
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end space-x-1">
-                  <!--
-                    Supprimer.
-                    TODO backend : DELETE /api/admin/cards/:id
-                      → soft-delete : UPDATE cards SET deleted_at=NOW()
-                      → retirer snapshot public (CDN / cache)
-                      → logguer dans admin_audit_log
-                      → notifier le propriétaire par email (optionnel)
-                  -->
                   <button
                     @click="confirmDelete(card)"
                     class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition-colors"
@@ -186,19 +116,16 @@
             </tr>
 
             <tr v-if="filteredCards.length === 0">
-              <td
-                colspan="7"
-                class="px-4 py-12 text-center text-sm text-base-content/40"
-              >
+              <td colspan="6" class="px-4 py-12 text-center text-sm text-base-content/40">
                 <p>
                   {{
-                    allCards.length === 0
+                    adminStore.cards.length === 0
                       ? 'Aucune carte créée par les utilisateurs.'
                       : 'Aucune carte ne correspond aux filtres.'
                   }}
                 </p>
                 <button
-                  v-if="allCards.length > 0 && (search || activeFilter !== 'all')"
+                  v-if="adminStore.cards.length > 0 && (search || activeFilter !== 'all')"
                   @click="activeFilter = 'all'; search = ''"
                   class="mt-2 text-flame-500 hover:underline text-xs"
                 >
@@ -220,12 +147,8 @@
       tabindex="-1"
       ref="deleteModalRef"
     >
-      <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
-      >
-        <h3 class="font-semibold mb-2 text-base-content">
-          Supprimer la carte
-        </h3>
+      <div class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300">
+        <h3 class="font-semibold mb-2 text-base-content">Supprimer la carte</h3>
         <p class="text-sm mb-1 text-base-content/50">
           Supprimer définitivement
           <strong>"{{ cardToDelete.name || 'Sans titre' }}"</strong>
@@ -233,10 +156,6 @@
         </p>
         <p class="text-xs mb-4 text-base-content/40">
           Cette action est irréversible. Le lien de partage sera désactivé.
-          <!--
-            TODO backend : ajouter un avertissement si la carte est liée à un QR code imprimé
-            (flag `has_been_shared` ou compteur qrScans > 0)
-          -->
         </p>
         <div class="flex space-x-3">
           <button
@@ -254,6 +173,7 @@
         </div>
       </div>
     </div>
+
     <!-- Toast notification -->
     <Transition name="toast">
       <div
@@ -268,26 +188,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { Search, CreditCard, Eye, Trash2, CheckCircle } from 'lucide-vue-next'
-import { useThemeStore } from '../../stores/themeStore'
-import { useCardsStore } from '../../stores/cards'
+import { useAdminStore } from '../../stores/adminStore'
 
-const themeStore = useThemeStore()
+const adminStore = useAdminStore()
 
-/*
- * Source de données : cardsStore.getAllCardsAdmin()
- *
- * Avant backend :
- *   - Scanne tous les localStorage digitalcard_userCards_{email} des utilisateurs inscrits
- *   - Enrichit avec ownerName + ownerEmail depuis authStore.getAllUsersWithStats
- *   - Réactif via adminCardsVersion (compteur incrémenté après chaque mutation admin)
- *
- * Après backend :
- *   - Remplacer par GET /api/admin/cards (paginé, filtré côté serveur)
- *   - Ajouter state page + totalPages pour la pagination
- */
-const cardsStore = useCardsStore()
+onMounted(() => adminStore.loadCards())
 
 const search = ref('')
 const activeFilter = ref('all')
@@ -299,32 +206,21 @@ let toastTimer = null
 function showToast(msg) {
   if (toastTimer) clearTimeout(toastTimer)
   toast.value = msg
-  toastTimer = setTimeout(() => {
-    toast.value = null
-  }, 2500)
+  toastTimer = setTimeout(() => { toast.value = null }, 2500)
 }
 
-watch(cardToDelete, (v) => {
-  if (v) nextTick(() => deleteModalRef.value?.focus())
-})
+watch(cardToDelete, (v) => { if (v) nextTick(() => deleteModalRef.value?.focus()) })
 
-// Liste complète — dépend de adminCardsVersion + authStore.allUsers (réactif automatiquement)
-// TODO backend : remplacé par un ref alimenté par l'API (GET /api/admin/cards)
-const allCards = computed(() => cardsStore.getAllCardsAdmin())
-
-const publicCount = computed(() => allCards.value.filter((c) => c.isPublic).length)
-const privateCount = computed(() => allCards.value.filter((c) => !c.isPublic).length)
-const totalViews = computed(() => allCards.value.reduce((s, c) => s + (c.views || 0), 0))
+const totalViews = computed(() => adminStore.cards.reduce((s, c) => s + (c.views || 0), 0))
 
 const filterOptions = computed(() => [
-  { value: 'all', label: 'Toutes', count: allCards.value.length },
-  { value: 'public', label: 'Publiques', count: publicCount.value },
-  { value: 'private', label: 'Privées', count: privateCount.value },
+  { value: 'all',     label: 'Toutes',    count: adminStore.cards.length },
+  { value: 'public',  label: 'Publiques', count: adminStore.cards.filter(c => c.isPublic).length },
+  { value: 'private', label: 'Privées',   count: adminStore.cards.filter(c => !c.isPublic).length },
 ])
 
-// TODO backend : filtrage côté serveur via query params
-const filteredCards = computed(() => {
-  return allCards.value.filter((c) => {
+const filteredCards = computed(() =>
+  adminStore.cards.filter((c) => {
     const q = search.value.toLowerCase()
     const matchSearch =
       !q ||
@@ -336,17 +232,15 @@ const filteredCards = computed(() => {
       (activeFilter.value === 'public' && c.isPublic) ||
       (activeFilter.value === 'private' && !c.isPublic)
     return matchSearch && matchFilter
-  })
-})
+  }),
+)
 
-function confirmDelete(card) {
-  cardToDelete.value = card
-}
+function confirmDelete(card) { cardToDelete.value = card }
 
-function doDelete() {
+async function doDelete() {
   if (!cardToDelete.value) return
   const name = cardToDelete.value.name || 'Sans titre'
-  cardsStore.adminDeleteCard(cardToDelete.value.id, cardToDelete.value.ownerEmail)
+  await adminStore.deleteCard(cardToDelete.value.id)
   cardToDelete.value = null
   showToast(`"${name}" supprimée`)
 }

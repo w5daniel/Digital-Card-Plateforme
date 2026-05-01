@@ -4,6 +4,7 @@ import { CARD_TEMPLATES } from '../data/mockData'
 import { useAuthStore } from './authStore'
 import { useAdminStore } from './adminStore'
 import cardsApi from '@/api/cards'
+import * as adminApi from '@/api/admin'
 
 // ⚠️ PHASE 4.5 — ces constantes restent pour les fonctions admin (cross-utilisateurs)
 // getAllCardsAdmin et adminDeleteCard lisent encore localStorage jusqu'à la Phase 4.5
@@ -400,6 +401,22 @@ export const useCardsStore = defineStore('cards', () => {
     } catch { /* quota */ }
   }
 
+  function syncTemplatePremium(id, isPremium) {
+    const tmpl = templates.value.find((t) => t.id === id)
+    if (!tmpl) return
+    tmpl.isPremium = isPremium
+    if (tmpl._isCustom) {
+      _saveCustomTemplates()
+    } else {
+      try {
+        const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
+        const overrides = raw ? JSON.parse(raw) : {}
+        overrides[tmpl.slug] = { ...overrides[tmpl.slug], isPremium }
+        localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
+      } catch { /* quota */ }
+    }
+  }
+
   function removeTemplate(slug) {
     const index = templates.value.findIndex((t) => t.slug === slug)
     if (index === -1) return
@@ -414,31 +431,49 @@ export const useCardsStore = defineStore('cards', () => {
     } catch { /* quota */ }
   }
 
-  function addOfficialTemplate(data) {
+  async function addOfficialTemplate(data) {
     if (!authStore.isAdmin) return null
-    const base = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'modele'
-    let slug = base
-    let i = 2
-    while (templates.value.find((t) => t.slug === slug)) { slug = `${base}-${i}`; i++ }
+    const suggestedSlug = data.slug
+      || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      || 'modele'
+    const { data: resp } = await adminApi.createTemplate({
+      name:       data.name,
+      slug:       suggestedSlug,
+      category:   data.category || 'Personnalisé',
+      is_premium: data.isPremium || false,
+      meta: {
+        description:             data.description || '',
+        colors:                  data.colors,
+        editorData:              data.editorData,
+        previewElements:         data.previewElements,
+        previewVersoElements:    data.previewVersoElements,
+        previewBackgrounds:      data.previewBackgrounds,
+        previewCardWidth:        data.previewCardWidth,
+        previewCardHeight:       data.previewCardHeight,
+        previewCardBorderRadius: data.previewCardBorderRadius,
+        previewOrientation:      data.previewOrientation,
+        previewFontFamily:       data.previewFontFamily,
+      },
+    })
+    const db = resp.template
     const newTmpl = {
-      id: crypto.randomUUID(),
-      slug,
-      name: data.name,
-      category: data.category || 'Personnalisé',
-      isPremium: data.isPremium || false,
-      description: data.description || '',
-      rating: 0,
-      thumbnail: '',
-      colors: data.colors || { primary: '#6366F1', secondary: '#1E293B', text: '#ffffff' },
-      editorData: data.editorData || null,
-      previewElements: data.previewElements || null,
-      previewVersoElements: data.previewVersoElements || null,
-      previewBackgrounds: data.previewBackgrounds || null,
-      previewCardWidth: data.previewCardWidth || null,
-      previewCardHeight: data.previewCardHeight || null,
-      previewCardBorderRadius: data.previewCardBorderRadius ?? null,
-      previewOrientation: data.previewOrientation || null,
-      previewFontFamily: data.previewFontFamily || null,
+      id:                      db.id,
+      slug:                    db.slug,
+      name:                    db.name,
+      category:                db.category,
+      isPremium:               !!db.is_premium,
+      description:             db.meta?.description            || '',
+      rating: 0, thumbnail: '',
+      colors:                  db.meta?.colors                 || { primary: '#6366F1', secondary: '#1E293B', text: '#ffffff' },
+      editorData:              db.meta?.editorData             || null,
+      previewElements:         db.meta?.previewElements        || null,
+      previewVersoElements:    db.meta?.previewVersoElements   || null,
+      previewBackgrounds:      db.meta?.previewBackgrounds     || null,
+      previewCardWidth:        db.meta?.previewCardWidth       || null,
+      previewCardHeight:       db.meta?.previewCardHeight      || null,
+      previewCardBorderRadius: db.meta?.previewCardBorderRadius ?? null,
+      previewOrientation:      db.meta?.previewOrientation     || null,
+      previewFontFamily:       db.meta?.previewFontFamily      || null,
       _isCustom: true,
     }
     templates.value.push(newTmpl)
@@ -446,32 +481,44 @@ export const useCardsStore = defineStore('cards', () => {
     return newTmpl
   }
 
-  function updateOfficialTemplate(slug, updates) {
+  async function updateOfficialTemplate(slug, updates) {
     if (!authStore.isAdmin) return null
     const tmpl = templates.value.find((t) => t.slug === slug)
     if (!tmpl) return null
-    if (updates.name) tmpl.name = updates.name
-    if (updates.category) tmpl.category = updates.category
+    await adminApi.updateTemplate(tmpl.id, {
+      name:       updates.name,
+      category:   updates.category,
+      is_premium: updates.isPremium,
+      meta: {
+        description:             updates.description,
+        colors:                  updates.colors,
+        editorData:              updates.editorData,
+        previewElements:         updates.previewElements,
+        previewVersoElements:    updates.previewVersoElements,
+        previewBackgrounds:      updates.previewBackgrounds,
+        previewCardWidth:        updates.previewCardWidth,
+        previewCardHeight:       updates.previewCardHeight,
+        previewCardBorderRadius: updates.previewCardBorderRadius,
+        previewOrientation:      updates.previewOrientation,
+        previewFontFamily:       updates.previewFontFamily,
+      },
+    })
+    if (updates.name)                      tmpl.name = updates.name
+    if (updates.category)                  tmpl.category = updates.category
     if (updates.description !== undefined) tmpl.description = updates.description
-    if (updates.colors) tmpl.colors = updates.colors
-    if (updates.editorData) tmpl.editorData = updates.editorData
-    if (updates.isPremium !== undefined) tmpl.isPremium = updates.isPremium
-    if (updates.previewElements) tmpl.previewElements = updates.previewElements
-    if (updates.previewVersoElements) tmpl.previewVersoElements = updates.previewVersoElements
-    if (updates.previewBackgrounds) tmpl.previewBackgrounds = updates.previewBackgrounds
-    if (updates.previewCardWidth) tmpl.previewCardWidth = updates.previewCardWidth
-    if (updates.previewCardHeight) tmpl.previewCardHeight = updates.previewCardHeight
+    if (updates.colors)                    tmpl.colors = updates.colors
+    if (updates.editorData)                tmpl.editorData = updates.editorData
+    if (updates.isPremium !== undefined)   tmpl.isPremium = updates.isPremium
+    if (updates.previewElements)           tmpl.previewElements = updates.previewElements
+    if (updates.previewVersoElements)      tmpl.previewVersoElements = updates.previewVersoElements
+    if (updates.previewBackgrounds)        tmpl.previewBackgrounds = updates.previewBackgrounds
+    if (updates.previewCardWidth)          tmpl.previewCardWidth = updates.previewCardWidth
+    if (updates.previewCardHeight)         tmpl.previewCardHeight = updates.previewCardHeight
     if (updates.previewCardBorderRadius != null) tmpl.previewCardBorderRadius = updates.previewCardBorderRadius
-    if (updates.previewOrientation) tmpl.previewOrientation = updates.previewOrientation
-    if (updates.previewFontFamily) tmpl.previewFontFamily = updates.previewFontFamily
+    if (updates.previewOrientation)        tmpl.previewOrientation = updates.previewOrientation
+    if (updates.previewFontFamily)         tmpl.previewFontFamily = updates.previewFontFamily
     tmpl._isCustom = true
     _saveCustomTemplates()
-    try {
-      const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
-      const overrides = raw ? JSON.parse(raw) : {}
-      overrides[slug] = { ...overrides[slug], name: tmpl.name, category: tmpl.category, description: tmpl.description, isPremium: tmpl.isPremium }
-      localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
-    } catch { /* quota */ }
     return tmpl
   }
 
@@ -517,6 +564,7 @@ export const useCardsStore = defineStore('cards', () => {
     getAllCardsAdmin,
     adminDeleteCard,
     toggleTemplatePremium,
+    syncTemplatePremium,
     removeTemplate,
     addOfficialTemplate,
     updateOfficialTemplate,

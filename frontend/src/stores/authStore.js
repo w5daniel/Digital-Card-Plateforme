@@ -152,31 +152,16 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  // ── Premium — mock localStorage jusqu'au système de paiement (Phase 4.5+) ──
+  // ── Premium ───────────────────────────────────────────────────────────────
   async function upgradeToPremium() {
     isLoading.value = true
+    error.value = null
     try {
-      await new Promise((r) => setTimeout(r, 1000))
-      if (!user.value) throw new Error('Vous devez être connecté')
-
-      const expiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-      user.value.is_premium = true
-      user.value.premium_expires_at = expiry
-      user.value.isPremium = true
-      user.value.premiumUntil = expiry
-
-      if (!Array.isArray(user.value.subscriptionHistory)) user.value.subscriptionHistory = []
-      user.value.subscriptionHistory.push({
-        reference: 'SUB-' + Date.now(),
-        date: new Date().toISOString(),
-        amount: 4990,
-        tax: 18,
-        total: 5888,
-        plan: 'Premium',
-      })
+      const { data } = await api.post('/api/auth/upgrade-premium')
+      user.value = _normalize(data.user)
       return user.value
     } catch (err) {
-      error.value = err.message
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à niveau Premium'
       throw err
     } finally {
       isLoading.value = false

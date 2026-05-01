@@ -13,7 +13,7 @@ class TemplateController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $templates = $request->user()->templates()->latest()->get();
+        $templates = $request->user()->templates()->where('is_gallery', false)->latest()->get();
 
         return response()->json(['templates' => $templates]);
     }
@@ -23,7 +23,7 @@ class TemplateController extends Controller
         $user = $request->user();
 
         $limit = $this->templateLimit($user);
-        if ($limit !== null && $user->templates()->count() >= $limit) {
+        if ($limit !== null && $user->templates()->where('is_gallery', false)->count() >= $limit) {
             return response()->json([
                 'message' => "Limite atteinte ({$limit} templates). Passez au plan Premium pour en créer davantage.",
             ], 403);

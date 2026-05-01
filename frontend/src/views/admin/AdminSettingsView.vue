@@ -193,10 +193,10 @@
         </span>
         <button
           @click="saveSettings"
-          :disabled="!isDirty"
+          :disabled="!isDirty || isSaving"
           class="px-5 py-2 rounded-lg bg-flame-500 hover:bg-flame-600 disabled:opacity-40 text-white text-sm font-medium transition-colors"
         >
-          Enregistrer les modifications
+          {{ isSaving ? 'Enregistrement...' : 'Enregistrer les modifications' }}
         </button>
       </div>
     </div>
@@ -204,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Sliders, Info, ToggleRight, AlertTriangle, CheckCircle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useAdminStore } from '../../stores/adminStore'
@@ -214,6 +214,12 @@ const adminStore = useAdminStore()
 
 // Copie locale jusqu'à sauvegarde explicite
 const draft = ref({ ...adminStore.settings })
+const isSaving = ref(false)
+
+onMounted(async () => {
+  await adminStore.loadSettings()
+  draft.value = { ...adminStore.settings }
+})
 const saved = ref(false)
 const confirmingReset = ref(false)
 let savedTimer = null
@@ -227,7 +233,6 @@ const toggleOptions = [
   { key: 'allowGallery', label: 'Galerie publique', desc: 'La galerie est visible par tous' },
 ]
 
-// TODO backend : valider appName, supportEmail, limites côté serveur (PUT /api/admin/settings)
 function validate() {
   const d = draft.value
   if (!d.appName || d.appName.trim().length === 0) return "Le nom de l'application est requis"
@@ -238,24 +243,29 @@ function validate() {
   return null
 }
 
-const saveSettings = () => {
+const saveSettings = async () => {
   const err = validate()
   if (err) {
     alert(err)
     return
   }
-  adminStore.updateSettings({ ...draft.value })
-  saved.value = true
-  if (savedTimer) clearTimeout(savedTimer)
-  savedTimer = setTimeout(() => (saved.value = false), 2500)
+  isSaving.value = true
+  try {
+    await adminStore.updateSettings({ ...draft.value })
+    saved.value = true
+    if (savedTimer) clearTimeout(savedTimer)
+    savedTimer = setTimeout(() => (saved.value = false), 2500)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const resetToDefaults = () => {
+const resetToDefaults = async () => {
   if (!confirmingReset.value) {
     confirmingReset.value = true
     return
   }
-  adminStore.resetSettings()
+  await adminStore.resetSettings()
   draft.value = { ...adminStore.settings }
   confirmingReset.value = false
 }

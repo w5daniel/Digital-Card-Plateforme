@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Search, Globe, Trash2, CheckCircle, ExternalLink } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
 import { useUserTemplatesStore } from '../../stores/userTemplatesStore'
@@ -178,12 +178,15 @@ function showToast(msg) {
 }
 
 // ── Données ──────────────────────────────────────────────────────────────
-const communityTemplates = computed(() => {
-  void templatesStore.communityVersion // dépendance réactive — force recalcul après suppression
-  return templatesStore.getAllCommunityTemplates()
-})
+const communityTemplates = ref([])
 
-// ── Filtre ───────────────────────────────────────────────────────────────
+async function loadCommunity() {
+  communityTemplates.value = await templatesStore.getAllCommunityTemplates()
+}
+
+onMounted(loadCommunity)
+
+// ── Filtre ─────────────────────────────────────────────────────────────
 const filteredCommunity = computed(() => {
   const q = search.value.toLowerCase()
   if (!q) return communityTemplates.value
@@ -248,12 +251,13 @@ function confirmDeleteTemplate(tpl) {
   templateToDelete.value = tpl
 }
 
-function doDeleteTemplate() {
+async function doDeleteTemplate() {
   if (!templateToDelete.value) return
   const name = templateToDelete.value.name || 'Sans titre'
-  templatesStore.adminRemoveCommunityTemplate(templateToDelete.value.id)
+  await templatesStore.adminRemoveCommunityTemplate(templateToDelete.value.id)
   templateToDelete.value = null
   showToast(`"${name}" retiré de la galerie`)
+  await loadCommunity()
 }
 
 const formatDate = (iso) =>

@@ -18,8 +18,8 @@
           class="text-xs whitespace-nowrap text-base-content/40"
         >
           {{ filteredTemplates.length }} modèle(s)
-          <span v-if="filteredTemplates.length !== cardsStore.getAllTemplates.length">
-            sur {{ cardsStore.getAllTemplates.length }}
+          <span v-if="filteredTemplates.length !== adminStore.templates.length">
+            sur {{ adminStore.templates.length }}
           </span>
         </p>
 
@@ -168,13 +168,13 @@
       >
         <p class="text-sm">
           {{
-            cardsStore.getAllTemplates.length === 0
+            adminStore.templates.length === 0
               ? 'Aucun modèle disponible.'
               : 'Aucun modèle ne correspond à la recherche.'
           }}
         </p>
         <button
-          v-if="searchQuery && cardsStore.getAllTemplates.length > 0"
+          v-if="searchQuery && adminStore.templates.length > 0"
           @click="searchQuery = ''"
           class="mt-2 text-flame-500 hover:underline text-xs"
         >
@@ -240,24 +240,23 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Pencil, Trash2, Search, CheckCircle } from 'lucide-vue-next'
 import { useThemeStore } from '../../stores/themeStore'
-import { useCardsStore } from '../../stores/cards'
+import { useAdminStore } from '../../stores/adminStore'
 import BusinessCard from '../../components/BusinessCard.vue'
 import { LAYOUT_MAP, buildElements } from '../../utils/templateLayouts'
 
 const router = useRouter()
 const themeStore = useThemeStore()
-const cardsStore = useCardsStore()
+const adminStore = useAdminStore()
 
-// ── Recherche / filtre modèles ──────────────────────────────────────────
-// TODO backend : filtrage côté serveur via GET /api/admin/templates?search=
+// ── Recherche / filtre modèles ────────────────────────────────────────────
 const searchQuery = ref('')
 const filteredTemplates = computed(() => {
   const q = searchQuery.value.toLowerCase()
-  if (!q) return cardsStore.getAllTemplates
-  return cardsStore.getAllTemplates.filter(
+  if (!q) return adminStore.templates
+  return adminStore.templates.filter(
     (t) =>
-      t.name.toLowerCase().includes(q) ||
-      t.slug.toLowerCase().includes(q) ||
+      (t.name || '').toLowerCase().includes(q) ||
+      (t.slug || '').toLowerCase().includes(q) ||
       (t.category || '').toLowerCase().includes(q),
   )
 })
@@ -269,7 +268,8 @@ const previewScale = ref(0.52)
 const previewColW = ref(240) // column width in px — used by per-template style helpers
 
 let ro = null
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([adminStore.loadTemplates(), adminStore.loadCards()])
   if (!gridRef.value) return
   ro = new ResizeObserver((entries) => {
     const w = entries[0]?.contentRect.width
@@ -441,11 +441,10 @@ watch(templateToDelete, (v) => {
   if (v) nextTick(() => deleteModalRef.value?.focus())
 })
 
-// Usage count per template (from real card data)
+// Usage count per template (from cards loaded in adminStore)
 const templateUsageMap = computed(() => {
-  const allCards = cardsStore.getAllCardsAdmin()
   const map = {}
-  for (const c of allCards) {
+  for (const c of adminStore.cards) {
     const slug = c.templateSlug || c.template
     if (slug) map[slug] = (map[slug] || 0) + 1
   }
@@ -459,18 +458,18 @@ function confirmDelete(tmpl) {
   templateToDelete.value = tmpl
 }
 
-function doDelete() {
+async function doDelete() {
   if (!templateToDelete.value) return
   const name = templateToDelete.value.name
-  cardsStore.removeTemplate(templateToDelete.value.slug)
+  await adminStore.deleteTemplate(templateToDelete.value.id)
   templateToDelete.value = null
   showToast(`"${name}" supprimé`)
 }
 
-function doTogglePremium(tmpl) {
-  cardsStore.toggleTemplatePremium(tmpl.slug)
+async function doTogglePremium(tmpl) {
+  await adminStore.toggleTemplatePremium(tmpl.id)
   showToast(
-    tmpl.isPremium ? `"${tmpl.name}" est maintenant Premium` : `Premium retiré de "${tmpl.name}"`,
+    tmpl.is_premium ? `Premium retiré de "${tmpl.name}"` : `"${tmpl.name}" est maintenant Premium`,
   )
 }
 </script>

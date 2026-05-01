@@ -5,6 +5,7 @@ import { useCardsStore } from './cards'
 import { hasStyledInfoFields } from '@/utils/cardElements'
 import { konvaToCardEl } from '@/utils/cardElements'
 import templatesApi from '@/api/templates'
+import { updateTemplate as adminUpdateTemplate } from '@/api/admin'
 
 export const MAX_FREE_TEMPLATES = 2
 
@@ -333,11 +334,11 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
   }
 
   /**
-   * ⚠️ Phase 4.5 — Admin moderation endpoint not yet implemented.
-   * Will call DELETE /api/admin/templates/{id} once Phase 4.5 is complete.
+   * Admin : retire un template de la galerie communauté (is_public → false).
+   * Résout le stub Phase 4.3. Appelle PATCH /api/admin/templates/{id}.
    */
-  function adminRemoveCommunityTemplate(templateId) {
-    console.warn(`[Phase 4.5] adminRemoveCommunityTemplate(${templateId}) — not yet migrated to API`)
+  async function adminRemoveCommunityTemplate(templateId) {
+    await adminUpdateTemplate(templateId, { is_public: false })
   }
 
   return {

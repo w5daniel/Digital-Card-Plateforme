@@ -6,6 +6,7 @@ use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
+        if (!SystemSetting::get('allowRegistration', true)) {
+            return response()->json(['message' => 'Les inscriptions sont fermées.'], 403);
+        }
+
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -105,6 +110,17 @@ class AuthController extends Controller
         $user->update(['password' => $request->password]);
 
         return response()->json(['message' => 'Mot de passe mis à jour.']);
+    }
+
+    public function upgradePremium(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update([
+            'is_premium'         => true,
+            'premium_expires_at' => now()->addYear(),
+        ]);
+
+        return response()->json(['user' => $user->fresh()]);
     }
 
     public function forgotPassword(Request $request): JsonResponse

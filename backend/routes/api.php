@@ -1,13 +1,30 @@
 <?php
 
+use App\Http\Controllers\Admin\CardController as AdminCardController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandKitController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\TemplateController;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', fn () => response()->json(['status' => 'ok', 'app' => config('app.name')]));
+
+// Config publique (maintenanceMode, allowGallery, allowRegistration, limites cartes)
+Route::get('/config', function () {
+    $data = SystemSetting::instance()->mergedData();
+    return response()->json(collect($data)->only([
+        'maintenanceMode',
+        'allowGallery',
+        'allowRegistration',
+        'maxCardsPerUser',
+        'maxCardsPerPremium',
+    ]));
+});
 
 Route::prefix('auth')->group(function () {
     Route::post('/register',        [AuthController::class, 'register']);
@@ -16,12 +33,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password',  [AuthController::class, 'resetPassword']);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout',   [AuthController::class, 'logout']);
-        Route::get('/me',        [AuthController::class, 'me']);
-        Route::put('/profile',   [AuthController::class, 'updateProfile']);
-        Route::post('/avatar',   [AuthController::class, 'updateAvatar']);
-        Route::delete('/avatar', [AuthController::class, 'deleteAvatar']);
-        Route::put('/password',  [AuthController::class, 'changePassword']);
+        Route::post('/logout',           [AuthController::class, 'logout']);
+        Route::get('/me',                [AuthController::class, 'me']);
+        Route::put('/profile',           [AuthController::class, 'updateProfile']);
+        Route::post('/avatar',           [AuthController::class, 'updateAvatar']);
+        Route::delete('/avatar',         [AuthController::class, 'deleteAvatar']);
+        Route::put('/password',          [AuthController::class, 'changePassword']);
+        Route::post('/upgrade-premium',  [AuthController::class, 'upgradePremium']);
     });
 });
 
@@ -38,6 +56,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/brand-kit',         [BrandKitController::class, 'update']);
     Route::post('/brand-kit/logo',   [BrandKitController::class, 'uploadLogo']);
     Route::delete('/brand-kit/logo', [BrandKitController::class, 'deleteLogo']);
+
+    // ── Routes Admin ──────────────────────────────────────────────────────
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('users',                    [UserController::class, 'index']);
+        Route::patch('users/{user}',           [UserController::class, 'update']);
+        Route::delete('users/{user}',          [UserController::class, 'destroy']);
+
+        Route::get('cards',                    [AdminCardController::class, 'index']);
+        Route::delete('cards/{card}',          [AdminCardController::class, 'destroy']);
+
+        Route::get('templates',                [AdminTemplateController::class, 'index']);
+        Route::post('templates',               [AdminTemplateController::class, 'store']);
+        Route::patch('templates/{template}',   [AdminTemplateController::class, 'update']);
+        Route::delete('templates/{template}',  [AdminTemplateController::class, 'destroy']);
+
+        Route::get('settings',                 [SettingsController::class, 'show']);
+        Route::put('settings',                 [SettingsController::class, 'update']);
+    });
 });
 
 // Public — accessible sans authentification

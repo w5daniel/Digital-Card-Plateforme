@@ -1,279 +1,238 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import {
-  SEED_USERS,
-  SEED_CARDS,
-  SEED_TEMPLATES,
-  SEED_SETTINGS,
-} from '../data/mockData'
-
-// ── Helpers localStorage ────────────────────────────────────────────────────
-const LS_KEYS = {
-  users: 'admin_users',
-  cards: 'admin_cards',
-  templates: 'admin_templates',
-  settings: 'admin_settings',
-}
-
-function loadFromLS(key, seed) {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(seed))
-  } catch {
-    return JSON.parse(JSON.stringify(seed))
-  }
-}
-
-function saveToLS(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify(data))
-  } catch (e) {
-    if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-      console.warn('[adminStore] localStorage quota dépassé — données non sauvegardées pour', key)
-    } else {
-      console.warn('[adminStore] Erreur localStorage :', e)
-    }
-  }
-}
+import { SEED_SETTINGS } from '../data/mockData'
+import * as adminApi from '../api/admin'
+import { useCardsStore } from './cards'
 
 // ────────────────────────────────────────────────────────────────────────────
 export const useAdminStore = defineStore('admin', () => {
   // ── State ─────────────────────────────────────────────────────────────────
-  const users = ref(loadFromLS(LS_KEYS.users, SEED_USERS))
-  const cards = ref(loadFromLS(LS_KEYS.cards, SEED_CARDS))
-  const templates = ref(loadFromLS(LS_KEYS.templates, SEED_TEMPLATES))
-  const settings = ref(loadFromLS(LS_KEYS.settings, SEED_SETTINGS))
+  const users     = ref([])
+  const cards     = ref([])
+  const templates = ref([])
+  // Settings initialisé avec les defaults — peuplé par loadPublicConfig() au boot
+  // et loadSettings() dans l'espace admin
+  const settings  = ref({ ...SEED_SETTINGS })
   const isLoading = ref(false)
-  const error = ref(null)
+  const error     = ref(null)
 
-  // ── Stats globales (computed) ─────────────────────────────────────────────
+  // ── Normalisations ────────────────────────────────────────────────────────
+  function _normalizeUser(u) {
+    return {
+      id:               u.id,
+      name:             u.name,
+      email:            u.email,
+      role:             u.role,
+      status:           u.is_banned ? 'blocked' : 'active',
+      isPremium:        !!u.is_premium,
+      premiumExpiresAt: u.premium_expires_at,
+      cardCount:        u.cards_count ?? 0,
+      createdAt:        u.created_at,
+    }
+  }
+
+  function _normalizeCard(c) {
+    return {
+      id:         c.id,
+      name:       c.title,
+      isPublic:   !!c.is_public,
+      views:      c.views ?? 0,
+      ownerName:  c.user?.name  ?? '—',
+      ownerEmail: c.user?.email ?? '—',
+      createdAt:  c.created_at,
+    }
+  }
+
+  // ── Stats globales ────────────────────────────────────────────────────────
   const stats = computed(() => ({
-    totalUsers: users.value.length,
-    activeUsers: users.value.filter((u) => u.status === 'active').length,
-    blockedUsers: users.value.filter((u) => u.status === 'blocked').length,
-    premiumUsers: users.value.filter((u) => u.isPremium).length,
-    totalCards: cards.value.length,
-    publicCards: cards.value.filter((c) => c.visibility === 'public').length,
-    flaggedCards: cards.value.filter((c) => c.flagged).length,
-    pendingCards: cards.value.filter((c) => c.status === 'pending').length,
-    totalTemplates: templates.value.length,
-    premiumTemplates: templates.value.filter((t) => t.isPremium).length,
-    totalViews: cards.value.reduce((sum, c) => sum + (c.views || 0), 0),
+    totalUsers:      users.value.length,
+    activeUsers:     users.value.filter(u => u.status === 'active').length,
+    blockedUsers:    users.value.filter(u => u.status === 'blocked').length,
+    premiumUsers:    users.value.filter(u => u.isPremium).length,
+    freeUsers:       users.value.filter(u => !u.isPremium).length,
+    totalCards:      cards.value.length,
+    publicCards:     cards.value.filter(c => c.isPublic).length,
+    totalViews:      cards.value.reduce((s, c) => s + (c.views || 0), 0),
+    totalTemplates:  templates.value.length,
+    premiumTemplates: templates.value.filter(t => t.is_premium).length,
   }))
 
-  // ── Activité récente ───────────────────────────────────────────────────────
+  // ── Activité récente ──────────────────────────────────────────────────────
   const recentActivity = computed(() => {
-    const items = [
-      ...users.value.slice(-3).map((u) => ({
-        type: 'user',
-        label: `Nouvel utilisateur : ${u.name}`,
-        time: u.createdAt,
+    const recentUsers = [...users.value]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5)
+      .map(u => ({
+        type:  'user',
+        label: `Nouvel utilisateur : ${u.name} (${u.email})`,
+        time:  u.createdAt,
         color: 'text-blue-500',
-      })),
-      ...cards.value
-        .filter((c) => c.flagged)
-        .map((c) => ({
-          type: 'flag',
-          label: `Carte signalée : "${c.title}" (${c.ownerName})`,
-          time: c.createdAt,
-          color: 'text-red-500',
-        })),
-      ...cards.value.slice(-4).map((c) => ({
-        type: 'card',
-        label: `Nouvelle carte : "${c.title}" par ${c.ownerName}`,
-        time: c.createdAt,
+      }))
+
+    const recentCards = [...cards.value]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5)
+      .map(c => ({
+        type:  'card',
+        label: `Nouvelle carte "${c.name || 'Sans titre'}" par ${c.ownerName}`,
+        time:  c.createdAt,
         color: 'text-green-500',
-      })),
-    ]
-    return items.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 8)
+      }))
+
+    return [...recentUsers, ...recentCards]
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 8)
   })
 
-  // ── Gestion Utilisateurs ───────────────────────────────────────────────────
-  // TODO: remplacer par `await api.patch(`/admin/users/${id}`, { status: 'blocked' })`
-  const blockUser = (id) => {
-    error.value = null
+  // ── Chargement ───────────────────────────────────────────────────────────
+
+  // Chargé au boot du router pour tous les visiteurs (maintenanceMode, allowGallery…)
+  const loadPublicConfig = async () => {
     try {
-      const u = users.value.find((u) => u.id === id)
-      if (u) {
-        u.status = 'blocked'
-        saveToLS(LS_KEYS.users, users.value)
-      }
-    } catch (err) {
-      error.value = err.message || "Erreur lors du blocage de l'utilisateur"
+      const { data } = await adminApi.getPublicConfig()
+      Object.assign(settings.value, data)
+    } catch {
+      // silencieux — on conserve les defaults si l'API est indisponible
     }
   }
 
-  const unblockUser = (id) => {
-    error.value = null
+  // Chargé dans l'espace admin (settings complets)
+  const loadSettings = async () => {
     try {
-      const u = users.value.find((u) => u.id === id)
-      if (u) {
-        u.status = 'active'
-        saveToLS(LS_KEYS.users, users.value)
-      }
+      const { data } = await adminApi.getSettings()
+      settings.value = data
     } catch (err) {
-      error.value = err.message || "Erreur lors du déblocage de l'utilisateur"
+      error.value = err.message || 'Erreur chargement settings'
     }
   }
 
-  const toggleUserRole = (id) => {
-    error.value = null
+  const loadUsers = async () => {
     try {
-      const u = users.value.find((u) => u.id === id)
-      if (u) {
-        u.role = u.role === 'admin' ? 'user' : 'admin'
-        saveToLS(LS_KEYS.users, users.value)
-      }
+      const { data } = await adminApi.getUsers()
+      users.value = data.map(_normalizeUser)
     } catch (err) {
-      error.value = err.message || 'Erreur lors du changement de rôle'
+      error.value = err.message || 'Erreur chargement utilisateurs'
     }
   }
 
-  const toggleUserPremium = (id) => {
-    error.value = null
+  const loadCards = async () => {
     try {
-      const u = users.value.find((u) => u.id === id)
-      if (u) {
-        u.isPremium = !u.isPremium
-        saveToLS(LS_KEYS.users, users.value)
-      }
+      const { data } = await adminApi.getCards()
+      cards.value = data.map(_normalizeCard)
     } catch (err) {
-      error.value = err.message || 'Erreur lors du changement premium'
+      error.value = err.message || 'Erreur chargement cartes'
     }
   }
 
-  const deleteUser = (id) => {
-    error.value = null
-    try {
-      // TODO: remplacer par `await api.delete(`/admin/users/${id}`)`
-      users.value = users.value.filter((u) => u.id !== id)
-      saveToLS(LS_KEYS.users, users.value)
-    } catch (err) {
-      error.value = err.message || "Erreur lors de la suppression de l'utilisateur"
+  function _normalizeTemplate(t) {
+    return {
+      id:                      t.id,
+      slug:                    t.slug,
+      name:                    t.name,
+      category:                t.category,
+      isPremium:               !!t.is_premium,
+      is_premium:              t.is_premium,
+      description:             t.meta?.description            || '',
+      colors:                  t.meta?.colors                 || { primary: '#6366F1', secondary: '#1E293B', text: '#fff' },
+      editorData:              t.meta?.editorData             || null,
+      previewElements:         t.meta?.previewElements        || null,
+      previewVersoElements:    t.meta?.previewVersoElements   || null,
+      previewBackgrounds:      t.meta?.previewBackgrounds     || null,
+      previewCardWidth:        t.meta?.previewCardWidth       || null,
+      previewCardHeight:       t.meta?.previewCardHeight      || null,
+      previewCardBorderRadius: t.meta?.previewCardBorderRadius ?? null,
+      previewOrientation:      t.meta?.previewOrientation     || null,
+      previewFontFamily:       t.meta?.previewFontFamily      || null,
+      is_gallery:              t.is_gallery,
+      is_public:               t.is_public,
+      created_at:              t.created_at,
     }
   }
 
-  // ── Gestion Cartes ─────────────────────────────────────────────────────────
-  const approveCard = (id) => {
-    error.value = null
+  const loadTemplates = async () => {
     try {
-      const c = cards.value.find((c) => c.id === id)
-      if (c) {
-        c.status = 'approved'
-        c.flagged = false
-        saveToLS(LS_KEYS.cards, cards.value)
-      }
+      const { data } = await adminApi.getTemplates()
+      templates.value = data.map(_normalizeTemplate)
     } catch (err) {
-      error.value = err.message || "Erreur lors de l'approbation"
+      error.value = err.message || 'Erreur chargement templates'
     }
   }
 
-  const flagCard = (id) => {
+  // ── Mutations Users ───────────────────────────────────────────────────────
+  const blockUser = async (id) => {
     error.value = null
-    try {
-      const c = cards.value.find((c) => c.id === id)
-      if (c) {
-        c.flagged = !c.flagged
-        saveToLS(LS_KEYS.cards, cards.value)
-      }
-    } catch (err) {
-      error.value = err.message || 'Erreur lors du signalement'
-    }
+    await adminApi.updateUser(id, { is_banned: true })
+    await loadUsers()
   }
 
-  const deleteCard = (id) => {
+  const unblockUser = async (id) => {
     error.value = null
-    try {
-      // TODO: remplacer par `await api.delete(`/admin/cards/${id}`)`
-      cards.value = cards.value.filter((c) => c.id !== id)
-      saveToLS(LS_KEYS.cards, cards.value)
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la suppression de la carte'
-    }
+    await adminApi.updateUser(id, { is_banned: false })
+    await loadUsers()
   }
 
-  // ── Gestion Templates ──────────────────────────────────────────────────────
-  const addTemplate = (template) => {
+  const toggleUserRole = async (id) => {
     error.value = null
-    try {
-      // TODO: remplacer par `const res = await api.post('/admin/templates', template)`
-      const newT = {
-        id: `t${Date.now()}`,
-        usageCount: 0,
-        active: true,
-        createdAt: new Date().toISOString(),
-        ...template,
-      }
-      templates.value.unshift(newT)
-      saveToLS(LS_KEYS.templates, templates.value)
-      return newT
-    } catch (err) {
-      error.value = err.message || "Erreur lors de l'ajout du template"
-    }
+    const u = users.value.find(u => u.id === id)
+    if (!u) return
+    await adminApi.updateUser(id, { role: u.role === 'admin' ? 'user' : 'admin' })
+    await loadUsers()
   }
 
-  const updateTemplate = (id, patch) => {
+  const toggleUserPremium = async (id) => {
     error.value = null
-    try {
-      const t = templates.value.find((t) => t.id === id)
-      if (t) {
-        Object.assign(t, patch)
-        saveToLS(LS_KEYS.templates, templates.value)
-      }
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la mise à jour du template'
-    }
+    const u = users.value.find(u => u.id === id)
+    if (!u) return
+    await adminApi.updateUser(id, { is_premium: !u.isPremium })
+    await loadUsers()
   }
 
-  const deleteTemplate = (id) => {
+  const deleteUser = async (id) => {
     error.value = null
-    try {
-      templates.value = templates.value.filter((t) => t.id !== id)
-      saveToLS(LS_KEYS.templates, templates.value)
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la suppression du template'
-    }
+    await adminApi.deleteUser(id)
+    users.value = users.value.filter(u => u.id !== id)
   }
 
-  const toggleTemplatePremium = (id) => {
+  // ── Mutations Cards ───────────────────────────────────────────────────────
+  const deleteCard = async (id) => {
     error.value = null
-    try {
-      const t = templates.value.find((t) => t.id === id)
-      if (t) {
-        t.isPremium = !t.isPremium
-        saveToLS(LS_KEYS.templates, templates.value)
-      }
-    } catch (err) {
-      error.value = err.message || 'Erreur lors du changement premium'
-    }
+    await adminApi.deleteCard(id)
+    cards.value = cards.value.filter(c => c.id !== id)
   }
 
-  // ── Paramètres système ─────────────────────────────────────────────────────
-  const updateSettings = (patch) => {
+  // ── Mutations Templates ───────────────────────────────────────────────────
+  const toggleTemplatePremium = async (id) => {
     error.value = null
-    try {
-      // TODO: remplacer par `await api.put('/admin/settings', patch)`
-      Object.assign(settings.value, patch)
-      saveToLS(LS_KEYS.settings, settings.value)
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la mise à jour des paramètres'
-    }
+    const t = templates.value.find(t => t.id === id)
+    if (!t) return
+    const newIsPremium = !t.is_premium
+    await adminApi.updateTemplate(id, { is_premium: newIsPremium })
+    await loadTemplates()
+    useCardsStore().syncTemplatePremium(id, newIsPremium)
   }
 
-  const resetSettings = () => {
+  const deleteTemplate = async (id) => {
     error.value = null
-    try {
-      settings.value = { ...SEED_SETTINGS }
-      saveToLS(LS_KEYS.settings, settings.value)
-    } catch (err) {
-      error.value = err.message || 'Erreur lors de la réinitialisation'
-    }
+    await adminApi.deleteTemplate(id)
+    templates.value = templates.value.filter(t => t.id !== id)
   }
 
-  // ── Simulation loading (UX) ────────────────────────────────────────────────
+  // ── Mutations Settings ────────────────────────────────────────────────────
+  const updateSettings = async (patch) => {
+    error.value = null
+    const { data } = await adminApi.updateSettings(patch)
+    settings.value = data
+  }
+
+  const resetSettings = async () => {
+    error.value = null
+    const { data } = await adminApi.updateSettings(SEED_SETTINGS)
+    settings.value = data
+  }
+
+  // ── UX loading helper ─────────────────────────────────────────────────────
   const withLoading = async (fn) => {
     isLoading.value = true
-    await new Promise((r) => setTimeout(r, 300))
     try {
       await fn()
     } finally {
@@ -282,26 +241,34 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   return {
+    // State
     users,
     cards,
     templates,
     settings,
-    stats,
-    recentActivity,
     isLoading,
     error,
+    // Computed
+    stats,
+    recentActivity,
+    // Loaders
+    loadPublicConfig,
+    loadSettings,
+    loadUsers,
+    loadCards,
+    loadTemplates,
+    // Users
     blockUser,
     unblockUser,
     toggleUserRole,
     toggleUserPremium,
     deleteUser,
-    approveCard,
-    flagCard,
+    // Cards
     deleteCard,
-    addTemplate,
-    updateTemplate,
-    deleteTemplate,
+    // Templates
     toggleTemplatePremium,
+    deleteTemplate,
+    // Settings
     updateSettings,
     resetSettings,
     withLoading,

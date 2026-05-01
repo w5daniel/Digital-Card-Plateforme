@@ -145,9 +145,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // Restore session on app load
+  // Restore session + config publique au premier chargement
   if (!authStore.user && !from.name) {
     await authStore.restoreSession()
+    await useAdminStore().loadPublicConfig()
   }
 
   const isAuthenticated = authStore.isAuthenticated

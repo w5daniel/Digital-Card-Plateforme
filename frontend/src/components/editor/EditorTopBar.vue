@@ -858,10 +858,10 @@ async function saveAsGalleryTemplate(name, meta = {}) {
 
     const slug = editorStore.editingGallerySlug
     if (slug) {
-      cardsStore.updateOfficialTemplate(slug, data)
+      await cardsStore.updateOfficialTemplate(slug, data)
       editorStore.editMode = 'edit-gallery-template'
     } else {
-      const newTmpl = cardsStore.addOfficialTemplate(data)
+      const newTmpl = await cardsStore.addOfficialTemplate(data)
       if (newTmpl) {
         editorStore.editingGallerySlug = newTmpl.slug
         editorStore.editingTemplateId = null

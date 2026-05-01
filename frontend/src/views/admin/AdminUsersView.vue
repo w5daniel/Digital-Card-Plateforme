@@ -1,20 +1,9 @@
 <template>
   <div class="space-y-4">
-    <!--
-      TODO backend : cette vue lira ses données via GET /api/admin/users
-        → pagination côté serveur (éviter de charger 100 000 utilisateurs d'un coup)
-        → filtres envoyés en query params : ?search=&status=&plan=&page=1&limit=50
-        → tri configurable : ?sort=createdAt&order=desc
-        → réponse : { data: User[], total: number, page: number, pages: number }
-      Pour l'instant : toutes les opérations sont synchrones et locales (localStorage).
-    -->
-
     <!-- ── Header + Recherche + Filtres ── -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="relative w-full sm:w-72">
-        <Search
-          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"
-        />
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
         <input
           v-model="search"
           type="text"
@@ -23,10 +12,6 @@
         />
       </div>
       <div class="flex items-center space-x-2">
-        <!--
-          TODO backend : ces filtres seront envoyés au serveur en query params
-            plutôt que filtrés côté client sur la liste complète
-        -->
         <select
           v-model="filterStatus"
           class="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-flame-500 bg-base-100 border-base-300 text-base-content"
@@ -49,26 +34,13 @@
     <!-- Compteur -->
     <p class="text-xs text-base-content/40">
       {{ filteredUsers.length }} utilisateur(s) trouvé(s)
-      <span v-if="filteredUsers.length !== authStore.getAllUsersWithStats.length">
-        sur {{ authStore.getAllUsersWithStats.length }} au total
+      <span v-if="filteredUsers.length !== adminStore.users.length">
+        sur {{ adminStore.users.length }} au total
       </span>
-      <!--
-        TODO backend : afficher ici la pagination :
-          "Page X / Y — N utilisateurs au total"
-          + boutons Précédent / Suivant
-      -->
     </p>
 
     <!-- ── Table des utilisateurs ── -->
-    <!--
-      Source de données : authStore.getAllUsersWithStats (computed réactif sur allUsers[])
-      TODO backend : remplacer par les données paginées du serveur
-        → GET /api/admin/users avec les query params de filtrage
-        → cardCount vient du COUNT() SQL (pas besoin de lire localStorage)
-    -->
-    <div
-      class="rounded-xl border overflow-hidden border-base-300"
-    >
+    <div class="rounded-xl border overflow-hidden border-base-300">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -82,9 +54,7 @@
               <th class="text-right px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody
-            class="divide-y divide-base-300"
-          >
+          <tbody class="divide-y divide-base-300">
             <tr
               v-for="u in filteredUsers"
               :key="u.id"
@@ -100,16 +70,8 @@
                     {{ u.name?.charAt(0)?.toUpperCase() || '?' }}
                   </div>
                   <div class="min-w-0">
-                    <p
-                      class="font-medium truncate text-base-content"
-                    >
-                      {{ u.name }}
-                    </p>
-                    <p
-                      class="text-xs truncate text-base-content/40"
-                    >
-                      {{ u.email }}
-                    </p>
+                    <p class="font-medium truncate text-base-content">{{ u.name }}</p>
+                    <p class="text-xs truncate text-base-content/40">{{ u.email }}</p>
                   </div>
                 </div>
               </td>
@@ -118,11 +80,7 @@
               <td class="px-4 py-3 hidden sm:table-cell">
                 <span
                   class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase"
-                  :class="
-                    u.role === 'admin'
-                      ? 'bg-red-500/10 text-red-500'
-                      : 'bg-base-200 text-base-content/70'
-                  "
+                  :class="u.role === 'admin' ? 'bg-red-500/10 text-red-500' : 'bg-base-200 text-base-content/70'"
                 >
                   {{ u.role === 'admin' ? 'Admin' : 'User' }}
                 </span>
@@ -132,11 +90,7 @@
               <td class="px-4 py-3 hidden md:table-cell">
                 <span
                   class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                  :class="
-                    u.isPremium
-                      ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                      : 'bg-base-200 text-base-content/50'
-                  "
+                  :class="u.isPremium ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : 'bg-base-200 text-base-content/50'"
                 >
                   {{ u.isPremium ? 'Premium' : 'Gratuit' }}
                 </span>
@@ -146,11 +100,7 @@
               <td class="px-4 py-3">
                 <span
                   class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                  :class="
-                    u.status === 'active'
-                      ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                      : 'bg-red-500/10 text-red-500'
-                  "
+                  :class="u.status === 'active' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-red-500/10 text-red-500'"
                 >
                   <span
                     class="w-1.5 h-1.5 rounded-full"
@@ -161,89 +111,42 @@
               </td>
 
               <!-- Nb cartes -->
-              <!--
-                TODO backend : cardCount vient du COUNT() SQL dans la réponse serveur.
-                Pour l'instant : lu depuis localStorage digitalcard_userCards_{email}
-                dans authStore.getAllUsersWithStats (computed).
-              -->
               <td class="px-4 py-3 hidden lg:table-cell">
-                <span class="text-base-content/80">
-                  {{ u.cardCount }}
-                </span>
+                <span class="text-base-content/80">{{ u.cardCount }}</span>
               </td>
 
               <!-- Date inscription -->
               <td class="px-4 py-3 hidden lg:table-cell">
-                <span
-                  class="text-xs text-base-content/40"
-                >
-                  {{ formatDate(u.createdAt) }}
-                </span>
+                <span class="text-xs text-base-content/40">{{ formatDate(u.createdAt) }}</span>
               </td>
 
               <!-- Actions -->
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end space-x-1">
-                  <!--
-                    Toggle Premium.
-                    TODO backend : PATCH /api/admin/users/:id/premium
-                      → mettre à jour is_premium + premium_until en DB
-                      → si vrai Stripe actif : gérer abonnement
-                      → logguer dans admin_audit_log
-                  -->
+                  <!-- Toggle Premium -->
                   <button
-                    @click="
-                      pendingAction = {
-                        type: u.isPremium ? 'remove-premium' : 'add-premium',
-                        user: u,
-                      }
-                    "
+                    @click="pendingAction = { type: u.isPremium ? 'remove-premium' : 'add-premium', user: u }"
                     :disabled="u.role === 'admin'"
                     class="p-1.5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    :class="
-                      u.isPremium
-                        ? 'text-yellow-500 hover:bg-yellow-500/10'
-                        : 'text-base-content/40 hover:bg-base-200'
-                    "
+                    :class="u.isPremium ? 'text-yellow-500 hover:bg-yellow-500/10' : 'text-base-content/40 hover:bg-base-200'"
                     :title="u.isPremium ? 'Retirer Premium' : 'Attribuer Premium'"
                   >
                     <Star class="w-4 h-4" />
                   </button>
 
-                  <!--
-                    Bloquer / Débloquer.
-                    TODO backend : PATCH /api/admin/users/:id { status }
-                      → invalider tous les tokens actifs de cet utilisateur
-                      → l'utilisateur est déconnecté à sa prochaine requête
-                      → logguer dans admin_audit_log
-                  -->
+                  <!-- Bloquer / Débloquer -->
                   <button
-                    @click="
-                      pendingAction = {
-                        type: u.status === 'active' ? 'ban' : 'unban',
-                        user: u,
-                      }
-                    "
+                    @click="pendingAction = { type: u.status === 'active' ? 'ban' : 'unban', user: u }"
                     :disabled="u.role === 'admin'"
                     class="p-1.5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    :class="
-                      u.status === 'blocked'
-                        ? 'text-green-500 hover:bg-green-500/10'
-                        : 'text-orange-500 hover:bg-orange-500/10'
-                    "
+                    :class="u.status === 'blocked' ? 'text-green-500 hover:bg-green-500/10' : 'text-orange-500 hover:bg-orange-500/10'"
                     :title="u.status === 'active' ? 'Bloquer' : 'Débloquer'"
                   >
                     <UserX v-if="u.status === 'active'" class="w-4 h-4" />
                     <UserCheck v-else class="w-4 h-4" />
                   </button>
 
-                  <!--
-                    Supprimer.
-                    TODO backend : DELETE /api/admin/users/:id
-                      → soft-delete + anonymisation RGPD
-                      → CASCADE sur cards, sessions, abonnements
-                      → email de confirmation à l'utilisateur
-                  -->
+                  <!-- Supprimer -->
                   <button
                     @click="confirmDelete(u)"
                     :disabled="u.role === 'admin'"
@@ -258,12 +161,9 @@
 
             <!-- État vide -->
             <tr v-if="filteredUsers.length === 0">
-              <td
-                colspan="7"
-                class="px-4 py-12 text-center text-sm text-base-content/40"
-              >
+              <td colspan="7" class="px-4 py-12 text-center text-sm text-base-content/40">
                 {{
-                  authStore.getAllUsersWithStats.length === 0
+                  adminStore.users.length === 0
                     ? 'Aucun utilisateur inscrit pour le moment.'
                     : 'Aucun utilisateur ne correspond aux filtres.'
                 }}
@@ -283,22 +183,13 @@
       tabindex="-1"
       ref="deleteModalRef"
     >
-      <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
-      >
-        <h3 class="font-semibold mb-2 text-base-content">
-          Supprimer l'utilisateur
-        </h3>
+      <div class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300">
+        <h3 class="font-semibold mb-2 text-base-content">Supprimer l'utilisateur</h3>
         <p class="text-sm mb-1 text-base-content/50">
           Supprimer définitivement <strong>{{ userToDelete.name }}</strong> ?
         </p>
         <p class="text-xs mb-4 text-base-content/40">
-          Ses {{ userToDelete.cardCount }} carte(s) seront également supprimées. Cette action est
-          irréversible.
-          <!--
-            TODO backend : ajouter un avertissement si l'abonnement Stripe est actif
-            (récupéré depuis GET /api/admin/users/:id/subscription)
-          -->
+          Ses {{ userToDelete.cardCount }} carte(s) seront également supprimées. Cette action est irréversible.
         </p>
         <div class="flex space-x-3">
           <button
@@ -316,6 +207,7 @@
         </div>
       </div>
     </div>
+
     <!-- ── Modal confirmation action (ban/unban/premium) ── -->
     <div
       v-if="pendingAction"
@@ -325,12 +217,8 @@
       tabindex="-1"
       ref="actionModalRef"
     >
-      <div
-        class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300"
-      >
-        <h3 class="font-semibold mb-2 text-base-content">
-          {{ actionLabels[pendingAction.type].title }}
-        </h3>
+      <div class="w-full max-w-sm rounded-xl p-6 shadow-xl border bg-base-100 border-base-300">
+        <h3 class="font-semibold mb-2 text-base-content">{{ actionLabels[pendingAction.type].title }}</h3>
         <p class="text-sm mb-4 text-base-content/50">
           {{ actionLabels[pendingAction.type].message }}
           <strong>{{ pendingAction.user.name }}</strong> ?
@@ -367,28 +255,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { Search, Star, UserX, UserCheck, Trash2, CheckCircle } from 'lucide-vue-next'
-import { useAuthStore } from '../../stores/authStore'
+import { useAdminStore } from '../../stores/adminStore'
 
+const adminStore = useAdminStore()
 
-/*
- * Source de données : authStore.getAllUsersWithStats
- *
- * Avant backend :
- *   - alimenté par digitalcard_allUsers (localStorage)
- *   - écrit à chaque login / register / upgradeToPremium
- *   - cardCount lu depuis digitalcard_userCards_{email}
- *
- * Après backend :
- *   - remplacer getAllUsersWithStats par un appel API paginé
- *   - ajouter un state `page`, `totalPages`, `isLoading` pour la pagination
- *   - les filtres search/status/plan passent en query params serveur
- */
-const authStore = useAuthStore()
+onMounted(() => adminStore.loadUsers())
 
 // ── Filtres locaux ────────────────────────────────────────────────────────
-// TODO backend : envoyer ces valeurs en query params au serveur (filtrage côté SQL)
 const search = ref('')
 const filterStatus = ref('')
 const filterPlan = ref('')
@@ -402,87 +277,55 @@ let toastTimer = null
 function showToast(msg) {
   if (toastTimer) clearTimeout(toastTimer)
   toast.value = msg
-  toastTimer = setTimeout(() => {
-    toast.value = null
-  }, 2500)
+  toastTimer = setTimeout(() => { toast.value = null }, 2500)
 }
 
-// Auto-focus modals for Escape key
-watch(userToDelete, (v) => {
-  if (v) nextTick(() => deleteModalRef.value?.focus())
-})
-watch(pendingAction, (v) => {
-  if (v) nextTick(() => actionModalRef.value?.focus())
-})
+watch(userToDelete, (v) => { if (v) nextTick(() => deleteModalRef.value?.focus()) })
+watch(pendingAction, (v) => { if (v) nextTick(() => actionModalRef.value?.focus()) })
 
 const actionLabels = {
-  ban: {
-    title: "Bloquer l'utilisateur",
-    message: 'Bloquer le compte de',
-    btn: 'Bloquer',
-    btnClass: 'bg-orange-500 hover:bg-orange-600',
-  },
-  unban: {
-    title: "Débloquer l'utilisateur",
-    message: 'Réactiver le compte de',
-    btn: 'Débloquer',
-    btnClass: 'bg-green-500 hover:bg-green-600',
-  },
-  'add-premium': {
-    title: 'Attribuer Premium',
-    message: 'Passer au plan Premium pour',
-    btn: 'Confirmer',
-    btnClass: 'bg-yellow-500 hover:bg-yellow-600',
-  },
-  'remove-premium': {
-    title: 'Retirer Premium',
-    message: 'Retirer le plan Premium de',
-    btn: 'Retirer',
-    btnClass: 'bg-yellow-500 hover:bg-yellow-600',
-  },
+  ban:            { title: "Bloquer l'utilisateur",  message: 'Bloquer le compte de',         btn: 'Bloquer',    btnClass: 'bg-orange-500 hover:bg-orange-600' },
+  unban:          { title: "Débloquer l'utilisateur", message: 'Réactiver le compte de',        btn: 'Débloquer',  btnClass: 'bg-green-500 hover:bg-green-600' },
+  'add-premium':  { title: 'Attribuer Premium',       message: 'Passer au plan Premium pour',  btn: 'Confirmer',  btnClass: 'bg-yellow-500 hover:bg-yellow-600' },
+  'remove-premium': { title: 'Retirer Premium',       message: 'Retirer le plan Premium de',   btn: 'Retirer',    btnClass: 'bg-yellow-500 hover:bg-yellow-600' },
 }
 
-// ── Liste filtrée ─────────────────────────────────────────────────────────
-// TODO backend : la liste entière vient du serveur déjà filtrée/paginée.
-//   Ce computed local disparaît au profit d'un simple `authStore.users` (ref réactive).
-const filteredUsers = computed(() => {
-  return authStore.getAllUsersWithStats.filter((u) => {
+const filteredUsers = computed(() =>
+  adminStore.users.filter((u) => {
     const q = search.value.toLowerCase()
-    const matchSearch =
-      !q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    const matchSearch = !q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
     const matchStatus = !filterStatus.value || u.status === filterStatus.value
-    const matchPlan =
-      !filterPlan.value || (filterPlan.value === 'premium' ? u.isPremium : !u.isPremium)
+    const matchPlan   = !filterPlan.value   || (filterPlan.value === 'premium' ? u.isPremium : !u.isPremium)
     return matchSearch && matchStatus && matchPlan
-  })
-})
+  }),
+)
 
-// ── Actions ───────────────────────────────────────────────────────────────
-function confirmDelete(u) {
-  userToDelete.value = u
-}
+function confirmDelete(u) { userToDelete.value = u }
 
-function doDelete() {
+async function doDelete() {
   if (!userToDelete.value) return
   const name = userToDelete.value.name
-  authStore.adminDeleteUser(userToDelete.value.id)
+  await adminStore.deleteUser(userToDelete.value.id)
   userToDelete.value = null
   showToast(`${name} a été supprimé`)
 }
 
-function executeAction() {
+async function executeAction() {
   if (!pendingAction.value) return
   const { type, user } = pendingAction.value
-  const toastMessages = { ban: `${user.name} a été bloqué`, unban: `${user.name} a été débloqué`, 'add-premium': `${user.name} est maintenant Premium`, 'remove-premium': `Premium retiré pour ${user.name}` }
-  if (type === 'ban') authStore.adminBanUser(user.id)
-  else if (type === 'unban') authStore.adminUnbanUser(user.id)
-  else if (type === 'add-premium' || type === 'remove-premium')
-    authStore.adminTogglePremium(user.id)
+  const toastMessages = {
+    ban:              `${user.name} a été bloqué`,
+    unban:            `${user.name} a été débloqué`,
+    'add-premium':    `${user.name} est maintenant Premium`,
+    'remove-premium': `Premium retiré pour ${user.name}`,
+  }
+  if (type === 'ban')                                     await adminStore.blockUser(user.id)
+  else if (type === 'unban')                              await adminStore.unblockUser(user.id)
+  else if (type === 'add-premium' || type === 'remove-premium') await adminStore.toggleUserPremium(user.id)
   pendingAction.value = null
   showToast(toastMessages[type])
 }
 
-// ── Formatage date ────────────────────────────────────────────────────────
 const formatDate = (iso) =>
   iso
     ? new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
