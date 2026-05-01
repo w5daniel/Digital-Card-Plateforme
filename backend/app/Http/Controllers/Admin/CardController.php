@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Card;
+use App\Notifications\CardDeletedByAdmin;
 use Illuminate\Http\JsonResponse;
 
 class CardController extends Controller
@@ -31,7 +32,12 @@ class CardController extends Controller
 
     public function destroy(Card $card): JsonResponse
     {
+        $card->load('user');
+        /** @var \App\Models\User|null $owner */
+        $owner = $card->user;
+        $title = (string) $card->title;
         $card->delete();
+        if ($owner) $owner->notify(new CardDeletedByAdmin($title));
 
         return response()->json(null, 204);
     }

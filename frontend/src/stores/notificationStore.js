@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { getNotifications, markAllRead, deleteNotification } from '../api/notifications'
 
 export const useNotificationStore = defineStore('notification', () => {
   // ── Toasts (éphémères) ────────────────────────────────────────────────────
@@ -35,6 +36,15 @@ export const useNotificationStore = defineStore('notification', () => {
     notifications.value = notifications.value.filter((n) => n.id !== id)
   }
 
+  const _showToast = (message, type = 'info', duration = 5000) => {
+    const id = Date.now() + Math.random()
+    const toast = { id, message, type, duration, timerId: null }
+    notifications.value.push(toast)
+    if (duration > 0) {
+      toast.timerId = setTimeout(() => removeNotification(id), duration)
+    }
+  }
+
   const clearAllToasts = () => {
     notifications.value.forEach((n) => { if (n.timerId) clearTimeout(n.timerId) })
     notifications.value = []
@@ -62,6 +72,28 @@ export const useNotificationStore = defineStore('notification', () => {
     if (inbox.value.length > 50) inbox.value = inbox.value.slice(0, 50)
   }
 
+  const loadFromApi = async () => {
+    try {
+      const { data } = await getNotifications()
+      let hasNew = false
+      for (const n of data) {
+        if (inbox.value.some((i) => i._apiId === n.id)) continue
+        inbox.value.push({
+          id:        n.id,
+          message:   n.data.message,
+          type:      n.data.type ?? 'info',
+          timestamp: new Date(n.created_at),
+          read:      false,
+          _apiId:    n.id,
+        })
+        _showToast(n.data.message, n.data.type ?? 'info')
+        hasNew = true
+      }
+      if (inbox.value.length > 50) inbox.value = inbox.value.slice(0, 50)
+      if (hasNew) markAllRead().catch(() => {})
+    } catch { /* silencieux si non connecté */ }
+  }
+
   const markAsRead = (id) => {
     const notif = inbox.value.find((n) => n.id === id)
     if (notif) notif.read = true
@@ -73,6 +105,19 @@ export const useNotificationStore = defineStore('notification', () => {
 
   const clearInbox = () => {
     inbox.value = []
+  }
+
+  const markAllAsReadAndSync = async () => {
+    markAllAsRead()
+    try { await markAllRead() } catch { /* ignore */ }
+  }
+
+  const removeFromInbox = async (id) => {
+    const notif = inbox.value.find((n) => n.id === id)
+    inbox.value = inbox.value.filter((n) => n.id !== id)
+    if (notif?._apiId) {
+      try { await deleteNotification(notif._apiId) } catch { /* ignore */ }
+    }
   }
 
   return {
@@ -89,8 +134,11 @@ export const useNotificationStore = defineStore('notification', () => {
     inbox,
     unreadCount,
     addToInbox,
+    loadFromApi,
     markAsRead,
     markAllAsRead,
+    markAllAsReadAndSync,
+    removeFromInbox,
     clearInbox,
   }
 })

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Template;
+use App\Notifications\TemplateDeletedByAdmin;
+use App\Notifications\TemplateRemovedFromGalleryByAdmin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -61,14 +63,28 @@ class TemplateController extends Controller
             'meta'       => 'sometimes|array',
         ]);
 
+        $wasPublic = (bool) $template->is_public;
+        $template->load('user');
         $template->update($validated);
+
+        $becomesPrivate = $wasPublic && isset($validated['is_public']) && !$validated['is_public'];
+        /** @var \App\Models\User|null $owner */
+        $owner = $template->user;
+        if ($becomesPrivate && $owner) {
+            $owner->notify(new TemplateRemovedFromGalleryByAdmin((string) $template->name));
+        }
 
         return response()->json($template->fresh());
     }
 
     public function destroy(Template $template): JsonResponse
     {
+        $template->load('user');
+        /** @var \App\Models\User|null $owner */
+        $owner = $template->user;
+        $name  = (string) $template->name;
         $template->delete();
+        if ($owner) $owner->notify(new TemplateDeletedByAdmin($name));
 
         return response()->json(null, 204);
     }

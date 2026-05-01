@@ -40,6 +40,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Identifiants incorrects.'], 401);
         }
 
+        if (auth()->user()->is_banned) {
+            Auth::guard('web')->logout();
+            return response()->json(['message' => 'Votre compte a été suspendu.'], 403);
+        }
+
         $request->session()->regenerate();
 
         return response()->json(['user' => auth()->user()]);
@@ -56,7 +61,16 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $request->user()]);
+        $user = $request->user();
+
+        if ($user->is_banned) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return response()->json(['message' => 'Compte suspendu.', 'suspended' => true], 403);
+        }
+
+        return response()->json(['user' => $user]);
     }
 
     public function updateProfile(UpdateProfileRequest $request): JsonResponse

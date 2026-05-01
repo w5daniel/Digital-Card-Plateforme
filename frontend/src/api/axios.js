@@ -10,4 +10,16 @@ const api = axios.create({
   },
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 403 && error.response?.data?.suspended) {
+      const { useAuthStore } = await import('@/stores/authStore')
+      await useAuthStore().logout()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  },
+)
+
 export default api

@@ -58,6 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
       await api.get('/sanctum/csrf-cookie')
       const { data } = await api.post('/api/auth/login', { email, password, remember: rememberMe })
       user.value = _normalize(data.user)
+      useNotificationStore().loadFromApi()
       return user.value
     } catch (err) {
       error.value = err.response?.data?.message || 'Identifiants incorrects'
@@ -104,8 +105,10 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await api.get('/api/auth/me')
       user.value = _normalize(data.user)
+      useNotificationStore().loadFromApi()
     } catch {
       user.value = null
+      // 403 banned → géré par l'intercepteur axios global (logout + redirect)
     }
   }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandKitController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TemplateController;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
@@ -27,9 +28,9 @@ Route::get('/config', function () {
 });
 
 Route::prefix('auth')->group(function () {
-    Route::post('/register',        [AuthController::class, 'register']);
-    Route::post('/login',           [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/register',        [AuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/login',           [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
     Route::post('/reset-password',  [AuthController::class, 'resetPassword']);
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -46,11 +47,15 @@ Route::prefix('auth')->group(function () {
 // IMPORTANT: community avant apiResource pour éviter que Laravel matche {id}=community
 Route::get('/templates/community', [TemplateController::class, 'community']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'maintenance'])->group(function () {
     Route::apiResource('cards', CardController::class);
     Route::post('/cards/{card}/stats', [CardController::class, 'incrementStat']);
 
     Route::apiResource('templates', TemplateController::class);
+
+    Route::get('/notifications',            [NotificationController::class, 'index']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}',    [NotificationController::class, 'destroy']);
 
     Route::get('/brand-kit',         [BrandKitController::class, 'show']);
     Route::put('/brand-kit',         [BrandKitController::class, 'update']);
