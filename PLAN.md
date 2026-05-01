@@ -109,15 +109,39 @@ MAIL_MAILER=log
 
 **Bug corrigé** : cast `'fonts' => 'json'` ajouté au modèle pour que Laravel encode la string en JSON valide avant insert MySQL (évite CONSTRAINT violation).
 
-## 🔲 Phases suivantes
+### Phase 4.5 — Admin ✅ COMPLET
+**Backend**
+- `Admin/UserController.php` — index, update (ban/unban, role, premium), destroy
+- `Admin/CardController.php` — index (toutes les cartes), destroy
+- `Admin/TemplateController.php` — index (`is_gallery=true` uniquement), store (crée template officiel avec `is_gallery=true`, slug unique auto-généré, données dans `meta`), update (name, category, slug, meta, is_premium, is_public), destroy
+- `SettingsController.php` — show, update (SystemSetting singleton)
+- Middleware `EnsureAdmin` (`role === 'admin'`)
+- Route `GET /api/config` (publique) — expose maintenanceMode, allowGallery, allowRegistration, limites cartes
+- Routes admin : `GET/PATCH/DELETE /api/admin/users/{id}`, `GET/DELETE /api/admin/cards/{id}`, `GET/POST/PATCH/DELETE /api/admin/templates/{id}`, `GET/PUT /api/admin/settings`
 
-### Phase 4.5 — Admin
-- `Admin/UserController`, `Admin/CardController`, `Admin/TemplateController`
-- Middleware `EnsureAdmin`
-- Migrer `frontend/src/stores/adminStore.js`
+**Frontend**
+- `frontend/src/api/admin.js` — module axios dédié (getPublicConfig, getSettings, updateSettings, getUsers, updateUser, deleteUser, getCards, deleteCard, getTemplates, createTemplate, updateTemplate, deleteTemplate)
+- `frontend/src/stores/adminStore.js` — 100% migré localStorage → API
+  - `loadPublicConfig()` — chargé au boot du router (maintenanceMode, allowGallery…)
+  - `loadSettings/loadUsers/loadCards/loadTemplates` — chargent depuis API
+  - `_normalizeTemplate()` — mappe `meta.*` vers propriétés top-level pour AdminTemplatesView
+  - `toggleTemplatePremium()` — met à jour DB + appelle `cardsStore.syncTemplatePremium()` pour propager à GalleryView
+- `frontend/src/stores/cards.js`
+  - `addOfficialTemplate()` rendue async — appelle `adminApi.createTemplate()`, utilise `id`/`slug` DB réels
+  - `updateOfficialTemplate()` rendue async — appelle `adminApi.updateTemplate()`
+  - Ajout `syncTemplatePremium(id, isPremium)` — sync in-memory + localStorage après toggle premium admin
+- `frontend/src/components/editor/EditorTopBar.vue` — `await` ajouté sur les deux appels dans `saveAsGalleryTemplate()`
 
-### Phase 4.6 — Éditeur
-- Brancher `saveCard()` dans `frontend/src/stores/useEditorStore.js` sur l'API cards
+**Bugs corrigés**
+- Templates communauté users visibles dans `/admin/templates` → `index()` réduit à `WHERE is_gallery=true`
+- Toggle Premium non reflété dans `/gallery` → ajout `syncTemplatePremium()` appelé après chaque toggle
+- Template officiel admin apparaissait dans son dashboard → `TemplateController::index()` filtre `where('is_gallery', false)` ; `store()` exclut aussi `is_gallery=true` du comptage quota
+
+### Phase 4.6 — Éditeur ✅ COMPLET
+**Frontend**
+- `frontend/src/utils/cardSerializer.js` — **NEW** utilitaires de sérialisation extraits : `serializeShadow`, `editorToCardEl(el, index, iconUrls, cardWidth, cardHeight)`, `extractContact`, `CONTACT_ROLES`
+- `frontend/src/stores/useEditorStore.js` — `saveCard(name)` ajouté : icon pre-compute, sérialisation Konva→%, contact extract, auto-template, `addCard/updateCard` API, gestion `isDirty/isSaving/editingCardId/editMode`
+- `frontend/src/components/editor/EditorTopBar.vue` — `saveAsCard()` délègue à `editorStore.saveCard(name)`; imports `serializeShadow`/`extractContact` depuis `cardSerializer`; définitions locales redondantes supprimées
 
 ---
 
@@ -161,10 +185,17 @@ Brand Kit
   GET/PUT        /api/brand-kit     (auth:sanctum)
   POST/DELETE    /api/brand-kit/logo(auth:sanctum)
 
+Config publique
+  GET  /api/config
+
 Admin
-  GET/PUT/DELETE /api/admin/users/{id}    (auth:sanctum + admin)
-  GET/DELETE     /api/admin/cards/{id}    (auth:sanctum + admin)
-  GET/DELETE     /api/admin/templates/{id}(auth:sanctum + admin)
+  GET            /api/admin/users             (auth:sanctum + admin)
+  PATCH/DELETE   /api/admin/users/{id}        (auth:sanctum + admin)
+  GET            /api/admin/cards             (auth:sanctum + admin)
+  DELETE         /api/admin/cards/{id}        (auth:sanctum + admin)
+  GET/POST       /api/admin/templates         (auth:sanctum + admin)
+  PATCH/DELETE   /api/admin/templates/{id}    (auth:sanctum + admin)
+  GET/PUT        /api/admin/settings          (auth:sanctum + admin)
 ```
 
 ## Fichiers critiques
@@ -181,3 +212,9 @@ Admin
 | `backend/app/Http/Controllers/GalleryController.php` | Galerie officielle |
 | `frontend/src/api/templates.js` | Module axios templates |
 | `frontend/src/stores/userTemplatesStore.js` | Templates store (API) |
+| `backend/app/Http/Controllers/Admin/TemplateController.php` | Templates officiels admin (CRUD) |
+| `backend/app/Http/Controllers/Admin/UserController.php` | Gestion users admin |
+| `backend/app/Http/Controllers/Admin/CardController.php` | Modération cartes admin |
+| `backend/app/Http/Controllers/Admin/SettingsController.php` | Settings système |
+| `frontend/src/api/admin.js` | Module axios admin |
+| `frontend/src/stores/adminStore.js` | Admin store (API) |

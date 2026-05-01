@@ -2084,7 +2084,7 @@ function syncTextRenderedDims(elId) {
   if (!node) return
   const el = editorStore.currentElements.find((e) => e.id === elId)
   liveDragPos[elId] = {
-    ...(liveDragPos[elId] || {}),
+    ...liveDragPos[elId],
     width: node.width(),
     height: node.height(),
     underlineLines: el ? getTextUnderlineLines(el) : null,

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { iconToDataUrl } from '@/utils/iconRenderer'
+import { editorToCardEl, extractContact } from '@/utils/cardSerializer'
 
 // Business card dimensions: 85.6mm × 54mm (ratio 1.585)
 export const CARD_W = 680
@@ -888,6 +890,96 @@ export const useEditorStore = defineStore('editor', () => {
     historyIndex.value = 0
   }
 
+  async function saveCard(name) {
+    const { useCardsStore } = await import('@/stores/cards')
+    const { useUserTemplatesStore } = await import('@/stores/userTemplatesStore')
+    const cardsStore = useCardsStore()
+    const templatesStore = useUserTemplatesStore()
+
+    const cardName_ = name || cardName.value
+    isSaving.value = true
+    try {
+      const cardData = getCardData()
+
+      // Pre-compute icon SVG data URLs for pixel-identical rendering
+      const allEls = [...(cardData.elements?.recto || []), ...(cardData.elements?.verso || [])]
+      const iconUrls = {}
+      await Promise.all(
+        allEls.filter((e) => e.type === 'icon' && e.iconId).map(async (el) => {
+          iconUrls[el.id] = await iconToDataUrl(el.iconId, el.fill || '#1a1a1a', el.colorful)
+        }),
+      )
+
+      const rectoEls = (cardData.elements?.recto || [])
+        .map((el, i) => editorToCardEl(el, i, iconUrls, cardWidth.value, cardHeight.value))
+        .filter(Boolean)
+      const versoEls = (cardData.elements?.verso || [])
+        .map((el, i) => editorToCardEl(el, i, iconUrls, cardWidth.value, cardHeight.value))
+        .filter(Boolean)
+
+      const contact = extractContact([...rectoEls, ...versoEls], contactExtra.value)
+
+      // Extract dominant fontFamily from recto text elements
+      const fontCounts = {}
+      rectoEls
+        .filter((e) => (e.type === 'text' || e.type === 'contact') && e.fontFamily)
+        .forEach((e) => {
+          fontCounts[e.fontFamily] = (fontCounts[e.fontFamily] || 0) + 1
+        })
+      const dominantFont =
+        Object.entries(fontCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || undefined
+
+      // Create auto-generated hidden template if none exists yet
+      let templateModelId_ = editingTemplateId.value || null
+      if (!templateModelId_) {
+        const autoTemplate = await templatesStore.addTemplate({
+          name: `Auto — ${cardName_}`,
+          editorData: cardData,
+          fieldConfig: JSON.parse(JSON.stringify(fieldConfig.value)),
+          templateSlug: templateSlug.value || null,
+          isAuto: true,
+        })
+        templateModelId_ = autoTemplate.id
+        editingTemplateId.value = templateModelId_
+      }
+
+      const payload = {
+        name: cardName_,
+        template: templateSlug.value || 'blank',
+        isPublic: false,
+        templateModelId: templateModelId_,
+        data: {
+          elements: rectoEls,
+          versoElements: versoEls,
+          backgrounds: cardData.backgrounds,
+          contact,
+          contactExtra: JSON.parse(JSON.stringify(contactExtra.value)),
+          fieldConfig: JSON.parse(JSON.stringify(fieldConfig.value)),
+          editorData: cardData,
+          showQR: [...rectoEls, ...versoEls].some((e) => e.type === 'qr'),
+          fontFamily: dominantFont,
+          orientation: orientation.value,
+          cardWidth: cardWidth.value,
+          cardHeight: cardHeight.value,
+          cardBorderRadius: cardBorderRadius.value,
+        },
+      }
+
+      if (editingCardId.value) {
+        const updated = await cardsStore.updateCard(editingCardId.value, payload)
+        if (!updated) throw new Error('Carte introuvable — impossible de sauvegarder')
+      } else {
+        const newCard = await cardsStore.addCard(payload)
+        editingCardId.value = newCard.id
+        editMode.value = 'edit-card'
+      }
+
+      isDirty.value = false
+    } finally {
+      isSaving.value = false
+    }
+  }
+
   return {
     // constants
     CARD_W,
@@ -999,5 +1091,6 @@ export const useEditorStore = defineStore('editor', () => {
     initEditor,
     applyRectoTemplate,
     getCardData,
+    saveCard,
   }
 })

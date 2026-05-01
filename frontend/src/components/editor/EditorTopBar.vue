@@ -335,6 +335,7 @@ import { useNotificationStore } from '@/stores/notificationStore'
 import { useUserTemplatesStore, MAX_FREE_TEMPLATES } from '@/stores/userTemplatesStore'
 import { iconToDataUrl } from '@/utils/iconRenderer'
 import { hasStyledInfoFields } from '@/utils/cardElements'
+import { serializeShadow, extractContact } from '@/utils/cardSerializer'
 import SaveAsModal from '@/components/editor/SaveAsModal.vue'
 
 const router = useRouter()
@@ -382,18 +383,6 @@ function commitName() {
 }
 
 // Serialize shadow properties (shared across all element types)
-function serializeShadow(el) {
-  if (!el.shadowEnabled) return {}
-  return {
-    shadowEnabled: true,
-    shadowColor: el.shadowColor || '#000000',
-    shadowBlur: el.shadowBlur ?? 8,
-    shadowOffsetX: el.shadowOffsetX ?? 3,
-    shadowOffsetY: el.shadowOffsetY ?? 3,
-    shadowOpacity: el.shadowOpacity ?? 0.35,
-  }
-}
-
 // Convert a Konva editor element to BusinessCard.vue's % format
 function editorToCardEl(el, index, iconUrls = {}) {
   const cw = editorStore.cardWidth
@@ -655,34 +644,6 @@ function editorToCardEl(el, index, iconUrls = {}) {
   return null
 }
 
-// Contact field roles used for structured JSON storage + QR code
-const CONTACT_ROLES = [
-  'firstName',
-  'lastName',
-  'title',
-  'company',
-  'email',
-  'phone',
-  'website',
-  'address',
-]
-
-function extractContact(els, extras = []) {
-  const contact = {}
-  CONTACT_ROLES.forEach((role) => {
-    const el = els.find((e) => e.role === role && e.text)
-    if (el) contact[role] = el.text
-  })
-  if (contact.firstName || contact.lastName) {
-    contact.fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ')
-  }
-  // Merge custom labeled fields
-  extras.forEach(({ label, value }) => {
-    if (label && value) contact[label] = value
-  })
-  return contact
-}
-
 // ── Save logic ──────────────────────────────────────────────────────────────
 
 // Reactively detects if any Info-role element has styled runs (Privacy Guard)
@@ -880,95 +841,15 @@ async function saveAsGalleryTemplate(name, meta = {}) {
 }
 
 /**
- * Save the current design as a card.
- * Creates an auto-generated template (isAuto: true, hidden) behind the scenes.
+ * Save the current design as a card — delegates to editorStore.saveCard().
  */
 async function saveAsCard(name) {
-  editorStore.isSaving = true
   try {
-    const cardData = editorStore.getCardData()
-
-    // Pre-compute icon SVG data URLs for pixel-identical rendering in BusinessCard.vue
-    const allEls = [...(cardData.elements?.recto || []), ...(cardData.elements?.verso || [])]
-    const iconUrls = {}
-    await Promise.all(
-      allEls.filter((e) => e.type === 'icon' && e.iconId).map(async (el) => {
-        iconUrls[el.id] = await iconToDataUrl(el.iconId, el.fill || '#1a1a1a', el.colorful)
-      }),
-    )
-
-    const rectoEls = (cardData.elements?.recto || [])
-      .map((el, i) => editorToCardEl(el, i, iconUrls))
-      .filter(Boolean)
-
-    const versoEls = (cardData.elements?.verso || [])
-      .map((el, i) => editorToCardEl(el, i, iconUrls))
-      .filter(Boolean)
-
-    const contact = extractContact([...rectoEls, ...versoEls], editorStore.contactExtra)
-
-    // Extract dominant fontFamily from recto text elements
-    const fontCounts = {}
-    rectoEls
-      .filter((e) => (e.type === 'text' || e.type === 'contact') && e.fontFamily)
-      .forEach((e) => {
-        fontCounts[e.fontFamily] = (fontCounts[e.fontFamily] || 0) + 1
-      })
-    const dominantFont = Object.entries(fontCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || undefined
-
-    // Create or find the auto-template behind the scenes
-    let templateModelId = editorStore.editingTemplateId || null
-    if (!templateModelId) {
-      // Create auto-generated hidden template
-      const autoTemplate = await templatesStore.addTemplate({
-        name: `Auto — ${name}`,
-        editorData: cardData,
-        fieldConfig: JSON.parse(JSON.stringify(editorStore.fieldConfig)),
-        templateSlug: editorStore.templateSlug || null,
-        isAuto: true,
-      })
-      templateModelId = autoTemplate.id
-      editorStore.editingTemplateId = templateModelId
-    }
-
-    const payload = {
-      name,
-      template: editorStore.templateSlug || 'blank',
-      isPublic: false, // cards are always private — only templates can be public
-      templateModelId,
-      data: {
-        elements: rectoEls,
-        versoElements: versoEls,
-        backgrounds: cardData.backgrounds,
-        contact,
-        contactExtra: JSON.parse(JSON.stringify(editorStore.contactExtra)),
-        fieldConfig: JSON.parse(JSON.stringify(editorStore.fieldConfig)),
-        editorData: cardData,
-        showQR: [...rectoEls, ...versoEls].some((e) => e.type === 'qr'),
-        fontFamily: dominantFont,
-        orientation: editorStore.orientation,
-        cardWidth: editorStore.cardWidth,
-        cardHeight: editorStore.cardHeight,
-        cardBorderRadius: editorStore.cardBorderRadius,
-      },
-    }
-
-    if (editorStore.editingCardId) {
-      const updated = await cardsStore.updateCard(editorStore.editingCardId, payload)
-      if (!updated) throw new Error('Carte introuvable — impossible de sauvegarder')
-    } else {
-      const newCard = await cardsStore.addCard(payload)
-      editorStore.editingCardId = newCard.id
-      editorStore.editMode = 'edit-card'
-    }
-
-    editorStore.isDirty = false
+    await editorStore.saveCard(name)
     showSaveSuccess()
   } catch (err) {
     console.error('[saveAsCard]', err)
     notif.error(err.message || 'Erreur lors de la sauvegarde. Veuillez réessayer.')
-  } finally {
-    editorStore.isSaving = false
   }
 }
 
