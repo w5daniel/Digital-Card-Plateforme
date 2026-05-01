@@ -99,75 +99,89 @@ Route::post('/forgot-password', [...])→middleware('throttle:3,1');   // 3 req/
 
 ---
 
-## Session 4 — Email verification + SMTP Gmail (Bugs 1 + 2)
+## ✅ Session 4 — Email verification + SMTP Gmail (Bugs 1 + 2) — COMPLET
 
-**Durée estimée : ~2h | Fichiers : 8 + config .env**
+**Fichiers modifiés : 5 | Nouveaux fichiers : 3 | Config : `.env`**
 
-> **Prérequis avant de coder :**
-> 1. Activer la **double authentification** sur le compte Gmail utilisé
-> 2. Aller sur **myaccount.google.com/apppasswords**
-> 3. Créer un App Password "Digital Card Platform" → copier les 16 caractères
-> 4. Avoir ces infos prêtes pour configurer le `.env`
+### Bug 2 — Mot de passe oublié ✅
 
-### Bug 2 — Mot de passe oublié (résolu par la config SMTP seule)
+La logique backend était correcte. Seule la config SMTP manquait.
 
-La logique backend est **100% correcte**. Aucun code à changer. Seule la configuration SMTP manque.
-
-### Bug 1 — Vérification email à l'inscription
-
-**`backend/.env`** :
+**`backend/.env`** — remplacement du bloc MAIL_* :
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_ENCRYPTION=tls
 MAIL_USERNAME=<adresse-gmail>
-MAIL_PASSWORD=<app-password-16-chars>
+MAIL_PASSWORD=<app-password-16-chars>   ← App Password Google (pas le mdp Gmail)
 MAIL_FROM_ADDRESS=<adresse-gmail>
 MAIL_FROM_NAME="Digital Card Platform"
 ```
+> App Password : myaccount.google.com/apppasswords (nécessite 2FA activé sur le compte Gmail)
+
+---
+
+### Bug 1 — Vérification email à l'inscription ✅
+
+**Stratégie de signature du lien :** HMAC personnalisé (pas `URL::temporarySignedRoute` qui lierait la signature au domaine backend) :
+```
+signature = hmac_sha256("{id}|{hash}|{expires}", APP_KEY)
+hash       = sha1($user->email)
+expires    = Unix timestamp + 60 minutes
+```
+Le lien pointe vers le **frontend** : `{FRONTEND_URL}/verify-email?id=...&hash=...&expires=...&signature=...`
 
 **Backend :**
 
-1. **`backend/app/Models/User.php:5`** : décommenter `MustVerifyEmail` et l'ajouter dans `implements`
+1. ✅ **`backend/app/Models/User.php`** :
+   - Décommenté `use Illuminate\Contracts\Auth\MustVerifyEmail;` + ajouté dans `implements`
+   - Override `sendEmailVerificationNotification()` → dispatche `VerifyEmailNotification`
 
-2. **`backend/app/Notifications/VerifyEmailNotification.php`** (nouveau) :
-   - Surcharge `Illuminate\Auth\Notifications\VerifyEmail`
-   - Personnalise le lien pour pointer vers le **frontend SPA** : `http://localhost:5173/verify-email?id={id}&hash={hash}&expires={expires}&signature={signature}`
-   - Message en français : "Bienvenue sur Digital Card Platform ! Confirmez votre adresse email pour activer votre compte."
+2. ✅ **`backend/app/Notifications/VerifyEmailNotification.php`** (nouveau) :
+   - Canal `mail` uniquement
+   - Construit l'URL signée HMAC pointant vers `{FRONTEND_URL}/verify-email`
+   - Email en français : "Bienvenue sur Digital Card Platform ! Confirmez votre adresse email."
+   - Lien expire dans 60 minutes
 
-3. **`backend/app/Http/Controllers/VerifyEmailController.php`** (nouveau) :
-   - `verify(Request $request, $id, $hash)` : valide `expires` + `signature` + `hash` → marque `email_verified_at` → 200
-   - `resend(Request $request)` : renvoie l'email si `!$request->user()->hasVerifiedEmail()`
+3. ✅ **`backend/app/Http/Controllers/VerifyEmailController.php`** (nouveau) :
+   - `verify($id, $hash)` : vérifie `expires` (410 si expiré), `hash` (sha1 email), `signature` HMAC → `markEmailAsVerified()` → 200
+   - `resend($email)` : endpoint **sans auth** (rate limit `throttle:3,1`), envoie la notification si compte non-vérifié. Réponse vague pour éviter l'énumération d'emails.
 
-4. **`backend/routes/api.php`** : ajouter routes de vérification :
+4. ✅ **`backend/routes/api.php`** — nouvelles routes publiques :
    ```php
-   Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])->name('verification.verify');
-   Route::post('/email/resend', [VerifyEmailController::class, 'resend'])->middleware('auth:sanctum');
+   Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify']);
+   Route::post('/email/resend', [VerifyEmailController::class, 'resend'])->middleware('throttle:3,1');
    ```
 
-5. **`backend/app/Http/Controllers/AuthController.php`** — `register()` :
-   - Ne plus connecter l'user immédiatement (`Auth::login()` retiré)
-   - Retourner `['emailPendingVerification' => true, 'email' => $user->email]`
+5. ✅ **`backend/app/Http/Controllers/AuthController.php`** :
+   - `register()` : retiré `Auth::login()`, ajouté `sendEmailVerificationNotification()`, retourne `['emailPendingVerification' => true, 'email' => ...]`
+   - `login()` : ajouté check `hasVerifiedEmail()` — si non-vérifié, logout + retourne 403 avec `emailNotVerified: true` et l'email
 
 **Frontend :**
 
-6. **`frontend/src/views/VerifyEmailView.vue`** (nouvelle vue) :
-   - En `onMounted` : lire `id`, `hash`, `expires`, `signature` de `route.query` → POST `/api/email/verify/{id}/{hash}?expires=...&signature=...`
-   - Succès → toast "Email confirmé ✅" + redirect `/login`
-   - Erreur → message "Lien invalide ou expiré" + bouton "Renvoyer un lien"
+6. ✅ **`frontend/src/views/VerifyEmailView.vue`** (nouveau) :
+   - 5 états : `loading` / `success` / `already` / `expired` / `error`
+   - `onMounted` appelle `GET /api/email/verify/{id}/{hash}?expires=...&signature=...`
+   - HTTP 410 → état `expired` ; autres erreurs → `error` ; message "déjà vérifié" → `already`
+   - Composant inline `ResendBlock` (defineComponent + render function) : input email + bouton renvoyer
+   - Styled identique à `AuthView.vue` (fond animé, couleurs flame)
 
-7. **`frontend/src/router/index.js`** :
-   - Ajouter route `/verify-email` → `VerifyEmailView` (meta: `hideLayout: true, guestOnly: false`)
+7. ✅ **`frontend/src/router/index.js`** — route ajoutée :
+   ```js
+   { path: '/verify-email', name: 'verify-email', component: () => import('../views/VerifyEmailView.vue'), meta: { hideLayout: true } }
+   ```
 
-8. **`frontend/src/views/AuthView.vue`** :
-   - Après inscription réussie (si `emailPendingVerification: true`), afficher écran :
-     "📧 Vérifiez votre email — Un lien de confirmation a été envoyé à **{email}**. Cliquez dessus pour activer votre compte."
-     + bouton "Renvoyer l'email" + lien "Changer d'adresse"
+8. ✅ **`frontend/src/views/AuthView.vue`** :
+   - Après inscription : si `result.emailPendingVerification` → affiche écran "Vérifiez votre email" (`showVerifyPending = true`)
+   - Après tentative de login sur compte non-vérifié : si `result.emailNotVerified` → même écran
+   - Refs ajoutées : `showVerifyPending`, `pendingEmail`, `resendLoading`, `handleResendVerification()`
+   - Reset de `showVerifyPending` lors du switch d'onglet login ↔ register
 
-9. **`frontend/src/stores/authStore.js`** :
-   - Ajouter `resendVerificationEmail()` → `POST /api/email/resend`
-   - Adapter `register()` pour gérer le flag `emailPendingVerification`
+9. ✅ **`frontend/src/stores/authStore.js`** :
+   - `register()` : retourne `{ emailPendingVerification: true, email }` sans setter `user.value`
+   - `login()` : si 403 + `emailNotVerified`, retourne `{ emailNotVerified: true, email }` sans throw
+   - `resendVerificationEmail(email)` : POST `/api/email/resend`, toast succès ou erreur
 
 ---
 

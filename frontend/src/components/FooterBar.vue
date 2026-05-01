@@ -49,7 +49,7 @@
           <h4 class="font-semibold mb-4 text-powder-100">Ressources</h4>
           <ul class="space-y-2 text-sm text-powder-400">
             <li>
-              <a href="#" class="hover:text-flame-400 transition-colors">Documentation API</a>
+              <router-link to="/api-docs" class="hover:text-flame-400 transition-colors">Documentation API</router-link>
             </li>
             <li><a href="#" class="hover:text-flame-400 transition-colors">Tutoriels</a></li>
             <li><a href="#" class="hover:text-flame-400 transition-colors">Support</a></li>
