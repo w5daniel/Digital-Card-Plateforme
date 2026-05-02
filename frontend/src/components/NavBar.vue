@@ -123,7 +123,7 @@
                   v-for="notif in notifStore.inbox"
                   :key="notif.id"
                   @click="notifStore.markAsRead(notif.id)"
-                  class="w-full flex items-start space-x-3 px-4 py-3 text-left transition-colors border-b last:border-b-0 border-base-300/60 hover:bg-base-200/50"
+                  class="w-full flex items-start space-x-3 px-4 py-3 text-left transition-colors border-b last:border-b-0 border-base-300/60 dark:border-white/10 hover:bg-base-200/50"
                   :class="[!notif.read ? 'bg-primary/5' : '']"
                 >
                   <!-- Type Icon -->

@@ -296,6 +296,21 @@
             </div>
           </div>
 
+          <!-- Quota indicator — free plan only -->
+          <div
+            v-if="!authStore.isPremium && !authStore.isAdmin"
+            class="mb-6 flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/40"
+          >
+            <Info class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-amber-600 dark:text-amber-500 leading-relaxed">
+                Les cartes enregistrées génèrent automatiquement un modèle dans votre historique,
+                qui est comptabilisé dans votre quota de {{ MAX_FREE_TEMPLATES }} modèles.
+                <router-link to="/pricing" class="underline font-medium ml-1 hover:text-amber-700 dark:hover:text-amber-300">Passer au Premium →</router-link>
+              </p>
+            </div>
+          </div>
+
           <div
             v-if="sortedTemplates.length > 0"
             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -1111,6 +1126,7 @@ import {
   ArrowUpDown,
   Globe,
   Lock,
+  Info,
 } from 'lucide-vue-next'
 
 const router = useRouter()

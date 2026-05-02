@@ -124,8 +124,11 @@ export const useUserTemplatesStore = defineStore('userTemplates', () => {
       userTemplates.value.push(template)
       return template
     } catch (err) {
-      error.value = err.message || 'Erreur lors de la création du modèle'
-      throw err
+      const msg = err.response?.status === 403
+        ? `Limite de ${MAX_FREE_TEMPLATES} modèles atteinte. Passez au plan Premium pour en créer plus.`
+        : (err.message || 'Erreur lors de la création du modèle')
+      error.value = msg
+      throw new Error(msg)
     } finally {
       isLoading.value = false
     }

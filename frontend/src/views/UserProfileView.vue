@@ -595,7 +595,7 @@
                       v-else-if="!authStore.hasPremium()"
                       class="text-xs text-onyx-500 dark:text-powder-500"
                     >
-                      {{ stats.totalCards }} / 3 cartes utilisées
+                      {{ stats.totalCards }} / {{ freeCardLimit }} cartes utilisées
                     </p>
                   </div>
                   <div v-if="!authStore.hasPremium()" class="flex flex-col items-end gap-1">
@@ -604,8 +604,8 @@
                     >
                       <div
                         class="h-full rounded-full transition-all duration-500"
-                        :class="stats.totalCards >= 2 ? 'bg-red-500' : 'bg-flame-500'"
-                        :style="{ width: `${Math.min((stats.totalCards / 2) * 100, 100)}%` }"
+                        :class="stats.totalCards >= freeCardLimit ? 'bg-red-500' : 'bg-flame-500'"
+                        :style="{ width: `${Math.min((stats.totalCards / freeCardLimit) * 100, 100)}%` }"
                       />
                     </div>
                   </div>
@@ -947,7 +947,8 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
-import { useCardsStore } from '@/stores/cards'
+import { useCardsStore, MAX_FREE_CARDS } from '@/stores/cards'
+import { useAdminStore } from '@/stores/adminStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import {
@@ -980,6 +981,7 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const cardsStore = useCardsStore()
+const adminStore = useAdminStore()
 const themeStore = useThemeStore()
 const notify = useNotificationStore()
 
@@ -996,6 +998,7 @@ const navItems = [
 
 // ── Stats items for sidebar ─────────────────────────────────────
 const stats = computed(() => cardsStore.getGlobalStats())
+const freeCardLimit = computed(() => adminStore.settings?.maxCardsPerUser ?? MAX_FREE_CARDS)
 
 const statItems = computed(() => [
   { label: 'Cartes', value: stats.value.totalCards, color: 'text-flame-500' },
