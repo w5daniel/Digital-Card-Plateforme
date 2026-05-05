@@ -11,7 +11,8 @@ class CardController extends Controller
 {
     public function index(): JsonResponse
     {
-        $cards = Card::with('user:id,name,email')
+        $cards = Card::select('id', 'user_id', 'title', 'is_public', 'views', 'created_at')
+            ->with('user:id,name,email')
             ->orderByDesc('created_at')
             ->get()
             ->map(fn($c) => [
