@@ -123,7 +123,7 @@
       <!-- Tab Switch + Actions Row -->
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
         <!-- Tab Switch: Modèles / Cartes -->
-        <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1">
+        <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 w-72">
           <!-- Sliding pill -->
           <div
             class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
