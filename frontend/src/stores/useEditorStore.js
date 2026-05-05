@@ -929,19 +929,7 @@ export const useEditorStore = defineStore('editor', () => {
       const dominantFont =
         Object.entries(fontCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || undefined
 
-      // Create auto-generated hidden template if none exists yet
-      let templateModelId_ = editingTemplateId.value || null
-      if (!templateModelId_) {
-        const autoTemplate = await templatesStore.addTemplate({
-          name: `Auto — ${cardName_}`,
-          editorData: cardData,
-          fieldConfig: JSON.parse(JSON.stringify(fieldConfig.value)),
-          templateSlug: templateSlug.value || null,
-          isAuto: true,
-        })
-        templateModelId_ = autoTemplate.id
-        editingTemplateId.value = templateModelId_
-      }
+      const templateModelId_ = editingTemplateId.value || null
 
       const payload = {
         name: cardName_,

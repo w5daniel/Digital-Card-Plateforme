@@ -13,7 +13,7 @@ class CardController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $cards = $request->user()->cards()->latest()->get();
+        $cards = $request->user()->cards()->get();
 
         return response()->json(['cards' => $cards]);
     }

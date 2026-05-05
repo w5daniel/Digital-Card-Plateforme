@@ -73,7 +73,7 @@ export const useCardsStore = defineStore('cards', () => {
       ownerId:         apiCard.user_id,
       createdAt:       apiCard.created_at,
       updatedAt:       apiCard.updated_at,
-      isPublic:        false,
+      isPublic:        !!apiCard.is_public,
       shareSlug:       apiCard.share_slug,
       views:           apiCard.views     || 0,
       downloads:       apiCard.downloads || 0,
@@ -128,7 +128,8 @@ export const useCardsStore = defineStore('cards', () => {
       userCards.value = data.cards.map(_normalizeCard)
     } catch (err) {
       error.value = err.message
-      userCards.value = []
+      const { useNotificationStore } = await import('./notificationStore')
+      useNotificationStore().error('Impossible de charger vos cartes. Veuillez rafraîchir la page.')
     } finally {
       isLoading.value = false
     }

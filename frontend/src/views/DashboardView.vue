@@ -3,69 +3,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header Section -->
       <div class="mb-12">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-3 text-onyx-900 dark:text-powder-100">
-              Mon tableau de bord
-            </h1>
-            <p class="text-lg text-onyx-600 dark:text-powder-400">
-              Gérez toutes vos cartes de visite en un seul endroit
-            </p>
-          </div>
-          <div class="mt-6 md:mt-0 flex flex-wrap gap-3">
-            <button
-              @click="exportCards"
-              :disabled="selectedCardIds.size === 0"
-              :title="
-                selectedCardIds.size === 0
-                  ? 'Sélectionnez au moins une carte'
-                  : `Exporter ${selectedCardIds.size} carte(s)`
-              "
-              class="btn-secondary flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-onyx-800"
-            >
-              <Download class="w-5 h-5" />
-              <span
-                >Exporter{{ selectedCardIds.size > 0 ? ` (${selectedCardIds.size})` : '' }}</span
-              >
-            </button>
-            <label
-              v-if="authStore.isPremium || authStore.isAdmin"
-              class="btn-secondary flex items-center space-x-2 cursor-pointer dark:bg-onyx-800"
-            >
-              <Plus class="w-5 h-5 " />
-              <span>Importer</span>
-              <input type="file" accept=".json" @change="importCards" class="hidden" />
-            </label>
-            <button
-              v-else
-              @click="router.push('/pricing')"
-              class="btn-secondary flex items-center space-x-2 opacity-60"
-              title="L'import est réservé au plan Premium"
-            >
-              <Plus class="w-5 h-5" />
-              <span>Importer</span>
-              <span class="text-[10px] font-bold text-amber-500 ml-1">PRO</span>
-            </button>
-            <router-link
-              v-if="store.canCreateCard"
-              to="/editor"
-              class="btn-primary flex items-center space-x-2 bg-flame-500"
-            >
-              <Plus class="w-5 h-5" />
-              <span>Créer une carte</span>
-            </router-link>
-            <button
-              v-else
-              @click="router.push('/pricing')"
-              class="btn-primary flex items-center space-x-2 opacity-60"
-              :title="`Limite de ${MAX_FREE_CARDS} cartes atteinte — passez au Premium`"
-            >
-              <Plus class="w-5 h-5" />
-              <span>Créer une carte</span>
-              <span class="text-[10px] font-bold text-amber-300 ml-1">PRO</span>
-            </button>
-          </div>
-        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-3 text-onyx-900 dark:text-powder-100">
+          Mon tableau de bord
+        </h1>
+        <p class="text-lg text-onyx-600 dark:text-powder-400">
+          Gérez toutes vos cartes de visite en un seul endroit
+        </p>
       </div>
 
       <!-- Stats Cards -->
@@ -177,35 +120,91 @@
       </div>
 
 
-      <!-- Tab Switch: Modèles / Cartes -->
-      <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1 mb-4 max-w-md">
-        <!-- Sliding pill -->
-        <div
-          class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
-          :style="{ left: dashboardTab === 'templates' ? '4px' : 'calc(50% + 0px)' }"
-        ></div>
-        <button
-          @click="dashboardTab = 'templates'"
-          class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-          :class="
-            dashboardTab === 'templates'
-              ? 'text-onyx-900 dark:text-powder-50'
-              : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
-          "
-        >
-          Modèles ({{ displayedTemplates.length }})
-        </button>
-        <button
-          @click="dashboardTab = 'cards'"
-          class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-          :class="
-            dashboardTab === 'cards'
-              ? 'text-onyx-900 dark:text-powder-50'
-              : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
-          "
-        >
-          Cartes ({{ store.userCards.length }})
-        </button>
+      <!-- Tab Switch + Actions Row -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <!-- Tab Switch: Modèles / Cartes -->
+        <div class="relative flex bg-powder-200 dark:bg-onyx-800 rounded-xl p-1">
+          <!-- Sliding pill -->
+          <div
+            class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-onyx-700 rounded-lg shadow-sm transition-all duration-300 ease-out"
+            :style="{ left: dashboardTab === 'templates' ? '4px' : 'calc(50% + 0px)' }"
+          ></div>
+          <button
+            @click="dashboardTab = 'templates'"
+            class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="
+              dashboardTab === 'templates'
+                ? 'text-onyx-900 dark:text-powder-50'
+                : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
+            "
+          >
+            Modèles ({{ displayedTemplates.length }})
+          </button>
+          <button
+            @click="dashboardTab = 'cards'"
+            class="relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="
+              dashboardTab === 'cards'
+                ? 'text-onyx-900 dark:text-powder-50'
+                : 'text-onyx-400 dark:text-onyx-500 hover:text-onyx-700 dark:hover:text-onyx-200'
+            "
+          >
+            Cartes ({{ store.userCards.length }})
+          </button>
+        </div>
+
+        <!-- Actions — visibles uniquement sur l'onglet Cartes -->
+        <div v-if="dashboardTab === 'cards'" class="flex flex-wrap gap-3">
+          <button
+            @click="exportCards"
+            :disabled="selectedCardIds.size === 0"
+            :title="
+              selectedCardIds.size === 0
+                ? 'Sélectionnez au moins une carte'
+                : `Exporter ${selectedCardIds.size} carte(s)`
+            "
+            class="btn-secondary flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-onyx-800"
+          >
+            <Download class="w-5 h-5" />
+            <span>Exporter{{ selectedCardIds.size > 0 ? ` (${selectedCardIds.size})` : '' }}</span>
+          </button>
+          <label
+            v-if="authStore.isPremium || authStore.isAdmin"
+            class="btn-secondary flex items-center space-x-2 cursor-pointer dark:bg-onyx-800"
+          >
+            <Plus class="w-5 h-5" />
+            <span>Importer</span>
+            <input type="file" accept=".json" @change="importCards" class="hidden" />
+          </label>
+          <button
+            v-else
+            @click="router.push('/pricing')"
+            class="btn-secondary flex items-center space-x-2 opacity-60"
+            title="L'import est réservé au plan Premium"
+          >
+            <Plus class="w-5 h-5" />
+            <span>Importer</span>
+            <span class="text-[10px] font-bold text-amber-500 ml-1">PRO</span>
+          </button>
+          <router-link
+            v-if="store.canCreateCard"
+            to="/editor"
+            class="btn-primary flex items-center space-x-2 bg-flame-500"
+          >
+            <Plus class="w-5 h-5" />
+            <span>Créer une carte</span>
+          </router-link>
+          <button
+            v-else
+            @click="router.push('/pricing')"
+            class="btn-primary flex items-center space-x-2 opacity-60"
+            :title="`Limite de ${MAX_FREE_CARDS} cartes atteinte — passez au Premium`"
+          >
+            <Plus class="w-5 h-5" />
+            <span>Créer une carte</span>
+            <span class="text-[10px] font-bold text-amber-300 ml-1">PRO</span>
+          </button>
+        </div>
       </div>
 
       <!-- Preview quality notice -->
@@ -1137,7 +1136,7 @@ const notificationStore = useNotificationStore()
 const themeStore = useThemeStore()
 
 // ── Dashboard tab switch ──────────────────────────────────────
-const dashboardTab = ref(localStorage.getItem('ecodev_dashboard_tab') || 'templates')
+const dashboardTab = ref(localStorage.getItem('ecodev_dashboard_tab') || 'cards')
 watch(dashboardTab, (v) => localStorage.setItem('ecodev_dashboard_tab', v))
 
 // ── Sort ──────────────────────────────────────────────────────
