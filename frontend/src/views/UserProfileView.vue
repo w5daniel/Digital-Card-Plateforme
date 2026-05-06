@@ -657,18 +657,23 @@
                       : 'border-powder-100 dark:border-onyx-800 hover:border-accent-200 dark:hover:border-accent-800'
                   "
                 >
-                  <div
-                    class="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-500 text-white"
-                  >
-                    Populaire
-                  </div>
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-bold text-sm text-onyx-900 dark:text-powder-100">Premium</h3>
+                  <div class="absolute top-3 right-3 flex flex-col items-end gap-1">
+                    <div class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-500 text-white">
+                      Populaire
+                    </div>
+
                     <span
                       v-if="authStore.hasPremium()"
                       class="text-[10px] font-bold text-accent-600 bg-accent-50 dark:bg-accent-900/30 px-2 py-0.5 rounded-full"
-                      >Actuel</span
                     >
+                      Actuel
+                    </span>
+                  </div>
+
+                  <div class="flex items-center mb-3">
+                    <h3 class="font-bold text-sm text-onyx-900 dark:text-powder-100">
+                      Premium
+                    </h3>
                   </div>
                   <div class="text-xl font-bold text-onyx-900 dark:text-powder-100 mb-3">
                     4 990 FCFA<span class="text-xs font-normal text-onyx-500 dark:text-powder-500"
@@ -1086,10 +1091,14 @@ const confirmDeleteAccount = () => {
   showDeleteAccountConfirm.value = true
 }
 
-const onDeleteAccountConfirmed = () => {
+const onDeleteAccountConfirmed = async () => {
   showDeleteAccountConfirm.value = false
-  authStore.logout()
-  router.push('/')
+  try {
+    await authStore.deleteAccount()
+    router.push('/')
+  } catch {
+    notify.error('Erreur lors de la suppression du compte. Réessayez.')
+  }
 }
 
 // ── Password form ───────────────────────────────────────────────

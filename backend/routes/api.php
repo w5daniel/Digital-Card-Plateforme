@@ -42,6 +42,7 @@ Route::prefix('auth')->group(function () {
         Route::delete('/avatar',         [AuthController::class, 'deleteAvatar']);
         Route::put('/password',          [AuthController::class, 'changePassword']);
         Route::post('/upgrade-premium',  [AuthController::class, 'upgradePremium']);
+        Route::delete('/account',        [AuthController::class, 'deleteAccount']);
     });
 });
 

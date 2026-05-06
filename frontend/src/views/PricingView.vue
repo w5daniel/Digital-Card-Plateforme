@@ -368,11 +368,11 @@
                       alt="Orange Money"
                       class="w-10 h-10 object-contain"
                     />
-                    <!-- Wave logo -->
+                    <!-- Moov logo -->
                     <img
-                      v-else-if="op.id === 'wave'"
-                      src="/wave.webp"
-                      alt="Wave"
+                      v-else-if="op.id === 'moov'"
+                      src="/logo-moov-money.png"
+                      alt="Moov"
                       class="w-10 h-10 object-contain"
                     />
                     {{ op.label }}
@@ -579,7 +579,7 @@ const mobileOperator = ref('orange')
 const mobilePhone = ref('')
 const mobileOperators = [
   { id: 'orange', label: 'Orange Money' },
-  { id: 'wave', label: 'Wave' },
+  { id: 'moov', label: 'Moov Money' },
 ]
 
 // Carte bancaire

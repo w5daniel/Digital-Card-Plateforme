@@ -97,6 +97,14 @@ export const useAuthStore = defineStore('auth', () => {
     notificationStore.clearInbox()
   }
 
+  async function deleteAccount() {
+    await api.delete('/api/auth/account')
+    user.value = null
+    const notificationStore = useNotificationStore()
+    notificationStore.clearAllToasts()
+    notificationStore.clearInbox()
+  }
+
   async function restoreSession() {
     try {
       const { data } = await api.get('/api/auth/me')
@@ -185,6 +193,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     resendVerificationEmail,
     logout,
+    deleteAccount,
     restoreSession,
     updateProfile,
     changePassword,

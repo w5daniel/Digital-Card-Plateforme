@@ -135,6 +135,28 @@ class AuthController extends Controller
         return response()->json(['message' => 'Mot de passe mis à jour.']);
     }
 
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Supprimer les templates (nullOnDelete en migration → pas de cascade auto)
+        $user->templates()->delete();
+
+        // Supprimer l'avatar physique
+        $rawPath = $user->getRawOriginal('avatar_url');
+        if ($rawPath) {
+            Storage::disk('public')->delete($rawPath);
+        }
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $user->delete(); // cascade cards + brand_kit via FK
+
+        return response()->json(['message' => 'Compte supprimé.']);
+    }
+
     public function upgradePremium(Request $request): JsonResponse
     {
         $user = $request->user();
