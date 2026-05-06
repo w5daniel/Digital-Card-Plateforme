@@ -3,30 +3,10 @@ import { ref, computed } from 'vue'
 import { useNotificationStore } from './notificationStore'
 import api from '../api/axios'
 
-// ── Admin registry — localStorage, migré en Phase 4.5 via GET /api/admin/users ──
-const ALL_USERS_LS_KEY = 'digitalcard_allUsers'
-
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const isLoading = ref(false)
   const error = ref(null)
-
-  // Admin registry — reste en localStorage jusqu'à Phase 4.5
-  const allUsers = ref([])
-  ;(function _loadRegistry() {
-    try {
-      const raw = localStorage.getItem(ALL_USERS_LS_KEY)
-      allUsers.value = raw ? JSON.parse(raw) : []
-    } catch {
-      allUsers.value = []
-    }
-  })()
-
-  function _saveRegistry() {
-    try {
-      localStorage.setItem(ALL_USERS_LS_KEY, JSON.stringify(allUsers.value))
-    } catch { /* quota localStorage */ }
-  }
 
   // avatar_url est maintenant une URL complète retournée par le backend (Storage::url)
   const profilePhoto = computed(() => user.value?.avatar_url ?? null)
@@ -193,66 +173,6 @@ export const useAuthStore = defineStore('auth', () => {
     return true
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // FONCTIONS ADMIN — localStorage jusqu'à Phase 4.5 (GET /api/admin/users)
-  // Les utilisateurs inscrits via l'API n'apparaissent pas ici avant Phase 4.5.
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  const getAllUsersWithStats = computed(() => {
-    return allUsers.value.map((u) => {
-      let cardCount = 0
-      try {
-        const raw = localStorage.getItem(`digitalcard_userCards_${u.email}`)
-        cardCount = raw ? JSON.parse(raw).length : 0
-      } catch { /* ignore */ }
-      return { ...u, cardCount }
-    })
-  })
-
-  function adminBanUser(id) {
-    if (!isAdmin.value) return
-    const u = allUsers.value.find((u) => u.id === id)
-    if (!u || u.role === 'admin') return
-    u.status = 'blocked'
-    _saveRegistry()
-  }
-
-  function adminUnbanUser(id) {
-    if (!isAdmin.value) return
-    const u = allUsers.value.find((u) => u.id === id)
-    if (!u) return
-    u.status = 'active'
-    _saveRegistry()
-  }
-
-  function adminTogglePremium(id) {
-    if (!isAdmin.value) return
-    const u = allUsers.value.find((u) => u.id === id)
-    if (!u) return
-    u.isPremium = !u.isPremium
-    u.premiumUntil = u.isPremium
-      ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-      : null
-    _saveRegistry()
-  }
-
-  function adminDeleteUser(id) {
-    if (!isAdmin.value) return
-    const u = allUsers.value.find((u) => u.id === id)
-    if (!u || u.role === 'admin') return
-    allUsers.value = allUsers.value.filter((u) => u.id !== id)
-    _saveRegistry()
-    try {
-      const cardsRaw = localStorage.getItem(`digitalcard_userCards_${u.email}`)
-      if (cardsRaw) {
-        const cards = JSON.parse(cardsRaw)
-        for (const card of cards) localStorage.removeItem(`digitalcard_public_${card.id}`)
-      }
-      localStorage.removeItem(`digitalcard_userCards_${u.email}`)
-      localStorage.removeItem(`userProfilePhoto_${u.email}`)
-    } catch { /* ignore */ }
-  }
-
   return {
     user,
     isLoading,
@@ -274,11 +194,5 @@ export const useAuthStore = defineStore('auth', () => {
     hasPremium,
     setProfilePhoto,
     removeProfilePhoto,
-    // Admin — gestion des utilisateurs
-    getAllUsersWithStats,
-    adminBanUser,
-    adminUnbanUser,
-    adminTogglePremium,
-    adminDeleteUser,
   }
 })

@@ -890,6 +890,16 @@ export const useEditorStore = defineStore('editor', () => {
     historyIndex.value = 0
   }
 
+  function applyFullTemplate(editorData) {
+    elements.value = JSON.parse(JSON.stringify(editorData.elements || { recto: [], verso: [] }))
+    backgrounds.value = JSON.parse(JSON.stringify(editorData.backgrounds || { recto: '#FFFFFF', verso: '#1E293B' }))
+    selectedIds.value = []
+    activePage.value = 'recto'
+    isDirty.value = true
+    history.value = [_snapshot()]
+    historyIndex.value = 0
+  }
+
   async function saveCard(name) {
     const { useCardsStore } = await import('@/stores/cards')
     const { useUserTemplatesStore } = await import('@/stores/userTemplatesStore')
@@ -1078,6 +1088,7 @@ export const useEditorStore = defineStore('editor', () => {
     // init
     initEditor,
     applyRectoTemplate,
+    applyFullTemplate,
     getCardData,
     saveCard,
   }

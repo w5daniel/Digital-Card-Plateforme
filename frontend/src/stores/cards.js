@@ -1,62 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { CARD_TEMPLATES } from '../data/mockData'
 import { useAuthStore } from './authStore'
 import { useAdminStore } from './adminStore'
 import cardsApi from '@/api/cards'
 import * as adminApi from '@/api/admin'
-
-// ⚠️ PHASE 4.5 — ces constantes restent pour les fonctions admin (cross-utilisateurs)
-// getAllCardsAdmin et adminDeleteCard lisent encore localStorage jusqu'à la Phase 4.5
-const LS_PREFIX = 'digitalcard_userCards_'
-
-// Surcharges admin — TODO Phase 4.5 : migrer vers API
-const ADMIN_OVERRIDES_LS_KEY = 'digitalcard_adminTemplateOverrides'
-const ADMIN_REMOVED_LS_KEY = 'digitalcard_adminRemovedTemplates'
-const ADMIN_CUSTOM_TEMPLATES_KEY = 'digitalcard_adminCustomTemplates'
+import { getGallery } from '@/api/gallery'
 
 export const MAX_FREE_CARDS = 3
 
 export const useCardsStore = defineStore('cards', () => {
   const authStore = useAuthStore()
 
-  // Templates prédéfinis
-  // TODO backend Phase 4.3 : GET /api/admin/templates
-  const templates = ref([...CARD_TEMPLATES])
-
-  ;(function _applyTemplateOverrides() {
-    try {
-      const removedRaw = localStorage.getItem(ADMIN_REMOVED_LS_KEY)
-      const removedSlugs = removedRaw ? JSON.parse(removedRaw) : []
-      if (removedSlugs.length > 0) {
-        templates.value = templates.value.filter((t) => !removedSlugs.includes(t.slug))
-      }
-    } catch { /* ignore */ }
-    try {
-      const overridesRaw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
-      const overrides = overridesRaw ? JSON.parse(overridesRaw) : {}
-      templates.value = templates.value.map((t) =>
-        overrides[t.slug] ? { ...t, ...overrides[t.slug] } : t,
-      )
-    } catch { /* ignore */ }
-  })()
-
-  ;(function _loadAdminCustomTemplates() {
-    try {
-      const raw = localStorage.getItem(ADMIN_CUSTOM_TEMPLATES_KEY)
-      if (raw) {
-        const customs = JSON.parse(raw)
-        for (const t of customs) {
-          const existingIdx = templates.value.findIndex((x) => x.slug === t.slug)
-          if (existingIdx === -1) {
-            templates.value.push(t)
-          } else {
-            templates.value[existingIdx] = t
-          }
-        }
-      }
-    } catch { /* ignore */ }
-  })()
+  const templates = ref([])
 
   const userCards = ref([])
   const currentTemplate = ref(null)
@@ -344,93 +299,7 @@ export const useCardsStore = defineStore('cards', () => {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // FONCTIONS ADMIN — ⚠️ EN ATTENTE PHASE 4.5 (restent en localStorage)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  const adminCardsVersion = ref(0)
-
-  function getAllCardsAdmin() {
-    adminCardsVersion.value
-    const users = authStore.getAllUsersWithStats
-    const allCards = []
-    for (const user of users) {
-      try {
-        const raw = localStorage.getItem(LS_PREFIX + user.email)
-        const cards = raw ? JSON.parse(raw) : []
-        for (const card of cards) {
-          allCards.push({ ...card, ownerName: user.name, ownerEmail: user.email })
-        }
-      } catch { /* skip entrée corrompue */ }
-    }
-    return allCards.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  }
-
-  function adminDeleteCard(cardId, ownerEmail) {
-    if (!authStore.isAdmin) return
-    try {
-      const raw = localStorage.getItem(LS_PREFIX + ownerEmail)
-      if (!raw) return
-      const cards = JSON.parse(raw).filter((c) => c.id !== cardId)
-      localStorage.setItem(LS_PREFIX + ownerEmail, JSON.stringify(cards))
-    } catch { /* données corrompues */ }
-    if (ownerEmail === authStore.user?.email) {
-      const idx = userCards.value.findIndex((c) => c.id === cardId)
-      if (idx !== -1) userCards.value.splice(idx, 1)
-    }
-    adminCardsVersion.value++
-  }
-
   // ── Admin : templates officiels ────────────────────────────────────────────
-
-  function _saveCustomTemplates() {
-    try {
-      const customs = templates.value.filter((t) => t._isCustom)
-      localStorage.setItem(ADMIN_CUSTOM_TEMPLATES_KEY, JSON.stringify(customs))
-    } catch { /* quota */ }
-  }
-
-  function toggleTemplatePremium(slug) {
-    const tmpl = templates.value.find((t) => t.slug === slug)
-    if (!tmpl) return
-    tmpl.isPremium = !tmpl.isPremium
-    try {
-      const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
-      const overrides = raw ? JSON.parse(raw) : {}
-      overrides[slug] = { ...overrides[slug], isPremium: tmpl.isPremium }
-      localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
-    } catch { /* quota */ }
-  }
-
-  function syncTemplatePremium(id, isPremium) {
-    const tmpl = templates.value.find((t) => t.id === id)
-    if (!tmpl) return
-    tmpl.isPremium = isPremium
-    if (tmpl._isCustom) {
-      _saveCustomTemplates()
-    } else {
-      try {
-        const raw = localStorage.getItem(ADMIN_OVERRIDES_LS_KEY)
-        const overrides = raw ? JSON.parse(raw) : {}
-        overrides[tmpl.slug] = { ...overrides[tmpl.slug], isPremium }
-        localStorage.setItem(ADMIN_OVERRIDES_LS_KEY, JSON.stringify(overrides))
-      } catch { /* quota */ }
-    }
-  }
-
-  function removeTemplate(slug) {
-    const index = templates.value.findIndex((t) => t.slug === slug)
-    if (index === -1) return
-    templates.value.splice(index, 1)
-    try {
-      const raw = localStorage.getItem(ADMIN_REMOVED_LS_KEY)
-      const removed = raw ? JSON.parse(raw) : []
-      if (!removed.includes(slug)) {
-        removed.push(slug)
-        localStorage.setItem(ADMIN_REMOVED_LS_KEY, JSON.stringify(removed))
-      }
-    } catch { /* quota */ }
-  }
 
   async function addOfficialTemplate(data) {
     if (!authStore.isAdmin) return null
@@ -478,7 +347,6 @@ export const useCardsStore = defineStore('cards', () => {
       _isCustom: true,
     }
     templates.value.push(newTmpl)
-    _saveCustomTemplates()
     return newTmpl
   }
 
@@ -518,10 +386,37 @@ export const useCardsStore = defineStore('cards', () => {
     if (updates.previewCardBorderRadius != null) tmpl.previewCardBorderRadius = updates.previewCardBorderRadius
     if (updates.previewOrientation)        tmpl.previewOrientation = updates.previewOrientation
     if (updates.previewFontFamily)         tmpl.previewFontFamily = updates.previewFontFamily
-    tmpl._isCustom = true
-    _saveCustomTemplates()
     return tmpl
   }
+
+  async function loadGalleryTemplates() {
+    try {
+      const { data } = await getGallery()
+      templates.value = (data.templates ?? []).map((t) => ({
+        id:                      t.id,
+        slug:                    t.slug,
+        name:                    t.name,
+        category:                t.category || 'Personnalisé',
+        isPremium:               !!t.is_premium,
+        description:             t.meta?.description            || '',
+        rating: 0, thumbnail: '',
+        colors:                  t.meta?.colors                 || { primary: '#6366F1', secondary: '#1E293B', text: '#ffffff' },
+        editorData:              t.meta?.editorData             || null,
+        previewElements:         t.meta?.previewElements        || null,
+        previewVersoElements:    t.meta?.previewVersoElements   || null,
+        previewBackgrounds:      t.meta?.previewBackgrounds     || null,
+        previewCardWidth:        t.meta?.previewCardWidth       || null,
+        previewCardHeight:       t.meta?.previewCardHeight      || null,
+        previewCardBorderRadius: t.meta?.previewCardBorderRadius ?? null,
+        previewOrientation:      t.meta?.previewOrientation     || null,
+        previewFontFamily:       t.meta?.previewFontFamily      || null,
+      }))
+    } catch {
+      templates.value = []
+    }
+  }
+
+  loadGalleryTemplates()
 
   return {
     // State
@@ -541,6 +436,7 @@ export const useCardsStore = defineStore('cards', () => {
 
     // Methods
     loadUserCards,
+    loadGalleryTemplates,
     clearCards,
     getTemplateBySlug,
     addCard,
@@ -561,12 +457,7 @@ export const useCardsStore = defineStore('cards', () => {
     exportCardsAsJSON,
     importCardsFromJSON,
 
-    // Admin — ⚠️ Phase 4.5
-    getAllCardsAdmin,
-    adminDeleteCard,
-    toggleTemplatePremium,
-    syncTemplatePremium,
-    removeTemplate,
+    // Admin
     addOfficialTemplate,
     updateOfficialTemplate,
   }

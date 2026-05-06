@@ -258,7 +258,7 @@ const maintenanceMode = computed(() => adminStore.settings?.maintenanceMode ?? f
 // Nombre de comptes bloqués (données réelles depuis authStore)
 // TODO backend : vient du champ `blockedUsers` de GET /api/admin/overview
 const blockedUsersCount = computed(
-  () => authStore.getAllUsersWithStats.filter((u) => u.status === 'blocked').length,
+  () => adminStore.users.filter((u) => u.status === 'blocked').length,
 )
 
 const navItems = computed(() => [

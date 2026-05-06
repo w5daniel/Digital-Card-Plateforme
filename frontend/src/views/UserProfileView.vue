@@ -1251,7 +1251,6 @@ const onCancelSubConfirmed = () => {
   showCancelSubConfirm.value = false
   if (authStore.user) {
     authStore.user.isPremium = false
-    localStorage.setItem('user', JSON.stringify(authStore.user))
   }
   notify.info("Abonnement annulé. Votre accès Premium reste actif jusqu'à la fin de période.")
 }
@@ -1262,7 +1261,6 @@ const showClearBillingConfirm = ref(false)
 const clearBillingData = () => {
   if (!authStore.user) return
   delete authStore.user.subscriptionHistory
-  localStorage.setItem('user', JSON.stringify(authStore.user))
   showClearBillingConfirm.value = false
   notify.success('Données de facturation supprimées')
 }
