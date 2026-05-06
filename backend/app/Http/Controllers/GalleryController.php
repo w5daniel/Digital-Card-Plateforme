@@ -9,7 +9,10 @@ class GalleryController extends Controller
 {
     public function index(): JsonResponse
     {
-        $templates = Template::where('is_gallery', true)->latest()->get();
+        $templates = Template::where('is_gallery', true)
+            ->select(['id', 'slug', 'name', 'category', 'is_premium', 'meta', 'created_at', 'updated_at'])
+            ->latest()
+            ->get();
 
         return response()->json(['templates' => $templates]);
     }
