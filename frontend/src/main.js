@@ -31,9 +31,13 @@ async function bootstrap() {
 
   watch(
     () => authStore.user?.email,
-    async () => {
-      fontStore.reloadUserFonts()
-      await brandKitStore.loadForUser()
+    async (newEmail) => {
+      if (newEmail) {
+        fontStore.reloadUserFonts()
+        await brandKitStore.loadForUser()
+      } else {
+        brandKitStore.clearForUser()
+      }
     },
   )
 
