@@ -1226,8 +1226,8 @@ const savePreferences = () => {
 
 const freeFeatures = [
   '3 cartes de visite',
-  '8 modèles gratuits',
-  'Export PNG',
+  'modèles gratuits seulement',
+  'Export JPG basse résolution',
   'QR code standard (niveau L)',
   '50 polices',
   'Partage par lien',
@@ -1235,7 +1235,7 @@ const freeFeatures = [
 
 const premiumFeatures = [
   'Cartes illimitées',
-  'Tous les modèles (14+)',
+  'Tous les modèles gratuits + modèles exclusifs Premium',
   'Export PNG, JPG, PDF, JSON',
   'QR code personnalisé (couleurs, logo, niveaux M/Q/H)',
   '300+ polices, import et combinaisons',

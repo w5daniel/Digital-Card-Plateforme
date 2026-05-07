@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         if (auth()->user()->is_banned) {
             Auth::guard('web')->logout();
-            return response()->json(['message' => 'Votre compte a été suspendu.'], 403);
+            return response()->json(['message' => 'Votre compte a été suspendu. Veuillez contacter l’administrateur : contact@ecodev.dev '], 403);
         }
 
         if (!auth()->user()->hasVerifiedEmail()) {
