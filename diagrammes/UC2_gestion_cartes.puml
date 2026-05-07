@@ -1,0 +1,61 @@
+@startuml UC2_GestionCartes
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  ArrowColor DarkBlue
+}
+skinparam actor {
+  BackgroundColor Orange
+  BorderColor DarkOrange
+}
+title Diagramme de Cas d'Utilisation — Gestion des Cartes de Visite
+
+left to right direction
+
+actor "Utilisateur\nauthentifié" as U
+actor "Utilisateur\nPremium" as P
+
+U -|> P : hérite
+
+rectangle "Gestion des Cartes" {
+  usecase "Consulter\nses cartes" as UC_LIST
+  usecase "Créer une carte\n(éditeur canvas)" as UC_CREATE
+  usecase "Modifier une carte" as UC_EDIT
+  usecase "Supprimer une carte" as UC_DELETE
+  usecase "Sélectionner\nun modèle" as UC_TEMPLATE
+  usecase "Générer\nun QR code" as UC_QR
+  usecase "Exporter\nen PNG / PDF" as UC_EXPORT
+  usecase "Générer un lien\nde partage public" as UC_SHARE
+  usecase "Créer en lot\n(Excel / CSV)" as UC_BATCH
+  usecase "Publier dans\nla galerie communautaire" as UC_PUBLISH
+}
+
+U --> UC_LIST
+U --> UC_CREATE
+U --> UC_EDIT
+U --> UC_DELETE
+U --> UC_EXPORT
+U --> UC_SHARE
+
+UC_CREATE ..> UC_QR : «include»
+UC_CREATE ..> UC_TEMPLATE : «extend»
+UC_EDIT ..> UC_TEMPLATE : «extend»
+
+P --> UC_BATCH
+P --> UC_PUBLISH
+
+note bottom of UC_BATCH
+  Réservé aux comptes Premium.
+  Import d'un fichier Excel/CSV
+  avec liste de contacts.
+end note
+
+note right of UC_CREATE
+  Contrainte métier :
+  Free : 3 cartes max
+  Premium : illimité
+end note
+
+@enduml

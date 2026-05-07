@@ -1,0 +1,150 @@
+@startuml DiagrammeClasses
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  ArrowColor DarkBlue
+}
+skinparam note {
+  BackgroundColor LightYellow
+  BorderColor DarkGoldenRod
+}
+title Diagramme de Classes — Plateforme de Cartes de Visite Numériques
+
+' ───────────── USER ─────────────
+class User {
+  + id : bigint <<PK>>
+  + name : string
+  + email : string <<unique>>
+  + password : string
+  + role : enum {user, admin}
+  + is_premium : boolean
+  + premium_expires_at : timestamp
+  + is_banned : boolean
+  + avatar : string
+  + email_verified_at : timestamp
+  + created_at : timestamp
+  + updated_at : timestamp
+  --
+  + isPremium() : boolean
+  + isAdmin() : boolean
+}
+
+' ───────────── CARD ─────────────
+class Card {
+  + id : uuid <<PK>>
+  + user_id : bigint <<FK>>
+  + title : string
+  + elements : json
+  + backgrounds : json
+  + share_slug : string <<unique>>
+  + created_at : timestamp
+  + updated_at : timestamp
+  --
+  + getPublicUrl() : string
+}
+
+note right of Card
+  elements = {
+    recto: [ Element[] ],
+    verso: [ Element[] ]
+  }
+  backgrounds = {
+    recto: { color, gradient },
+    verso: { color, gradient }
+  }
+end note
+
+' ───────────── TEMPLATE ─────────────
+class Template {
+  + id : uuid <<PK>>
+  + user_id : bigint <<FK, nullable>>
+  + name : string
+  + elements : json
+  + backgrounds : json
+  + is_gallery : boolean
+  + is_public : boolean
+  + is_premium : boolean
+  + category : string
+  + slug : string <<unique>>
+  + created_at : timestamp
+  + updated_at : timestamp
+}
+
+note right of Template
+  is_gallery = true : template
+  officiel (admin)
+  is_public = true : visible
+  dans la galerie communautaire
+end note
+
+' ───────────── BRAND KIT ─────────────
+class BrandKit {
+  + id : bigint <<PK>>
+  + user_id : bigint <<FK, unique>>
+  + colors : json
+  + font_family : string
+  + logo_url : string
+  + updated_at : timestamp
+}
+
+' ───────────── CUSTOM FONT ─────────────
+class CustomFont {
+  + id : bigint <<PK>>
+  + user_id : bigint <<FK>>
+  + family : string
+  + url : string
+  + created_at : timestamp
+}
+
+' ───────────── NOTIFICATION ─────────────
+class Notification {
+  + id : bigint <<PK>>
+  + user_id : bigint <<FK>>
+  + type : string
+  + data : json
+  + read_at : timestamp
+  + created_at : timestamp
+}
+
+' ───────────── SYSTEM SETTINGS ─────────────
+class SystemSettings {
+  + id : bigint <<PK>>
+  + key : string <<unique>>
+  + value : json
+  + updated_at : timestamp
+}
+
+' ───────────── ELEMENT (value object) ─────────────
+class Element {
+  + id : string
+  + type : enum {text, shape, image, icon, qr}
+  + x : float
+  + y : float
+  + width : float
+  + height : float
+  + rotation : float
+  + opacity : float
+  + visible : boolean
+  + locked : boolean
+  + groupId : string
+}
+
+note bottom of Element
+  Stocké en JSON dans
+  Card.elements et
+  Template.elements.
+  Non persisté seul.
+end note
+
+' ───────────── RELATIONS ─────────────
+User "1" o-- "0..*" Card : possède
+User "1" o-- "0..*" Template : crée
+User "1" o-- "0..1" BrandKit : possède
+User "1" o-- "0..*" CustomFont : uploade
+User "1" o-- "0..*" Notification : reçoit
+
+Card "1" *-- "0..*" Element : contient (JSON)
+Template "1" *-- "0..*" Element : contient (JSON)
+
+@enduml

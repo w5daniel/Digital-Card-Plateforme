@@ -110,6 +110,17 @@ class CardController extends Controller
         return response()->json(['message' => 'Compteur mis à jour.']);
     }
 
+    public function incrementPublicStat(Request $request, Card $card): JsonResponse
+    {
+        $request->validate([
+            'stat' => ['required', 'in:downloads,qr_scans,shares'],
+        ]);
+
+        $card->increment($request->stat);
+
+        return response()->json(['message' => 'Compteur mis à jour.']);
+    }
+
     private function cardLimit(User $user): ?int
     {
         if ($user->role === 'admin') return null;

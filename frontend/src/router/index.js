@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import AuthView from '../views/AuthView.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useAdminStore } from '@/stores/adminStore'
 import { useNotificationStore } from '@/stores/notificationStore'
@@ -15,7 +16,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/AuthView.vue'),
+      component: AuthView,
       meta: { requiresAuth: false, hideLayout: true, guestOnly: true },
     },
     {
@@ -27,7 +28,7 @@ const router = createRouter({
     {
       path: '/reset-password',
       name: 'reset-password',
-      component: () => import('../views/AuthView.vue'),
+      component: AuthView,
       meta: { requiresAuth: false, hideLayout: true },
     },
     {
@@ -198,6 +199,15 @@ router.beforeEach(async (to, from, next) => {
   }
 
   next()
+})
+
+router.onError((error, to) => {
+  if (
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed')
+  ) {
+    window.location.href = to.fullPath
+  }
 })
 
 export default router

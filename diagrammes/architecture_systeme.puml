@@ -1,0 +1,67 @@
+@startuml Architecture_Systeme
+skinparam componentStyle rectangle
+skinparam component {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+}
+skinparam database {
+  BackgroundColor LightYellow
+  BorderColor DarkGoldenRod
+}
+skinparam node {
+  BackgroundColor WhiteSmoke
+  BorderColor Gray
+}
+title Architecture du Système — Plateforme de Cartes de Visite Numériques
+
+node "Navigateur (Client)" {
+  package "Vue 3 SPA — localhost:5173" {
+    component "[Vue Router]\n18 vues" as Router
+    component "[Pinia]\n9 stores" as Pinia
+    component "[Axios]\nClient HTTP" as Axios
+    component "[Konva.js]\nÉditeur Canvas" as Konva
+    component "[jsPDF / html-to-image]\nExport PNG / PDF" as Export
+    component "[QR Code Styling]\nGénération QR" as QR
+    component "[XLSX]\nImport Excel/CSV" as XLSX
+  }
+}
+
+node "Serveur Local (Laragon)" {
+  package "API REST Laravel — localhost:8000" {
+    component "[Routes API]\n/api/*" as Routes
+    component "[Contrôleurs]\nCardController\nTemplateController\nAuthController\nAdminController" as Controllers
+    component "[Modèles Eloquent]\nUser, Card, Template\nBrandKit, Notification..." as Models
+    component "[Laravel Sanctum]\nAuth SPA cookie" as Sanctum
+    component "[SMTP Gmail]\nEmail vérification" as SMTP
+  }
+
+  database "MySQL\ndigital_card_platform" as DB {
+    [users]
+    [cards]
+    [templates]
+    [brand_kits]
+    [notifications]
+    [system_settings]
+  }
+}
+
+Axios -down-> Routes : HTTP / JSON\n(Cookie Sanctum)
+Routes --> Controllers
+Controllers --> Models
+Models -down-> DB : SQL\n(Eloquent ORM)
+Controllers --> Sanctum : auth:sanctum\nmiddleware
+Controllers --> SMTP : Mail::send()
+
+Pinia --> Axios
+Router --> Pinia
+Konva --> Pinia
+Export --> Konva
+QR --> Pinia
+XLSX --> Pinia
+
+note right of Sanctum
+  Cookie HttpOnly SameSite=Lax
+  Pas de token dans localStorage
+end note
+
+@enduml

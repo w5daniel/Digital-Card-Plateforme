@@ -91,6 +91,8 @@ Route::post('/email/resend', [VerifyEmailController::class, 'resend'])
 
 // Public — accessible sans authentification
 Route::get('/share/{id}', [CardController::class, 'publicShow']);
+Route::post('/share/{card}/stats', [CardController::class, 'incrementPublicStat'])
+    ->middleware('throttle:10,1');
 
 // Galerie officielle
 Route::get('/gallery',        [GalleryController::class, 'index']);

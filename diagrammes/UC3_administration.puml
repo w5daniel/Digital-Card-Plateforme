@@ -1,0 +1,53 @@
+@startuml UC3_Administration
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor LightPink
+  BorderColor DarkRed
+  ArrowColor DarkRed
+}
+skinparam actor {
+  BackgroundColor Orange
+  BorderColor DarkOrange
+}
+title Diagramme de Cas d'Utilisation — Administration et Galerie
+
+left to right direction
+
+actor "Administrateur" as A
+actor "Utilisateur\nPremium" as P
+
+rectangle "Administration" {
+  usecase "Consulter le\ntableau de bord KPI" as UC_DASH
+  usecase "Gérer les\nutilisateurs" as UC_USERS
+  usecase "Bannir /\ndébannir un utilisateur" as UC_BAN
+  usecase "Promouvoir\ncompte Premium" as UC_PREMIUM
+  usecase "Gérer les templates\nofficiels de la galerie" as UC_TEMPLATES
+  usecase "Configurer les\nparamètres système" as UC_SETTINGS
+
+  UC_USERS ..> UC_BAN : «extend»
+  UC_USERS ..> UC_PREMIUM : «extend»
+}
+
+rectangle "Galerie Communautaire" {
+  usecase "Parcourir\nla galerie" as UC_BROWSE
+  usecase "Publier une carte\ndans la galerie" as UC_PUBLISH
+  usecase "Modérer\nle contenu" as UC_MODERATE
+}
+
+A --> UC_DASH
+A --> UC_USERS
+A --> UC_TEMPLATES
+A --> UC_SETTINGS
+A --> UC_MODERATE
+
+P --> UC_BROWSE
+P --> UC_PUBLISH
+
+note right of UC_SETTINGS
+  Mode maintenance,
+  limites par rôle,
+  accès galerie
+end note
+
+@enduml

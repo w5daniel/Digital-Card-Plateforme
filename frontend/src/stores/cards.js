@@ -206,21 +206,21 @@ export const useCardsStore = defineStore('cards', () => {
   async function incrementCardDownloads(cardId) {
     const card = getCardById(cardId)
     if (card) card.downloads++
-    try { await cardsApi.incrementStat(cardId, 'downloads') } catch { /* non-bloquant */ }
+    try { await cardsApi.incrementPublicStat(cardId, 'downloads') } catch { /* non-bloquant */ }
     return card || null
   }
 
   async function incrementCardQRScans(cardId) {
     const card = getCardById(cardId)
     if (card) card.qrScans = (card.qrScans || 0) + 1
-    try { await cardsApi.incrementStat(cardId, 'qr_scans') } catch { /* non-bloquant */ }
+    try { await cardsApi.incrementPublicStat(cardId, 'qr_scans') } catch { /* non-bloquant */ }
     return card || null
   }
 
   async function incrementCardShares(cardId) {
     const card = getCardById(cardId)
     if (card) card.shares = (card.shares || 0) + 1
-    try { await cardsApi.incrementStat(cardId, 'shares') } catch { /* non-bloquant */ }
+    try { await cardsApi.incrementPublicStat(cardId, 'shares') } catch { /* non-bloquant */ }
     return card || null
   }
 

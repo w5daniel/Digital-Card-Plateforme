@@ -91,10 +91,16 @@ CHAPITRE IV : RÉALISATION ET BILAN
   3. Fonctionnalités transverses
      3.1 Export PNG / PDF et génération QR vCard
      3.2 Création en lot (batch import Excel/CSV)
-  4. Enchaînement des écrans (captures)
-  5. Difficultés rencontrées et solutions apportées
-  6. Compétences acquises
-  7. Apports, limites du stage et perspectives d'amélioration
+  4. Enchaînement des écrans et réalisations visuelles
+     4.1 Présentation des vues principales
+     4.2 Galerie des modèles de cartes réalisés
+  5. Estimation financière du projet
+     5.1 Charges matérielles et logicielles
+     5.2 Charges humaines
+     5.3 Récapitulatif et valorisation
+  6. Difficultés rencontrées et solutions apportées
+  7. Compétences acquises
+  8. Apports, limites du stage et perspectives d'amélioration
 
 CONCLUSION GÉNÉRALE
 BIBLIOGRAPHIE / WEBOGRAPHIE
@@ -821,9 +827,9 @@ Les diagrammes de cas d'utilisation (Use Case) décrivent, du point de vue de l'
 
 | Acteur | Description |
 |---|---|
-| **Utilisateur Free** | Compte standard — accès à la création de cartes (3 max), aux templates de la galerie, à l'export et au partage |
-| **Utilisateur Premium** | Accès étendu — cartes illimitées, templates personnalisés illimités, création en lot, publication communautaire |
-| **Administrateur** | Accès complet — toutes les fonctionnalités Premium + gestion des utilisateurs, modération, paramètres système |
+| **Visiteur** | Utilisateur non authentifié — peut consulter les cartes publiques partagées et créer un compte |
+| **Utilisateur authentifié** | Utilisateur connecté (Free ou Premium) — crée, édite, exporte et partage ses cartes de visite. Les fonctionnalités réservées au compte Premium (création en lot, publication communautaire) sont indiquées comme extensions dans les diagrammes |
+| **Administrateur** | Gère les utilisateurs, modère la galerie communautaire et configure les paramètres système |
 
 **Tableau 9 — Acteurs du système**
 
@@ -1097,6 +1103,497 @@ Utilisateur    BatchModal (Vue)    userTemplatesStore    XLSX lib    cardsStore 
 La phase de conception a permis de formaliser l'ensemble des interactions, structures et flux de notre plateforme. Les diagrammes de cas d'utilisation ont délimité précisément le périmètre fonctionnel pour chacun des trois acteurs du système. L'architecture trois couches — Vue 3 SPA, API REST Laravel, base de données MySQL — garantit une séparation claire des responsabilités et facilite l'évolution indépendante de chaque couche. Le diagramme de classes a modélisé les six entités principales et leurs relations, reflétant fidèlement le schéma de la base de données. Enfin, les diagrammes de séquences ont illustré les quatre flux fonctionnels les plus représentatifs : inscription, sauvegarde, export et création en lot.
 
 Cette modélisation rigoureuse a constitué le socle sur lequel s'est appuyé le développement. Le chapitre suivant détaille la réalisation concrète de ces spécifications, module par module, en suivant la progression des six sprints agiles.
+
+---
+
+## CHAPITRE IV : RÉALISATION ET BILAN
+
+### Introduction du Chapitre IV
+
+Après avoir posé les fondements théoriques au Chapitre II et modélisé l'architecture au Chapitre III, ce dernier chapitre rend compte de la phase de réalisation. Il présente la traduction concrète des spécifications en code fonctionnel, module par module, en suivant la progression des six sprints agiles. Nous exposons successivement le développement frontend, le développement backend, les fonctionnalités transverses, un aperçu des interfaces et des modèles de cartes réalisés, une estimation financière du projet, puis un bilan sur les difficultés rencontrées, les compétences acquises et les perspectives d'évolution.
+
+---
+
+### 1. Développement Frontend
+
+#### 1.1 Composants et vues (Vue 3 / Pinia)
+
+Le frontend de la plateforme est une application monopage (SPA) construite avec **Vue 3** (Composition API) et **Vite 7**. L'architecture s'organise autour de deux piliers : le routage géré par **Vue Router 5** et la gestion d'état centralisée assurée par neuf stores **Pinia**.
+
+**Vue Router et guards d'authentification**
+
+Vue Router assure la navigation entre les 18 vues de l'application sans rechargement de page. Un guard global `beforeEach` est défini dans `src/router/index.js` ; il s'exécute avant chaque transition de route et prend en charge quatre vérifications successives : restauration de la session au premier chargement, application du mode maintenance (accès administrateur uniquement), contrôle de l'accès à la galerie communautaire, et vérification croisée du statut utilisateur contre le registre admin pour détecter d'éventuels bans. Les routes sont annotées avec des métadonnées (`requiresAuth`, `requiresAdmin`, `guestOnly`, `hideLayout`) qui permettent au guard de prendre les décisions de redirection appropriées.
+
+**Stores Pinia**
+
+La gestion d'état est déléguée à neuf stores spécialisés, chacun responsable d'un domaine métier précis :
+
+| Store | Fichier | Responsabilité principale |
+|---|---|---|
+| `authStore` | `authStore.js` | Session utilisateur, inscription, connexion, gestion des rôles |
+| `cardsStore` | `cards.js` | CRUD des cartes, galerie de templates, modération admin |
+| `useEditorStore` | `useEditorStore.js` | État complet de l'éditeur canvas (éléments, historique, sélection) |
+| `userTemplatesStore` | `userTemplatesStore.js` | Templates réutilisables, création en lot |
+| `adminStore` | `adminStore.js` | Tableau de bord admin, paramètres système |
+| `brandKit` | `brandKit.js` | Palette de couleurs, polices et logo de marque par utilisateur |
+| `fontStore` | `fontStore.js` | Chargement dynamique des Google Fonts |
+| `themeStore` | `themeStore.js` | Basculement mode clair/sombre |
+| `notificationStore` | `notificationStore.js` | Toasts et notifications persistantes |
+
+**Tableau 12 — Stores Pinia de l'application**
+
+**Vues principales**
+
+Les 18 vues couvrent l'ensemble du parcours utilisateur, de l'accueil public jusqu'au panneau d'administration :
+
+| Vue | Route | Description |
+|---|---|---|
+| `HomeView` | `/` | Page d'accueil publique |
+| `AuthView` | `/auth` | Connexion, inscription, réinitialisation du mot de passe |
+| `DashboardView` | `/dashboard` | Tableau de bord utilisateur avec statistiques |
+| `EditorView` | `/editor` | Éditeur de carte principal |
+| `GalleryView` | `/gallery` | Galerie de templates officiels et communautaires |
+| `ShareView` | `/share/:id` | Page de partage public d'une carte |
+| `UserProfileView` | `/profile` | Profil et paramètres du compte |
+| `PricingView` | `/pricing` | Présentation des offres Free et Premium |
+| `AdminDashboardView` | `/admin` | Tableau de bord administrateur (KPIs, activité) |
+| Vues admin (×4) | `/admin/*` | Gestion utilisateurs, cartes, templates, paramètres système |
+
+**Tableau 13 — Vues principales de l'application**
+
+#### 1.2 Éditeur canvas interactif (Konva.js)
+
+L'éditeur de cartes est la fonctionnalité centrale de la plateforme. Il est implémenté dans `EditorView.vue` et s'appuie sur le store `useEditorStore` pour gérer l'intégralité de son état.
+
+**Architecture du canvas**
+
+L'éditeur repose sur **vue-konva**, le wrapper Vue 3 de la bibliothèque Konva.js. Le canvas est organisé en une hiérarchie Stage → Layer → éléments (nœuds Konva). Chaque carte possède deux faces (recto et verso) ; la propriété `activePage` du store contrôle quelle face est affichée et éditée. L'état des éléments est structuré en objet `{ recto: [], verso: [] }`, et toutes les mutations passent par `activePage` pour cibler la bonne face.
+
+Chaque élément est représenté par un objet JavaScript portant des propriétés communes (`id`, `type`, `x`, `y`, `width`, `height`, `rotation`, `opacity`, `visible`, `locked`, `groupId`) et des propriétés spécifiques à son type. Cinq types d'éléments sont pris en charge : `text`, `shape`, `image`, `icon`, `qr`.
+
+**Fonctionnalités avancées**
+
+L'éditeur offre un ensemble riche de fonctionnalités éditoriales :
+
+- **Formatage riche :** les éléments texte supportent le gras, l'italique, le souligné, la couleur, la police, la taille et l'interlignage, avec un mécanisme de *text runs* permettant le formatage partiel au sein d'un même élément.
+- **Dégradés :** les textes et les formes supportent des dégradés linéaires et radiaux configurables.
+- **Ombres portées :** chaque élément peut recevoir une ombre configurable (décalage, flou, couleur, opacité).
+- **Historique undo/redo :** une pile de 50 états est maintenue via des copies profondes de l'état `{ elements, backgrounds }`, permettant d'annuler ou de rejouer toute action d'édition.
+- **Sélection multiple et groupement :** les éléments peuvent être sélectionnés individuellement ou collectivement, groupés, puis transformés simultanément.
+- **Calques :** l'ordre d'empilement est gérable depuis un panneau dédié avec réordonnancement par glisser-déposer.
+
+La barre latérale gauche de l'éditeur est composée de neuf sous-composants spécialisés (`EditorSidebarInfo.vue`, `EditorSidebarDesign.vue`, `EditorSidebarElements.vue`, `EditorSidebarIcons.vue`, `EditorSidebarText.vue`, `EditorSidebarLayers.vue`, `EditorSidebarImport.vue`, `EditorSidebarQR.vue`, `EditorSidebarTools.vue`) qui accèdent directement aux stores Pinia pour lire et modifier l'état du canvas.
+
+---
+
+### 2. Développement Backend
+
+#### 2.1 Routes API, contrôleurs et modèles Laravel
+
+Le backend est une API REST développée avec **Laravel**. Les routes sont définies dans `routes/api.php` et protégées par le middleware `auth:sanctum`, à l'exception des routes publiques (accès aux cartes partagées, endpoints d'authentification).
+
+**Principaux endpoints**
+
+| Méthode | Route | Contrôleur | Description |
+|---|---|---|---|
+| `POST` | `/api/register` | `AuthController@register` | Inscription + envoi de l'email de vérification |
+| `POST` | `/api/login` | `AuthController@login` | Connexion, création de session |
+| `POST` | `/api/logout` | `AuthController@logout` | Déconnexion |
+| `GET` | `/api/cards` | `CardController@index` | Liste des cartes de l'utilisateur connecté |
+| `POST` | `/api/cards` | `CardController@store` | Création d'une nouvelle carte |
+| `PUT` | `/api/cards/{id}` | `CardController@update` | Mise à jour d'une carte |
+| `DELETE` | `/api/cards/{id}` | `CardController@destroy` | Suppression d'une carte |
+| `GET` | `/api/cards/share/{slug}` | `CardController@share` | Accès public à une carte partagée |
+| `GET` | `/api/templates` | `TemplateController@index` | Liste des templates (officiels + utilisateur) |
+| `POST` | `/api/templates` | `TemplateController@store` | Création d'un template |
+| `GET` | `/api/admin/users` | `AdminController@users` | Liste des utilisateurs (admin) |
+| `PATCH` | `/api/admin/users/{id}` | `AdminController@updateUser` | Ban, promotion premium, suppression (admin) |
+
+**Tableau 14 — Principaux endpoints de l'API REST**
+
+**Modèles Eloquent**
+
+Les données sont manipulées via les modèles Eloquent suivants :
+
+- `User` — Utilisateur avec rôles (`role`, `is_premium`, `is_banned`, `premium_expires_at`)
+- `Card` — Carte de visite ; les données du canvas (éléments, arrière-plans) sont stockées dans des colonnes JSON (`elements`, `backgrounds`)
+- `Template` — Template réutilisable ; même structure JSON que `Card` pour les données canvas
+- `BrandKit` — Kit de marque par utilisateur, relation 1-1 avec `User`
+- `Notification` — Notifications persistantes liées à un utilisateur
+
+Les relations entre modèles sont définies via les mécanismes natifs d'Eloquent : un `User` possède plusieurs `Card` (`hasMany`), un `User` possède un `BrandKit` (`hasOne`), etc.
+
+#### 2.2 Authentification et sécurité (Laravel Sanctum)
+
+L'authentification repose sur **Laravel Sanctum** en mode SPA (cookie-based), sans token stocké en localStorage. Ce choix élimine les risques d'exposition des tokens aux attaques XSS. Le flux d'authentification se déroule en trois étapes :
+
+1. Le frontend appelle `GET /sanctum/csrf-cookie` pour récupérer le token CSRF
+2. L'utilisateur soumet ses identifiants via `POST /api/login`
+3. Laravel crée une session côté serveur et renvoie un cookie de session `HttpOnly`, `SameSite=Lax` ; les requêtes suivantes transmettent automatiquement ce cookie
+
+**Vérification de l'adresse e-mail à l'inscription**
+
+La sécurité du processus d'inscription est renforcée par une vérification obligatoire de l'adresse e-mail. Lors de la création de compte via `POST /api/register`, Laravel génère automatiquement un lien de vérification signé (URL `signed` contenant l'identifiant et un hash HMAC) et l'envoie à l'utilisateur par e-mail. L'envoi est assuré par le service **Gmail SMTP** configuré dans le fichier `.env` (`MAIL_MAILER=smtp`, `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_ENCRYPTION=tls`). L'utilisateur doit cliquer sur ce lien avant de pouvoir accéder à toutes les fonctionnalités de la plateforme.
+
+Côté backend, le modèle `User` implémente le contrat `MustVerifyEmail` de Laravel. Le contrôleur de vérification (`EmailVerificationNotificationController`) gère la réémission du lien en cas d'expiration. Les routes protégées exigent le middleware `verified` en plus de `auth:sanctum`, garantissant qu'aucune opération sur les cartes n'est possible pour un compte non vérifié.
+
+Ce mécanisme présente un double avantage : il prévient la création de comptes avec des adresses fictives ou erronées, et réduit le risque de spam au sein de la galerie communautaire.
+
+Côté backend, chaque contrôleur vérifie également la propriété des ressources avant toute modification :
+
+```php
+// Vérification de propriété — CardController
+if ($card->user_id !== auth()->id()) {
+    return response()->json(['message' => 'Forbidden'], 403);
+}
+```
+
+Côté frontend, les routes protégées (`requiresAuth`, `requiresAdmin`) sont bloquées par le guard Vue Router si l'utilisateur n'est pas connecté ou ne possède pas le rôle requis.
+
+---
+
+### 3. Fonctionnalités transverses
+
+#### 3.1 Export PNG / PDF et génération QR vCard
+
+**Export PNG haute résolution**
+
+L'export PNG est réalisé via la méthode `toDataURL()` de Konva.js avec un paramètre `pixelRatio: 3`, produisant une image à trois fois la résolution d'affichage. Cette valeur garantit une qualité d'impression satisfaisante pour une carte de visite standard (85 × 54 mm à 300 DPI environ). Le fichier est proposé au téléchargement en créant dynamiquement un élément `<a>` avec l'URL de données et le nom de fichier cible.
+
+**Export PDF multi-pages**
+
+L'export PDF génère un document deux pages (recto et verso) à l'aide de **jsPDF**. Les deux faces du canvas sont capturées séquentiellement en Data URL, puis insérées dans le document via `addImage()`. Les dimensions sont définies selon le format carte de visite (85 × 54 mm, orientation paysage), garantissant un document prêt à l'impression.
+
+**Génération QR vCard**
+
+Le QR code est généré par la bibliothèque **QR Code Styling** à partir d'une chaîne vCard 3.0 construite dynamiquement depuis les champs de contact de la carte. Le format respecte le standard RFC 2426 :
+
+```
+BEGIN:VCARD
+VERSION:3.0
+FN:Prénom Nom
+N:Nom;Prénom;;;
+ORG:Entreprise
+TITLE:Fonction
+TEL;TYPE=CELL:+226XXXXXXXX
+EMAIL:contact@exemple.com
+URL:https://exemple.com
+END:VCARD
+```
+
+Le QR code est entièrement personnalisable : forme des points, couleur, coins arrondis, logo central et niveau de correction d'erreur. Il est inséré dans le canvas comme un élément `qr` standard, et donc exporté avec la carte.
+
+#### 3.2 Création en lot (batch import Excel/CSV)
+
+La création en lot permet à un utilisateur Premium de générer simultanément plusieurs cartes de visite à partir d'un template et d'un fichier Excel ou CSV contenant une liste de contacts.
+
+**Flux de traitement**
+
+1. **Import et parsing :** le fichier est lu par la bibliothèque **XLSX** qui retourne un tableau d'objets JavaScript, chaque objet représentant une ligne (`{ firstName, lastName, email, phone, company, title, ... }`)
+2. **Aperçu :** avant la création, l'utilisateur visualise les N contacts détectés dans la modale `BatchCreateModal.vue`
+3. **Injection par rôle :** pour chaque contact, `userTemplatesStore.createCardsFromTemplate()` clone les éléments du template et injecte les valeurs dans les éléments texte en se basant sur la propriété `role` de chaque élément (`el.role === 'firstName'` → `el.text = contact.firstName`)
+4. **Sauvegarde :** chaque carte générée est sauvegardée via `cardsStore.saveCard()`, qui appelle `POST /api/cards` pour créer la carte en base de données
+
+**Correspondance colonnes → rôles**
+
+| Rôle dans le template | Colonne CSV attendue |
+|---|---|
+| `firstName` | firstName / Prénom |
+| `lastName` | lastName / Nom |
+| `company` | company / Entreprise |
+| `title` | title / Fonction |
+| `phone` | phone / Téléphone |
+| `email` | email / Email |
+| `website` | website / Site web |
+| `address` | address / Adresse |
+
+**Tableau 15 — Correspondance rôles/colonnes pour l'import en lot**
+
+---
+
+### 4. Enchaînement des écrans et réalisations visuelles
+
+#### 4.1 Présentation des vues principales
+
+Les captures suivantes illustrent les principales interfaces de la plateforme, telles que réalisées à l'issue du développement.
+
+[CAPTURE : vue_accueil.png]
+
+*Figure 10 — Page d'accueil de la plateforme*
+
+La page d'accueil présente la proposition de valeur de la plateforme, les fonctionnalités principales et un appel à l'action vers la création de compte. Elle est accessible sans authentification.
+
+[CAPTURE : vue_dashboard.png]
+
+*Figure 11 — Tableau de bord utilisateur*
+
+Le tableau de bord présente les cartes créées par l'utilisateur avec leurs statistiques (vues, téléchargements, scans QR, partages), ainsi que des accès rapides vers l'éditeur et la galerie de templates.
+
+[CAPTURE : vue_editeur.png]
+
+*Figure 12 — Éditeur canvas interactif*
+
+L'éditeur est organisé en trois zones : la barre latérale gauche (outils et options), le canvas central (zone d'édition recto/verso), et le panneau de propriétés de l'élément sélectionné. L'utilisateur compose sa carte en ajoutant, déplaçant et stylisant les éléments graphiques.
+
+[CAPTURE : vue_galerie.png]
+
+*Figure 13 — Galerie de templates*
+
+La galerie présente les templates officiels et les publications de la communauté Premium. L'utilisateur peut prévisualiser un template et l'appliquer directement à une nouvelle carte.
+
+[CAPTURE : vue_admin.png]
+
+*Figure 14 — Panneau d'administration*
+
+Le panneau admin offre une vue d'ensemble des indicateurs clés (nombre d'utilisateurs, cartes créées, publications en galerie), ainsi que les outils de gestion des utilisateurs, de modération de contenu et de configuration système.
+
+#### 4.2 Galerie des modèles de cartes réalisés
+
+Au-delà des fonctionnalités techniques, nous avons conçu plusieurs modèles de cartes de visite avec la plateforme, destinés à démontrer concrètement ses capacités graphiques. Ces réalisations constituent la preuve tangible du niveau de rendu atteignable par tout utilisateur de la solution.
+
+[CAPTURE : modele_carte_01.png]
+
+*Figure 15 — Modèle « Minimal Pro » (fond blanc, typographie sobre)*
+
+[CAPTURE : modele_carte_02.png]
+
+*Figure 16 — Modèle « Tech Dark » (fond sombre, dégradé bleu)*
+
+[CAPTURE : modele_carte_03.png]
+
+*Figure 17 — Modèle « Creative Orange » (fond coloré, formes géométriques)*
+
+[CAPTURE : modele_carte_04.png]
+
+*Figure 18 — Modèle « Corporate » (logo entreprise, QR code vCard intégré)*
+
+Ces modèles ont été créés directement avec l'éditeur canvas de la plateforme et exportés en PNG haute résolution (pixel ratio ×3). Ils illustrent la diversité des combinaisons visuelles réalisables : typographies variées, dégradés, formes géométriques, images, icônes Iconify et QR codes vCard.
+
+---
+
+### 5. Estimation financière du projet
+
+Cette section présente une estimation du coût de réalisation du projet, structurée en charges matérielles, logicielles et humaines.
+
+#### 5.1 Charges matérielles et logicielles
+
+**Charges matérielles**
+
+| Désignation | Valeur totale | Durée de vie | Prorata 3 mois | Coût imputé |
+|---|---|---|---|---|
+| Ordinateur portable | 350 000 FCFA | 36 mois | 350 000 ÷ 36 × 3 | 29 167 FCFA |
+| Connexion internet | — | — | 3 × 10 000 FCFA/mois | 30 000 FCFA |
+| **Sous-total matériel** | | | | **59 167 FCFA** |
+
+**Tableau 16 — Charges matérielles du projet**
+
+**Charges logicielles**
+
+L'intégralité des outils et bibliothèques utilisés dans ce projet sont distribués sous licence open source ou sont disponibles gratuitement :
+
+| Outil / Bibliothèque | Licence | Coût |
+|---|---|---|
+| Vue 3, Vite, Pinia, Vue Router | MIT | 0 FCFA |
+| Laravel, Laravel Sanctum | MIT | 0 FCFA |
+| MySQL, Laragon | GPL / Gratuit | 0 FCFA |
+| Konva.js, vue-konva | MIT | 0 FCFA |
+| jsPDF, html-to-image, XLSX | MIT | 0 FCFA |
+| Tailwind CSS, DaisyUI | MIT | 0 FCFA |
+| QR Code Styling | MIT | 0 FCFA |
+| VS Code, Git, draw.io, StarUML | Gratuit / Open Source | 0 FCFA |
+| **Sous-total logiciels** | | **0 FCFA** |
+
+**Tableau 17 — Charges logicielles du projet**
+
+#### 5.2 Charges humaines
+
+Le développement a été réalisé sur 12 semaines à raison de 40 heures par semaine en moyenne, soit **480 heures de travail effectif**. Sur la base d'un taux horaire de **1 500 FCFA/heure** pour un stagiaire en Génie Logiciel au Burkina Faso :
+
+| Poste | Durée | Taux | Montant |
+|---|---|---|---|
+| Analyse des besoins et conception (Sprints 1–2) | 80 h | 1 500 FCFA/h | 120 000 FCFA |
+| Développement frontend — vues et éditeur (Sprints 2–4) | 200 h | 1 500 FCFA/h | 300 000 FCFA |
+| Développement backend — API REST (Sprints 2–4) | 100 h | 1 500 FCFA/h | 150 000 FCFA |
+| Fonctionnalités transverses — Export, QR, Batch (Sprint 5) | 60 h | 1 500 FCFA/h | 90 000 FCFA |
+| Panel admin, tests et validation (Sprint 6) | 40 h | 1 500 FCFA/h | 60 000 FCFA |
+| **Total charges humaines** | **480 h** | | **720 000 FCFA** |
+
+**Tableau 18 — Charges humaines du projet**
+
+#### 5.3 Récapitulatif et valorisation
+
+| Poste | Montant |
+|---|---|
+| Charges matérielles | 59 167 FCFA |
+| Charges logicielles | 0 FCFA |
+| Charges humaines | 720 000 FCFA |
+| **Coût total estimé** | **779 167 FCFA** |
+
+**Tableau 19 — Récapitulatif financier du projet**
+
+**Valorisation économique**
+
+Pour contextualiser ce coût, nous l'avons comparé au tarif d'une agence web professionnelle. Une application de cette envergure — éditeur canvas interactif, API REST complète, authentification sécurisée, export multi-format, panel d'administration — représenterait un devis estimé entre **3 500 000 et 5 000 000 FCFA** chez un prestataire externe. Le coût de développement réalisé dans le cadre du stage (≈ 779 167 FCFA, dont la quasi-totalité en temps humain) représente environ **20 % du coût commercial équivalent**, illustrant l'intérêt économique significatif de cette réalisation pour ECODEV INTERNATIONAL.
+
+---
+
+### 6. Difficultés rencontrées et solutions apportées
+
+Le développement a engendré plusieurs défis techniques. En voici les principaux, accompagnés des solutions retenues.
+
+**Difficulté 1 — Configuration CORS et authentification Sanctum**
+
+La mise en place de l'authentification par cookie entre le frontend Vue 3 (port 5173) et l'API Laravel (port 8000) a été la première difficulté majeure. Les requêtes cross-origin bloquaient les cookies de session, rendant toutes les routes protégées inaccessibles.
+
+*Solution :* nous avons configuré les en-têtes CORS dans `config/cors.php` de Laravel (`supports_credentials: true`, origines autorisées explicitement) et ajouté les attributs `withCredentials: true` et `withXSRFToken: true` dans l'instance Axios. L'appel préalable à `GET /sanctum/csrf-cookie` avant toute requête d'authentification a résolu définitivement le problème.
+
+**Difficulté 2 — Export haute résolution du canvas Konva**
+
+L'export PNG produisait initialement des images floues, car la résolution d'affichage par défaut (~72 DPI) était insuffisante pour une impression de qualité sur une carte de visite.
+
+*Solution :* l'utilisation du paramètre `pixelRatio: 3` dans la méthode `stage.toDataURL()` de Konva.js a multiplié la résolution de l'image exportée par trois. Cette adaptation a nécessité d'ajuster la gestion des dimensions dans le module `src/utils/cardExporter.js`.
+
+**Difficulté 3 — Synchronisation des rôles d'éléments dans la création en lot**
+
+Lors de la création en lot, l'injection des données de contact échouait pour les éléments dont le rôle n'était pas explicitement défini, produisant des cartes avec des champs vides.
+
+*Solution :* nous avons renforcé la logique d'injection dans `userTemplatesStore.createCardsFromTemplate()` en ajoutant une correspondance insensible à la casse entre les noms de colonnes du fichier CSV et les rôles des éléments. Les éléments sans rôle correspondant conservent leur valeur de placeholder initiale.
+
+**Difficulté 4 — Gestion des deux faces recto/verso dans l'éditeur**
+
+La cohabitation des deux faces dans un seul store éditeur a introduit une complexité dans la synchronisation de l'état : des modifications pouvaient involontairement affecter la face inactive.
+
+*Solution :* l'état des éléments est structuré en objet `{ recto: [], verso: [] }` dans le store, et toutes les mutations passent obligatoirement par la propriété `activePage` pour cibler la bonne face. L'application d'un template sur le recto (`applyRectoTemplate()`) a été conçue pour préserver intégralement les éléments du verso.
+
+---
+
+### 7. Compétences acquises
+
+Ce stage a constitué une opportunité de développement professionnel et technique significative. Les compétences acquises s'articulent autour de trois dimensions.
+
+**Compétences techniques**
+
+- Maîtrise du framework **Vue 3** (Composition API, `<script setup>`, composables, réactivité fine)
+- Conception et implémentation d'une **API REST avec Laravel** : contrôleurs, ressources Eloquent, middleware, migrations
+- Utilisation avancée de **Konva.js** pour la manipulation d'éléments canvas 2D interactifs
+- Intégration de l'authentification sécurisée par **Laravel Sanctum** (cookie de session SPA)
+- Export de documents multiformat (**jsPDF**, html-to-image) et génération de QR codes conformes au standard **vCard 3.0**
+- Gestion de version avec **Git** (branches fonctionnelles, résolution de conflits, historique structuré)
+
+**Compétences méthodologiques**
+
+- Application de la **méthode Agile** : planification par sprints, définition des objectifs, livraison incrémentale d'un produit fonctionnel
+- Rédaction de spécifications fonctionnelles et techniques
+- Modélisation UML : cas d'utilisation, diagramme de classes, diagrammes de séquences
+
+**Compétences transversales**
+
+- Communication technique régulière avec l'encadrant de stage
+- Autonomie dans la recherche de solutions (documentation officielle, communautés open source)
+- Rigueur dans la validation des fonctionnalités avant livraison de chaque sprint
+
+---
+
+### 8. Apports, limites du stage et perspectives d'amélioration
+
+**Apports du stage**
+
+Sur le plan de l'entreprise, ce stage a livré un MVP opérationnel qu'ECODEV INTERNATIONAL peut utiliser immédiatement pour des démonstrations et des tests avec des premiers utilisateurs. La plateforme couvre l'ensemble du parcours utilisateur — de la création de compte à l'export d'une carte personnalisée — et intègre un panel d'administration complet pour la gestion des utilisateurs et du contenu.
+
+Sur le plan personnel, cette expérience a consolidé notre expertise en développement web full-stack et nous a confrontés à des problématiques réelles : gestion des sessions cross-origin, performance du canvas, interopérabilité des formats d'export, sécurisation des accès.
+
+**Limites identifiées**
+
+La version actuelle comporte plusieurs limites inhérentes au contexte d'un stage de trois mois :
+
+- **Déploiement en production non effectué :** la plateforme fonctionne en environnement local (Laragon). Le déploiement sur un serveur VPS et la configuration d'un nom de domaine restent à réaliser.
+- **Absence de tests automatisés :** aucune suite de tests unitaires ou d'intégration n'a été mise en place par manque de temps ; les fonctionnalités ont été validées manuellement.
+- **Paiement en ligne non intégré :** le module Premium est géré manuellement par l'administrateur ; l'intégration d'une passerelle de paiement mobile n'a pas été développée dans ce cadre.
+- **Optimisation mobile partielle :** l'interface est optimisée pour les écrans de bureau ; une adaptation complète aux smartphones nécessiterait un effort de responsive design supplémentaire.
+
+**Perspectives d'amélioration**
+
+Les évolutions envisageables pour les prochaines versions de la plateforme sont les suivantes :
+
+- Intégration d'une **passerelle de paiement mobile** locale (CinetPay, Orange Money) pour automatiser la gestion des abonnements Premium
+- **Déploiement en production** sur un serveur cloud (DigitalOcean, OVH) avec configuration HTTPS et CDN
+- Développement d'une **application mobile** (React Native ou Flutter) permettant le scan de QR codes et la gestion des cartes reçues
+- **Internationalisation (i18n)** pour supporter le français, l'anglais et d'autres langues locales
+- Mise en place de **tests automatisés** (Vitest pour le frontend, PHPUnit pour le backend)
+- **Analytiques avancées** : tableau de bord de statistiques détaillées par carte (vues par période, origines géographiques, taux de téléchargement)
+- **API publique pour applications tierces** : exposition d'une API REST versionnée (`/api/v1/`) permettant à des applications partenaires (CRM, outils RH, annuaires d'entreprise) d'accéder aux cartes de visite de leurs utilisateurs, d'en créer par programmation ou d'en synchroniser les données de contact. Cette ouverture transformerait la plateforme en un véritable écosystème, où des développeurs externes pourraient construire leurs propres intégrations à partir d'une clé API personnelle, selon le modèle OAuth 2.0 avec des scopes de permission granulaires (`cards:read`, `cards:write`, `templates:read`)
+
+---
+
+### Conclusion du Chapitre IV
+
+Ce chapitre a présenté la réalisation concrète de la plateforme, depuis l'architecture des composants Vue 3 et des stores Pinia jusqu'aux endpoints de l'API Laravel, en passant par les fonctionnalités transverses d'export et de création en lot. Les captures d'écran et les modèles de cartes réalisés attestent du niveau fonctionnel et visuel atteint à l'issue du stage.
+
+L'estimation financière a mis en évidence la valeur économique du projet — un coût de développement de l'ordre de 779 167 FCFA pour un équivalent commercial estimé entre 3,5 et 5 millions de FCFA — soulignant l'intérêt stratégique de cette réalisation pour ECODEV INTERNATIONAL. Enfin, le bilan technique a permis d'identifier les axes d'amélioration prioritaires qui serviront de feuille de route pour les développements futurs de la plateforme.
+
+---
+
+## CONCLUSION GÉNÉRALE
+
+Au terme de ce stage de trois mois au sein d'ECODEV INTERNATIONAL, nous pouvons affirmer que les objectifs fixés en début de mission ont été atteints. La plateforme de génération, gestion et partage de cartes de visite numériques constitue un MVP fonctionnel couvrant l'ensemble du parcours utilisateur : création de compte, édition graphique recto-verso, export PNG et PDF haute résolution, génération de QR codes conformes au standard vCard, partage public, bibliothèque de templates, création en lot depuis Excel/CSV, et panneau d'administration complet.
+
+Ce projet a représenté bien plus qu'un exercice académique. Il nous a confrontés à des défis techniques réels — configuration de l'authentification cross-origin avec Sanctum, gestion de la résolution canvas pour l'impression, synchronisation de l'état dans un éditeur interactif complexe — et nous a contraints à produire des solutions documentées et maintenables. La méthode Agile, appliquée sur six sprints, a structuré notre progression et nous a appris à livrer des incréments fonctionnels validés plutôt qu'une solution monolithique inachevée.
+
+Sur le plan des compétences, ce stage a profondément enrichi notre maîtrise de Vue 3 et de l'écosystème JavaScript moderne, tout en nous initiant aux bonnes pratiques du développement backend avec Laravel et à la conception de bases de données relationnelles. Il nous a également sensibilisés aux enjeux de sécurité des applications web — authentification par cookie, protection CSRF, validation des droits d'accès par ressource — et à l'importance d'une architecture claire, modulaire et évolutive.
+
+La plateforme développée répond à un besoin concret du marché burkinabè, où les outils de communication professionnelle dématérialisée restent peu répandus. Elle offre à ECODEV INTERNATIONAL une base technologique solide sur laquelle pourront s'appuyer des développements futurs : déploiement en production, intégration de passerelles de paiement locales, application mobile et enrichissement des fonctionnalités à destination des entreprises.
+
+En définitive, ce stage a constitué une étape décisive dans notre parcours de formation en Génie Logiciel. Il nous a permis de transformer des connaissances théoriques en compétences opérationnelles, de mesurer les exigences du développement logiciel professionnel, et de contribuer concrètement à un projet porteur de valeur pour notre structure d'accueil.
+
+---
+
+## BIBLIOGRAPHIE / WEBOGRAPHIE
+
+### Ouvrages de référence
+
+[1] HAVERBEKE, Marijn. *Eloquent JavaScript : A Modern Introduction to Programming*, 3ème édition. No Starch Press, 2018. ISBN 978-1-59327-950-9. Disponible en ligne : https://eloquentjavascript.net
+
+[2] STAUFFER, Matt. *Laravel: Up & Running — A Framework for Building Modern PHP Apps*, 3ème édition. O'Reilly Media, 2023. ISBN 978-1-098-14839-2.
+
+[3] OSMANI, Addy. *Learning JavaScript Design Patterns*, 2ème édition. O'Reilly Media, 2023. Disponible en ligne : https://www.patterns.dev
+
+### Documentation officielle
+
+[4] Vue.js Core Team. *Vue 3 — The Progressive JavaScript Framework — Documentation officielle*. 2024. https://vuejs.org/guide/introduction.html
+
+[5] Vue.js Core Team. *Pinia — The intuitive store for Vue.js — Documentation officielle*. 2024. https://pinia.vuejs.org
+
+[6] Vue.js Core Team. *Vue Router 4 — Documentation officielle*. 2024. https://router.vuejs.org
+
+[7] Taylor Otwell et contributeurs. *Laravel 11.x — Documentation officielle*. 2024. https://laravel.com/docs/11.x
+
+[8] Taylor Otwell et contributeurs. *Laravel Sanctum — SPA Authentication — Documentation officielle*. 2024. https://laravel.com/docs/11.x/sanctum
+
+[9] Anton Lavrenov et contributeurs. *Konva.js — HTML5 Canvas JavaScript framework — Documentation officielle*. 2024. https://konvajs.org/docs/
+
+[10] Adam Crockett et contributeurs. *Tailwind CSS v3 — Documentation officielle*. 2024. https://tailwindcss.com/docs
+
+[11] Pouya Saadeghi et contributeurs. *DaisyUI — Component library for Tailwind CSS — Documentation officielle*. 2024. https://daisyui.com/docs/install/
+
+### Standards et RFC
+
+[12] DAWSON, F. ; HOWES, T. *RFC 2426 — vCard MIME Directory Profile (vCard 3.0)*. IETF Network Working Group, 1998. https://www.rfc-editor.org/rfc/rfc2426
+
+[13] PERREAULT, S. *RFC 6350 — vCard Format Specification (vCard 4.0)*. IETF, 2011. https://www.rfc-editor.org/rfc/rfc6350
+
+### Packages npm référencés
+
+[14] *QR Code Styling — npm package*. https://www.npmjs.com/package/qr-code-styling
+
+[15] *SheetJS / XLSX — Community Edition — npm package*. https://www.npmjs.com/package/xlsx
+
+[16] *html-to-image — npm package*. https://www.npmjs.com/package/html-to-image
+
+[17] *jsPDF — npm package*. https://www.npmjs.com/package/jspdf
+
+[18] *Axios — Promise based HTTP client — npm package*. https://www.npmjs.com/package/axios
+
+[19] *@iconify/vue — Iconify for Vue — npm package*. https://www.npmjs.com/package/@iconify/vue
 
 ---
 
