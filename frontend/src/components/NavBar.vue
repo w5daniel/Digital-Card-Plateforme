@@ -542,7 +542,7 @@ const userInitial = computed(() => {
 })
 
 // Photo de profil synchronisée via authStore (source unique de vérité)
-const handleProfilePhotoUpload = (event) => {
+const handleProfilePhotoUpload = async (event) => {
   const file = event.target.files?.[0]
   if (!file) return
   if (file.size > 2 * 1024 * 1024) {
@@ -553,9 +553,12 @@ const handleProfilePhotoUpload = (event) => {
     notifStore.error('Veuillez sélectionner une image valide')
     return
   }
-  const reader = new FileReader()
-  reader.onload = (e) => authStore.setProfilePhoto(e.target?.result)
-  reader.readAsDataURL(file)
+  try {
+    await authStore.setProfilePhoto(file)
+    notifStore.success('Photo de profil mise à jour')
+  } catch {
+    notifStore.error('Erreur lors du téléchargement de la photo')
+  }
 }
 
 const showRemovePhotoConfirm = ref(false)

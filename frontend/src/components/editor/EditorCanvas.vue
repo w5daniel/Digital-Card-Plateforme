@@ -628,7 +628,12 @@ function onCardDrop(event) {
       if (tpl.isPremium && !authStore.isPremium && !authStore.isAdmin) return
       if (tpl.editorData) {
         const ed = JSON.parse(JSON.stringify(tpl.editorData))
-        editorStore.applyRectoTemplate(ed.elements?.recto || [], ed.backgrounds?.recto || tpl.colors?.primary || '#FFFFFF')
+        const hasVerso = (ed.elements?.verso?.length ?? 0) > 0
+        if (hasVerso) {
+          editorStore.applyFullTemplate(ed)
+        } else {
+          editorStore.applyRectoTemplate(ed.elements?.recto || [], ed.backgrounds?.recto || tpl.colors?.primary || '#FFFFFF')
+        }
       } else {
         const layout = LAYOUT_MAP[tpl.slug] || 'center'
         const rectoEls = buildEditorElements(layout, DEFAULT_EDITOR_PERSON, tpl.colors)
