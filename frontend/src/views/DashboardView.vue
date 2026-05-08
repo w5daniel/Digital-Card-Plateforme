@@ -236,16 +236,7 @@
                 <ArrowUpDown class="w-3.5 h-3.5" />
                 <span>{{ templateSortOrder === 'newest' ? 'Plus récent' : 'Plus ancien' }}</span>
               </button>
-              <label
-                class="flex items-center space-x-2 text-sm text-onyx-500 dark:text-powder-400 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  v-model="showAutoTemplates"
-                  class="rounded border-gray-300 text-flame-500 shadow-sm focus:border-flame-300 focus:ring focus:ring-flame-200 focus:ring-opacity-50"
-                />
-                <span>Afficher l'historique auto.</span>
-              </label>
+              
               <button
                 v-if="sortedTemplates.length > 0"
                 @click="toggleSelectAllTemplates"

@@ -125,6 +125,9 @@ class CardController extends Controller
     {
         if ($user->role === 'admin') return null;
 
-        return $user->is_premium ? 50 : 3;
+        $key     = $user->is_premium ? 'maxCardsPerPremium' : 'maxCardsPerUser';
+        $default = $user->is_premium ? 50 : 3;
+
+        return (int) \App\Models\SystemSetting::get($key, $default);
     }
 }
