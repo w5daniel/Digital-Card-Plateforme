@@ -4,7 +4,7 @@
 //
 // Combine deux sources Iconify (chargement on-demand, zéro impact bundle) :
 //   • logos:*    — Logos officiels des marques, réseaux sociaux, apps, tech
-//   • openmoji:* — Stickers/emojis OpenMoji colorés (open-source)
+//   • openmoji:* — Stickers colorés (emojis, objets, symboles) de la collection OpenMoji
 //
 // Chaque élément utilise un `iconId` Iconify. Le rendu se fait via
 // <IconifyIcon :icon="item.iconId" /> dans EditorLeftSidebar.vue.

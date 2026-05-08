@@ -1,6 +1,5 @@
 /**
  * Données mock centralisées — remplacées par les appels API une fois le backend connecté.
- * Voir docs/POST-BACKEND-TODO.md pour la migration.
  */
 
 // ── Auth ────────────────────────────────────────────────────────────────────
