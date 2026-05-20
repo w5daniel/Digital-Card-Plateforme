@@ -218,7 +218,7 @@ import {
   Download,
   Share2,
   QrCode,
-  Smartphone,
+  FileSpreadsheet,
   Lock,
 } from 'lucide-vue-next'
 
@@ -245,9 +245,9 @@ const features = [
     description: 'Partagez vos cartes par email, SMS, réseaux sociaux ou lien direct.',
   },
   {
-    icon: Smartphone,
-    title: 'Responsive Design',
-    description: "Vos cartes s'affichent parfaitement sur tous les appareils et écrans.",
+    icon: FileSpreadsheet,
+    title: 'Création en lot',
+    description: "Générez plusieurs cartes simultanément depuis un fichier Excel et un template.",
   },
   {
     icon: Lock,
